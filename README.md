@@ -22,3 +22,10 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+
+
+.env example 
+
+VUE_APP_API_BASE_URL=http://localhost:3000/api
+
