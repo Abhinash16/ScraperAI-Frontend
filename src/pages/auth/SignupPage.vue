@@ -6,12 +6,19 @@
           <v-row no-gutters>
             <!-- LEFT SIDE -->
             <v-col cols="12" md="5" class="pa-8 grey lighten-4">
-              <v-img
-                src="../../assets/10.png"
-                contain
-                max-width="140"
-                class="mb-4"
-              ></v-img>
+              <v-avatar
+                size="140"
+                color="primary"
+                tile
+                class="mr-2 mb-4 rounded-lg"
+              >
+                <v-img
+                  src="../../assets/13.png"
+                  max-height="140"
+                  max-width="140"
+                  class="mx-auto"
+                ></v-img>
+              </v-avatar>
 
               <div class="mb-10">
                 <v-chip

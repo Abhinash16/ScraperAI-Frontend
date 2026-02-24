@@ -3,12 +3,15 @@
     <v-row justify="center">
       <v-col cols="12" md="4">
         <div class="text-center mb-8">
-          <v-img
-            src="../../assets/10.png"
-            contain
-            max-height="50"
-            class="mx-auto mb-4"
-          />
+          <v-avatar size="60" color="primary" tile class="mr-2 mb-0 rounded-lg">
+            <v-img
+              src="../../assets/13.png"
+              max-height="60"
+              max-width="60"
+              class="mx-auto"
+            ></v-img>
+          </v-avatar>
+
           <h1 class="text-h4 font-weight-black secondary--text">
             Welcome Back
           </h1>
