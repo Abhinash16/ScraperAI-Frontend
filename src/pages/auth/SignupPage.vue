@@ -1,63 +1,188 @@
 <template>
-  <v-app>
-    <v-container>
-      <v-card max-width="400" class="mx-auto pa-5">
-        <v-form ref="form" v-model="valid">
-          <v-text-field
-            v-model="name"
-            label="Name"
-            :rules="[(v) => !!v || 'Name is required']"
-            required
-          ></v-text-field>
+  <v-container fluid fill-height>
+    <v-row align="center" justify="center">
+      <v-col cols="12" md="7" lg="7">
+        <v-card elevation="6" class="rounded-xl">
+          <v-row no-gutters>
+            <!-- LEFT SIDE -->
+            <v-col cols="12" md="5" class="pa-8 grey lighten-4">
+              <v-img
+                src="../../assets/10.png"
+                contain
+                max-width="140"
+                class="mb-4"
+              ></v-img>
 
-          <v-text-field
-            v-model="company"
-            label="Company"
-            :rules="[(v) => !!v || 'Company is required']"
-            required
-          ></v-text-field>
+              <div class="mb-10">
+                <v-chip
+                  color="primary lighten-4"
+                  text-color="primary"
+                  small
+                  class="font-weight-bold mb-4"
+                >
+                  TRUSTED BY 500+ TEAMS
+                </v-chip>
+                <h2
+                  class="text-h4 font-weight-black secondary--text line-height-1 mb-4"
+                >
+                  Turn your website into a
+                  <span class="primary--text">Brain.</span>
+                </h2>
+                <p class="body-1 grey--text text--darken-1">
+                  Scraper.ai uses your existing content to power a custom GPT
+                  tailored to your customers' needs.
+                </p>
+              </div>
 
-          <v-text-field
-            v-model="email"
-            label="Email"
-            :rules="[
-              (v) => !!v || 'E-mail is required',
-              (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
-            ]"
-            required
-          ></v-text-field>
+              <v-list color="transparent" dense>
+                <v-list-item class="px-0">
+                  <v-list-item-icon class="mr-3"
+                    ><v-icon color="success"
+                      >mdi-check-circle</v-icon
+                    ></v-list-item-icon
+                  >
+                  <v-list-item-content class="body-2 font-weight-medium"
+                    >Zero-code installation</v-list-item-content
+                  >
+                </v-list-item>
+                <v-list-item class="px-0">
+                  <v-list-item-icon class="mr-3"
+                    ><v-icon color="success"
+                      >mdi-check-circle</v-icon
+                    ></v-list-item-icon
+                  >
+                  <v-list-item-content class="body-2 font-weight-medium"
+                    >Real-time sitemap syncing</v-list-item-content
+                  >
+                </v-list-item>
+              </v-list>
+            </v-col>
 
-          <v-text-field
-            v-model="password"
-            label="Password"
-            :rules="[(v) => !!v || 'Password is required']"
-            type="password"
-            required
-          ></v-text-field>
+            <!-- RIGHT SIDE -->
+            <v-col cols="12" md="7" class="pa-8">
+              <div class="d-flex justify-space-between align-center mb-8">
+                <h3 class="text-h5 font-weight-bold">Sign Up</h3>
+                <v-btn
+                  text
+                  color="primary"
+                  class="text-capitalize font-weight-bold"
+                  href="/login"
+                >
+                  Log In instead
+                </v-btn>
+              </div>
 
-          <v-select
-            v-model="countryCode"
-            :items="countryCodes"
-            label="Country Code"
-            required
-          ></v-select>
+              <v-form ref="form" v-model="valid" lazy-validation>
+                <v-row dense>
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      v-model="name"
+                      label="Full Name"
+                      outlined
+                      flat
+                      dense
+                      class="rounded-lg"
+                      :rules="[(v) => !!v || 'Required']"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      v-model="company"
+                      label="Company"
+                      outlined
+                      flat
+                      dense
+                      class="rounded-lg"
+                      :rules="[(v) => !!v || 'Required']"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12">
+                    <v-text-field
+                      v-model="email"
+                      label="Email Address"
+                      outlined
+                      flat
+                      dense
+                      class="rounded-lg"
+                      :rules="[(v) => /.+@.+\..+/.test(v) || 'Invalid Email']"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12">
+                    <v-text-field
+                      v-model="password"
+                      label="Create Password"
+                      type="password"
+                      outlined
+                      flat
+                      dense
+                      class="rounded-lg"
+                      :rules="[(v) => !!v || 'Required']"
+                    ></v-text-field>
+                  </v-col>
 
-          <v-text-field
-            v-model="phone"
-            label="Phone Number"
-            :rules="[(v) => !!v || 'Phone number is required']"
-            required
-          ></v-text-field>
+                  <v-col cols="4" sm="3">
+                    <v-select
+                      v-model="countryCode"
+                      :items="countryCodes"
+                      outlined
+                      flat
+                      dense
+                      hide-details
+                      class="rounded-lg"
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="8" sm="9">
+                    <v-text-field
+                      v-model="phone"
+                      label="Phone"
+                      outlined
+                      flat
+                      dense
+                      class="rounded-lg"
+                      :rules="[(v) => !!v || 'Required']"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
 
-          <v-btn color="primary" block @click="submit">Sign Up</v-btn>
+                <v-btn
+                  block
+                  x-large
+                  depressed
+                  :loading="loading"
+                  color="secondary"
+                  class="mt-6 rounded-lg font-weight-bold text-capitalize"
+                  @click="submit"
+                >
+                  Create Free Account
+                  <v-icon right size="18">mdi-sparkles</v-icon>
+                </v-btn>
 
-          <div class="my-5 text-center">
-            Already have an account ? <a href="/login">login</a>
-          </div>
-        </v-form>
-      </v-card>
-    </v-container>
-  </v-app>
+                <p
+                  class="text-center mt-6 caption grey--text font-weight-medium"
+                >
+                  By signing up, you agree to our
+                  <a href="#" class="text-decoration-none primary--text"
+                    >Privacy Policy</a
+                  >
+                </p>
+              </v-form>
+            </v-col>
+          </v-row>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- SNACKBAR -->
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      timeout="3000"
+      top
+      right
+    >
+      {{ snackbarText }}
+    </v-snackbar>
+  </v-container>
 </template>
 
 <script>
@@ -67,51 +192,53 @@ export default {
   data() {
     return {
       valid: false,
+      loading: false,
+
       name: "",
       company: "",
       email: "",
       password: "",
       phone: "",
-      countryCode: "+91", // Default to India
-      countryCodes: ["+91", "+1", "+44", "+61", "+81", "+86", "+49", "+33"], // Example list
+      countryCode: "+91",
+
+      countryCodes: ["+91", "+1", "+44", "+61", "+81", "+86", "+49", "+33"],
+
+      snackbar: false,
+      snackbarText: "",
+      snackbarColor: "success",
     };
   },
+
   methods: {
     async submit() {
-      if (this.$refs.form.validate()) {
-        try {
-          const response = await axios.post(
-            "http://localhost:3000/api/clients/signup",
-            {
-              name: this.name,
-              company: this.company,
-              email: this.email,
-              password: this.password,
-              phone: `${this.countryCode}${this.phone}`,
-            },
-          );
-          alert("Signup successful!");
-          console.log("Response:", response.data);
-          // Reset form fields after successful submission
-          this.name = "";
-          this.company = "";
-          this.email = "";
-          this.password = "";
-          this.phone = "";
-          this.countryCode = "+91"; // Reset to default
-        } catch (error) {
-          console.error("Error during signup:", error);
-          alert("An error occurred during signup.");
-        }
+      if (!this.$refs.form.validate()) return;
+
+      this.loading = true;
+
+      try {
+        await axios.post("http://localhost:3000/api/clients/signup", {
+          name: this.name,
+          company: this.company,
+          email: this.email,
+          password: this.password,
+          phone: `${this.countryCode}${this.phone}`,
+        });
+
+        this.snackbarText = "Signuup successful! Please log in.";
+        this.snackbarColor = "success";
+        this.snackbar = true;
+        this.$router.push("/login");
+
+        this.$refs.form.reset();
+      } catch (error) {
+        this.snackbarText =
+          error.response?.data?.message || "Signup failed. Try again.";
+        this.snackbarColor = "error";
+        this.snackbar = true;
+      } finally {
+        this.loading = false;
       }
     },
   },
 };
 </script>
-
-<style scoped>
-.v-container {
-  max-width: 600px;
-  margin: 0 auto;
-}
-</style>

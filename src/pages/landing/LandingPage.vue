@@ -1,235 +1,258 @@
 <template>
-  <v-app>
-    <!-- Header Section with Background Image -->
-    <v-card flat dark class="header" height="100vh">
-      <v-container fill-height>
-        <div style="max-width: 600px" class="mx-auto">
+  <div>
+    <v-app-bar app flat color="white" light elevate-on-scroll>
+      <v-container class="py-0 fill-height">
+        <v-avatar size="40" color="primary" tile class="mr-2 mb-0 rounded-lg">
           <v-img
-            src="../../assets/images/scraper-logo.webp"
-            alt="Scraper.ai Logo"
-            contain
-            height="100"
+            src="../../assets/13.png"
+            max-height="40"
+            max-width="40"
           ></v-img>
-          <div class="text-h5 my-4">
-            WE LOVE MAKING THINGS SIMPLE AND AMAZING
+        </v-avatar>
+        <div>
+          <h3 class="font-weight-black secondary--text">scraperAI</h3>
+          <div class="text-caption grey--text hidden-sm-and-down">
+            Modular Intelligence Grid System
           </div>
-          <div class="text-h3 my-4">WELCOME TO SCRAPER.AI</div>
-          <div>
-            With Scraper.ai, creating an intelligent chatbot has never been
-            easier. Our solution allows you to implement a powerful AI chatbot
-            with just a simple script. By analyzing your sitemap, Scraper.ai
-            configures your chatbot to understand and respond based on your
-            website’s content. Whether you're looking to enhance customer
-            engagement, provide instant support, or streamline your business
-            processes, our tool ensures your chatbot is ready in minutes.
-            Harness the power of AI and take your business interactions to the
-            next level with Scraper.ai.
-          </div>
+        </div>
+        <v-spacer></v-spacer>
+        <v-btn text class="text-capitalize font-weight-bold">Features</v-btn>
+        <v-btn text class="text-capitalize font-weight-bold mr-2"
+          >Pricing</v-btn
+        >
+        <v-btn
+          color="primary"
+          rounded
+          depressed
+          class="px-6 text-capitalize font-weight-bold"
+          @click="redirectToSignup"
+        >
+          {{ isLoggedIn ? "Dashboard" : "Sign In" }}
+        </v-btn>
+      </v-container>
+    </v-app-bar>
+
+    <div>
+      <v-sheet
+        color="grey lighten-5"
+        min-height="90vh"
+        class="d-flex align-center pt-12 pb-12"
+        style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)"
+      >
+        <v-container>
+          <v-row align="center" justify="center">
+            <v-col cols="12" md="6" class="text-left">
+              <v-chip
+                color="primary"
+                label
+                small
+                class="mb-4 font-weight-bold px-4"
+              >
+                NEW: GPT-4 INTEGRATION
+              </v-chip>
+              <h1
+                class="text-h2 font-weight-black mb-4 secondary--text line-height-1"
+              >
+                Welcome to <span class="primary--text">scraperAI</span>
+              </h1>
+              <p
+                class="text-h6 grey--text text--darken-1 font-weight-regular mb-8"
+              >
+                Harness the power of AI to transform your sitemap into an
+                intelligent chatbot in minutes. Simple script. Powerful results.
+              </p>
+              <div class="d-flex align-center">
+                <v-btn
+                  x-large
+                  rounded
+                  color="primary"
+                  class="px-10 py-6 elevation-8 mr-4 text-capitalize font-weight-bold"
+                  @click="redirectToSignup"
+                >
+                  Get Started Free
+                </v-btn>
+                <v-btn
+                  x-large
+                  rounded
+                  outlined
+                  color="primary"
+                  class="px-8 text-capitalize font-weight-bold"
+                >
+                  View Demo
+                </v-btn>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6" class="hidden-sm-and-down">
+              <v-img
+                src="../../assets//images/landing.png"
+                max-width="600"
+                class="mx-auto"
+                style="filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1))"
+              ></v-img>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-sheet>
+
+      <v-container class="py-16">
+        <v-row justify="center" class="mb-12">
+          <v-col cols="12" md="8" class="text-center">
+            <h2 class="text-h4 font-weight-bold mb-4">
+              Why Choose Scraper.ai?
+            </h2>
+            <v-divider
+              class="mx-auto mb-6 primary"
+              style="max-width: 60px; border-width: 2px"
+            ></v-divider>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col v-for="(feature, i) in mainFeatures" :key="i" cols="12" md="4">
+            <v-card
+              hover
+              class="pa-6 rounded-xl transition-swing"
+              min-height="250"
+              outlined
+            >
+              <v-avatar color="primary lighten-5" size="64" class="mb-6">
+                <v-icon color="primary" size="32">{{ feature.icon }}</v-icon>
+              </v-avatar>
+              <h3 class="text-h6 font-weight-bold mb-3">{{ feature.title }}</h3>
+              <p class="grey--text text--darken-1 mb-0">{{ feature.text }}</p>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+
+      <v-sheet color="secondary" dark class="py-16">
+        <v-container>
+          <v-row>
+            <v-col
+              v-for="(service, i) in services"
+              :key="i"
+              cols="12"
+              sm="6"
+              md="3"
+              class="text-center"
+            >
+              <v-icon size="48" color="primary lighten-2" class="mb-4">
+                {{ service.icon }}
+              </v-icon>
+              <h4 class="text-uppercase font-weight-bold subtitle-1 mb-2">
+                {{ service.title }}
+              </h4>
+              <v-divider
+                color="primary"
+                class="mx-auto mb-4"
+                style="max-width: 30px"
+              ></v-divider>
+              <p class="body-2 grey--text text--lighten-1 px-4">
+                {{ service.desc }}
+              </p>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-sheet>
+
+      <v-container class="py-16 text-center">
+        <v-card color="primary" dark class="pa-12 rounded-xl elevation-12">
+          <h2 class="text-h3 font-weight-bold mb-6">
+            Ready to automate your support?
+          </h2>
+          <p class="text-h6 mb-8 opacity-80">
+            Join 1,000+ businesses using Scraper.ai to save time.
+          </p>
           <v-btn
-            large
-            class="my-5"
-            color="primary"
-            depressed
+            x-large
+            light
+            rounded
+            class="px-12 font-weight-bold"
             @click="redirectToSignup"
           >
-            Get Started
+            Get Started Now
           </v-btn>
+        </v-card>
+      </v-container>
+    </div>
+
+    <v-footer padless color="dark" class="pt-12">
+      <v-container>
+        <v-row>
+          <v-col cols="12" md="4" class="mb-6">
+            <v-img
+              src="../../assets/images/scraper-logo.webp"
+              max-width="120"
+              class="mb-4"
+            ></v-img>
+            <p class="grey--text pr-md-12">
+              Transforming how businesses interact with their customers through
+              autonomous AI scraping and chat technology.
+            </p>
+            <div class="mt-4">
+              <v-btn
+                v-for="icon in icons"
+                :key="icon"
+                icon
+                color="grey darken-1"
+                class="mr-2"
+              >
+                <v-icon size="20px">{{ icon }}</v-icon>
+              </v-btn>
+            </div>
+          </v-col>
+          <v-col cols="6" md="2" class="mb-6">
+            <div class="font-weight-bold mb-4">Product</div>
+            <div
+              v-for="link in [
+                'Features',
+                'Integrations',
+                'Pricing',
+                'Changelog',
+              ]"
+              :key="link"
+              class="mb-2"
+            >
+              <a
+                href="#"
+                class="text-decoration-none grey--text text--darken-1"
+                >{{ link }}</a
+              >
+            </div>
+          </v-col>
+          <v-col cols="6" md="2" class="mb-6">
+            <div class="font-weight-bold mb-4">Company</div>
+            <div
+              v-for="link in ['About Us', 'Contact', 'Privacy Policy', 'Terms']"
+              :key="link"
+              class="mb-2"
+            >
+              <a
+                href="#"
+                class="text-decoration-none grey--text text--darken-1"
+                >{{ link }}</a
+              >
+            </div>
+          </v-col>
+          <v-col cols="12" md="4">
+            <div class="font-weight-bold mb-4">Stay Updated</div>
+            <v-text-field
+              label="Email Address"
+              solo
+              flat
+              background-color="secondary lighten-4"
+              append-icon="mdi-send"
+              rounded
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-divider class="my-8"></v-divider>
+        <div class="text-center grey--text body-2 pb-8">
+          &copy; {{ new Date().getFullYear() }} Scraper.ai. All rights reserved.
         </div>
       </v-container>
-    </v-card>
-
-    <!-- Features Section -->
-    <v-container style="padding: 96px 0">
-      <div class="text-h4 mb-6">Why Choose Scraper.ai?</div>
-      <v-row>
-        <v-col cols="12" md="4">
-          <v-card flat>
-            <v-card-title>
-              <div>
-                <strong>Implement a chatbot with a script</strong>
-              </div>
-            </v-card-title>
-            <v-card-text>
-              With Scraper.ai, you can deploy a powerful AI chatbot by simply
-              adding a script to your site.
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="12" md="4">
-          <v-card flat>
-            <v-card-title>
-              <div><strong>Powered by ChatGPT</strong></div>
-            </v-card-title>
-            <v-card-text>
-              Our solution is powered by advanced ChatGPT AI, ensuring
-              intelligent and responsive interactions.
-            </v-card-text>
-          </v-card>
-        </v-col>
-        <v-col cols="12" md="4">
-          <v-card flat>
-            <v-card-title>
-              <div>
-                <strong>Conversations tailored to your website content</strong>
-              </div>
-            </v-card-title>
-            <v-card-text>
-              By analyzing your sitemap, our tool configures the chatbot to
-              provide responses tailored to your content.
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-
-    <!-- New Section -->
-    <v-card dark class="rounded-0" id="features" style="padding: 96px 0">
-      <div class="v-responsive mx-auto" style="max-width: 1350px">
-        <div class="v-responsive__content">
-          <v-container fluid>
-            <v-row>
-              <!-- First Feature -->
-              <v-col sm="4" md="3" cols="12">
-                <v-container pa-0>
-                  <v-row no-gutters justify-center>
-                    <v-col cols="12" class="text-center mb-4">
-                      <v-icon size="56" color="primary"
-                        >mdi-keyboard-outline</v-icon
-                      >
-                    </v-col>
-                    <v-col cols="12">
-                      <h3
-                        class="text-subtitle-1 font-weight-bold mb-1 text-center text-uppercase"
-                      >
-                        Trendy Design
-                      </h3>
-                      <v-divider
-                        class="mx-auto mb-6"
-                        style="max-width: 28px"
-                      ></v-divider>
-                      <p class="grey--text text-darken-1 text-center mb-6">
-                        Efficiently unleash media information without
-                        cross-media value. Quickly maximize value timely
-                        deliverables schemas.
-                      </p>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-col>
-              <!-- Second Feature -->
-              <v-col sm="4" md="3" cols="12">
-                <v-container pa-0>
-                  <v-row no-gutters justify-center>
-                    <v-col cols="12" class="text-center mb-4">
-                      <v-icon size="56" color="primary"
-                        >mdi-camera-outline</v-icon
-                      >
-                    </v-col>
-                    <v-col cols="12">
-                      <h3
-                        class="text-subtitle-1 font-weight-bold mb-1 text-center text-uppercase"
-                      >
-                        Photography
-                      </h3>
-                      <v-divider
-                        class="mx-auto mb-6"
-                        style="max-width: 28px"
-                      ></v-divider>
-                      <p class="grey--text text-darken-1 text-center mb-6">
-                        Efficiently unleash media information without
-                        cross-media value. Quickly maximize value timely
-                        deliverables schemas.
-                      </p>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-col>
-              <!-- Third Feature -->
-              <v-col sm="4" md="3" cols="12">
-                <v-container pa-0>
-                  <v-row no-gutters justify-center>
-                    <v-col cols="12" class="text-center mb-4">
-                      <v-icon size="56" color="primary"
-                        >mdi-pencil-outline</v-icon
-                      >
-                    </v-col>
-                    <v-col cols="12">
-                      <h3
-                        class="text-subtitle-1 font-weight-bold mb-1 text-center text-uppercase"
-                      >
-                        Brand Making
-                      </h3>
-                      <v-divider
-                        class="mx-auto mb-6"
-                        style="max-width: 28px"
-                      ></v-divider>
-                      <p class="grey--text text-darken-1 text-center mb-6">
-                        Efficiently unleash media information without
-                        cross-media value. Quickly maximize value timely
-                        deliverables schemas.
-                      </p>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-col>
-              <!-- Fourth Feature -->
-              <v-col sm="4" md="3" cols="12">
-                <v-container pa-0>
-                  <v-row no-gutters justify-center>
-                    <v-col cols="12" class="text-center mb-4">
-                      <v-icon size="56" color="primary"
-                        >mdi-puzzle-outline</v-icon
-                      >
-                    </v-col>
-                    <v-col cols="12">
-                      <h3
-                        class="text-subtitle-1 font-weight-bold mb-1 text-center text-uppercase"
-                      >
-                        24/7 Support
-                      </h3>
-                      <v-divider
-                        class="mx-auto mb-6"
-                        style="max-width: 28px"
-                      ></v-divider>
-                      <p class="grey--text text-darken-1 text-center mb-6">
-                        Efficiently unleash media information without
-                        cross-media value. Quickly maximize value timely
-                        deliverables schemas.
-                      </p>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-col>
-            </v-row>
-          </v-container>
-        </div>
-      </div>
-    </v-card>
-
-    <!-- Footer Section -->
-    <v-footer dark padless>
-      <v-card color="indigo" flat width="100%" class="rounded-0 text-center">
-        <v-card-text>
-          <v-btn
-            v-for="icon in icons"
-            :key="icon"
-            class="mx-4 white--text"
-            icon
-          >
-            <v-icon size="24px">{{ icon }}</v-icon>
-          </v-btn>
-        </v-card-text>
-        <v-card-text class="white--text pt-0">
-          Phasellus feugiat arcu sapien, et iaculis ipsum elementum sit amet.
-          Mauris cursus commodo interdum.
-        </v-card-text>
-        <v-divider></v-divider>
-        <v-card-text class="white--text">
-          {{ new Date().getFullYear() }} — <strong>Scraper.ai</strong>
-        </v-card-text>
-      </v-card>
     </v-footer>
-  </v-app>
+  </div>
 </template>
 
 <script>
@@ -238,12 +261,48 @@ export default {
   data: () => ({
     isLoggedIn: false,
     icons: ["mdi-facebook", "mdi-twitter", "mdi-linkedin", "mdi-instagram"],
+    mainFeatures: [
+      {
+        icon: "mdi-code-tags",
+        title: "Script Deployment",
+        text: "Deploy a powerful AI chatbot by simply adding a single line of script to your site's header.",
+      },
+      {
+        icon: "mdi-robot",
+        title: "Powered by ChatGPT",
+        text: "Built on the latest LLMs ensuring your users get human-like, intelligent, and accurate responses.",
+      },
+      {
+        icon: "mdi-web",
+        title: "Sitemap Intelligent",
+        text: "Automatically crawls your sitemap to learn about your products, services, and documentation.",
+      },
+    ],
+    services: [
+      {
+        icon: "mdi-keyboard-outline",
+        title: "Trendy Design",
+        desc: "Sleek, modern interfaces that blend seamlessly with your existing brand identity.",
+      },
+      {
+        icon: "mdi-camera-outline",
+        title: "Visual Assets",
+        desc: "Automated image processing for products mentioned within the chat flow.",
+      },
+      {
+        icon: "mdi-pencil-outline",
+        title: "Brand Making",
+        desc: "Customizable tones and styles to ensure the AI speaks your company's language.",
+      },
+      {
+        icon: "mdi-puzzle-outline",
+        title: "24/7 Support",
+        desc: "Your support never sleeps. Answer queries instantly at any time of day.",
+      },
+    ],
   }),
   mounted() {
-    const token = localStorage.getItem("user-token");
-    if (token) {
-      this.isLoggedIn = true;
-    }
+    this.isLoggedIn = !!localStorage.getItem("user-token");
   },
   methods: {
     redirectToSignup() {
@@ -252,12 +311,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-/* .header {
-  background-image: url("../../assets/images/background.png");
-  background-size: cover;
-  background-position: center;
-  border-radius: 0;
-} */
-</style>
