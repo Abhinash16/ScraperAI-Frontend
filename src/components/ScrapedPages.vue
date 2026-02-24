@@ -1,7 +1,5 @@
 <template>
   <v-container>
-    <h2>Scraped Pages</h2>
-
     <v-simple-table>
       <thead>
         <tr>
@@ -34,7 +32,7 @@ export default {
     async fetchScrapedPages() {
       try {
         const response = await apiClient.get("content/scraped-pages");
-        this.scrapedPages = response.data.pages;
+        this.scrapedPages = response.data.data || [];
       } catch (error) {
         console.error("Error fetching scraped pages:", error);
       }

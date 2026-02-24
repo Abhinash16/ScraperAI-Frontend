@@ -1,20 +1,27 @@
 <template>
-  <v-container>
+  <div>
+    <!-- Upload Button -->
     <div class="text-right">
-      <v-btn @click="uploadUrlDialog = true" color="primary" depressed rounded
-        >Upload</v-btn
-      >
+      <v-btn @click="uploadUrlDialog = true" color="primary" depressed rounded>
+        Upload
+      </v-btn>
     </div>
-    <v-overlay :value="loading"> </v-overlay>
+
+    <!-- Loading Overlay -->
+    <v-overlay :value="loading"></v-overlay>
+
+    <!-- Empty State -->
     <div>
-      <v-card v-if="!loading && pages.length == 0" class="my-5">
+      <v-card v-if="!loading && pages.length === 0" class="my-5">
         <v-container class="pa-4 py-15 text-center">
           <div class="my-4">
-            You have not added any pages, start by uploading a sitemap or a url
+            You have not added any pages, start by uploading a sitemap or a URL
           </div>
         </v-container>
       </v-card>
-      <v-simple-table>
+
+      <!-- Pages Table -->
+      <v-simple-table v-else>
         <thead>
           <tr>
             <th>Title</th>
@@ -27,33 +34,33 @@
         <tbody>
           <tr v-for="page in pages" :key="page.url">
             <td>{{ page.title }}</td>
-            <td>{{ page.url }}</td>
+            <td>
+              <a :href="page.url" target="_blank">{{ page.url }}</a>
+            </td>
             <td
-              :class="page.status === 'done' ? 'success--text' : 'error--text'"
+              :class="{
+                'success--text': page.status === 'done',
+                'error--text': page.status === 'error',
+                'warning--text':
+                  page.status === 'pending' || page.status === 'ongoing',
+              }"
             >
               {{ page.status }}
             </td>
             <td>
-              <v-btn
-                small
-                depressed
-                v-if="page.status === 'pending'"
-                @click="scrapePage(page.url)"
-                :disabled="page.status === 'done' || page.status === 'ongoing'"
-              >
-                Scrape Now
-              </v-btn>
-              <v-btn
-                small
-                depressed
-                v-if="page.status === 'error'"
-                @click="scrapePage(page.url)"
-                :disabled="page.status === 'done' || page.status === 'ongoing'"
-              >
-                Retry
-              </v-btn>
+              <div v-if="page.status === 'pending' || page.status === 'error'">
+                <v-btn
+                  small
+                  depressed
+                  color="primary"
+                  @click="scrapePage(page.url)"
+                  :disabled="page.status === 'ongoing'"
+                >
+                  {{ page.status === "pending" ? "Scrape Now" : "Retry" }}
+                </v-btn>
+              </div>
               <div v-else>
-                {{ page.scrapedAt | moment("lll") }}
+                {{ formatDate(page.createdAt) }}
               </div>
             </td>
           </tr>
@@ -61,6 +68,7 @@
       </v-simple-table>
     </div>
 
+    <!-- Loading Dialog -->
     <v-dialog persistent max-width="300" v-model="loading">
       <v-card>
         <div class="pa-3 text-center">
@@ -69,10 +77,12 @@
             size="15"
             indeterminate
           ></v-progress-circular>
-          scraping...
+          Scraping...
         </div>
       </v-card>
     </v-dialog>
+
+    <!-- Upload URL / Sitemap Dialog -->
     <v-dialog
       max-width="700"
       :loading="loading"
@@ -84,11 +94,13 @@
           <v-tabs v-model="currentTab">
             <v-tab tab-value="sitemap">Sitemap</v-tab>
             <v-tab tab-value="url">Url</v-tab>
-            <v-tab disabled tab-value="json">json</v-tab>
-            <v-tab disabled tab-value="csv">csv</v-tab>
+            <v-tab disabled tab-value="json">JSON</v-tab>
+            <v-tab disabled tab-value="csv">CSV</v-tab>
           </v-tabs>
+
           <div class="my-4">
-            <div v-if="currentTab == 'sitemap'">
+            <!-- Sitemap Tab -->
+            <div v-if="currentTab === 'sitemap'">
               <div class="my-4">
                 Please enter the sitemap URL of your website so we can retrieve
                 all associated URLs. If you prefer to enter specific URLs
@@ -103,7 +115,9 @@
                 >Submit</v-btn
               >
             </div>
-            <div v-if="currentTab == 'url'">
+
+            <!-- URL Tab -->
+            <div v-if="currentTab === 'url'">
               <div class="my-4">
                 Please enter your website's URL to add it to your page list. You
                 can later decide if you want to scrape the data from this URL to
@@ -120,7 +134,7 @@
         </v-container>
       </v-card>
     </v-dialog>
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -141,27 +155,36 @@ export default {
     this.fetchPages();
   },
   methods: {
+    formatDate(dateStr) {
+      return new Date(dateStr).toLocaleString();
+    },
+
     async scrapePage(url) {
+      const pageIndex = this.pages.findIndex((p) => p.url === url);
+      if (pageIndex !== -1) this.pages[pageIndex].status = "ongoing";
+
       this.loading = true;
       try {
         await apiClient.post("content/scrape", { url });
-        this.fetchPages();
-        this.loading = false;
+        await this.fetchPages();
       } catch (error) {
-        this.loading = false;
         console.error("Error scraping page:", error);
         alert("Failed to scrape the page. Please try again.");
+      } finally {
+        this.loading = false;
       }
     },
+
     async fetchPages() {
       this.uploadUrlDialog = false;
       try {
-        const response = await apiClient.get("content/pages");
-        this.pages = response.data.pages;
+        const { data } = await apiClient.get("content/pages");
+        this.pages = data.data || [];
       } catch (error) {
         console.error("Error fetching pages:", error);
       }
     },
+
     async submitSitemap() {
       if (!this.sitemapUrl) {
         alert("Please enter a valid sitemap URL.");
@@ -171,25 +194,24 @@ export default {
         await apiClient.post("content/sitemap", {
           sitemapUrl: this.sitemapUrl,
         });
-        this.fetchPages();
+        await this.fetchPages();
       } catch (error) {
         console.error("Error submitting sitemap:", error);
         alert("Failed to submit sitemap. Please try again.");
       }
     },
+
     async submitUrl() {
       if (!this.url) {
-        alert("Please enter a valid sitemap URL.");
+        alert("Please enter a valid URL.");
         return;
       }
       try {
-        await apiClient.post("content/scrape/url", {
-          url: this.url,
-        });
-        this.fetchPages();
+        await apiClient.post("content/scrape/url", { url: this.url });
+        await this.fetchPages();
       } catch (error) {
-        console.error("Error submitting sitemap:", error);
-        alert("Failed to submit sitemap. Please try again.");
+        console.error("Error submitting URL:", error);
+        alert("Failed to submit URL. Please try again.");
       }
     },
   },
