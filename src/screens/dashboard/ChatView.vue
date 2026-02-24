@@ -100,9 +100,14 @@ import { io } from "socket.io-client";
 import apiClient from "@/service/axios";
 
 export default {
+  props: {
+    chatId: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
-      chatId: this.$route.params.chatId,
       messages: [],
       newMessage: "",
       socket: null,

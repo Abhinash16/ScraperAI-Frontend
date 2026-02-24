@@ -47,6 +47,9 @@ apiClient.interceptors.response.use(
       } else {
         // Handle other 401 errors
         alert("Unauthorized access. Please log in again.");
+        localStorage.removeItem("user-token");
+        setAuthToken(null);
+        window.location.href = "/login";
       }
     }
 
