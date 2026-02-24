@@ -97,9 +97,7 @@
       <v-container class="py-16">
         <v-row justify="center" class="mb-12">
           <v-col cols="12" md="8" class="text-center">
-            <h2 class="text-h4 font-weight-bold mb-4">
-              Why Choose Scraper.ai?
-            </h2>
+            <h2 class="text-h4 font-weight-bold mb-4">Why Choose scraperAI?</h2>
             <v-divider
               class="mx-auto mb-6 primary"
               style="max-width: 60px; border-width: 2px"
@@ -161,7 +159,7 @@
             Ready to automate your support?
           </h2>
           <p class="text-h6 mb-8 opacity-80">
-            Join 1,000+ businesses using Scraper.ai to save time.
+            Join 1,000+ businesses using scraperAI to save time.
           </p>
           <v-btn
             x-large
@@ -248,7 +246,7 @@
         </v-row>
         <v-divider class="my-8"></v-divider>
         <div class="text-center grey--text body-2 pb-8">
-          &copy; {{ new Date().getFullYear() }} Scraper.ai. All rights reserved.
+          &copy; {{ new Date().getFullYear() }} scraperAI. All rights reserved.
         </div>
       </v-container>
     </v-footer>

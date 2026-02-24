@@ -2,10 +2,18 @@
   <v-container fluid fill-height>
     <v-row align="center" justify="center">
       <v-col cols="12" md="7" lg="7">
-        <v-card elevation="6" class="rounded-xl">
+        <v-card rounded="xl" outlined>
           <v-row no-gutters>
             <!-- LEFT SIDE -->
-            <v-col cols="12" md="5" class="pa-8 grey lighten-4">
+            <v-col
+              cols="12"
+              md="5"
+              class="pa-8 grey lighten-4"
+              style="
+                border-top-left-radius: 15px;
+                border-bottom-left-radius: 15px;
+              "
+            >
               <v-avatar
                 size="140"
                 color="primary"
@@ -36,7 +44,7 @@
                   <span class="primary--text">Brain.</span>
                 </h2>
                 <p class="body-1 grey--text text--darken-1">
-                  Scraper.ai uses your existing content to power a custom GPT
+                  scraperAI uses your existing content to power a custom GPT
                   tailored to your customers' needs.
                 </p>
               </div>
@@ -156,7 +164,7 @@
                   x-large
                   depressed
                   :loading="loading"
-                  color="secondary"
+                  color="primary"
                   class="mt-6 rounded-lg font-weight-bold text-capitalize"
                   @click="submit"
                 >

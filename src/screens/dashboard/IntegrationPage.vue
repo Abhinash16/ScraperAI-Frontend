@@ -85,8 +85,8 @@
         <div>
           Do not share your API key with others, or expose it in the browser or
           other client-side code. In order to protect the security of your
-          account, scraper.ai may also automatically disable any API key that
-          has leaked publicly.
+          account, scraperAI may also automatically disable any API key that has
+          leaked publicly.
         </div>
 
         <div class="my-5">

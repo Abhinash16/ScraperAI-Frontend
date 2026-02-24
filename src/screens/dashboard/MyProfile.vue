@@ -96,7 +96,7 @@
           <div>
             Do not share your API key with others, or expose it in the browser
             or other client-side code. In order to protect the security of your
-            account, scraper.ai may also automatically disable any API key that
+            account, scraperAI may also automatically disable any API key that
             has leaked publicly.
           </div>
 
@@ -157,11 +157,14 @@ export default {
       this.loading = true;
       try {
         const { data } = await apiClient.get("/clients/currentUser");
-        this.currentUser = data;
-        this.name = data.name;
-        this.email = data.email;
-        this.phone = data.phone;
-        this.company = data.company;
+
+        const user = data.data;
+
+        this.currentUser = user;
+        this.name = user.name || "";
+        this.email = user.email || "";
+        this.phone = user.phone || "";
+        this.company = user.company || "";
       } catch (error) {
         this.errorMessage =
           error.response?.data?.message || "something is wrong";

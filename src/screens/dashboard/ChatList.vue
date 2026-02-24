@@ -136,8 +136,8 @@ export default {
     async fetchChats() {
       this.loading = true;
       try {
-        const response = await apiClient.get("/chats");
-        this.chats = response.data;
+        const { data } = await apiClient.get("/chats");
+        this.chats = data.data || [];
       } catch (error) {
         this.errorMessage =
           error.response?.data?.message || "Error fetching chats.";

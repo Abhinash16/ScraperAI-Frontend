@@ -20,7 +20,7 @@
           </p>
         </div>
 
-        <v-card class="pa-6 rounded-xl elevation-24 white">
+        <v-card class="pa-6" rounded="xl" outlined>
           <h3 class="text-h5 font-weight-bold mb-6">Login</h3>
 
           <v-form ref="form" v-model="valid" lazy-validation>
@@ -56,7 +56,7 @@
 
             <!-- BUTTON WITH LOADING -->
             <v-btn
-              color="secondary"
+              color="primary"
               block
               x-large
               depressed
