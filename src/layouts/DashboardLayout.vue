@@ -31,7 +31,7 @@
         </v-btn>
 
         <v-avatar size="36" class="ml-4 grey lighten-3">
-          <v-icon color="primary">mdi-account</v-icon>
+          <v-icon color="black">mdi-account</v-icon>
         </v-avatar>
       </v-container>
     </v-app-bar>

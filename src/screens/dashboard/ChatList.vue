@@ -37,7 +37,7 @@
                       size="44"
                       rounded="xl"
                     >
-                      <v-icon color="primary">mdi-account-circle</v-icon>
+                      <v-icon color="black">mdi-account-circle</v-icon>
                     </v-avatar>
                   </v-col>
 

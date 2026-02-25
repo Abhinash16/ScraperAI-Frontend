@@ -6,7 +6,7 @@
           <!-- HEADER -->
           <v-toolbar flat>
             <v-avatar color="#cde6ff" size="44" rounded="xl">
-              <v-icon color="primary">mdi-account-circle</v-icon>
+              <v-icon color="black">mdi-account-circle</v-icon>
             </v-avatar>
 
             <div class="ml-3">
