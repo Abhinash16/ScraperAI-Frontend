@@ -77,7 +77,7 @@
           </v-col>
 
           <!-- Right Side (Empty for now) -->
-          <v-col cols="12" md="7">
+          <v-col cols="12" md="7" class="hidden-sm-and-down">
             <chat-view
               v-if="selectedChatId"
               :chatId="selectedChatId"
@@ -91,6 +91,15 @@
         </v-row>
       </v-col>
     </v-row>
+
+    <!-- Mobile Bottom Sheet -->
+    <v-bottom-sheet v-model="chatViewBottomSheet" inset class="p-0 m-0">
+      <chat-view
+        v-if="selectedChatId"
+        :chatId="selectedChatId"
+        :key="'mobile-' + selectedChatId"
+      />
+    </v-bottom-sheet>
 
     <!-- Loader -->
     <v-overlay :value="loading" opacity="0.3">
@@ -121,6 +130,7 @@ export default {
     snackbar: false,
     errorMessage: "",
     selectedChatId: null,
+    chatViewBottomSheet: false,
   }),
 
   created() {
@@ -147,7 +157,11 @@ export default {
     viewChat(chatId) {
       // this.$router.push("/dashboard/chat/" + chatId);
       this.selectedChatId = chatId;
-      console.log("Selected Chat ID:", chatId);
+
+      // If mobile → open bottom sheet
+      if (this.$vuetify.breakpoint.smAndDown) {
+        this.chatViewBottomSheet = true;
+      }
     },
 
     getStatusColor(status) {
