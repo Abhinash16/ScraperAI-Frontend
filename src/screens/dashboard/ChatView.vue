@@ -100,14 +100,15 @@ import { io } from "socket.io-client";
 import apiClient from "@/service/axios";
 
 export default {
-  props: {
-    chatId: {
-      type: String,
-      required: true,
-    },
-  },
+  // props: {
+  //   chatId: {
+  //     type: String,
+  //     required: true,
+  //   },
+  // },
   data() {
     return {
+      chatId: this.$route.params.chatId,
       messages: [],
       newMessage: "",
       socket: null,
@@ -130,8 +131,15 @@ export default {
   methods: {
     async connectSocket() {
       try {
-        const { data } = await apiClient.get("/clients/currentUser");
-        this.apiKey = data.apiKey;
+        const response = await apiClient.get("/clients/currentUser");
+
+        // ✅ correct path
+        this.apiKey = response.data.data.apiKey;
+
+        if (!this.apiKey) {
+          console.error("API key not found");
+          return;
+        }
 
         this.socket = io("http://localhost:3000");
 
@@ -143,12 +151,12 @@ export default {
           });
         });
 
-        // When new message comes
+        // Receive new message
         this.socket.on("message", (message) => {
           this.messages.push(message);
         });
 
-        // Load previous messages
+        // Load old messages
         this.socket.on("previousMessages", (messages) => {
           this.messages = messages;
         });

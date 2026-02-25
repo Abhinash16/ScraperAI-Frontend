@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Upload Button -->
-    <div class="text-right">
+    <div class="text-right mb-2">
       <v-btn @click="uploadUrlDialog = true" color="primary" depressed rounded>
         Upload
       </v-btn>
@@ -11,14 +11,19 @@
     <v-overlay :value="loading"></v-overlay>
 
     <!-- Empty State -->
-    <div>
-      <v-card v-if="!loading && pages.length === 0" class="my-5">
+    <v-card outlined rounded="xl">
+      <div
+        v-if="!loading && pages.length === 0"
+        class="my-5"
+        outlined
+        rounded="xl"
+      >
         <v-container class="pa-4 py-15 text-center">
           <div class="my-4">
             You have not added any pages, start by uploading a sitemap or a URL
           </div>
         </v-container>
-      </v-card>
+      </div>
 
       <!-- Pages Table -->
       <v-simple-table v-else>
@@ -66,7 +71,7 @@
           </tr>
         </tbody>
       </v-simple-table>
-    </div>
+    </v-card>
 
     <!-- Loading Dialog -->
     <v-dialog persistent max-width="300" v-model="loading">

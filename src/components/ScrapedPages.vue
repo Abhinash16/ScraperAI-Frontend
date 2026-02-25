@@ -1,22 +1,24 @@
 <template>
-  <v-container>
-    <v-simple-table>
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Url</th>
-          <th>scrapedAt</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="page in scrapedPages" :key="page.url">
-          <td>{{ page.title }}</td>
-          <td>{{ page.url }}</td>
-          <td>{{ page.scrapedAt }}</td>
-        </tr>
-      </tbody>
-    </v-simple-table>
-  </v-container>
+  <div>
+    <v-card outlined rounded="xl">
+      <v-simple-table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Url</th>
+            <th>scrapedAt</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="page in scrapedPages" :key="page.url">
+            <td>{{ page.title }}</td>
+            <td>{{ page.url }}</td>
+            <td>{{ page.scrapedAt }}</td>
+          </tr>
+        </tbody>
+      </v-simple-table>
+    </v-card>
+  </div>
 </template>
 
 <script>

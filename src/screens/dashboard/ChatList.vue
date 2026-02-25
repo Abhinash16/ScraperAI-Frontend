@@ -102,7 +102,7 @@
           </v-col>
 
           <v-col cols="12" md="8">
-            <chat-view
+            <!-- <chat-view
               v-if="selectedChatId"
               :chat-id="selectedChatId"
               :key="selectedChatId"
@@ -119,7 +119,7 @@
                 >
                 <div class="text-h6">Select a chat to start messaging</div>
               </div>
-            </v-card>
+            </v-card> -->
           </v-col>
         </v-row>
       </v-col>
@@ -140,10 +140,10 @@
 
 <script>
 import apiClient from "@/service/axios";
-import ChatView from "@/components/ChatView.vue";
+// import ChatView from "@/components/ChatView.vue";
 
 export default {
-  components: { ChatView },
+  // components: { ChatView },
   data: () => ({
     chats: [],
     loading: false,
@@ -180,7 +180,8 @@ export default {
     },
 
     viewChat(chatId) {
-      this.selectedChatId = chatId;
+      this.$router.push("/dashboard/chat/" + chatId);
+      // this.selectedChatId = chatId;
     },
 
     getStatusColor(status) {
