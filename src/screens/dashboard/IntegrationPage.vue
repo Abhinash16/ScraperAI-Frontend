@@ -1,285 +1,628 @@
 <template>
   <div>
-    <v-tabs v-model="currentTab">
-      <v-tab tab-value="general">General</v-tab>
-      <v-tab tab-value="connect-app">Connect ChatGPT</v-tab>
-      <v-tab tab-value="api-keys"
-        >User API Keys
-        <v-chip class="ml-2" small color="warning">Legacy</v-chip></v-tab
-      >
-      <v-tab tab-value="db-settings">Database </v-tab>
-    </v-tabs>
+    <v-card outlined rounded="lg">
+      <v-tabs v-model="currentTab" color="primary" grow>
+        <v-tab tab-value="general">General</v-tab>
+        <v-tab tab-value="connect-app">Connect ChatGPT</v-tab>
+        <v-tab tab-value="api-keys"
+          >User API Keys
+          <v-chip class="ml-2" x-small outlined color="warning"
+            >Legacy</v-chip
+          ></v-tab
+        >
+        <v-tab tab-value="db-settings">Database </v-tab>
+      </v-tabs>
+    </v-card>
 
     <div v-if="currentTab == 'general'">
-      <v-card class="my-4 pa-4" outlined rounded="xl">
-        <div>
-          Add the following script to your <code>index.html</code> page, and you
-          will see a chatbot pop up on your site.
-        </div>
-        --- script start ---
-        <div class="my-4">
-          <code> src="https://scraper.ai/chatpanel.js" </code>
+      <v-card
+        class="pa-4 my-6"
+        rounded="xl"
+        outlined
+        color="#eff2fb"
+        dark
+        max-width="800"
+      >
+        <!-- Header -->
+        <div class="d-flex align-center mb-6">
+          <v-avatar
+            height="50"
+            width="50"
+            rounded="xl"
+            color="#cde6ff"
+            class="d-flex align-center justify-center mr-4"
+          >
+            <v-icon large color="black"> mdi-code-tags </v-icon>
+          </v-avatar>
+
           <div>
-            <code>id="chatPanelScript"</code>
-          </div>
-          <div>
-            <code>
-              data-api-key="{{ currentLoggedInUser.apiKey || "your-api-key" }}
-            </code>
+            <h3 class="black--text">Embed Script</h3>
+            <div class="text-caption black--text">
+              Add the following script to your <code>index.html</code> page, and
+              you will see a chatbot pop up on your site.
+            </div>
           </div>
         </div>
-        --- script end ---
+
+        <!-- Code Block -->
+        <v-card outlined color="grey darken-4" class="pa-4" rounded="xl">
+          <div class="d-flex justify-space-between align-center mb-2">
+            <span class="text-caption grey--text text--lighten-1">SCRIPT</span>
+            <v-btn
+              x-small
+              color="primary"
+              @click="copyScriptCode"
+              depressed
+              rounded
+            >
+              <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
+            </v-btn>
+          </div>
+          <code
+            class="transparent white--text d-block pa-0 font-weight-light"
+            style="font-family: monospace !important"
+          >
+            &lt;script src="https://scraper.ai/chatpanel.js"
+            id="chatPanelScript" data-api-key="{{
+              currentLoggedInUser?.apiKey || "N/A"
+            }}"&gt; &lt;/script&gt;
+          </code>
+        </v-card>
+
+        <!-- Footer Links -->
+        <div class="mt-6">
+          <v-btn text color="primary" @click="viewInstallationGuide()">
+            View Installation Guide
+          </v-btn>
+        </div>
       </v-card>
     </div>
 
     <div v-if="currentTab == 'connect-app'">
-      <v-card class="my-4 pa-4" outlined rounded="xl">
-        <div>
-          <strong>Connect ChatGPT </strong>
-          <v-chip small v-if="currentLoggedInUser.chatgptApiKey" color="success"
-            >connected</v-chip
+      <v-card
+        class="pa-4 my-6"
+        rounded="xl"
+        outlined
+        color="#eff2fb"
+        max-width="800"
+      >
+        <div class="d-flex align-center mb-6">
+          <v-avatar
+            height="50"
+            width="50"
+            rounded="xl"
+            color="#cde6ff"
+            class="d-flex align-center justify-center mr-4"
           >
+            <v-img src="../../assets/images/chatgpt-icon.png"></v-img>
+          </v-avatar>
+
+          <div class="flex-grow-1">
+            <div class="d-flex align-center">
+              <h3 class="black--text mr-2">Connect ChatGPT</h3>
+              <v-chip
+                v-if="currentLoggedInUser.chatgptApiKey"
+                small
+                color="success"
+                outlined
+              >
+                Connected
+              </v-chip>
+            </div>
+            <div class="text-caption black--text">
+              Connect your OpenAI account to process your chatbot. All chats
+              will be handled by this API key.
+            </div>
+          </div>
         </div>
-        <div>
-          Connect your openai for we to process your chatbot, remember all the
-          chats will be handled by this account
-        </div>
-        <div v-if="currentLoggedInUser.chatgptApiKey" class="my-4">
-          <v-btn
-            color="success"
-            @click="connectChatGptDialog = true"
-            depressed
-            class="mr-2"
-            outlined
-            >Edit</v-btn
+
+        <v-card outlined color="white" class="pa-4 mb-4" rounded="xl">
+          <div
+            v-if="currentLoggedInUser.chatgptApiKey"
+            class="d-flex align-center"
           >
-          <v-btn
-            color="error"
-            @click="connectChatGptDialog = true"
-            depressed
-            class="mr-2"
-            outlined
-            >Disconnect</v-btn
+            <v-btn
+              color="primary"
+              @click="connectChatGptDialog = true"
+              depressed
+              rounded
+              class="mr-2"
+            >
+              Edit Connection
+            </v-btn>
+            <v-btn
+              color="error"
+              @click="connectChatGptDialog = true"
+              outlined
+              rounded
+            >
+              Disconnect
+            </v-btn>
+          </div>
+
+          <div v-else>
+            <v-btn
+              color="primary"
+              @click="connectChatGptDialog = true"
+              depressed
+              rounded
+            >
+              Connect OpenAI
+            </v-btn>
+          </div>
+        </v-card>
+
+        <v-card outlined color="white" class="pa-2 px-4" rounded="xl">
+          <v-switch
+            v-model="chatgptEnabled"
+            @change="updateChatGptStatus"
+            color="primary"
+            inset
+            hide-details
+            class="mt-0"
           >
-        </div>
-        <div v-else>
-          <v-btn @click="connectChatGptDialog = true" depressed class="mt-2"
-            >Connect</v-btn
-          >
-        </div>
-
-        <v-switch
-          @change="updateChatGptStatus"
-          v-model="chatgptEnabled"
-          dense
-          :label="`Automated response generated by ChatGPT without any human intervention.`"
-        ></v-switch>
-      </v-card>
-    </div>
-
-    <div v-if="currentTab == 'api-keys'">
-      <v-card class="my-4 pa-4" outlined rounded="xl">
-        <v-alert outlined type="info" rounded="xl">
-          Your secret key will be disabled until the payment is made or the
-          billing cycle lapses. Once we receive the payment, the key will be
-          reactivated and function normally.
-        </v-alert>
-        <div>
-          Do not share your API key with others, or expose it in the browser or
-          other client-side code. In order to protect the security of your
-          account, scraperAI may also automatically disable any API key that has
-          leaked publicly.
-        </div>
-
-        <div class="my-5">
-          SECRET KEY - <code>{{ currentLoggedInUser.apiKey }}</code>
-        </div>
-      </v-card>
-    </div>
-
-    <div v-if="currentTab == 'db-settings'">
-      <v-card class="my-4 pa-4" outlined rounded="xl">
-        <div>
-          <strong>Connect DB </strong>
-          <v-chip small v-if="currentLoggedInUser.dbUri" color="success"
-            >connected</v-chip
-          >
-        </div>
-        <div>
-          Connect your db for we to process your chatbot, remember all the chats
-          will be stored in this db, if db fails, it will be stored in our db.
-        </div>
-
-        <div v-if="currentLoggedInUser.dbUri" class="my-4">
-          <v-btn
-            color="success"
-            @click="connectDBDialog = true"
-            depressed
-            class="mr-2"
-            outlined
-            >Edit</v-btn
-          >
-          <v-btn
-            :disabled="loading"
-            @click="removeDbUri"
-            class="my-4 mr-2"
-            depressed
-            color="error"
-            >Remove</v-btn
-          >
-        </div>
-        <div v-else>
-          <v-btn @click="connectDBDialog = true" depressed class="my-2"
-            >Connect</v-btn
-          >
-        </div>
-
-        <div>
-          For efficient db queries and faster processing we perform Vector
-          Search Query, your db should include:
-        </div>
-
-        <!-- Steps -->
-
-        <div class="mb-4">
-          <strong>Steps to Create a Vector Search Index</strong>
-          <ol class="unlist">
-            <li>Go to <b>Create a Vector Search Index</b>.</li>
-            <li>Click on <b>Start Your Index Configuration</b>.</li>
-            <li>Select <b>Vector Search</b> as the index type.</li>
-            <li>Enter the <b>Index Name</b>.</li>
-            <li>Choose the data source: <b>scraperAi.contentchunks</b>.</li>
-            <li>
-              Open the <b>JSON Editor</b> and paste the following configuration:
-            </li>
-          </ol>
-        </div>
-
-        <!-- Code Block -->
-        <v-card
-          dark
-          class="pa-4"
-          style="background: #1e1e1e; position: relative"
-          max-width="400"
-          rounded="lg"
-        >
-          <v-btn small color="primary" @click="copyCode"> Copy </v-btn>
-
-          <pre class="code-block"><code ref="codeBlock">
-{
-  "fields": [
-    {
-      "type": "vector",
-      "path": "embedding",
-      "numDimensions": 1536,
-      "similarity": "cosine"
-    },
-    {
-      "type": "filter",
-      "path": "client"
-    }
-  ]
-}
-              </code></pre>
+            <template v-slot:label>
+              <span class="text-body-2 black--text">
+                Automated response generated by ChatGPT without any human
+                intervention.
+              </span>
+            </template>
+          </v-switch>
         </v-card>
       </v-card>
     </div>
 
-    <v-dialog max-width="400" v-model="connectChatGptDialog">
-      <v-card :loading="loading">
-        <v-container>
-          <div class="my-4">
-            <div><strong>API Key </strong></div>
-            <div>
-              Your chatgpt api key, don't worry we will make sure its not
-              misused
+    <div v-if="currentTab == 'api-keys'">
+      <v-card
+        class="pa-4 my-6"
+        rounded="xl"
+        outlined
+        color="#eff2fb"
+        max-width="800"
+      >
+        <div class="d-flex align-center mb-6">
+          <v-avatar
+            height="50"
+            width="50"
+            rounded="xl"
+            color="#cde6ff"
+            class="d-flex align-center justify-center mr-4"
+          >
+            <v-icon large color="black"> mdi-key-variant </v-icon>
+          </v-avatar>
+
+          <div class="flex-grow-1">
+            <h3 class="black--text">API Keys</h3>
+            <div class="text-caption black--text">
+              Manage your secret keys to integrate the scraperAI services into
+              your application.
+            </div>
+          </div>
+        </div>
+
+        <v-alert
+          border="left"
+          colored-border
+          color="warning"
+          elevation="0"
+          class="white mb-6 black--text text-body-2"
+          rounded="xl"
+        >
+          Your secret key will be disabled until the payment is made or the
+          billing cycle lapses. Once we receive the payment, the key will be
+          reactivated and function normally.
+        </v-alert>
+
+        <v-card outlined color="grey darken-4" class="pa-4 mb-6" rounded="xl">
+          <div class="d-flex justify-space-between align-center mb-2">
+            <span class="text-caption grey--text text--lighten-1"
+              >SECRET KEY</span
+            >
+            <v-btn
+              x-small
+              color="primary"
+              @click="copyApiKey"
+              depressed
+              rounded
+            >
+              <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
+            </v-btn>
+          </div>
+          <code
+            class="transparent white--text d-block pa-0 font-weight-light"
+            style="font-family: monospace !important"
+          >
+            {{ currentLoggedInUser.apiKey || "N/A" }}
+          </code>
+        </v-card>
+
+        <v-card flat color="transparent" class="pa-2">
+          <div class="d-flex align-start">
+            <v-icon small color="orange darken-2" class="mr-2 mt-1"
+              >mdi-shield-alert-outline</v-icon
+            >
+            <div class="grey--text text--darken-3 text-body-2">
+              <strong>Security Warning:</strong> Do not share your API key with
+              others, or expose it in the browser or other client-side code. In
+              order to protect the security of your account, scraperAI may also
+              automatically disable any API key that has leaked publicly.
+            </div>
+          </div>
+        </v-card>
+      </v-card>
+    </div>
+
+    <div v-if="currentTab == 'db-settings'">
+      <v-card
+        class="pa-4 my-6"
+        rounded="xl"
+        outlined
+        color="#eff2fb"
+        max-width="800"
+      >
+        <div class="d-flex align-center mb-6">
+          <v-avatar
+            height="50"
+            width="50"
+            rounded="xl"
+            color="#cde6ff"
+            class="d-flex align-center justify-center mr-4"
+          >
+            <v-icon large color="black"> mdi-database-outline </v-icon>
+          </v-avatar>
+
+          <div class="flex-grow-1">
+            <div class="d-flex align-center">
+              <h3 class="black--text mr-2">Connect Database</h3>
+              <v-chip
+                v-if="currentLoggedInUser.dbUri"
+                small
+                color="success"
+                outlined
+              >
+                Connected
+              </v-chip>
+            </div>
+            <div class="text-caption black--text">
+              Connect your DB to store chat history locally. If your DB fails,
+              data will be backed up on our servers.
+            </div>
+          </div>
+        </div>
+
+        <v-card outlined color="white" class="pa-4 mb-6" rounded="xl">
+          <div v-if="currentLoggedInUser.dbUri" class="d-flex align-center">
+            <v-btn
+              color="primary"
+              @click="connectDBDialog = true"
+              depressed
+              rounded
+              class="mr-2"
+            >
+              Edit Connection
+            </v-btn>
+            <v-btn
+              :loading="loading"
+              color="error"
+              @click="removeDbUri"
+              outlined
+              rounded
+            >
+              Remove
+            </v-btn>
+          </div>
+          <div v-else>
+            <v-btn
+              color="primary"
+              @click="connectDBDialog = true"
+              depressed
+              rounded
+            >
+              Connect Database
+            </v-btn>
+          </div>
+        </v-card>
+
+        <div class="px-2 mb-4">
+          <div class="text-subtitle-2 black--text font-weight-bold mb-2">
+            Vector Search Configuration
+          </div>
+          <div class="text-body-2 black--text mb-4">
+            For efficient db queries and faster processing we perform Vector
+            Search Query, your db should include:
+          </div>
+
+          <div
+            v-for="(step, i) in [
+              'Go to Create a Vector Search Index.',
+              'Click on Start Your Index Configuration.',
+              'Select Vector Search as the index type.',
+              'Enter the Index Name.',
+              'Choose the data source: scraperAi.contentchunks.',
+              'Open the JSON Editor and paste the following configuration:',
+            ]"
+            :key="i"
+            class="d-flex align-start my-3"
+          >
+            <v-avatar
+              size="20"
+              color="primary"
+              class="mr-3 text-caption white--text"
+            >
+              {{ i + 1 }}
+            </v-avatar>
+            <span class="text-body-2 black--text">{{ step }}</span>
+          </div>
+        </div>
+
+        <v-card outlined color="grey darken-4" class="pa-4" rounded="xl">
+          <div class="d-flex justify-space-between align-center mb-2">
+            <span class="text-caption grey--text text--lighten-1"
+              >JSON CONFIGURATION</span
+            >
+            <v-btn x-small color="primary" @click="copyCode" depressed rounded>
+              <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
+            </v-btn>
+          </div>
+          <code
+            class="transparent white--text d-block pa-0 font-weight-light"
+            style="font-family: monospace !important"
+            ref="codeBlock"
+          >
+            { "fields": [ { "type": "vector", "path": "embedding",
+            "numDimensions": 1536, "similarity": "cosine" }, { "type": "filter",
+            "path": "client" } ] }
+          </code>
+        </v-card>
+      </v-card>
+    </div>
+
+    <v-dialog
+      v-model="connectChatGptDialog"
+      max-width="550"
+      persistent
+      rounded="xl"
+      overlay-color="#2c3e50"
+      overlay-opacity="0.8"
+    >
+      <v-card rounded="xl" :loading="loading">
+        <v-card-title class="d-flex align-center pb-0">
+          <v-avatar color="#eff2fb" rounded="xl" size="50" class="mr-4">
+            <v-img src="../../assets/images/chatgpt-icon.png"></v-img>
+          </v-avatar>
+          <div>
+            <div class="text-h6 font-weight-bold black--text">
+              OpenAI Settings
+            </div>
+            <div class="text-caption grey--text text--darken-1">
+              Configure your chatbot intelligence
+            </div>
+          </div>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="connectChatGptDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+
+        <v-card-text class="pt-6">
+          <div class="mb-5">
+            <label
+              class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
+            >
+              API Key
+            </label>
+            <div class="text-caption mb-2">
+              Securely connect your OpenAI account. Keys are encrypted.
             </div>
             <v-text-field
-              hide-details="auto"
-              dense
               v-model="chatgptApiKey"
+              placeholder="sk-..."
               outlined
-              style="max-width: 600px"
+              dense
+              hide-details="auto"
+              color="primary"
+              background-color="#f8fafc"
             ></v-text-field>
           </div>
-          <div class="my-4">
-            <div><strong>Model </strong></div>
-            <div>
-              Your chatgpt model key, don't worry we will make sure its not
-              misused
+
+          <div class="mb-5">
+            <label
+              class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
+            >
+              AI Model
+            </label>
+            <div class="text-caption mb-2">
+              Select the brain for your chatbot.
             </div>
             <v-select
-              hide-details="auto"
-              dense
               v-model="chatgptModel"
-              outlined
               :items="chatGptModels"
-              style="max-width: 600px"
+              outlined
+              dense
+              hide-details="auto"
+              color="primary"
+              background-color="#f8fafc"
             ></v-select>
           </div>
 
-          <div class="my-4">
-            <div><strong>Content </strong></div>
-            <div>Text related to you business (Do not change this)</div>
+          <div class="mb-5">
+            <label
+              class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
+            >
+              System Content
+            </label>
+            <div class="text-caption mb-2">Fixed business logic reference.</div>
             <v-textarea
               readonly
               hide-details="auto"
               dense
               v-model="chatgptContentPrompt"
               outlined
-              style="max-width: 600px"
+              rows="3"
+              background-color="#f1f3f4"
+              class="text-caption"
+              flat
             ></v-textarea>
           </div>
+        </v-card-text>
+
+        <v-card-actions class="pa-4 pt-0">
           <v-btn
-            :disabled="loading"
-            @click="updateChatGptSettings"
-            class="my-4"
-            depressed
+            block
+            x-large
             color="primary"
-            >Continue</v-btn
+            @click="updateChatGptSettings"
+            :loading="loading"
+            depressed
+            rounded
+            class="text-none font-weight-bold"
           >
-        </v-container>
+            Save & Continue
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog max-width="400" v-model="connectDBDialog">
-      <v-card :loading="loading">
-        <v-container>
-          <div class="my-4">
-            <div><strong>DB URI </strong></div>
-            <div>Enter your Mongodb URI for us to connect.</div>
+
+    <v-dialog
+      v-model="connectDBDialog"
+      max-width="500"
+      persistent
+      rounded="xl"
+      overlay-color="#2c3e50"
+      overlay-opacity="0.8"
+    >
+      <v-card rounded="xl" :loading="loading">
+        <v-card-title class="d-flex align-center pb-0">
+          <v-avatar color="#eff2fb" rounded="xl" size="50" class="mr-4">
+            <v-icon color="black">mdi-database-import</v-icon>
+          </v-avatar>
+          <div>
+            <div class="text-h6 font-weight-bold black--text">
+              Database Setup
+            </div>
+            <div class="text-caption grey--text text--darken-1">
+              Connect your MongoDB instance
+            </div>
+          </div>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="connectDBDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+
+        <v-card-text class="pt-6">
+          <div class="mb-5">
+            <label
+              class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
+            >
+              MongoDB Connection URI
+            </label>
+            <div class="text-caption mb-2">
+              Standard connection string including credentials.
+            </div>
             <v-text-field
-              hide-details="auto"
-              dense
               v-model="dbUri"
+              placeholder="mongodb+srv://..."
               outlined
-              style="max-width: 600px"
+              dense
+              hide-details="auto"
+              color="primary"
+              background-color="#f8fafc"
             ></v-text-field>
           </div>
-          <div class="my-4">
-            <div><strong>Database </strong></div>
-            <div>
-              Your chatgpt model key, don't worry we will make sure its not
-              misused
+
+          <div class="mb-5">
+            <label
+              class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
+            >
+              Database Instance
+            </label>
+            <div class="text-caption mb-2">
+              Select the specific cluster or model configuration.
             </div>
             <v-select
-              hide-details="auto"
-              dense
               v-model="selectedDbModel"
-              outlined
               :items="dbModels"
-              style="max-width: 600px"
+              outlined
+              dense
+              hide-details="auto"
+              color="primary"
+              background-color="#f8fafc"
             ></v-select>
           </div>
 
-          <v-btn
-            :disabled="loading"
-            @click="updateDBSettings"
-            class="my-4"
-            depressed
-            color="primary"
-            >Continue</v-btn
+          <v-alert
+            dense
+            text
+            type="info"
+            icon="mdi-shield-check"
+            class="rounded-lg text-caption"
           >
-        </v-container>
+            Your credentials are encrypted. We only use this to sync chat data.
+          </v-alert>
+        </v-card-text>
+
+        <v-card-actions class="pa-4 pt-0">
+          <v-btn
+            block
+            x-large
+            color="primary"
+            @click="updateDBSettings"
+            :loading="loading"
+            depressed
+            rounded
+            class="text-none font-weight-bold"
+          >
+            Connect & Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="deleteConfirmDialog"
+      max-width="350"
+      rounded="xl"
+      overlay-color="#2c3e50"
+      overlay-opacity="0.8"
+    >
+      <v-card class="text-center" rounded="xl">
+        <v-card-text>
+          <v-avatar color="error lighten-5" size="70" class="my-4">
+            <v-icon color="error" size="40">mdi-alert-octagon-outline</v-icon>
+          </v-avatar>
+
+          <div class="text-h6 font-weight-bold black--text mb-2">
+            Remove Database?
+          </div>
+          <p class="text-body-2 grey--text text--darken-1">
+            This will disconnect your MongoDB instance. Chat logs will revert to
+            being stored on our default database. This action cannot be undone.
+          </p>
+        </v-card-text>
+
+        <v-card-actions class="justify-center pb-4">
+          <v-btn
+            @click="deleteConfirmDialog = false"
+            text
+            rounded
+            large
+            class="px-6 mr-2 text-none"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            @click="updateDBSettings"
+            color="error"
+            depressed
+            rounded
+            large
+            class="px-8 text-none font-weight-bold"
+            :loading="loading"
+          >
+            Yes, Remove
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -318,18 +661,19 @@ export default {
       selectedDbModel: "Mongodb",
       connectDBDialog: false,
       snackbar: false,
+      deleteConfirmDialog: false,
     };
   },
+
   mounted() {
     this.currentLoggedInUserInfo();
   },
+
   methods: {
     removeDbUri() {
-      if (confirm("Are you sure you want to remove?")) {
-        this.dbUri = null;
-        this.updateDBSettings();
-      }
+      this.deleteConfirmDialog = true;
     },
+
     async currentLoggedInUserInfo() {
       try {
         const { data } = await apiClient.get("/clients/currentUser");
@@ -346,6 +690,7 @@ export default {
         console.log("something is wrong");
       }
     },
+
     async updateChatGptStatus() {
       try {
         this.loading = true;
@@ -354,12 +699,14 @@ export default {
         });
         this.currentLoggedInUser = data;
         this.loading = false;
+        this.currentLoggedInUserInfo();
       } catch (error) {
         console.log("🚀 ~ updateChatGptSettings ~ error:", error);
         this.loading = false;
         console.log("something is wrong");
       }
     },
+
     async updateChatGptSettings() {
       try {
         this.loading = true;
@@ -377,6 +724,7 @@ export default {
         console.log("something is wrong");
       }
     },
+
     async updateDBSettings() {
       try {
         this.loading = true;
@@ -396,6 +744,30 @@ export default {
       const text = this.$refs.codeBlock.innerText;
       navigator.clipboard.writeText(text);
       this.snackbar = true;
+    },
+
+    copyApiKey() {
+      const key = this.currentLoggedInUser.apiKey;
+      navigator.clipboard.writeText(key);
+      this.snackbar = true;
+      this.snackbarText = "API Key copied!";
+    },
+
+    copyScriptCode() {
+      const closingTag = "</" + "script>";
+
+      const text = `<script src="https://scraper.ai/chatpanel.js" id="chatPanelScript" data-api-key="${
+        this.currentLoggedInUser?.apiKey || "your-api-key"
+      }">${closingTag}`;
+
+      navigator.clipboard.writeText(text);
+      this.snackbar = true;
+    },
+
+    viewInstallationGuide() {
+      alert(
+        "Yahan pe installation guide ka video, PDF ya text dialog kuch bhi add kar sakte hain.",
+      );
     },
   },
 };
