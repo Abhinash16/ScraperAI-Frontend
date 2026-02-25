@@ -1,144 +1,276 @@
 <template>
   <div>
-    <!-- Upload Button -->
-    <div class="text-right mb-2">
-      <v-btn @click="uploadUrlDialog = true" color="primary" depressed rounded>
-        Upload
-      </v-btn>
-    </div>
-
-    <!-- Loading Overlay -->
-    <v-overlay :value="loading"></v-overlay>
+    <!-- Full Screen Loader -->
+    <v-overlay :value="loading" opacity="0.3">
+      <v-progress-circular indeterminate size="70" width="6" color="primary" />
+    </v-overlay>
 
     <!-- Empty State -->
     <v-card outlined rounded="xl">
-      <div
-        v-if="!loading && pages.length === 0"
-        class="my-5"
-        outlined
-        rounded="xl"
-      >
-        <v-container class="pa-4 py-15 text-center">
-          <div class="my-4">
-            You have not added any pages, start by uploading a sitemap or a URL
-          </div>
-        </v-container>
-      </div>
-
       <!-- Pages Table -->
-      <v-simple-table v-else>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Url</th>
-            <th>Status</th>
-            <th>Scraped At</th>
-          </tr>
-        </thead>
+      <div>
+        <div class="d-flex justify-space-between align-center pa-4 flex-wrap">
+          <!-- Left Content -->
+          <div>
+            <div class="text-h6 font-weight-bold">Crawled Pages Library</div>
+            <div class="text-body-2 grey--text">
+              {{ pages.length }} pages currently indexed for SupportBot.
+            </div>
+          </div>
 
-        <tbody>
-          <tr v-for="page in pages" :key="page.url">
-            <td>{{ page.title }}</td>
-            <td>
-              <a :href="page.url" target="_blank">{{ page.url }}</a>
-            </td>
-            <td
-              :class="{
-                'success--text': page.status === 'done',
-                'error--text': page.status === 'error',
-                'warning--text':
-                  page.status === 'pending' || page.status === 'ongoing',
-              }"
-            >
-              {{ page.status }}
-            </td>
-            <td>
-              <div v-if="page.status === 'pending' || page.status === 'error'">
-                <v-btn
+          <!-- Upload Button -->
+          <v-btn
+            class="mt-2 mt-md-0"
+            color="primary"
+            depressed
+            rounded
+            @click="uploadUrlDialog = true"
+          >
+            Upload
+          </v-btn>
+        </div>
+
+        <v-divider></v-divider>
+
+        <div
+          v-if="!loading && pages.length === 0"
+          class="my-5"
+          outlined
+          rounded="xl"
+        >
+          <v-container class="pa-4 py-15 text-center">
+            <div class="my-4">
+              You have not added any pages, start by uploading a sitemap or a
+              URL
+            </div>
+          </v-container>
+        </div>
+
+        <!-- Pages Table -->
+        <v-simple-table v-else>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Url</th>
+              <th>Status</th>
+              <th>Scraped At</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr v-for="page in pages" :key="page.url">
+              <td>{{ page.title }}</td>
+              <td>
+                <a :href="page.url" target="_blank">{{ page.url }}</a>
+              </td>
+              <td>
+                <v-chip
                   small
-                  depressed
-                  color="primary"
-                  @click="scrapePage(page.url)"
-                  :disabled="page.status === 'ongoing'"
+                  :color="
+                    page.status === 'done'
+                      ? 'success'
+                      : page.status === 'error'
+                      ? 'error'
+                      : page.status === 'pending' || page.status === 'ongoing'
+                      ? 'warning'
+                      : 'grey'
+                  "
+                  outlined
                 >
-                  {{ page.status === "pending" ? "Scrape Now" : "Retry" }}
-                </v-btn>
-              </div>
-              <div v-else>
-                {{ formatDate(page.createdAt) }}
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </v-simple-table>
+                  {{ page.status }}
+                </v-chip>
+              </td>
+              <td>
+                <div
+                  v-if="page.status === 'pending' || page.status === 'error'"
+                >
+                  <v-btn
+                    small
+                    depressed
+                    color="primary"
+                    @click="scrapePage(page.url)"
+                    :disabled="page.status === 'ongoing'"
+                  >
+                    {{ page.status === "pending" ? "Scrape Now" : "Retry" }}
+                  </v-btn>
+                </div>
+                <div v-else>
+                  {{ formatDate(page.createdAt) }}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </v-simple-table>
+      </div>
     </v-card>
 
-    <!-- Loading Dialog -->
-    <v-dialog persistent max-width="300" v-model="loading">
-      <v-card>
-        <div class="pa-3 text-center">
-          <v-progress-circular
-            width="1"
-            size="15"
-            indeterminate
-          ></v-progress-circular>
-          Scraping...
+    <!-- Scrape Loading Dialog -->
+    <v-dialog
+      v-model="scrapeLoading"
+      persistent
+      max-width="320"
+      rounded="xl"
+      overlay-opacity="0.7"
+    >
+      <v-card rounded="xl" class="pa-8 text-center" color="white">
+        <div class="d-flex justify-center mb-6">
+          <div style="position: relative">
+            <v-progress-circular
+              :size="100"
+              :width="2"
+              color="black"
+              indeterminate
+              style="position: absolute; top: -10px; left: -10px; opacity: 0.3"
+            ></v-progress-circular>
+
+            <v-progress-circular
+              :size="80"
+              :width="6"
+              color="primary"
+              indeterminate
+            >
+              <v-avatar color="primary darken-4" size="80">
+                <v-icon size="40" color="white" class="mdi-spin">
+                  mdi-auto-fix
+                </v-icon>
+              </v-avatar>
+            </v-progress-circular>
+          </div>
+        </div>
+
+        <div class="text-h6 font-weight-bold black--text mb-1">
+          Scraping Content
+        </div>
+
+        <div class="text-body-2 grey--text text--darken-1 mb-6">
+          Please wait while our AI analyzes your URLs and extracts data.
+        </div>
+
+        <div class="text-caption primary--text mt-2 font-weight-medium">
+          This usually takes a few seconds...
         </div>
       </v-card>
     </v-dialog>
 
     <!-- Upload URL / Sitemap Dialog -->
     <v-dialog
-      max-width="700"
-      :loading="loading"
-      :disabled="loading"
       v-model="uploadUrlDialog"
+      max-width="600"
+      rounded="xl"
+      persistent
+      overlay-color="#2c3e50"
+      overlay-opacity="0.8"
     >
-      <v-card :loading="loading">
-        <v-container>
-          <v-tabs v-model="currentTab">
-            <v-tab tab-value="sitemap">Sitemap</v-tab>
-            <v-tab tab-value="url">Url</v-tab>
-            <v-tab disabled tab-value="json">JSON</v-tab>
-            <v-tab disabled tab-value="csv">CSV</v-tab>
-          </v-tabs>
-
-          <div class="my-4">
-            <!-- Sitemap Tab -->
-            <div v-if="currentTab === 'sitemap'">
-              <div class="my-4">
-                Please enter the sitemap URL of your website so we can retrieve
-                all associated URLs. If you prefer to enter specific URLs
-                individually, please navigate to the 'URL' tab.
-              </div>
-              <v-text-field
-                outlined
-                v-model="sitemapUrl"
-                placeholder="eg: https://book.on-track.in/sitemap.xml"
-              />
-              <v-btn depressed color="primary" @click="submitSitemap"
-                >Submit</v-btn
-              >
+      <v-card rounded="xl" :loading="loading" class="overflow-hidden">
+        <div class="pa-6 pb-0 d-flex align-center">
+          <v-avatar color="#eff2fb" rounded="xl" size="48" class="mr-4">
+            <v-icon color="black">mdi-web-sync</v-icon>
+          </v-avatar>
+          <div>
+            <div class="text-h6 font-weight-bold black--text">
+              Add Data Source
             </div>
-
-            <!-- URL Tab -->
-            <div v-if="currentTab === 'url'">
-              <div class="my-4">
-                Please enter your website's URL to add it to your page list. You
-                can later decide if you want to scrape the data from this URL to
-                train your chatbot.
-              </div>
-              <v-text-field
-                outlined
-                v-model="url"
-                placeholder="eg: https://book.on-track.in/about"
-              />
-              <v-btn depressed color="primary" @click="submitUrl">Submit</v-btn>
+            <div class="text-caption grey--text text--darken-1">
+              Train your chatbot by syncing website content
             </div>
           </div>
-        </v-container>
+          <v-spacer></v-spacer>
+          <v-btn icon @click="uploadUrlDialog = false" :disabled="loading">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </div>
+
+        <v-tabs
+          v-model="currentTab"
+          color="primary"
+          class="px-4"
+          active-class="font-weight-bold"
+        >
+          <v-tab class="text-none">
+            <v-icon small class="mr-2">mdi-sitemap-outline</v-icon> Sitemap
+          </v-tab>
+          <v-tab class="text-none">
+            <v-icon small class="mr-2">mdi-link-variant</v-icon> Individual URL
+          </v-tab>
+          <v-tab disabled class="text-none">
+            <v-icon small class="mr-2">mdi-code-json</v-icon> JSON
+          </v-tab>
+          <v-tab disabled class="text-none">
+            <v-icon small class="mr-2">mdi-code-json</v-icon> CSV
+          </v-tab>
+        </v-tabs>
+
+        <v-divider></v-divider>
+
+        <v-card-text class="pa-6">
+          <v-tabs-items v-model="currentTab" class="transparent">
+            <v-tab-item>
+              <div class="text-body-2 black--text mb-4">
+                Enter your website's <strong>sitemap.xml</strong> URL. We will
+                automatically discover and list all associated pages for you.
+              </div>
+              <v-text-field
+                v-model="sitemapUrl"
+                outlined
+                placeholder="https://example.com/sitemap.xml"
+              ></v-text-field>
+              <v-btn
+                block
+                depressed
+                color="primary"
+                rounded
+                x-large
+                class="mt-2 text-none"
+                :disabled="loading"
+                @click="submitSitemap"
+              >
+                Import from Sitemap
+              </v-btn>
+            </v-tab-item>
+
+            <v-tab-item>
+              <div class="text-body-2 black--text mb-4">
+                Enter a specific page URL to add it to your training list. You
+                can trigger the scrape process in the next step.
+              </div>
+              <v-text-field
+                v-model="url"
+                outlined
+                placeholder="https://example.com/about-us"
+              ></v-text-field>
+              <v-btn
+                block
+                depressed
+                color="primary"
+                rounded
+                x-large
+                class="mt-2 text-none"
+                :disabled="loading"
+                @click="submitUrl"
+              >
+                Add Single URL
+              </v-btn>
+            </v-tab-item>
+          </v-tabs-items>
+        </v-card-text>
+
+        <div class="px-6 pb-6 text-center">
+          <span class="text-caption grey--text">
+            <v-icon x-small color="grey">mdi-lock-outline</v-icon>
+            Only public URLs can be crawled. Ensure your robots.txt allows
+            access.
+          </span>
+        </div>
       </v-card>
     </v-dialog>
+
+    <!--  Error Snackbar -->
+    <v-snackbar v-model="snackbar" color="error" timeout="4000" top right>
+      {{ errorMessage }}
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="snackbar = false"> Close </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -149,11 +281,14 @@ export default {
   data() {
     return {
       loading: false,
+      scrapeLoading: false,
       uploadUrlDialog: false,
       pages: [],
       sitemapUrl: "",
       currentTab: "sitemap",
       url: "",
+      snackbar: false,
+      errorMessage: "",
     };
   },
   mounted() {
@@ -182,18 +317,22 @@ export default {
 
     async fetchPages() {
       this.uploadUrlDialog = false;
+      this.loading = true;
       try {
         const { data } = await apiClient.get("content/pages");
         this.pages = data.data || [];
       } catch (error) {
         console.error("Error fetching pages:", error);
+      } finally {
+        this.loading = false;
       }
     },
 
     async submitSitemap() {
+      this.scrapeLoading = true;
       if (!this.sitemapUrl) {
-        alert("Please enter a valid sitemap URL.");
-        return;
+        this.errorMessage = "Please enter a valid sitemap URL.";
+        this.snackbar = true;
       }
       try {
         await apiClient.post("content/sitemap", {
@@ -201,22 +340,31 @@ export default {
         });
         await this.fetchPages();
       } catch (error) {
-        console.error("Error submitting sitemap:", error);
-        alert("Failed to submit sitemap. Please try again.");
+        this.errorMessage =
+          error.response?.data?.message ||
+          "Failed to submit sitemap. Please try again.";
+        this.snackbar = true;
+      } finally {
+        this.scrapeLoading = false;
       }
     },
 
     async submitUrl() {
+      this.scrapeLoading = true;
       if (!this.url) {
-        alert("Please enter a valid URL.");
-        return;
+        this.errorMessage = "Please enter a valid URL.";
+        this.snackbar = true;
       }
       try {
         await apiClient.post("content/scrape/url", { url: this.url });
         await this.fetchPages();
       } catch (error) {
-        console.error("Error submitting URL:", error);
-        alert("Failed to submit URL. Please try again.");
+        this.errorMessage =
+          error.response?.data?.message ||
+          "Failed to submit URL. Please try again.";
+        this.snackbar = true;
+      } finally {
+        this.scrapeLoading = false;
       }
     },
   },
