@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row justify="center">
-      <v-col cols="12" md="8" lg="7">
+      <v-col cols="12">
         <v-card class="rounded-xl" outlined elevation="0">
           <!-- HEADER -->
           <v-toolbar flat>
@@ -25,7 +25,7 @@
 
           <!-- MESSAGES AREA -->
           <v-card-text
-            style="height: 400px; overflow-y: auto"
+            style="height: 380px; overflow-y: auto"
             ref="chatMessages"
             class="grey lighten-5"
           >
@@ -100,15 +100,15 @@ import { io } from "socket.io-client";
 import apiClient from "@/service/axios";
 
 export default {
-  // props: {
-  //   chatId: {
-  //     type: String,
-  //     required: true,
-  //   },
-  // },
+  props: {
+    chatId: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
-      chatId: this.$route.params.chatId,
+      // chatId: this.$route.params.chatId,
       messages: [],
       newMessage: "",
       socket: null,
@@ -121,6 +121,13 @@ export default {
   },
 
   watch: {
+    chatId(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.resetChat();
+        this.connectSocket();
+      }
+    },
+
     messages() {
       this.$nextTick(() => {
         this.scrollToBottom();
@@ -128,17 +135,26 @@ export default {
     },
   },
 
+  // watch: {
+  //   messages() {
+  //     this.$nextTick(() => {
+  //       this.scrollToBottom();
+  //     });
+  //   },
+  // },
+
   methods: {
     async connectSocket() {
+      if (!this.chatId) return;
+
       try {
         const response = await apiClient.get("/clients/currentUser");
-
-        // ✅ correct path
         this.apiKey = response.data.data.apiKey;
 
-        if (!this.apiKey) {
-          console.error("API key not found");
-          return;
+        if (!this.apiKey) return;
+
+        if (this.socket) {
+          this.socket.disconnect();
         }
 
         this.socket = io("http://localhost:3000");
@@ -151,12 +167,10 @@ export default {
           });
         });
 
-        // Receive new message
         this.socket.on("message", (message) => {
           this.messages.push(message);
         });
 
-        // Load old messages
         this.socket.on("previousMessages", (messages) => {
           this.messages = messages;
         });
@@ -177,6 +191,14 @@ export default {
 
       this.socket.emit("sendMessage", message);
       this.newMessage = "";
+    },
+
+    resetChat() {
+      if (this.socket) {
+        this.socket.disconnect();
+        this.socket = null;
+      }
+      this.messages = [];
     },
 
     scrollToBottom() {

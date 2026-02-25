@@ -142,14 +142,17 @@
         <!-- Steps -->
 
         <div class="mb-4">
-          <strong>Steps:</strong>
-          <ul>
-            <li>Atlas Dashboard → Database → Browse Collections</li>
-            <li>Click your collection (e.g. <b>contentchunks</b>)</li>
-            <li>Click <b>Search Indexes</b></li>
-            <li>Click <b>Create Search Index</b></li>
-            <li>Choose <b>JSON Editor</b></li>
-          </ul>
+          <strong>Steps to Create a Vector Search Index</strong>
+          <ol class="unlist">
+            <li>Go to <b>Create a Vector Search Index</b>.</li>
+            <li>Click on <b>Start Your Index Configuration</b>.</li>
+            <li>Select <b>Vector Search</b> as the index type.</li>
+            <li>Enter the <b>Index Name</b>.</li>
+            <li>Choose the data source: <b>scraperAi.contentchunks</b>.</li>
+            <li>
+              Open the <b>JSON Editor</b> and paste the following configuration:
+            </li>
+          </ol>
         </div>
 
         <!-- Code Block -->
@@ -164,13 +167,18 @@
 
           <pre class="code-block"><code ref="codeBlock">
 {
-  "fields": {
-    "embedding": {
-      "type": "knnVector",
-      "dimensions": 1536,
+  "fields": [
+    {
+      "type": "vector",
+      "path": "embedding",
+      "numDimensions": 1536,
       "similarity": "cosine"
+    },
+    {
+      "type": "filter",
+      "path": "client"
     }
-  }
+  ]
 }
               </code></pre>
         </v-card>

@@ -1,56 +1,33 @@
 <template>
-  <v-container fluid>
+  <div>
     <v-row justify="center">
       <v-col cols="12">
-        <v-row align="center" class="mb-4">
-          <v-col cols="12" md="6">
-            <div class="text-h5 font-weight-bold">
-              <v-icon left color="primary">mdi-chat-processing</v-icon>
-              Chat Conversations
-            </div>
-            <div class="grey--text">Manage and monitor user conversations</div>
-          </v-col>
-
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="search"
-              prepend-inner-icon="mdi-magnify"
-              label="Search chat ID..."
-              outlined
-              dense
-              hide-details
-            />
-          </v-col>
-        </v-row>
-
-        <v-chip color="primary" text-color="white" small class="mb-4">
-          {{ filteredChats.length }} Chats Found
+        <v-chip color="primary" text-color="white" small>
+          {{ chats.length }} Chats Found
         </v-chip>
 
-        <v-divider class="mb-6"></v-divider>
-
-        <v-row>
-          <v-col cols="12" md="4">
+        <v-row class="my-2">
+          <!-- Chat List -->
+          <v-col cols="12" md="5">
             <v-card
               elevation="0"
-              class="rounded-xl"
+              outlined
+              class="rounded-xl px-4"
               style="max-height: 70vh; overflow-y: auto"
             >
               <div v-if="!loading">
                 <div
-                  v-for="chat in filteredChats"
+                  v-for="chat in chats"
                   :key="chat.chatId"
                   @click="viewChat(chat.chatId)"
                 >
                   <v-card
-                    class="mb-3 rounded-lg transition-swing"
+                    class="my-2 rounded-lg transition-swing"
                     :color="
-                      selectedChatId === chat.chatId
-                        ? 'blue lighten-5'
-                        : 'white'
+                      selectedChatId === chat.chatId ? '#eff2fb' : 'white'
                     "
-                    :elevation="selectedChatId === chat.chatId ? 2 : 0"
-                    outlined
+                    elevation="0"
+                    :outlined="selectedChatId === chat.chatId ? 1 : 0"
                     hover
                   >
                     <v-row align="center" class="pa-4" no-gutters>
@@ -63,9 +40,9 @@
                           "
                           size="45"
                         >
-                          <v-icon :dark="selectedChatId === chat.chatId"
-                            >mdi-account-circle</v-icon
-                          >
+                          <v-icon :dark="selectedChatId === chat.chatId">
+                            mdi-account-circle
+                          </v-icon>
                         </v-avatar>
                       </v-col>
 
@@ -73,92 +50,78 @@
                         <div class="font-weight-bold text-truncate">
                           {{ chat.chatId }}
                         </div>
+
                         <div class="grey--text text-caption">
                           Status:
-                          <span
-                            :class="getStatusColor(chat.userStatus) + '--text'"
-                          >
-                            {{ chat.userStatus }}
+                          <span :class="getStatusColor(chat.status) + '--text'">
+                            {{ chat.status }}
                           </span>
                         </div>
                       </v-col>
 
                       <v-col cols="auto">
-                        <v-icon small color="grey">mdi-chevron-right</v-icon>
+                        <v-icon small color="grey"> mdi-chevron-right </v-icon>
                       </v-col>
                     </v-row>
                   </v-card>
                 </div>
 
-                <div
-                  v-if="filteredChats.length === 0"
-                  class="text-center py-10"
-                >
-                  <v-icon large color="grey lighten-1">mdi-chat-remove</v-icon>
+                <div v-if="chats.length === 0" class="text-center py-10">
+                  <v-icon large color="grey lighten-1">
+                    mdi-chat-remove
+                  </v-icon>
                   <div class="grey--text mt-2">No conversations found</div>
                 </div>
               </div>
             </v-card>
           </v-col>
 
-          <v-col cols="12" md="8">
-            <!-- <chat-view
+          <!-- Right Side (Empty for now) -->
+          <v-col cols="12" md="7">
+            <chat-view
               v-if="selectedChatId"
-              :chat-id="selectedChatId"
+              :chatId="selectedChatId"
               :key="selectedChatId"
             />
-            <v-card
-              v-else
-              class="rounded-xl d-flex align-center justify-center grey lighten-4"
-              height="500"
-              flat
-            >
-              <div class="text-center grey--text">
-                <v-icon size="64" color="grey lighten-2"
-                  >mdi-message-text-outline</v-icon
-                >
-                <div class="text-h6">Select a chat to start messaging</div>
-              </div>
-            </v-card> -->
+            <div v-else class="text-center grey--text mt-10">
+              <v-icon large color="grey lighten-1"> mdi-chat-outline </v-icon>
+              <div class="mt-2">Select a chat to view the conversation</div>
+            </div>
           </v-col>
         </v-row>
       </v-col>
     </v-row>
 
+    <!-- Loader -->
     <v-overlay :value="loading" opacity="0.3">
       <v-progress-circular indeterminate size="64" color="primary" />
     </v-overlay>
 
+    <!-- Error Snackbar -->
     <v-snackbar v-model="snackbar" color="error" top right>
       {{ errorMessage }}
       <template v-slot:action="{ attrs }">
-        <v-btn text v-bind="attrs" @click="snackbar = false">Close</v-btn>
+        <v-btn text v-bind="attrs" @click="snackbar = false"> Close </v-btn>
       </template>
     </v-snackbar>
-  </v-container>
+  </div>
 </template>
 
 <script>
 import apiClient from "@/service/axios";
-// import ChatView from "@/components/ChatView.vue";
+import ChatView from "../../screens/dashboard/ChatView.vue";
 
 export default {
-  // components: { ChatView },
+  components: {
+    ChatView,
+  },
   data: () => ({
     chats: [],
     loading: false,
-    search: "",
     snackbar: false,
     errorMessage: "",
     selectedChatId: null,
   }),
-  computed: {
-    filteredChats() {
-      return this.chats.filter((chat) =>
-        chat.chatId.toLowerCase().includes(this.search.toLowerCase()),
-      );
-    },
-  },
 
   created() {
     this.fetchChats();
@@ -169,6 +132,8 @@ export default {
       this.loading = true;
       try {
         const { data } = await apiClient.get("/chats");
+
+        // According to new response structure
         this.chats = data.data || [];
       } catch (error) {
         this.errorMessage =
@@ -180,8 +145,9 @@ export default {
     },
 
     viewChat(chatId) {
-      this.$router.push("/dashboard/chat/" + chatId);
-      // this.selectedChatId = chatId;
+      // this.$router.push("/dashboard/chat/" + chatId);
+      this.selectedChatId = chatId;
+      console.log("Selected Chat ID:", chatId);
     },
 
     getStatusColor(status) {
