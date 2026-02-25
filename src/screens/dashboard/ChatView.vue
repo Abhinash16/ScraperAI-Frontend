@@ -5,8 +5,8 @@
         <v-card class="rounded-xl" outlined elevation="0">
           <!-- HEADER -->
           <v-toolbar flat>
-            <v-avatar color="primary lighten-4" size="40">
-              <v-icon color="primary">mdi-account</v-icon>
+            <v-avatar color="#cde6ff" size="44" rounded="xl">
+              <v-icon color="primary">mdi-account-circle</v-icon>
             </v-avatar>
 
             <div class="ml-3">
@@ -25,9 +25,8 @@
 
           <!-- MESSAGES AREA -->
           <v-card-text
-            style="height: 380px; overflow-y: auto"
+            style="height: 380px; overflow-y: auto; background-color: #eff2fb"
             ref="chatMessages"
-            class="grey lighten-5"
           >
             <!-- Empty State -->
             <div
