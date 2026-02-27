@@ -18,16 +18,29 @@
             </div>
           </div>
 
-          <!-- Upload Button -->
-          <v-btn
-            class="mt-2 mt-md-0"
-            color="primary"
-            depressed
-            rounded
-            @click="uploadUrlDialog = true"
-          >
-            Upload
-          </v-btn>
+          <div>
+            <v-btn
+              class="mt-2 mt-md-0 mr-2"
+              color="primary"
+              outlined
+              depressed
+              rounded
+              @click="ScrapAllDialog = true"
+            >
+              Scrape All Pages</v-btn
+            >
+
+            <!-- Upload Button -->
+            <v-btn
+              class="mt-2 mt-md-0"
+              color="primary"
+              depressed
+              rounded
+              @click="uploadUrlDialog = true"
+            >
+              Upload
+            </v-btn>
+          </div>
         </div>
 
         <v-divider></v-divider>
@@ -81,21 +94,27 @@
                 </v-chip>
               </td>
               <td>
-                <div
-                  v-if="page.status === 'pending' || page.status === 'error'"
-                >
+                <!-- Action state -->
+                <div v-if="['pending', 'error'].includes(page.status)">
                   <v-btn
                     small
+                    rounded
                     depressed
                     color="primary"
                     @click="scrapePage(page.url)"
-                    :disabled="page.status === 'ongoing'"
                   >
-                    {{ page.status === "pending" ? "Scrape Now" : "Retry" }}
+                    {{ page.status === "error" ? "Retry" : "Scrape Now" }}
                   </v-btn>
                 </div>
-                <div v-else>
+
+                <!-- Completed state -->
+                <div v-else-if="page.status === 'done'">
                   {{ formatDate(page.createdAt) }}
+                </div>
+
+                <!-- Ongoing -->
+                <div v-else class="text-caption grey--text">
+                  Scraping in progress…
                 </div>
               </td>
             </tr>
@@ -263,6 +282,41 @@
         </div>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="ScrapAllDialog" max-width="520" persistent>
+      <v-card rounded="xl">
+        <!-- Header -->
+        <v-card-title class="d-flex align-center">
+          <v-avatar color="primary" size="36" class="mr-3">
+            <v-icon dark>mdi-web-sync</v-icon>
+          </v-avatar>
+          <span class="text-h6 font-weight-medium">Scrape all pages</span>
+        </v-card-title>
+
+        <!-- Content -->
+        <v-card-text class="pt-2 text-body-2">
+          This action will scrape all the pages in your list. Depending on the
+          number of pages, this may take some time.
+        </v-card-text>
+
+        <!-- Actions -->
+        <v-card-actions class="px-6 pb-4">
+          <v-spacer />
+
+          <v-btn
+            outlined
+            rounded
+            color="grey darken-1"
+            @click="ScrapAllDialog = false"
+          >
+            Cancel
+          </v-btn>
+
+          <v-btn color="primary" rounded depressed @click="scrapAllPages()">
+            Scrape All
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!--  Error Snackbar -->
     <v-snackbar v-model="snackbar" color="error" timeout="4000" top right>
@@ -283,6 +337,7 @@ export default {
       loading: false,
       scrapeLoading: false,
       uploadUrlDialog: false,
+      ScrapAllDialog: false,
       pages: [],
       sitemapUrl: "",
       currentTab: "sitemap",
@@ -301,15 +356,45 @@ export default {
 
     async scrapePage(url) {
       const pageIndex = this.pages.findIndex((p) => p.url === url);
-      if (pageIndex !== -1) this.pages[pageIndex].status = "ongoing";
+      if (pageIndex === -1) return;
 
-      this.loading = true;
+      // Optimistic update
+      this.$set(this.pages[pageIndex], "status", "ongoing");
+
       try {
         await apiClient.post("content/scrape", { url });
         await this.fetchPages();
       } catch (error) {
-        console.error("Error scraping page:", error);
-        alert("Failed to scrape the page. Please try again.");
+        // Roll back UI state
+        this.$set(this.pages[pageIndex], "status", "error");
+
+        this.errorMessage =
+          error?.response?.data?.message ||
+          "Failed to scrape the page. Please try again.";
+
+        this.snackbar = true;
+      }
+    },
+
+    async scrapAllPages() {
+      this.loading = true;
+      if (this.pages.length === 0) {
+        this.errorMessage = "No pages to scrape.";
+        this.snackbar = true;
+        this.loading = false;
+        this.ScrapAllDialog = false;
+        return;
+      }
+      try {
+        await apiClient.post("/content/scrape-all");
+        await this.fetchPages();
+        this.ScrapAllDialog = false;
+      } catch (error) {
+        this.errorMessage =
+          error.response?.data?.message ||
+          "Failed to scrape all pages. Please try again.";
+        this.snackbar = true;
+        this.ScrapAllDialog = false;
       } finally {
         this.loading = false;
       }

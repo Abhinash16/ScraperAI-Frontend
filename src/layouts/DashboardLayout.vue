@@ -6,7 +6,6 @@
           <v-img src="../assets/13.png" max-height="40" max-width="40"></v-img>
         </v-avatar>
         <h3 class="font-weight-black secondary--text">scraperAI</h3>
-
         <v-spacer></v-spacer>
 
         <div class="hidden-sm-and-down">
@@ -33,8 +32,50 @@
         <v-avatar size="36" class="ml-4 grey lighten-3">
           <v-icon color="black">mdi-account</v-icon>
         </v-avatar>
+        <v-btn icon class="hidden-md-and-up" @click="mobileDrawer = true">
+          <v-icon>mdi-menu</v-icon>
+        </v-btn>
       </v-container>
     </v-app-bar>
+
+    <v-navigation-drawer
+      v-model="mobileDrawer"
+      app
+      temporary
+      right
+      class="hidden-md-and-up"
+    >
+      <v-list dense nav>
+        <v-subheader class="text-uppercase font-weight-black grey--text">
+          Main Menu
+        </v-subheader>
+
+        <v-list-item
+          v-for="(n, index) in sideNavs"
+          :key="index"
+          :to="n.link"
+          @click="mobileDrawer = false"
+          exact
+        >
+          <v-list-item-icon>
+            <v-icon>{{ n.icon }}</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>{{ n.name }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-divider class="my-4"></v-divider>
+
+        <v-list-item @click="logoutDialog = true">
+          <v-list-item-icon>
+            <v-icon color="error">mdi-logout</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title class="error--text"> Logout </v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
     <v-container fluid>
       <v-row>
@@ -70,15 +111,17 @@
 
               <v-divider class="my-6 mx-4"></v-divider>
 
-              <v-list-item link class="rounded-lg grey--text">
-                <v-list-item-icon class="mr-4"
-                  ><v-icon small>mdi-logout</v-icon></v-list-item-icon
-                >
-                <v-list-item-content
-                  ><v-list-item-title class="body-2"
-                    >Logout</v-list-item-title
-                  ></v-list-item-content
-                >
+              <v-list-item
+                link
+                class="rounded-lg grey--text"
+                @click="logoutDialog = true"
+              >
+                <v-list-item-icon class="mr-4">
+                  <v-icon small>mdi-logout</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title class="body-2"> Logout </v-list-item-title>
+                </v-list-item-content>
               </v-list-item>
             </v-list>
           </v-sheet>
@@ -104,6 +147,49 @@
         </v-col>
       </v-row>
     </v-container>
+    <v-dialog
+      v-model="logoutDialog"
+      max-width="360"
+      overlay-color="#2c3e50"
+      overlay-opacity="0.7"
+    >
+      <v-card rounded="xl" class="text-center">
+        <v-card-text class="pt-6">
+          <v-avatar color="error lighten-5" size="64" class="mb-4">
+            <v-icon color="error" size="36"> mdi-alert-octagon-outline </v-icon>
+          </v-avatar>
+
+          <div class="text-h6 font-weight-bold black--text mb-2">
+            Confirm Logout
+          </div>
+
+          <div class="text-body-2 grey--text text--darken-1">
+            Are you sure you want to log out of your account?
+          </div>
+        </v-card-text>
+
+        <v-card-actions class="justify-center pb-6">
+          <v-btn
+            text
+            rounded
+            class="px-6 mr-2 text-none"
+            @click="logoutDialog = false"
+          >
+            Cancel
+          </v-btn>
+
+          <v-btn
+            color="error"
+            depressed
+            rounded
+            class="px-8 text-none font-weight-bold"
+            @click="confirmLogout"
+          >
+            Yes, Logout
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-bottom-navigation
       app
@@ -125,9 +211,13 @@
 </template>
 
 <script>
+import { setAuthToken } from "@/service/axios";
+
 export default {
   data: () => ({
+    mobileDrawer: false,
     activeNav: 0,
+    logoutDialog: false,
     links: ["Overview", "Documentation", "API Reference"],
     sideNavs: [
       {
@@ -160,6 +250,11 @@ export default {
         link: "/dashboard/integration",
         icon: "mdi-puzzle-outline",
       },
+      {
+        name: "Security",
+        link: "/dashboard/security",
+        icon: "mdi-shield-lock-outline",
+      },
     ],
   }),
   computed: {
@@ -167,6 +262,16 @@ export default {
       // Logic to find current page name based on route
       const current = this.sideNavs.find((n) => n.link === this.$route.path);
       return current ? current.name : "";
+    },
+  },
+  methods: {
+    confirmLogout() {
+      this.logoutDialog = false;
+
+      localStorage.removeItem("user-token");
+      setAuthToken(null);
+
+      this.$router.push("/login");
     },
   },
 };

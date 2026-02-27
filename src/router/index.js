@@ -38,6 +38,11 @@ const routes = [
         component: () => import("../screens/dashboard/IntegrationPage.vue"),
         meta: { hideTab: true },
       },
+       {
+        path: "security",
+        component: () => import("../screens/dashboard/SecurityPage.vue"),
+        meta: { hideTab: true },
+      },
       {
         path: "chat",
         component: () => import("../screens/dashboard/ChatList.vue"),

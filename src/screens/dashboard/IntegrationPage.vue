@@ -409,7 +409,7 @@
             <label
               class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
             >
-              API Key
+              API Key *
             </label>
             <div class="text-caption mb-2">
               Securely connect your OpenAI account. Keys are encrypted.
@@ -473,6 +473,7 @@
             color="primary"
             @click="updateChatGptSettings"
             :loading="loading"
+            :disabled="!chatgptApiKey "
             depressed
             rounded
             class="text-none font-weight-bold"
@@ -570,6 +571,7 @@
             @click="updateDBSettings"
             :loading="loading"
             depressed
+            :disabled="!dbUri"
             rounded
             class="text-none font-weight-bold"
           >
