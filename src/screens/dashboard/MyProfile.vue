@@ -41,13 +41,47 @@
             <v-text-field v-model="name" label="Full name" outlined dense />
           </v-col>
 
-          <v-col cols="12">
+          <v-col cols="6">
             <v-text-field
-              v-model="company"
-              label="Company"
+              v-model="company_website"
+              label="Company website"
               outlined
               dense
-              readonly
+            />
+          </v-col>
+          <v-col cols="6">
+            <v-text-field
+              v-model="company_termsandconditions_url"
+              label="Terms and conditions URL"
+              outlined
+              dense
+            />
+          </v-col>
+
+          <v-col cols="6">
+            <v-text-field
+              v-model="company_privacypolicy_url"
+              label="Privacy policy URL"
+              outlined
+              dense
+            />
+          </v-col>
+
+          <v-col cols="6">
+            <v-text-field
+              v-model="company_aboutus_url"
+              label="About us URL"
+              outlined
+              dense
+            />
+          </v-col>
+
+          <v-col cols="12">
+            <v-text-field
+              v-model="company_name"
+              label="Company Name"
+              outlined
+              dense
             />
           </v-col>
 
@@ -73,7 +107,7 @@
         </v-row>
 
         <div class="d-flex justify-end mt-4">
-          <v-btn color="primary" depressed rounded>
+          <v-btn color="primary" @click="updateProfileInfo" depressed rounded>
             Save changes
           </v-btn>
         </div>
@@ -111,18 +145,14 @@
               Add an extra layer of security to your account.
             </div>
           </div>
-          <v-btn outlined color="primary" small>
-            Enable
-          </v-btn>
+          <v-btn outlined color="primary" small> Enable </v-btn>
         </div>
       </v-card>
 
       <v-card outlined rounded="xl" class="pa-4">
         <div class="d-flex justify-space-between align-center">
           <div>
-            <div class="font-weight-medium">
-              Log out of all devices
-            </div>
+            <div class="font-weight-medium">Log out of all devices</div>
             <div class="text-caption">
               End all active sessions across devices.
             </div>
@@ -215,7 +245,11 @@ export default {
       name: "",
       email: "",
       phone: "",
-      company: "",
+      company_name: "",
+      company_website: "",
+      company_termsandconditions_url: "",
+      company_privacypolicy_url: "",
+      company_aboutus_url: "",
 
       loading: false,
       snackbar: false,
@@ -247,7 +281,12 @@ export default {
         this.name = user.name || "";
         this.email = user.email || "";
         this.phone = user.phone || "";
-        this.company = user.company || "";
+        this.company_name = user.company_name || "";
+        this.company_website = user.company_website || "";
+        this.company_termsandconditions_url =
+          user.company_termsandconditions_url || "";
+        this.company_privacypolicy_url = user.company_privacypolicy_url || "";
+        this.company_aboutus_url = user.company_aboutus_url || "";
       } catch (error) {
         this.snackbarMessage =
           error.response?.data?.message || "Failed to load user data";
@@ -268,7 +307,27 @@ export default {
       this.snackbarMessage = "API key copied to clipboard";
       this.snackbar = true;
     },
+    async updateProfileInfo() {
+      // Implementation for updating profile information
+
+      try {
+        await apiClient.put("/clients/currentUser/update", {
+          name: this.name,
+          company_name: this.company_name,
+          company_website: this.company_website,
+          company_termsandconditions_url: this.company_termsandconditions_url,
+          company_privacypolicy_url: this.company_privacypolicy_url,
+          company_aboutus_url: this.company_aboutus_url,
+        });
+        this.snackbarMessage = "Profile information updated successfully";
+        this.snackbar = true;
+      } catch (error) {
+        this.snackbarMessage =
+          error.response?.data?.message ||
+          "Failed to update profile information";
+        this.snackbar = true;
+      }
+    },
   },
 };
-
 </script>
