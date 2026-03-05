@@ -39,7 +39,7 @@
               Add an extra layer of protection to your account.
             </div>
           </div>
-          <v-btn outlined small color="primary"> Enable </v-btn>
+          <v-btn rounded outlined small color="primary"> Enable </v-btn>
         </div>
       </v-card>
 
@@ -49,7 +49,7 @@
             <div class="font-weight-medium">Log out of all sessions</div>
             <div class="text-caption">Immediately end all active sessions.</div>
           </div>
-          <v-btn outlined small color="error"> Logout All </v-btn>
+          <v-btn rounded outlined small color="error"> Logout All </v-btn>
         </div>
       </v-card>
     </v-card>
@@ -119,6 +119,7 @@
           />
           <v-btn
             color="primary"
+            rounded
             depressed
             :disabled="!isValidIpOrCidr(newIp)"
             @click="addIp"

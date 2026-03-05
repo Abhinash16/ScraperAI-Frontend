@@ -13,6 +13,7 @@
             v-for="(link, index) in links"
             :key="index"
             text
+            rounded
             class="text-capitalize font-weight-bold grey--text text--darken-2 px-6"
           >
             {{ link }}
@@ -29,7 +30,7 @@
           <v-icon small class="mr-1">mdi-sparkles</v-icon> Try Chat
         </v-btn>
 
-        <v-avatar size="36" class="ml-4 grey lighten-3">
+        <v-avatar @click="$router.push('/dashboard/profile')"  size="36" class="ml-4 grey lighten-3">
           <v-icon color="black">mdi-account</v-icon>
         </v-avatar>
         <v-btn icon class="hidden-md-and-up" @click="mobileDrawer = true">
