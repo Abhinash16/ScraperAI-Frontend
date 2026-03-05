@@ -11,7 +11,18 @@
 
             <div class="ml-3">
               <div class="font-weight-bold">Chat Room: {{ chatId }}</div>
-              <div class="text-caption green--text">● Online</div>
+              <div class="text-caption green--text">
+                ● Online
+
+                <span class="primary--text ml-1">chatbot active</span>
+                <v-icon
+                  class="my-auto"
+                  size="12"
+                  color="primary"
+                  v-if="aiEnabled"
+                  >mdi-robot</v-icon
+                >
+              </div>
             </div>
 
             <v-spacer></v-spacer>
@@ -103,6 +114,10 @@ export default {
     chatId: {
       type: String,
       required: true,
+    },
+    aiEnabled: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

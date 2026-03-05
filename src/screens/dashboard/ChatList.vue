@@ -17,7 +17,7 @@
             <div
               v-for="chat in chats"
               :key="chat.chatId"
-              @click="viewChat(chat.chatId)"
+              @click="viewChat(chat)"
             >
               <v-card
                 class="my-2 rounded-lg transition-swing"
@@ -75,6 +75,7 @@
           v-if="selectedChatId"
           :chatId="selectedChatId"
           :key="selectedChatId"
+          :aiEnabled="aiEnabled"
         />
         <div v-else class="text-center grey--text mt-10">
           <v-icon large color="grey lighten-1"> mdi-chat-outline </v-icon>
@@ -89,6 +90,7 @@
         v-if="selectedChatId"
         :chatId="selectedChatId"
         :key="'mobile-' + selectedChatId"
+        :aiEnabled="aiEnabled"
       />
     </v-bottom-sheet>
 
@@ -122,6 +124,7 @@ export default {
     errorMessage: "",
     selectedChatId: null,
     chatViewBottomSheet: false,
+    aiEnabled: false, // New flag to track if AI is enabled for the selected chat
   }),
 
   created() {
@@ -145,9 +148,10 @@ export default {
       }
     },
 
-    viewChat(chatId) {
-      // this.$router.push("/dashboard/chat/" + chatId);
-      this.selectedChatId = chatId;
+    viewChat(chat) {
+      // this.$router.push("/dashboard/chat/" + chat.chatId);
+      this.selectedChatId = chat.chatId;
+      this.aiEnabled = chat.aiEnabled; // Set the AI enabled flag
 
       // If mobile → open bottom sheet
       if (this.$vuetify.breakpoint.smAndDown) {
