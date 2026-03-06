@@ -10,7 +10,18 @@
             </v-avatar>
 
             <div class="ml-3">
-              <div class="font-weight-bold">Chat Room: {{ chatId }}</div>
+              <div class="d-flex">
+                <div class="font-weight-bold">Chat Room: {{ chatId }}</div>
+                <v-chip
+                  v-if="!loading"
+                  small
+                  class="ml-2"
+                  :color="ticketStatus === 'open' ? 'orange' : 'green'"
+                  text-color="white"
+                >
+                  {{ ticketStatus }}
+                </v-chip>
+              </div>
               <div class="text-caption green--text">
                 ● Online
 
@@ -27,9 +38,39 @@
 
             <v-spacer></v-spacer>
 
-            <v-btn icon>
-              <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
+            <!-- Status Update Menu -->
+            <v-menu offset-y :disabled="statusUpdating">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+              </template>
+
+              <v-list dense>
+                <v-list-item
+                  @click="updateTicketStatus('open')"
+                  :disabled="statusUpdating"
+                >
+                  <v-list-item-title> Reopen Ticket </v-list-item-title>
+                </v-list-item>
+
+                <v-list-item
+                  @click="updateTicketStatus('resolved')"
+                  :disabled="statusUpdating"
+                >
+                  <v-list-item-title class="d-flex align-center">
+                    <v-progress-circular
+                      v-if="statusUpdating"
+                      indeterminate
+                      size="16"
+                      width="2"
+                      class="mr-2"
+                    />
+                    Mark as Resolved
+                  </v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-menu>
           </v-toolbar>
 
           <v-divider></v-divider>
@@ -39,9 +80,18 @@
             style="height: 380px; overflow-y: auto; background-color: #eff2fb"
             ref="chatMessages"
           >
+            <!-- Loader -->
+            <div
+              v-if="loading"
+              class="d-flex justify-center align-center"
+              style="height: 100%"
+            >
+              <v-progress-circular indeterminate color="primary" size="40" />
+            </div>
+
             <!-- Empty State -->
             <div
-              v-if="messages.length === 0"
+              v-else-if="messages.length === 0"
               class="text-center grey--text mt-10"
             >
               <v-icon large color="grey lighten-1"> mdi-chat-outline </v-icon>
@@ -51,7 +101,7 @@
             <!-- Messages -->
             <v-row
               v-for="message in messages"
-              :key="message._id"
+              :key="message._id || message.timestamp"
               no-gutters
               class="mb-3"
               :justify="message.sender === 'client' ? 'end' : 'start'"
@@ -77,6 +127,7 @@
           <v-card-actions class="pa-4">
             <v-text-field
               v-model="newMessage"
+              :disabled="ticketStatus === 'resolved'"
               @keyup.enter="sendMessage"
               placeholder="Type your message..."
               outlined
@@ -84,16 +135,16 @@
               hide-details
               rounded
               class="flex-grow-1"
-            ></v-text-field>
+            />
 
             <v-btn
               color="primary"
               class="ml-3 px-4"
               large
-              @click="sendMessage"
-              :disabled="!newMessage.trim()"
               depressed
               rounded
+              @click="sendMessage"
+              :disabled="!newMessage.trim() || ticketStatus === 'resolved'"
             >
               <v-icon left>mdi-send</v-icon>
               Send
@@ -102,6 +153,15 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- ERROR SNACKBAR -->
+    <v-snackbar v-model="snackbar" color="error" top right>
+      {{ errorMessage }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="snackbar = false"> Close </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -120,25 +180,32 @@ export default {
       default: false,
     },
   },
+
   data() {
     return {
-      // chatId: this.$route.params.chatId,
       messages: [],
       newMessage: "",
       socket: null,
       apiKey: "",
+
+      ticketStatus: "",
+
+      loading: false,
+      statusUpdating: false,
+
+      snackbar: false,
+      errorMessage: "",
     };
   },
 
   created() {
-    this.connectSocket();
+    this.initializeChat();
   },
 
   watch: {
     chatId(newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.resetChat();
-        this.connectSocket();
+        this.initializeChat();
       }
     },
 
@@ -149,29 +216,37 @@ export default {
     },
   },
 
-  // watch: {
-  //   messages() {
-  //     this.$nextTick(() => {
-  //       this.scrollToBottom();
-  //     });
-  //   },
-  // },
-
   methods: {
-    async connectSocket() {
-      if (!this.chatId) return;
+    async initializeChat() {
+      this.resetChat();
+      this.loading = true;
 
       try {
-        const response = await apiClient.get("/clients/currentUser");
-        this.apiKey = response.data.data.apiKey;
+        await this.fetchChatInfo();
+        await this.connectSocket();
+      } catch (error) {
+        this.showError("Failed to initialize chat");
+      } finally {
+        this.loading = false;
+      }
+    },
 
-        if (!this.apiKey) return;
+    async connectSocket() {
+      try {
+        const response = await apiClient.get("/clients/currentUser");
+        this.apiKey = response.data?.data?.apiKey;
+
+        if (!this.apiKey) {
+          throw new Error("API key missing");
+        }
 
         if (this.socket) {
           this.socket.disconnect();
         }
 
-        this.socket = io("http://localhost:3000");
+        this.socket = io("http://localhost:3000", {
+          transports: ["websocket"],
+        });
 
         this.socket.on("connect", () => {
           this.socket.emit("joinRoom", {
@@ -181,20 +256,64 @@ export default {
           });
         });
 
-        this.socket.on("message", (message) => {
-          this.messages.push(message);
+        this.socket.on("previousMessages", (messages) => {
+          this.messages = messages || [];
         });
 
-        this.socket.on("previousMessages", (messages) => {
-          this.messages = messages;
+        this.socket.on("message", (message) => {
+          if (message) {
+            this.messages.push(message);
+          }
+        });
+
+        this.socket.on("connect_error", () => {
+          this.showError("Socket connection failed");
         });
       } catch (error) {
-        console.error("Socket connection error:", error);
+        this.showError("Unable to connect chat socket");
+      }
+    },
+
+    async fetchChatInfo() {
+      try {
+        const { data } = await apiClient.get(`/chats?chatId=${this.chatId}`);
+
+        if (!data?.data?.length) {
+          throw new Error("Chat not found");
+        }
+
+        this.ticketStatus = data.data[0].ticketStatus || "open";
+      } catch (error) {
+        this.showError("Failed to load chat info");
+      }
+    },
+
+    async updateTicketStatus(status) {
+      if (this.statusUpdating) return;
+
+      this.statusUpdating = true;
+
+      try {
+        await apiClient.patch(`/chats/${this.chatId}/ticket-status`, {
+          ticketStatus: status,
+        });
+
+        this.ticketStatus = status;
+
+        this.$emit("statusUpdated", {
+          chatId: this.chatId,
+          ticketStatus: status,
+        });
+      } catch (error) {
+        this.showError("Failed to update ticket status");
+      } finally {
+        this.statusUpdating = false;
       }
     },
 
     sendMessage() {
       if (!this.newMessage.trim()) return;
+      if (!this.socket) return;
 
       const message = {
         apiKey: this.apiKey,
@@ -212,6 +331,7 @@ export default {
         this.socket.disconnect();
         this.socket = null;
       }
+
       this.messages = [];
     },
 
@@ -223,6 +343,12 @@ export default {
         top: el.scrollHeight,
         behavior: "smooth",
       });
+    },
+
+    showError(message) {
+      this.errorMessage = message;
+      this.snackbar = true;
+      console.error(message);
     },
   },
 
