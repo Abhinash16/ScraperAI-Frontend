@@ -38,7 +38,7 @@ const routes = [
         component: () => import("../screens/dashboard/IntegrationPage.vue"),
         meta: { hideTab: true },
       },
-       {
+      {
         path: "security",
         component: () => import("../screens/dashboard/SecurityPage.vue"),
         meta: { hideTab: true },
@@ -54,6 +54,16 @@ const routes = [
       {
         path: "try-chat",
         component: () => import("../screens/dashboard/TryChat.vue"),
+      },
+      {
+        path: "call-batches",
+        component: () => import("../screens/dashboard/CallAnalysis.vue"),
+        meta: { tab: 1 },
+      },
+      {
+        path: "/call-analysis/report/:id",
+        name: "CallAnalysisReport",
+        component: () => import("../screens/dashboard/CallAnalysisReport.vue"),
       },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
