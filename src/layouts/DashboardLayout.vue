@@ -247,6 +247,11 @@ export default {
         icon: "mdi-database-search-outline",
       },
       {
+        name:"Call Analysis",
+        link: "/dashboard/call-batches",
+        icon: "mdi-phone-outline",
+      },
+      {
         name: "Integration",
         link: "/dashboard/integration",
         icon: "mdi-puzzle-outline",

@@ -65,6 +65,11 @@ const routes = [
         name: "CallAnalysisReport",
         component: () => import("../screens/dashboard/CallAnalysisReport.vue"),
       },
+      {
+        path: "/batch-analysis/:id",
+        name: "BatchAnalysis",
+        component: () => import("../screens/dashboard/BatchCallAnalysis.vue"),
+      },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },

@@ -63,7 +63,7 @@
                 rounded
                 depressed
                 color="primary"
-                @click="openBatch(batch._id)"
+                @click="$router.push(`/batch-analysis/${batch._id}`)"
               >
                 View Calls
               </v-btn>
@@ -73,146 +73,94 @@
       </v-simple-table>
     </v-card>
 
-    <!-- CALLS DIALOG -->
-
-    <v-dialog v-model="batchDialog" max-width="1000">
-      <v-card rounded="xl">
-        <v-card-title>
-          Calls in Batch
-          <v-spacer />
-          <v-btn icon @click="batchDialog = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-
-        <v-container>
-          <v-expansion-panels>
-            <v-expansion-panel>
-              <v-expansion-panel-header>
-                <h1
-                  :class="
-                    batchInfo.averageQualityScore >= 4
-                      ? 'green--text'
-                      : 'red--text'
-                  "
-                >
-                  {{
-                    Math.round(batchInfo.averageQualityScore * 100) / 100 || "-"
-                  }}
-                </h1>
-                {{ batchInfo.batchSummary }}
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                <v-card
-                  outlined
-                  class="my-2"
-                  v-for="(insights, index) in batchInfo.batchInsights"
-                  :key="index"
-                >
-                  <v-container>
-                    <div>{{ insights.issue }}</div>
-                    <div>
-                      <strong>Frequency:</strong> {{ insights.frequency }}
-                    </div>
-                    <div>
-                      <strong>Suggestion:</strong> {{ insights.suggestion }}
-                    </div>
-                  </v-container>
-                </v-card>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-          </v-expansion-panels>
-        </v-container>
-        <v-divider />
-
-        <v-simple-table>
-          <thead>
-            <tr>
-              <th>Agent</th>
-              <th>Recording</th>
-              <th>Status</th>
-              <th>Score</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr v-for="call in calls" :key="call._id">
-              <td>{{ call.agentName }}</td>
-
-              <td>
-                <a :href="call.recordingUrl" target="_blank"> Open Audio </a>
-              </td>
-
-              <td>
-                <v-chip small :color="statusColor(call.status)" outlined>
-                  {{ call.status }}
-                </v-chip>
-              </td>
-
-              <td>
-                {{ call.qualityScore || "-" }}
-              </td>
-
-              <td>
-                <v-btn
-                  v-if="call.status === 'failed'"
-                  small
-                  color="primary"
-                  rounded
-                  depressed
-                  @click="retryCall(call._id)"
-                >
-                  Retry
-                </v-btn>
-
-                <v-btn
-                  v-if="call.status === 'completed'"
-                  small
-                  outlined
-                  rounded
-                  @click="viewReport(call)"
-                >
-                  View Report
-                </v-btn>
-              </td>
-            </tr>
-          </tbody>
-        </v-simple-table>
-      </v-card>
-    </v-dialog>
-
     <!-- Upload Batch -->
 
-    <v-dialog v-model="uploadDialog" max-width="600">
-      <v-card rounded="xl">
-        <v-card-title> Upload Call Batch </v-card-title>
+    <v-dialog
+      v-model="uploadDialog"
+      max-width="600"
+      rounded="xl"
+      persistent
+      overlay-color="#2c3e50"
+      overlay-opacity="0.8"
+    >
+      <v-card rounded="xl" :loading="loading" class="overflow-hidden">
+        <!-- Header -->
+        <div class="pa-6 pb-0 d-flex align-center">
+          <v-avatar color="#eff2fb" rounded="xl" size="48" class="mr-4">
+            <v-icon color="black">mdi-phone-plus</v-icon>
+          </v-avatar>
 
-        <v-card-text>
-          <v-text-field label="Batch Name" v-model="batchName" outlined />
+          <div>
+            <div class="text-h6 font-weight-bold black--text">
+              Upload Call Batch
+            </div>
+
+            <div class="text-caption grey--text text--darken-1">
+              Import multiple call recordings using JSON format
+            </div>
+          </div>
+
+          <v-spacer></v-spacer>
+
+          <v-btn icon @click="uploadDialog = false" :disabled="loading">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </div>
+
+        <v-divider class="mt-4"></v-divider>
+
+        <!-- Form -->
+        <v-card-text class="pa-6">
+          <v-text-field
+            label="Batch Name"
+            v-model="batchName"
+            outlined
+            dense
+            placeholder="Example: Sales Calls - July"
+            class="mb-4"
+          />
 
           <v-textarea
             label="Paste Calls JSON"
             v-model="callsJson"
             outlined
             rows="6"
+            placeholder='[ { "agent_name":"Rahul", "recording_url":"https://...", "email":"rahul@company.com" } ]'
           />
 
+          <div class="text-caption grey--text mt-2">
+            <v-icon x-small color="grey">mdi-information-outline</v-icon>
+            Upload multiple call records at once using valid JSON format.
+          </div>
           <div class="text-caption grey--text">
             Format: [ { "agent_name":"Rahul", "recording_url":"https://...",
             "email":"rahul@company.com" } ]
           </div>
         </v-card-text>
 
-        <v-card-actions>
-          <v-spacer />
-
-          <v-btn text @click="uploadDialog = false"> Cancel </v-btn>
-
-          <v-btn color="primary" rounded depressed @click="uploadBatch">
-            Upload
+        <!-- Actions -->
+        <div class="px-6 pb-6 d-flex justify-end">
+          <v-btn
+            text
+            class="mr-2 text-none"
+            @click="uploadDialog = false"
+            :disabled="loading"
+          >
+            Cancel
           </v-btn>
-        </v-card-actions>
+
+          <v-btn
+            color="primary"
+            rounded
+            depressed
+            large
+            class="text-none"
+            :loading="loading"
+            @click="uploadBatch"
+          >
+            Upload Batch
+          </v-btn>
+        </div>
       </v-card>
     </v-dialog>
   </div>
@@ -235,6 +183,13 @@ export default {
 
       batchName: "",
       callsJson: "",
+      callHeaders: [
+        { text: "Agent", value: "agentName" },
+        { text: "Recording", value: "recordingUrl" },
+        { text: "Status", value: "status" },
+        { text: "Score", value: "qualityScore" },
+        { text: "Action", value: "actions", sortable: false },
+      ],
     };
   },
 
