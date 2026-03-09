@@ -5,21 +5,20 @@
     </v-chip>
 
     <v-row no-gutters>
-  <v-col cols="12">
-    <v-chip-group
-      v-model="selectedTicketStatus"
-      active-class="primary--text"
-      column
-      @change="fetchChats"
-    >
-      <v-chip value="" outlined>All</v-chip>
-     <v-chip value="open" outlined color="orange">Open</v-chip>
-  <v-chip value="resolved" outlined color="green">Resolved</v-chip>
-    </v-chip-group>
-  </v-col>
-</v-row>
+      <v-col cols="12">
+        <v-chip-group
+          v-model="selectedTicketStatus"
+          active-class="primary--text"
+          column
+          @change="fetchChats"
+        >
+          <v-chip value="" outlined>All</v-chip>
+          <v-chip value="open" outlined color="orange">Open</v-chip>
+          <v-chip value="resolved" outlined color="green">Resolved</v-chip>
+        </v-chip-group>
+      </v-col>
+    </v-row>
     <v-row>
-      
       <!-- Chat List -->
       <v-col cols="12" md="5">
         <v-card
@@ -38,7 +37,6 @@
                 class="my-2 rounded-lg transition-swing"
                 :color="selectedChatId === chat.chatId ? '#eff2fb' : 'white'"
                 elevation="0"
-               
                 hover
               >
                 <v-row align="center" class="pa-4" no-gutters>
@@ -91,6 +89,7 @@
           :chatId="selectedChatId"
           :key="selectedChatId"
           :aiEnabled="aiEnabled"
+          @statusUpdated="fetchChats"
         />
         <div v-else class="text-center grey--text mt-10">
           <v-icon large color="grey lighten-1"> mdi-chat-outline </v-icon>
@@ -106,6 +105,7 @@
         :chatId="selectedChatId"
         :key="'mobile-' + selectedChatId"
         :aiEnabled="aiEnabled"
+        @statusUpdated="fetchChats"
       />
     </v-bottom-sheet>
 
@@ -140,7 +140,7 @@ export default {
     selectedChatId: null,
     chatViewBottomSheet: false,
     aiEnabled: false, // New flag to track if AI is enabled for the selected chat
-     selectedTicketStatus: "",
+    selectedTicketStatus: "",
   }),
 
   created() {
@@ -149,26 +149,26 @@ export default {
 
   methods: {
     async fetchChats() {
-  this.loading = true;
+      this.loading = true;
 
-  try {
-    let url = "/chats";
+      try {
+        let url = "/chats";
 
-    if (this.selectedTicketStatus) {
-      url += `?ticketStatus=${this.selectedTicketStatus}`;
-    }
+        if (this.selectedTicketStatus) {
+          url += `?ticketStatus=${this.selectedTicketStatus}`;
+        }
 
-    const { data } = await apiClient.get(url);
+        const { data } = await apiClient.get(url);
 
-    this.chats = data.data || [];
-  } catch (error) {
-    this.errorMessage =
-      error.response?.data?.message || "Error fetching chats.";
-    this.snackbar = true;
-  } finally {
-    this.loading = false;
-  }
-},
+        this.chats = data.data || [];
+      } catch (error) {
+        this.errorMessage =
+          error.response?.data?.message || "Error fetching chats.";
+        this.snackbar = true;
+      } finally {
+        this.loading = false;
+      }
+    },
 
     viewChat(chat) {
       // this.$router.push("/dashboard/chat/" + chat.chatId);

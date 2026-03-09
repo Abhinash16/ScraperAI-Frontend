@@ -15,24 +15,34 @@
                 <v-chip
                   v-if="!loading"
                   small
-                  class="ml-2"
+                  class="ml-2 text-capitalize text-caption"
                   :color="ticketStatus === 'open' ? 'orange' : 'green'"
                   text-color="white"
                 >
                   {{ ticketStatus }}
                 </v-chip>
               </div>
-              <div class="text-caption green--text">
-                ● Online
+              <div class="text-caption d-flex align-center">
+                <span class="green--text">● Online</span>
 
-                <span class="primary--text ml-1">chatbot active</span>
-                <v-icon
-                  class="my-auto"
-                  size="12"
-                  color="primary"
-                  v-if="aiEnabled"
+                <v-divider vertical class="mx-2"></v-divider>
+
+                <v-icon size="16" class="mr-1" color="primary"
                   >mdi-robot</v-icon
                 >
+
+                <span class="mr-2">
+                  {{ aiEnabledLocal ? "AI Active" : "AI Disabled" }}
+                </span>
+
+                <v-switch
+                  v-model="aiEnabledLocal"
+                  dense
+                  hide-details
+                  :loading="aiUpdating"
+                  :disabled="aiUpdating"
+                  @change="toggleAI"
+                ></v-switch>
               </div>
             </div>
 
@@ -190,6 +200,11 @@ export default {
 
       ticketStatus: "",
 
+      chatMongoId: null,
+
+      aiEnabledLocal: false,
+      aiUpdating: false,
+
       loading: false,
       statusUpdating: false,
 
@@ -213,6 +228,12 @@ export default {
       this.$nextTick(() => {
         this.scrollToBottom();
       });
+    },
+    aiEnabled: {
+      immediate: true,
+      handler(val) {
+        this.aiEnabledLocal = val;
+      },
     },
   },
 
@@ -282,7 +303,13 @@ export default {
           throw new Error("Chat not found");
         }
 
-        this.ticketStatus = data.data[0].ticketStatus || "open";
+        const chat = data.data[0];
+
+        this.ticketStatus = chat.ticketStatus || "open";
+        this.aiEnabledLocal = chat.aiEnabled || false;
+
+        // important
+        this.chatMongoId = chat._id;
       } catch (error) {
         this.showError("Failed to load chat info");
       }
@@ -308,6 +335,28 @@ export default {
         this.showError("Failed to update ticket status");
       } finally {
         this.statusUpdating = false;
+      }
+    },
+
+    async toggleAI() {
+      if (this.aiUpdating || !this.chatMongoId) return;
+
+      this.aiUpdating = true;
+
+      try {
+        const { data } = await apiClient.patch(
+          `/chats/${this.chatMongoId}/ai`,
+          { aiEnabled: this.aiEnabledLocal },
+        );
+
+        this.aiEnabledLocal = data.data.aiEnabled;
+      } catch (error) {
+        this.showError("Failed to update AI status");
+
+        // rollback switch
+        this.aiEnabledLocal = !this.aiEnabledLocal;
+      } finally {
+        this.aiUpdating = false;
       }
     },
 
