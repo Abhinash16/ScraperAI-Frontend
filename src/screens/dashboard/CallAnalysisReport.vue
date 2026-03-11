@@ -1,94 +1,119 @@
 <template>
-  <v-container max-width="1100">
-    <v-row>
-      <v-col cols="12">
-        <h1 class="text-h4 mb-4">Call Analysis Report</h1>
+  <div>
+    <!-- Header -->
+    <v-row align="center" class="mb-6">
+      <v-col cols="auto">
+        <v-btn icon text color="primary" @click="$router.back()">
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
+      </v-col>
+
+      <v-col>
+        <h1 class="text-h5 font-weight-bold mb-1">Call Analysis Report</h1>
+
+        <p class="text-subtitle-2 grey--text mb-0">
+          AI insights and performance evaluation for this call
+        </p>
       </v-col>
     </v-row>
 
     <!-- Loading -->
     <v-row v-if="loading">
       <v-col cols="12" class="text-center">
-        <v-progress-circular indeterminate size="50"></v-progress-circular>
-        <p class="mt-3">Analyzing call...</p>
+        <v-progress-circular indeterminate size="60" />
+        <p class="mt-3 grey--text">Analyzing call...</p>
       </v-col>
     </v-row>
 
     <template v-if="report && !loading">
       <!-- Agent Info -->
-      <v-row>
-        <v-col cols="12">
-          <v-card class="pa-4">
-            <v-row>
-              <v-col cols="12" md="4">
-                <div class="text-caption">Agent</div>
-                <div class="text-h6">{{ report.agentName }}</div>
-              </v-col>
+      <v-card outlined rounded="xl" class="mb-6">
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" md="4">
+              <div class="text-caption grey--text">Agent</div>
+              <div class="text-subtitle-1 font-weight-bold">
+                {{ report.agentName }}
+              </div>
+            </v-col>
 
-              <v-col cols="12" md="4">
-                <div class="text-caption">Agent Email</div>
-                <div class="text-h6">{{ report.agentEmail }}</div>
-              </v-col>
+            <v-col cols="12" md="4">
+              <div class="text-caption grey--text">Agent Email</div>
+              <div class="text-subtitle-1 font-weight-bold">
+                {{ report.agentEmail }}
+              </div>
+            </v-col>
 
-              <v-col cols="12" md="4">
-                <div class="text-caption">Call Status</div>
-                <v-chip color="green" v-if="report.status === 'completed'">
-                  Completed
-                </v-chip>
-                <v-chip color="orange" v-else>
-                  {{ report.status }}
-                </v-chip>
-              </v-col>
-            </v-row>
-          </v-card>
-        </v-col>
-      </v-row>
+            <v-col cols="12" md="4">
+              <div class="text-caption grey--text">Call Status</div>
+
+              <v-chip
+                class="rounded-xl"
+                small
+                :color="statusColor(report.status)"
+                label
+              >
+                {{ report.status }}
+              </v-chip>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
 
       <!-- Audio Player -->
-      <v-row class="mt-4">
-        <v-col cols="12">
-          <v-card class="pa-4">
-            <h3 class="mb-2">Call Recording</h3>
+      <v-card outlined rounded="xl" class="mb-6">
+        <v-card-text>
+          <div class="d-flex align-center mb-3">
+            <v-icon class="mr-2">mdi-headphones</v-icon>
+            <span class="font-weight-bold">Call Recording</span>
+          </div>
 
-            <audio
-              ref="audio"
-              :src="report.recordingUrl"
-              controls
-              style="width: 100%"
-            ></audio>
-          </v-card>
-        </v-col>
-      </v-row>
+          <audio
+            ref="audio"
+            :src="report.recordingUrl"
+            controls
+            style="width: 100%"
+          ></audio>
+        </v-card-text>
+      </v-card>
 
       <!-- Summary -->
-      <v-row class="mt-4">
-        <v-col cols="12">
-          <v-card class="pa-4">
-            <h3>Call Summary</h3>
-            <p class="mt-2">
-              {{ report.summary }}
-            </p>
-          </v-card>
-        </v-col>
-      </v-row>
+      <v-card outlined rounded="xl" class="mb-6">
+        <v-card-text>
+          <div class="font-weight-bold mb-2">Call Summary</div>
 
-      <!-- Stats -->
-      <v-row class="mt-4">
+          <p class="text-body-2 mb-0">
+            {{ report.summary }}
+          </p>
+        </v-card-text>
+      </v-card>
+
+      <!-- Metrics -->
+      <v-row class="mb-6">
+        <!-- Sentiment -->
         <v-col cols="12" md="6">
-          <v-card class="pa-4 text-center">
-            <div class="text-caption">Sentiment</div>
+          <v-card outlined rounded="xl" class="text-center pa-6">
+            <div class="text-caption grey--text mb-2">Sentiment</div>
 
-            <v-chip size="large" :color="sentimentColor(report.sentiment)">
+            <v-chip large :color="sentimentColor(report.sentiment)">
               {{ report.sentiment }}
             </v-chip>
           </v-card>
         </v-col>
 
+        <!-- Score -->
         <v-col cols="12" md="6">
-          <v-card class="pa-4 text-center">
-            <div class="text-caption">Quality Score</div>
+          <v-card outlined rounded="xl" class="text-center pa-6">
+            <div class="text-caption grey--text mb-2">Quality Score</div>
 
-            <div class="text-h3 mt-2">{{ report.qualityScore }}/100</div>
+            <div
+              class="text-h3 font-weight-bold"
+              :class="
+                report.qualityScore >= 70 ? 'success--text' : 'error--text'
+              "
+            >
+              {{ report.qualityScore }}/100
+            </div>
           </v-card>
         </v-col>
       </v-row>
@@ -112,8 +137,8 @@
               dot-color="red"
               size="small"
             >
-              <v-card>
-                <v-card-title>
+              <v-card rounded="xl">
+                <v-card-title class="text-capitalize">
                   {{ issue.issue }}
                 </v-card-title>
 
@@ -135,6 +160,7 @@
                   <v-btn
                     size="small"
                     color="primary"
+                    rounded="xl"
                     class="mt-3"
                     @click="jumpTo(issue.seconds)"
                   >
@@ -148,29 +174,25 @@
       </v-row>
 
       <!-- Transcript -->
-      <v-row class="mt-6">
-        <v-col cols="12">
-          <v-card class="pa-4">
-            <h3>Transcript</h3>
+      <v-card outlined rounded="xl">
+        <v-card-text>
+          <div class="font-weight-bold mb-3">Transcript</div>
 
-            <v-divider class="my-3"></v-divider>
+          <v-divider class="mb-4" />
 
-            <p style="white-space: pre-line">
-              {{ report.transcript }}
-            </p>
-          </v-card>
-        </v-col>
-      </v-row>
+          <p class="text-body-2" style="white-space: pre-line">
+            {{ report.transcript }}
+          </p>
+        </v-card-text>
+      </v-card>
     </template>
-  </v-container>
+  </div>
 </template>
 
 <script>
 import apiClient from "@/service/axios";
 
 export default {
-  name: "CallAnalysisReport",
-
   data() {
     return {
       report: null,
@@ -183,7 +205,6 @@ export default {
 
     try {
       const res = await apiClient.get(`/call-analysis/report/${id}`);
-
       this.report = res.data;
     } catch (err) {
       console.error(err);
@@ -194,14 +215,19 @@ export default {
 
   methods: {
     sentimentColor(sentiment) {
-      if (sentiment === "positive") return "green";
-      if (sentiment === "negative") return "red";
-      return "orange";
+      if (sentiment === "positive") return "success";
+      if (sentiment === "negative") return "error";
+      return "warning";
+    },
+
+    statusColor(status) {
+      if (status === "completed") return "success";
+      if (status === "failed") return "error";
+      return "warning";
     },
 
     jumpTo(seconds) {
       const audio = this.$refs.audio;
-
       if (!audio) return;
 
       audio.currentTime = seconds;
@@ -210,13 +236,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-h1 {
-  font-weight: 600;
-}
-
-p {
-  line-height: 1.6;
-}
-</style>

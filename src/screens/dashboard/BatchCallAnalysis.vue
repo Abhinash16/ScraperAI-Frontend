@@ -1,7 +1,7 @@
 <template>
-  <v-container fluid class="py-6">
+  <div>
     <!-- Header Section -->
-    <v-row align="center" class="mb-8">
+    <v-row align="center" class="mb-6">
       <v-col cols="auto">
         <v-btn icon text color="primary" @click="$router.back()">
           <v-icon>mdi-arrow-left</v-icon>
@@ -18,7 +18,7 @@
     </v-row>
 
     <!-- Batch Summary Card -->
-    <v-card outlined rounded="lg" class="mb-8 overflow-hidden">
+    <v-card outlined rounded="xl" class="mb-8 overflow-hidden">
       <v-card-text class="pa-0">
         <v-expansion-panels flat>
           <v-expansion-panel>
@@ -47,7 +47,7 @@
 
                 <!-- Summary Content -->
                 <div class="flex-grow-1">
-                  <h3 class="text-h6 font-weight-bold mb-2">
+                  <h3 class="text-h6 font-weight-medium mb-2">
                     {{ batchInfo.batchSummary }}
                   </h3>
                   <div class="d-flex gap-4 flex-wrap">
@@ -85,7 +85,7 @@
                   v-for="(insight, index) in batchInfo.batchInsights"
                   :key="index"
                 >
-                  <v-card outlined rounded="md" class="h-100">
+                  <v-card outlined rounded="xl" class="h-100">
                     <v-card-text class="pa-4">
                       <div class="d-flex align-center mb-3">
                         <v-icon small color="primary" class="mr-2">
@@ -124,7 +124,7 @@
     <div>
       <h3 class="text-h6 font-weight-bold mb-4">Call Details</h3>
 
-      <v-card outlined rounded="lg" class="overflow-hidden">
+      <v-card outlined rounded="xl" class="overflow-hidden">
         <v-data-table
           :headers="callHeaders"
           :items="calls"
@@ -157,7 +157,7 @@
               @click.stop
             >
               <v-icon left small>mdi-headphones</v-icon>
-              Play
+              Open
             </v-btn>
           </template>
 
@@ -166,6 +166,7 @@
             <v-chip
               small
               :color="statusColor(item.status)"
+              class="rounded-xl"
               :text-color="statusTextColor(item.status)"
               label
             >
@@ -243,7 +244,7 @@
         </v-data-table>
       </v-card>
     </div>
-  </v-container>
+  </div>
 </template>
 
 <script>

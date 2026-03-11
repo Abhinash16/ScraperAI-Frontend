@@ -220,15 +220,6 @@ export default {
       this.loading = false;
     },
 
-    async openBatch(batchId) {
-      const { data } = await apiClient.get(`/call-analysis/batch/${batchId}`);
-
-      this.batchInfo = data.batch;
-      this.calls = data.calls;
-
-      this.batchDialog = true;
-    },
-
     async retryCall(callId) {
       await apiClient.post(`/call-analysis/retry/${callId}`);
 
