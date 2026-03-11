@@ -1,7 +1,5 @@
 <template>
-  <v-container fluid>
-   
-
+  <div>
     <!-- Table -->
     <v-card v-if="scrapedPages.length" outlined class="rounded-xl">
       <v-data-table
@@ -15,7 +13,7 @@
         <!-- Title -->
         <template slot="item.title" slot-scope="props">
           <div class="font-weight-medium">
-            {{ props.item.title || 'Untitled Page' }}
+            {{ props.item.title || "Untitled Page" }}
           </div>
         </template>
 
@@ -23,11 +21,7 @@
         <template slot="item.url" slot-scope="props">
           <v-tooltip bottom>
             <template slot="activator" slot-scope="{ on, attrs }">
-              <span
-                class="primary--text text-body-2"
-                v-bind="attrs"
-                v-on="on"
-              >
+              <span class="primary--text text-body-2" v-bind="attrs" v-on="on">
                 {{ truncateUrl(props.item.url) }}
               </span>
             </template>
@@ -59,11 +53,7 @@
     </v-card>
 
     <!-- Empty State -->
-    <v-card
-      v-else
-      outlined
-      class="rounded-xl pa-12 text-center"
-    >
+    <v-card v-else outlined class="rounded-xl pa-12 text-center">
       <v-icon size="56" color="grey lighten-1">
         mdi-database-off-outline
       </v-icon>
@@ -71,7 +61,7 @@
         No pages have been scraped yet
       </div>
     </v-card>
-  </v-container>
+  </div>
 </template>
 
 <script>

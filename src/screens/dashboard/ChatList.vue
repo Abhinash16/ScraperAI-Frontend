@@ -4,23 +4,22 @@
       {{ chats.length }} Chats Found
     </v-chip>
 
-    <v-row no-gutters>
-      <v-col cols="12">
-        <v-chip-group
-          v-model="selectedTicketStatus"
-          active-class="primary--text"
-          column
-          @change="fetchChats"
-        >
-          <v-chip value="" outlined>All</v-chip>
-          <v-chip value="open" outlined color="orange">Open</v-chip>
-          <v-chip value="resolved" outlined color="green">Resolved</v-chip>
-        </v-chip-group>
-      </v-col>
-    </v-row>
+    <div class="d-flex">
+      <v-chip-group
+        v-model="selectedTicketStatus"
+        active-class="primary--text"
+        column
+        @change="fetchChats"
+      >
+        <v-chip value="" outlined>All</v-chip>
+        <v-chip value="open" outlined color="orange">Open</v-chip>
+        <v-chip value="resolved" outlined color="green">Resolved</v-chip>
+      </v-chip-group>
+    </div>
+
     <v-row>
       <!-- Chat List -->
-      <v-col cols="12" md="5">
+      <v-col cols="12" md="5" class="mt-0">
         <v-card
           elevation="0"
           outlined

@@ -142,6 +142,8 @@
         <div class="px-6 pb-6 d-flex justify-end">
           <v-btn
             text
+            rounded
+            large
             class="mr-2 text-none"
             @click="uploadDialog = false"
             :disabled="loading"

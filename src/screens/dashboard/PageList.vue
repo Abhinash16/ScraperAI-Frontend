@@ -211,10 +211,10 @@
           <v-tab class="text-none">
             <v-icon small class="mr-2">mdi-link-variant</v-icon> Individual URL
           </v-tab>
-          <v-tab disabled class="text-none">
+          <v-tab class="text-none">
             <v-icon small class="mr-2">mdi-code-json</v-icon> JSON
           </v-tab>
-          <v-tab disabled class="text-none">
+          <v-tab class="text-none">
             <v-icon small class="mr-2">mdi-code-json</v-icon> CSV
           </v-tab>
         </v-tabs>
@@ -268,6 +268,59 @@
                 @click="submitUrl"
               >
                 Add Single URL
+              </v-btn>
+            </v-tab-item>
+            <!-- JSON Upload -->
+            <v-tab-item>
+              <div class="text-body-2 black--text mb-4">
+                Upload a JSON file to train the chatbot.
+              </div>
+
+              <v-file-input
+                v-model="jsonFile"
+                outlined
+                accept=".json"
+                label="Upload JSON file"
+              ></v-file-input>
+
+              <v-btn
+                block
+                depressed
+                color="primary"
+                rounded
+                x-large
+                class="mt-2 text-none"
+                :disabled="loading || !jsonFile"
+                @click="uploadJson"
+              >
+                Upload JSON
+              </v-btn>
+            </v-tab-item>
+
+            <!-- CSV Upload -->
+            <v-tab-item>
+              <div class="text-body-2 black--text mb-4">
+                Upload a CSV file to train the chatbot.
+              </div>
+
+              <v-file-input
+                v-model="csvFile"
+                outlined
+                accept=".csv"
+                label="Upload CSV file"
+              ></v-file-input>
+
+              <v-btn
+                block
+                depressed
+                color="primary"
+                rounded
+                x-large
+                class="mt-2 text-none"
+                :disabled="loading || !csvFile"
+                @click="uploadCsv"
+              >
+                Upload CSV
               </v-btn>
             </v-tab-item>
           </v-tabs-items>
@@ -344,6 +397,9 @@ export default {
       url: "",
       snackbar: false,
       errorMessage: "",
+
+      jsonFile: null,
+      csvFile: null,
     };
   },
   mounted() {
@@ -450,6 +506,56 @@ export default {
         this.snackbar = true;
       } finally {
         this.scrapeLoading = false;
+      }
+    },
+    async uploadJson() {
+      if (!this.jsonFile) return;
+
+      const formData = new FormData();
+      formData.append("file", this.jsonFile);
+
+      this.loading = true;
+
+      try {
+        await apiClient.post("/content/upload-json", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        await this.fetchPages();
+        this.jsonFile = null;
+      } catch (error) {
+        this.errorMessage =
+          error.response?.data?.message || "Failed to upload JSON file.";
+        this.snackbar = true;
+      } finally {
+        this.loading = false;
+      }
+    },
+    async uploadCsv() {
+      if (!this.csvFile) return;
+
+      const formData = new FormData();
+      formData.append("file", this.csvFile);
+
+      this.loading = true;
+
+      try {
+        await apiClient.post("/content/upload-csv", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        await this.fetchPages();
+        this.csvFile = null;
+      } catch (error) {
+        this.errorMessage =
+          error.response?.data?.message || "Failed to upload CSV file.";
+        this.snackbar = true;
+      } finally {
+        this.loading = false;
       }
     },
   },

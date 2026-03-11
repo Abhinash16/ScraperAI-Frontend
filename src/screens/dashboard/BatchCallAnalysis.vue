@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header Section -->
-    <v-row align="center" class="mb-6">
+    <v-row class="mb-6">
       <v-col cols="auto">
         <v-btn icon text color="primary" @click="$router.back()">
           <v-icon>mdi-arrow-left</v-icon>
@@ -96,7 +96,13 @@
                         </span>
                       </div>
 
-                      <v-chip small outlined label color="grey" class="mb-4">
+                      <v-chip
+                        small
+                        outlined
+                        label
+                        color="grey"
+                        class="mb-4 rounded-xl"
+                      >
                         <v-icon small left>mdi-repeat</v-icon>
                         {{ insight.frequency }} occurrences
                       </v-chip>
