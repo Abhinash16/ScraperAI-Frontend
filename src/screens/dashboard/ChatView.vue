@@ -265,7 +265,7 @@ export default {
           this.socket.disconnect();
         }
 
-        this.socket = io("http://localhost:3000", {
+        this.socket = io("https://ai-api.on-track.in/", {
           transports: ["websocket"],
         });
 

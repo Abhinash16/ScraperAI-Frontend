@@ -2,12 +2,7 @@ import axios from "axios";
 
 // Create an Axios instance with a dynamic base URL
 const apiClient = axios.create({
-  // baseURL: process.env.VUE_APP_API_BASE_URL, // Set from environment variable
-  baseURL:
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-      ? "http://localhost:3000/api"
-      : "http://localhost:3000/api",
+  baseURL: process.env.VUE_APP_API_BASE_URL, // Set from environment variable
 });
 
 // Function to set the Authorization token

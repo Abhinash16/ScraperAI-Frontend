@@ -100,8 +100,7 @@
 </template>
 
 <script>
-import { setAuthToken } from "@/service/axios";
-import axios from "axios";
+import apiClient, { setAuthToken } from "@/service/axios";
 
 export default {
   data() {
@@ -124,13 +123,10 @@ export default {
       this.loading = true;
 
       try {
-        const response = await axios.post(
-          "http://localhost:3000/api/clients/login",
-          {
-            email: this.email,
-            password: this.password,
-          },
-        );
+        const response = await apiClient.post("/clients/login", {
+          email: this.email,
+          password: this.password,
+        });
 
         const token = response.data.token;
 

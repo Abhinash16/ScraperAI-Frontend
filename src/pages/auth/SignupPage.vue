@@ -146,20 +146,20 @@
                       class="rounded-lg"
                     ></v-select>
                   </v-col>
-                 <v-col cols="8" sm="9">
-  <v-text-field
-    v-model="phone"
-    label="Phone"
-    outlined
-    flat
-    dense
-    class="rounded-lg"
-    type="tel"
-    maxlength="10"
-    :rules="phoneRules"
-    @input="phone = phone.replace(/\D/g, '')"
-  />
-</v-col>
+                  <v-col cols="8" sm="9">
+                    <v-text-field
+                      v-model="phone"
+                      label="Phone"
+                      outlined
+                      flat
+                      dense
+                      class="rounded-lg"
+                      type="tel"
+                      maxlength="10"
+                      :rules="phoneRules"
+                      @input="phone = phone.replace(/\D/g, '')"
+                    />
+                  </v-col>
                 </v-row>
 
                 <v-btn
@@ -204,7 +204,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import apiClient from "@/service/axios";
 
 export default {
   data() {
@@ -217,10 +217,10 @@ export default {
       email: "",
       password: "",
       phone: "",
-       phoneRules: [
-      v => !!v || 'Phone number is required',
-      v => /^\d{10}$/.test(v) || 'Phone number must be exactly 10 digits',
-    ],
+      phoneRules: [
+        (v) => !!v || "Phone number is required",
+        (v) => /^\d{10}$/.test(v) || "Phone number must be exactly 10 digits",
+      ],
       countryCode: "+91",
 
       countryCodes: ["+91", "+1", "+44", "+61", "+81", "+86", "+49", "+33"],
@@ -238,7 +238,7 @@ export default {
       this.loading = true;
 
       try {
-        await axios.post("http://localhost:3000/api/clients/signup", {
+        await apiClient.post("/clients/signup", {
           name: this.name,
           company: this.company,
           email: this.email,
