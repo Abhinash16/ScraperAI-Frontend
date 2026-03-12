@@ -43,6 +43,10 @@
                   :disabled="aiUpdating"
                   @change="toggleAI"
                 ></v-switch>
+
+                <div class="green-text" v-if="showTypingIndicator">
+                  typing...
+                </div>
               </div>
             </div>
 
@@ -129,6 +133,14 @@
                 </v-card>
               </v-col>
             </v-row>
+
+            <v-row v-if="showTypingIndicator" no-gutters class="mb-3">
+              <v-col cols="auto">
+                <v-card class="pa-3 rounded-xl">
+                  <div class="typing muted-text">typing....</div>
+                </v-card>
+              </v-col>
+            </v-row>
           </v-card-text>
 
           <v-divider></v-divider>
@@ -139,6 +151,7 @@
               v-model="newMessage"
               :disabled="ticketStatus === 'resolved'"
               @keyup.enter="sendMessage"
+              @input="handleTyping"
               placeholder="Type your message..."
               outlined
               dense
@@ -210,6 +223,9 @@ export default {
 
       snackbar: false,
       errorMessage: "",
+      showTypingIndicator: false,
+      isTyping: false,
+      typingTimeout: null,
     };
   },
 
@@ -238,6 +254,23 @@ export default {
   },
 
   methods: {
+    handleTyping() {
+      if (!this.socket) return;
+
+      if (!this.isTyping) {
+        this.isTyping = true;
+
+        this.socket.emit("typing");
+      }
+
+      clearTimeout(this.typingTimeout);
+
+      this.typingTimeout = setTimeout(() => {
+        this.isTyping = false;
+
+        this.socket.emit("stopTyping");
+      }, 1200);
+    },
     async initializeChat() {
       this.resetChat();
       this.loading = true;
@@ -265,7 +298,7 @@ export default {
           this.socket.disconnect();
         }
 
-        this.socket = io("https://ai-api.on-track.in/", {
+        this.socket = io("https://ai-api.on-track.in", {
           transports: ["websocket"],
         });
 
@@ -282,6 +315,7 @@ export default {
         });
 
         this.socket.on("message", (message) => {
+          this.showTypingIndicator = false;
           if (message) {
             this.messages.push(message);
           }
@@ -289,6 +323,18 @@ export default {
 
         this.socket.on("connect_error", () => {
           this.showError("Socket connection failed");
+        });
+
+        this.socket.on("typing", (data) => {
+          if (data.sender === "user") {
+            this.showTypingIndicator = true;
+          }
+        });
+
+        this.socket.on("stopTyping", (data) => {
+          if (data.sender === "user") {
+            this.showTypingIndicator = false;
+          }
         });
       } catch (error) {
         this.showError("Unable to connect chat socket");
@@ -363,6 +409,9 @@ export default {
     sendMessage() {
       if (!this.newMessage.trim()) return;
       if (!this.socket) return;
+
+      this.socket.emit("stopTyping");
+      this.isTyping = false;
 
       const message = {
         apiKey: this.apiKey,
