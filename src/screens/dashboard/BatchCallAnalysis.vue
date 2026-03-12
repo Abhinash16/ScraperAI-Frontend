@@ -13,6 +13,7 @@
           <p class="text-subtitle-2 grey--text mb-0">
             Insights and performance metrics from processed calls
           </p>
+          <p>{{ batchInfo.batchName }}</p>
         </div>
       </v-col>
     </v-row>

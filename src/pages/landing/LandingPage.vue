@@ -50,8 +50,12 @@
               Customer Support, Reimagined
             </v-chip>
             <h1 class="text-h2 font-weight-black mb-6 secondary--text">
-              AI-Powered <span class="primary--text">Chatbot</span> for Every
-              Business
+              AI-Powered <br />
+              <span class="primary--text rotating-text">{{
+                rotatingWord
+              }}</span>
+              <br />
+              for Every Business
             </h1>
             <p
               class="text-h6 grey--text text--darken-1 font-weight-regular mb-10 mx-auto"
@@ -61,7 +65,7 @@
               Handle customer inquiries 24/7 with ease, precision, and
               context-aware responses.
             </p>
-            <div class="d-flex justify-center flex-wrap gap-4">
+            <div class="d-flex justify-between flex-wrap gap-4">
               <v-btn
                 x-large
                 rounded
@@ -324,7 +328,7 @@
             <v-img
               src="../../assets/13.png"
               max-width="120"
-              class="mb-4"
+              class="mb-4 rounded-lg"
             ></v-img>
             <p class="grey--text pr-md-12">
               Transforming how businesses interact with their customers through
@@ -401,6 +405,9 @@ export default {
   name: "LandingPage",
   data: () => ({
     isLoggedIn: false,
+    rotatingWord: "Chatbot",
+    words: ["Chatbot", "Call Analysis", "Analytics", "Copilot"],
+    wordIndex: 0,
     icons: ["mdi-facebook", "mdi-twitter", "mdi-linkedin", "mdi-instagram"],
     mainFeatures: [
       {
@@ -474,6 +481,10 @@ export default {
   }),
   mounted() {
     this.isLoggedIn = !!localStorage.getItem("user-token");
+    setInterval(() => {
+      this.wordIndex = (this.wordIndex + 1) % this.words.length;
+      this.rotatingWord = this.words[this.wordIndex];
+    }, 2000); // change every 2 seconds
   },
   methods: {
     redirectToSignup() {
@@ -496,5 +507,20 @@ export default {
 }
 .green {
   background: #27c93f;
+}
+.rotating-text {
+  display: inline-block;
+  animation: fadeSlide 0.6s ease;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
