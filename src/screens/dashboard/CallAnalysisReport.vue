@@ -56,6 +56,30 @@
                 {{ report.status }}
               </v-chip>
             </v-col>
+
+            <v-col cols="12" md="4">
+              <div class="text-caption grey--text">Language Detected</div>
+
+              <div class="text-subtitle-1 font-weight-bold">
+                {{ report.language || "N/A" }}
+              </div>
+            </v-col>
+
+            <v-col cols="12" md="4">
+              <div class="text-caption grey--text">Batch ID</div>
+
+              <div class="text-subtitle-1 font-weight-bold">
+                {{ report.batchId || "N/A" }}
+              </div>
+            </v-col>
+
+            <v-col cols="12" md="4">
+              <div class="text-caption grey--text">Call ID</div>
+
+              <div class="text-subtitle-1 font-weight-bold">
+                {{ report._id }}
+              </div>
+            </v-col>
           </v-row>
         </v-card-text>
       </v-card>

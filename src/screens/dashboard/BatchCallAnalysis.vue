@@ -285,6 +285,7 @@ export default {
           align: "start",
           sortable: false,
         },
+        { text: "Language", value: "language", align: "start" },
         { text: "Status", value: "status", align: "center" },
         { text: "Quality Score", value: "qualityScore", align: "center" },
         { text: "Action", value: "actions", align: "center", sortable: false },

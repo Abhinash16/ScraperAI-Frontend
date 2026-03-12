@@ -19,6 +19,10 @@ const routes = [
     children: [
       {
         path: "/",
+        component: () => import("../screens/dashboard/CompanyInsights.vue"),
+      },
+      {
+        path: "/",
         component: () => import("../screens/dashboard/DasboardHome.vue"),
       },
       {
@@ -69,6 +73,31 @@ const routes = [
         path: "/batch-analysis/:id",
         name: "BatchAnalysis",
         component: () => import("../screens/dashboard/BatchCallAnalysis.vue"),
+      },
+      {
+        path: "opportunity-analysis",
+        component: () =>
+          import("../screens/dashboard/insights/OpportunityAnalysis.vue"),
+      },
+      {
+        path: "keyword-research",
+        component: () =>
+          import("../screens/dashboard/insights/KeywordResearch.vue"),
+      },
+      {
+        path: "competitor-intelligence",
+        component: () =>
+          import("../screens/dashboard/insights/CompetitorIntelligence.vue"),
+      },
+      {
+        path: "seo-growth-report",
+        component: () =>
+          import("../screens/dashboard/insights/SeoGrowthReport.vue"),
+      },
+      {
+        path: "chatbot-knowledge-score",
+        component: () =>
+          import("../screens/dashboard/insights/ChatbotKnowledgeScore.vue"),
       },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
