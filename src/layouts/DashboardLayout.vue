@@ -30,7 +30,11 @@
           <v-icon small class="mr-1">mdi-sparkles</v-icon> Try Chat
         </v-btn>
 
-        <v-avatar @click="$router.push('/dashboard/profile')"  size="36" class="ml-4 grey lighten-3">
+        <v-avatar
+          @click="$router.push('/dashboard/profile')"
+          size="36"
+          class="ml-4 grey lighten-3"
+        >
           <v-icon color="black">mdi-account</v-icon>
         </v-avatar>
         <v-btn icon class="hidden-md-and-up" @click="mobileDrawer = true">
@@ -247,7 +251,12 @@ export default {
         icon: "mdi-database-search-outline",
       },
       {
-        name:"Call Analysis",
+        name: "DB Query Generator",
+        link: "/dashboard/database-ai/projects",
+        icon: "mdi-database-search-outline",
+      },
+      {
+        name: "Call Analysis",
         link: "/dashboard/call-batches",
         icon: "mdi-phone-outline",
       },

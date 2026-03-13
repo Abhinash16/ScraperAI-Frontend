@@ -226,10 +226,12 @@ export default {
       showTypingIndicator: false,
       isTyping: false,
       typingTimeout: null,
+      notificationSound: null,
     };
   },
 
   created() {
+    this.notificationSound = new Audio("/message.wav");
     this.initializeChat();
   },
 
@@ -317,6 +319,15 @@ export default {
         this.socket.on("message", (message) => {
           this.showTypingIndicator = false;
           if (message) {
+            // play sound only if user message
+            if (message.sender === "user" && this.notificationSound) {
+              this.notificationSound.currentTime = 0;
+              this.notificationSound.play().catch(() => {});
+            }
+            // if (message.sender === "user" && document.hidden) {
+            //   this.notificationSound.currentTime = 0;
+            //   this.notificationSound.play().catch(() => {});
+            // }
             this.messages.push(message);
           }
         });

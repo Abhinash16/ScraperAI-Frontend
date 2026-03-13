@@ -99,6 +99,22 @@ const routes = [
         component: () =>
           import("../screens/dashboard/insights/ChatbotKnowledgeScore.vue"),
       },
+
+      {
+        path: "database-ai/projects",
+        component: () =>
+          import("../screens/dashboard/databaseAI/ProjectList.vue"),
+      },
+      {
+        path: "database-ai/project/:id/config",
+        component: () =>
+          import("../screens/dashboard/databaseAI/ProjectConfig.vue"),
+      },
+      {
+        path: "database-ai/project/:id/chat",
+        component: () =>
+          import("../screens/dashboard/databaseAI/QueryChat.vue"),
+      },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },
