@@ -1,121 +1,216 @@
 <template>
   <div>
-    <!-- HEADER -->
-    <v-row>
-      <v-col cols="12" class="d-flex justify-space-between align-center">
+    <v-card outlined rounded="xl">
+      <div class="d-flex justify-space-between align-center pa-4">
         <div>
-          <div class="text-h5 font-weight-bold">Database AI Projects</div>
-          <div class="grey--text">Manage your AI query databases</div>
+          <div class="text-h6 font-weight-bold">Database AI Projects</div>
+          <div class="text-body-2 grey--text">
+            {{ projects.length }} projects created
+          </div>
         </div>
 
-        <v-btn color="primary" @click="openCreateDialog">
+        <v-btn color="primary" rounded depressed @click="openCreateDialog">
           <v-icon left>mdi-database-plus</v-icon>
           New Project
         </v-btn>
-      </v-col>
-    </v-row>
+      </div>
 
-    <!-- LOADING -->
-    <v-row v-if="loading" class="mt-4">
-      <v-col cols="12">
-        <v-card elevation="0" class="pa-6 rounded-xl">
-          <v-skeleton-loader
-            type="card, list-item, list-item"
-          ></v-skeleton-loader>
-        </v-card>
-      </v-col>
-    </v-row>
+      <v-divider />
 
-    <!-- PROJECT LIST -->
-    <v-row v-if="!loading" class="mt-4">
-      <v-col cols="12" md="6" v-for="p in projects" :key="p._id">
-        <v-card outlined class="pa-6 rounded-xl project-card" elevation="0">
-          <div class="d-flex justify-space-between align-center">
-            <div>
-              <div class="text-h6 font-weight-medium">
-                {{ p.name }}
-              </div>
+      <!-- LOADER -->
+      <v-overlay :value="loading" opacity="0.25">
+        <v-progress-circular
+          indeterminate
+          size="70"
+          width="6"
+          color="primary"
+        />
+      </v-overlay>
 
-              <div class="grey--text text-caption mt-1">
-                {{ p.dbType }} • {{ p.dbVersion }}
-              </div>
+      <!-- EMPTY STATE -->
+      <v-row v-if="!loading && !projects.length">
+        <v-col cols="12">
+          <v-card outlined rounded="xl" class="pa-10 text-center ma-4">
+            <v-icon size="50" color="grey lighten-1">mdi-database-off</v-icon>
 
-              <div class="mt-2 text-caption">
-                Tables: {{ p.tableCount || 0 }}
-              </div>
+            <div class="text-h6 font-weight-medium mt-3">No Projects Yet</div>
+
+            <div class="grey--text text-caption mb-4">
+              Create your first AI database project to begin
             </div>
 
-            <v-menu offset-y>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-dots-vertical</v-icon>
-                </v-btn>
-              </template>
+            <v-btn color="primary" rounded depressed @click="openCreateDialog">
+              Create Project
+            </v-btn>
+          </v-card>
+        </v-col>
+      </v-row>
 
-              <v-list dense>
-                <v-list-item @click="openConfig(p)">
-                  <v-list-item-icon>
-                    <v-icon small>mdi-cog</v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>Config</v-list-item-content>
-                </v-list-item>
+      <!-- PROJECT LIST -->
+      <v-row v-if="!loading && projects.length">
+        <v-col cols="12" md="6" lg="4" v-for="p in projects" :key="p._id">
+          <v-card outlined rounded="xl" class="pa-6 project-card ma-4">
+            <div class="d-flex justify-space-between align-start">
+              <div>
+                <div class="text-h6 font-weight-medium">
+                  {{ p.name }}
+                </div>
 
-                <v-list-item @click="openChat(p)">
-                  <v-list-item-icon>
-                    <v-icon small>mdi-robot</v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>AI Chat</v-list-item-content>
-                </v-list-item>
+                <div class="grey--text text-caption mt-1">
+                  {{ p.dbType }} • {{ p.dbVersion }}
+                </div>
 
-                <v-list-item @click="editProject(p)">
-                  <v-list-item-icon>
-                    <v-icon small>mdi-pencil</v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>Edit</v-list-item-content>
-                </v-list-item>
+                <!-- <div class="mt-3">
+                  <v-chip small outlined color="primary">
+                    Tables: {{ p.tableCount || 0 }}
+                  </v-chip>
+                </div> -->
+              </div>
 
-                <v-list-item @click="deleteProject(p)">
-                  <v-list-item-icon>
-                    <v-icon small color="red">mdi-delete</v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content class="red--text">
-                    Delete
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-menu>
+              <v-menu offset-y>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn icon v-bind="attrs" v-on="on">
+                    <v-icon>mdi-dots-vertical</v-icon>
+                  </v-btn>
+                </template>
+
+                <v-list dense>
+                  <v-list-item @click="openConfig(p)">
+                    <v-list-item-icon>
+                      <v-icon small>mdi-cog</v-icon>
+                    </v-list-item-icon>
+                    <v-list-item-content> Config </v-list-item-content>
+                  </v-list-item>
+
+                  <v-list-item @click="openChat(p)">
+                    <v-list-item-icon>
+                      <v-icon small>mdi-robot</v-icon>
+                    </v-list-item-icon>
+                    <v-list-item-content> AI Chat </v-list-item-content>
+                  </v-list-item>
+
+                  <v-list-item @click="editProject(p)">
+                    <v-list-item-icon>
+                      <v-icon small>mdi-pencil</v-icon>
+                    </v-list-item-icon>
+                    <v-list-item-content> Edit </v-list-item-content>
+                  </v-list-item>
+
+                  <v-list-item @click="deleteProject(p)">
+                    <v-list-item-icon>
+                      <v-icon small color="red">mdi-delete</v-icon>
+                    </v-list-item-icon>
+
+                    <v-list-item-content class="red--text">
+                      Delete
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </div>
+
+            <v-divider class="my-4" />
+
+            <div class="d-flex justify-space-between">
+              <v-btn small text color="primary" @click="openConfig(p)">
+                Configure
+              </v-btn>
+
+              <v-btn small text color="primary" @click="openChat(p)">
+                Open AI Chat
+              </v-btn>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-card>
+
+    <!-- CREATE / EDIT PROJECT -->
+    <v-dialog
+      v-model="dialog"
+      max-width="520"
+      rounded="xl"
+      persistent
+      overlay-opacity="0.8"
+      overlay-color="#2c3e50"
+    >
+      <v-card rounded="xl">
+        <!-- Header -->
+        <div class="pa-6 pb-0 d-flex align-center">
+          <v-avatar color="#eff2fb" rounded="xl" size="48" class="mr-4">
+            <v-icon color="black">
+              {{ editMode ? "mdi-pencil" : "mdi-database-plus" }}
+            </v-icon>
+          </v-avatar>
+
+          <div>
+            <div class="text-h6 font-weight-bold black--text">
+              {{ editMode ? "Edit Project" : "Create New Project" }}
+            </div>
+
+            <div class="text-caption grey--text">
+              Configure your AI database connection
+            </div>
           </div>
-        </v-card>
-      </v-col>
-    </v-row>
 
-    <!-- CREATE / EDIT DIALOG -->
-    <v-dialog v-model="dialog" max-width="500">
-      <v-card class="pa-6 rounded-xl">
-        <div class="text-h6 font-weight-bold mb-4">
-          {{ editMode ? "Edit Project" : "Create Project" }}
+          <v-spacer></v-spacer>
+
+          <v-btn icon @click="dialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
         </div>
 
-        <v-text-field v-model="form.name" label="Project Name" />
+        <v-divider class="mt-4" />
 
-        <v-select
-          v-model="form.dbType"
-          :items="['mysql']"
-          label="Database Type"
-        />
+        <!-- Form -->
+        <v-card-text class="pa-6">
+          <v-text-field
+            v-model="form.name"
+            label="Project Name"
+            outlined
+            dense
+            placeholder="Example: Ecommerce Database"
+            class="mb-4"
+          />
 
-        <v-text-field v-model="form.dbVersion" label="Database Version" />
+          <v-select
+            v-model="form.dbType"
+            :items="['mysql']"
+            label="Database Type"
+            outlined
+            dense
+            class="mb-4"
+          />
 
-        <div class="d-flex justify-end mt-4">
-          <v-btn text @click="dialog = false"> Cancel </v-btn>
+          <v-text-field
+            v-model="form.dbVersion"
+            label="Database Version"
+            outlined
+            dense
+            placeholder="Example: 8.0"
+          />
+        </v-card-text>
 
-          <v-btn color="primary" @click="saveProject"> Save </v-btn>
+        <!-- Actions -->
+        <div class="px-6 pb-6 d-flex justify-end">
+          <v-btn text rounded class="mr-2" @click="dialog = false">
+            Cancel
+          </v-btn>
+
+          <v-btn
+            color="primary"
+            rounded
+            depressed
+            :disabled="!form.name"
+            @click="saveProject"
+          >
+            Save Project
+          </v-btn>
         </div>
       </v-card>
     </v-dialog>
   </div>
 </template>
-
 <script>
 import apiClient from "@/service/axios";
 

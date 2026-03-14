@@ -120,22 +120,123 @@
             class="mb-4"
           />
 
-          <v-textarea
-            label="Paste Calls JSON"
-            v-model="callsJson"
-            outlined
-            rows="6"
-            placeholder='[ { "agent_name":"Rahul", "recording_url":"https://...", "email":"rahul@company.com" } ]'
-          />
+          <v-tabs v-model="tab" class="mb-4">
+            <v-tab>JSON Upload</v-tab>
+            <v-tab disabled>CSV Upload</v-tab>
+            <v-tab>Manual Entry</v-tab>
+          </v-tabs>
 
-          <div class="text-caption grey--text mt-2">
-            <v-icon x-small color="grey">mdi-information-outline</v-icon>
-            Upload multiple call records at once using valid JSON format.
-          </div>
-          <div class="text-caption grey--text">
-            Format: [ { "agent_name":"Rahul", "recording_url":"https://...",
-            "email":"rahul@company.com" } ]
-          </div>
+          <v-tabs-items v-model="tab">
+            <!-- JSON Upload -->
+            <v-tab-item>
+              <v-card flat>
+                <v-textarea
+                  label="Paste Calls JSON"
+                  v-model="callsJson"
+                  outlined
+                  rows="6"
+                  placeholder='[ { "agent_name":"Rahul", "recording_url":"https://...", "email":"rahul@company.com" } ]'
+                />
+              </v-card>
+              <div class="text-caption grey--text mt-2">
+                <v-icon x-small color="grey">mdi-information-outline</v-icon>
+                Upload multiple call records at once using valid JSON format.
+              </div>
+              <div class="text-caption grey--text">
+                Format: [ { "agent_name":"Rahul", "recording_url":"https://...",
+                "email":"rahul@company.com" } ]
+              </div>
+            </v-tab-item>
+
+            <!-- CSV Upload -->
+            <v-tab-item>
+              <v-card flat>
+                <v-file-input
+                  v-model="csvFile"
+                  outlined
+                  dense
+                  accept=".csv"
+                  label="Upload CSV File"
+                  prepend-icon="mdi-file-delimited"
+                  show-size
+                />
+              </v-card>
+            </v-tab-item>
+
+            <!-- Manual Entry -->
+            <v-tab-item>
+              <v-card flat>
+                <v-row>
+                  <v-col cols="12" md="4">
+                    <v-text-field
+                      v-model="manualForm.agent_name"
+                      label="Agent Name"
+                      outlined
+                      dense
+                    />
+                  </v-col>
+
+                  <v-col cols="12" md="4">
+                    <v-text-field
+                      v-model="manualForm.recording_url"
+                      label="Recording URL"
+                      outlined
+                      dense
+                    />
+                  </v-col>
+
+                  <v-col cols="12" md="4">
+                    <v-text-field
+                      v-model="manualForm.email"
+                      label="Agent Email"
+                      outlined
+                      dense
+                    />
+                  </v-col>
+                </v-row>
+
+                <div class="text-right">
+                  <v-btn
+                    small
+                    color="primary"
+                    :disabled="
+                      !this.manualForm.agent_name ||
+                      !this.manualForm.recording_url ||
+                      !this.manualForm.email
+                    "
+                    depressed
+                    @click="addManualCall"
+                  >
+                    Add Call
+                  </v-btn>
+                </div>
+
+                <v-simple-table v-if="manualCalls.length" class="mt-4">
+                  <thead>
+                    <tr>
+                      <th>Agent</th>
+                      <th>Recording</th>
+                      <th>Email</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr v-for="(call, i) in manualCalls" :key="i">
+                      <td>{{ call.agent_name }}</td>
+                      <td class="text-truncate">{{ call.recording_url }}</td>
+                      <td>{{ call.email }}</td>
+                      <td>
+                        <v-btn icon small @click="removeManualCall(i)">
+                          <v-icon small>mdi-delete</v-icon>
+                        </v-btn>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-simple-table>
+              </v-card>
+            </v-tab-item>
+          </v-tabs-items>
         </v-card-text>
 
         <!-- Actions -->
@@ -156,6 +257,7 @@
             rounded
             depressed
             large
+            :disabled="loading || !batchName"
             class="text-none"
             :loading="loading"
             @click="uploadBatch"
@@ -182,6 +284,18 @@ export default {
 
       batchDialog: false,
       uploadDialog: false,
+
+      tab: 0,
+
+      csvFile: null,
+
+      manualForm: {
+        agent_name: "",
+        recording_url: "",
+        email: "",
+      },
+
+      manualCalls: [],
 
       batchName: "",
       callsJson: "",
@@ -231,10 +345,82 @@ export default {
     viewReport(call) {
       this.$router.push(`/call-analysis/report/${call._id}`);
     },
+    addManualCall() {
+      if (
+        !this.manualForm.agent_name ||
+        !this.manualForm.recording_url ||
+        !this.manualForm.email
+      ) {
+        this.$toast.error("Please fill all fields");
+        return;
+      }
+
+      this.manualCalls.push({
+        agent_name: this.manualForm.agent_name,
+        recording_url: this.manualForm.recording_url,
+        email: this.manualForm.email,
+      });
+
+      this.manualForm = {
+        agent_name: "",
+        recording_url: "",
+        email: "",
+      };
+    },
+
+    removeManualCall(index) {
+      this.manualCalls.splice(index, 1);
+    },
+
+    // async uploadBatch() {
+    //   try {
+    //     const calls = JSON.parse(this.callsJson);
+
+    //     await apiClient.post("/call-analysis/batch-upload", {
+    //       batchName: this.batchName,
+    //       calls,
+    //     });
+
+    //     this.uploadDialog = false;
+
+    //     this.fetchBatches();
+    //   } catch (e) {
+    //     alert("Invalid JSON");
+    //   }
+    // },
 
     async uploadBatch() {
       try {
-        const calls = JSON.parse(this.callsJson);
+        let calls = [];
+
+        if (this.tab === 0) {
+          if (!this.jsonFile) throw new Error("Upload JSON file");
+
+          calls = JSON.parse(this.callsJson);
+        } else if (this.tab === 1) {
+          if (!this.csvFile) throw new Error("Upload CSV file");
+
+          const text = await this.csvFile.text();
+
+          const rows = text.split("\n");
+
+          calls = rows.slice(1).map((row) => {
+            const [agent_name, recording_url, email] = row.split(",");
+
+            return {
+              agent_name,
+              recording_url,
+              email,
+            };
+          });
+        } else {
+          if (!this.manualCalls.length)
+            throw new Error("Add at least one call");
+
+          calls = this.manualCalls;
+        }
+
+        this.loading = true;
 
         await apiClient.post("/call-analysis/batch-upload", {
           batchName: this.batchName,
@@ -242,10 +428,11 @@ export default {
         });
 
         this.uploadDialog = false;
-
         this.fetchBatches();
-      } catch (e) {
-        alert("Invalid JSON");
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        this.loading = false;
       }
     },
   },

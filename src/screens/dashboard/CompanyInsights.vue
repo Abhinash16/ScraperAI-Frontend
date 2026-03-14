@@ -353,7 +353,7 @@ export default {
         const res = await apiClient.get("/client-insight");
 
         if (res.data.success) {
-          this.insight = res.data.data;
+          this.insight = res.data.data || this.insight;
         }
       } catch (err) {
         this.errorMessage =
