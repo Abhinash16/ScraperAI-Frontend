@@ -63,15 +63,18 @@
         <v-simple-table v-else>
           <thead>
             <tr>
+              <th>id</th>
               <th>Title</th>
               <th>Url</th>
               <th>Status</th>
               <th>Scraped At</th>
+              <th>TTL</th>
             </tr>
           </thead>
 
           <tbody>
             <tr v-for="page in pages" :key="page.url">
+              <td>{{ page._id }}</td>
               <td>{{ page.title }}</td>
               <td>
                 <a :href="page.url" target="_blank">{{ page.url }}</a>
@@ -116,6 +119,27 @@
                 <div v-else class="text-caption grey--text">
                   Scraping in progress…
                 </div>
+              </td>
+              <td>
+                <v-text-field
+                  v-model.number="page.refreshInterval"
+                  type="number"
+                  label="seconds"
+                  dense
+                  hide-details
+                  style="max-width: 120px"
+                ></v-text-field>
+
+                <v-btn
+                  small
+                  rounded
+                  color="primary"
+                  depressed
+                  class="ml-2"
+                  @click="updateRefreshInterval(page)"
+                >
+                  Update
+                </v-btn>
               </td>
             </tr>
           </tbody>
@@ -406,6 +430,27 @@ export default {
     this.fetchPages();
   },
   methods: {
+    async updateRefreshInterval(page) {
+      if (!page._id || page.refreshInterval == null) return;
+
+      try {
+        await apiClient.post("content/pages/update-interval", {
+          contentId: page._id,
+          refreshInterval: page.refreshInterval,
+        });
+
+        this.$set(page, "status", "pending"); // optional: reset status
+        this.$set(page, "lastScrapedAt", null); // optional: reset lastScrapedAt
+
+        this.errorMessage = `Refresh interval updated for ${page.url}`;
+        this.snackbar = true;
+      } catch (error) {
+        this.errorMessage =
+          error.response?.data?.message ||
+          `Failed to update refresh interval for ${page.url}`;
+        this.snackbar = true;
+      }
+    },
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleString();
     },

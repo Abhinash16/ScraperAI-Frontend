@@ -128,7 +128,7 @@
                   elevation="1"
                 >
                   <div class="text-body-2">
-                    {{ message.message }}
+                    {{ message.text }}
                   </div>
                 </v-card>
               </v-col>
