@@ -115,6 +115,18 @@ const routes = [
         component: () =>
           import("../screens/dashboard/databaseAI/QueryChat.vue"),
       },
+      {
+        path: "knowledge-gap",
+        name: "KnowledgeGapList",
+        component: () =>
+          import("../screens/dashboard/knowledgeGap/KnowledgeGapList.vue"),
+      },
+      {
+        path: "knowledge-gap/:id",
+        name: "KnowledgeGap",
+        component: () =>
+          import("../screens/dashboard/knowledgeGap/KnowledgeGapView.vue"),
+      },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },

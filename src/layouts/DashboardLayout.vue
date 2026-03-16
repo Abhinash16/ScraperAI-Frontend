@@ -256,6 +256,11 @@ export default {
         icon: "mdi-database-search-outline",
       },
       {
+        name: "Knowledge Gap",
+        link: "/dashboard/knowledge-gap/",
+        icon: "mdi-database-search-outline",
+      },
+      {
         name: "Call Analysis",
         link: "/dashboard/call-batches",
         icon: "mdi-phone-outline",
