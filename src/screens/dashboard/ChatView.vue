@@ -127,10 +127,111 @@
                   class="pa-3 rounded-xl"
                   elevation="1"
                 >
-                  <div class="text-body-2">
-                    {{ message.text }}
+                  <div>
+                    <!-- TEXT MESSAGE -->
+                    <div v-if="message.type === 'text'" class="text-body-2">
+                      {{ message.text }}
+                    </div>
+
+                    <!-- IMAGE MESSAGE -->
+                    <div v-else-if="message.type === 'image'">
+                      <v-img
+                        :src="message.mediaUrl"
+                        max-width="220"
+                        class="rounded-lg"
+                        contain
+                        @click="openMedia(message.mediaUrl, 'image')"
+                        style="cursor: pointer"
+                      />
+
+                      <!-- optional caption -->
+                      <div v-if="message.caption" class="text-caption mt-1">
+                        {{ message.caption }}
+                      </div>
+                    </div>
+
+                    <!-- VIDEO MESSAGE -->
+                    <div
+                      v-else-if="message.type === 'video'"
+                      class="position-relative"
+                    >
+                      <video
+                        :src="message.mediaUrl"
+                        controls
+                        playsinline
+                        style="
+                          max-width: 220px;
+                          border-radius: 12px;
+                          cursor: pointer;
+                        "
+                        @click="openMedia(message.mediaUrl, 'video')"
+                      ></video>
+                    </div>
+                    <!-- LOCATION MESSAGE -->
+                    <div
+                      v-else-if="message.type === 'location'"
+                      class="location-card"
+                    >
+                      <!-- MAP PREVIEW -->
+                      <v-img
+                        :src="getMapPreview(message.location)"
+                        max-width="220"
+                        height="140"
+                        class="rounded-lg"
+                        @click="openMap(message.location)"
+                      >
+                        <template v-slot:error>
+                          <div
+                            class="d-flex align-center justify-center grey lighten-2"
+                            style="height: 100%"
+                          >
+                            <v-icon>mdi-map-marker</v-icon>
+                          </div>
+                        </template>
+                      </v-img>
+
+                      <!-- OPEN IN MAP -->
+                      <div
+                        class="d-flex justify-space-between align-center mt-1"
+                      >
+                        <span class="caption grey--text"> Location </span>
+
+                        <v-btn
+                          x-small
+                          text
+                          color="primary"
+                          @click.stop="openMap(message.location)"
+                        >
+                          Open
+                        </v-btn>
+                      </div>
+                    </div>
+
+                    <div
+                      v-else-if="message.type === 'audio'"
+                      class="d-flex align-center"
+                    >
+                      <v-icon small class="mr-2 primary--text">
+                        mdi-microphone
+                      </v-icon>
+
+                      <audio controls>
+                        <source :src="message.mediaUrl" type="audio/ogg" />
+                        Your browser does not support audio
+                      </audio>
+                    </div>
+
+                    <!-- FALLBACK -->
+                    <div v-else class="text-caption grey--text">
+                      Unsupported message type
+                    </div>
                   </div>
                 </v-card>
+                <div class="d-flex justify-end">
+                  <span class="caption grey--text mr-2">
+                    {{ formatTime(message.timestamp) }}
+                  </span>
+                </div>
               </v-col>
             </v-row>
 
@@ -176,6 +277,61 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <v-dialog
+      v-model="previewDialog"
+      max-width="700"
+      :fullscreen="$vuetify.breakpoint.xs"
+    >
+      <v-card class="rounded-xl d-flex flex-column">
+        <!-- HEADER -->
+        <div class="pa-4 d-flex align-center">
+          <div class="text-subtitle-1 font-weight-bold">
+            {{ previewType === "image" ? "Image View" : "Video View" }}
+          </div>
+
+          <v-spacer />
+
+          <v-btn icon @click="previewDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="flex-grow-1 d-flex justify-center align-center px-4 pb-2">
+          <!-- IMAGE -->
+          <v-img
+            v-if="previewType === 'image'"
+            :src="previewUrl"
+            contain
+            max-height="75vh"
+            class="rounded-lg"
+          />
+
+          <!-- VIDEO -->
+          <video
+            v-else-if="previewType === 'video'"
+            :src="previewUrl"
+            controls
+            style="max-width: 100%; max-height: 75vh; border-radius: 12px"
+          ></video>
+        </div>
+
+        <!-- ACTION -->
+        <div class="d-flex justify-end px-4 pb-4">
+          <v-btn
+            color="primary"
+            small
+            rounded
+            depressed
+            @click="downloadMedia(previewUrl)"
+          >
+            <v-icon left small>mdi-download</v-icon>
+            Download
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
 
     <!-- ERROR SNACKBAR -->
     <v-snackbar v-model="snackbar" color="error" top right>
@@ -227,6 +383,10 @@ export default {
       isTyping: false,
       typingTimeout: null,
       notificationSound: null,
+
+      previewDialog: false,
+      previewUrl: "",
+      previewType: "", // "image" | "video"
     };
   },
 
@@ -452,6 +612,52 @@ export default {
         top: el.scrollHeight,
         behavior: "smooth",
       });
+    },
+
+    openMedia(url, type) {
+      this.previewUrl = url;
+      this.previewType = type;
+      this.previewDialog = true;
+    },
+    downloadMedia(url) {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "media";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+    formatTime(timestamp) {
+      if (!timestamp) return "";
+
+      const date = new Date(timestamp);
+
+      return date.toLocaleString([], {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    },
+
+    getMapPreview(location) {
+      if (!location) return "";
+
+      const { latitude, longitude } = location;
+
+      return `https://static-maps.yandex.ru/1.x/?ll=${longitude},${latitude}&size=450,250&z=15&l=map&pt=${longitude},${latitude},pm2rdm`;
+    },
+    openMap(location) {
+      const { latitude, longitude } = location;
+
+      const url = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+      window.open(url, "_blank");
+    },
+
+    pauseAllAudio() {
+      const audios = document.querySelectorAll("audio");
+      audios.forEach((a) => a.pause());
     },
 
     showError(message) {

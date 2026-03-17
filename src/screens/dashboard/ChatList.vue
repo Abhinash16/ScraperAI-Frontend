@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-chip color="primary" text-color="white" small class="mb-2">
-      {{ chats.length }} Chats Found
+      {{ chats.length }}/{{ total }} Chats Loaded
     </v-chip>
 
     <div class="d-flex">
@@ -9,7 +9,7 @@
         v-model="selectedTicketStatus"
         active-class="primary--text"
         column
-        @change="fetchChats"
+        @change="fetchChats(false)"
       >
         <v-chip value="" outlined>All</v-chip>
         <v-chip value="open" outlined color="orange">Open</v-chip>
@@ -78,6 +78,24 @@
               <div class="grey--text mt-2">No conversations found</div>
             </div>
           </div>
+          <div class="text-center py-4" v-if="hasMore && chats.length">
+            <v-btn
+              outlined
+              color="primary"
+              @click="loadMoreChats"
+              :loading="loadingMore"
+              :disabled="loadingMore"
+            >
+              Load More
+            </v-btn>
+          </div>
+
+          <div
+            v-if="!hasMore && chats.length"
+            class="text-center grey--text py-2"
+          >
+            No more chats
+          </div>
         </v-card>
       </v-col>
 
@@ -140,6 +158,10 @@ export default {
     chatViewBottomSheet: false,
     aiEnabled: false, // New flag to track if AI is enabled for the selected chat
     selectedTicketStatus: "",
+    page: 1,
+    limit: 10,
+    total: 0,
+    hasMore: true,
   }),
 
   created() {
@@ -147,26 +169,57 @@ export default {
   },
 
   methods: {
-    async fetchChats() {
-      this.loading = true;
+    async fetchChats(loadMore = false) {
+      if (this.loading || this.loadingMore) return;
+
+      if (!loadMore) {
+        this.page = 1;
+        this.chats = [];
+        this.hasMore = true;
+      }
+
+      loadMore ? (this.loadingMore = true) : (this.loading = true);
 
       try {
-        let url = "/chats";
+        let url = `/chats?page=${this.page}&limit=${this.limit}`;
 
         if (this.selectedTicketStatus) {
-          url += `?ticketStatus=${this.selectedTicketStatus}`;
+          url += `&ticketStatus=${this.selectedTicketStatus}`;
         }
 
         const { data } = await apiClient.get(url);
 
-        this.chats = data.data || [];
+        const newChats = data.data || [];
+        const total = data.pagination?.total || 0;
+
+        const existingIds = new Set(this.chats.map((c) => c.chatId));
+        const filteredNewChats = newChats.filter(
+          (c) => !existingIds.has(c.chatId),
+        );
+
+        this.chats = loadMore
+          ? [...this.chats, ...filteredNewChats]
+          : filteredNewChats;
+
+        this.total = total;
+        this.hasMore = this.chats.length < total;
+
+        if (newChats.length) {
+          this.page++;
+        }
       } catch (error) {
         this.errorMessage =
           error.response?.data?.message || "Error fetching chats.";
         this.snackbar = true;
       } finally {
         this.loading = false;
+        this.loadingMore = false;
       }
+    },
+
+    loadMoreChats() {
+      if (!this.hasMore || this.loadingMore) return;
+      this.fetchChats(true);
     },
 
     viewChat(chat) {

@@ -1,10 +1,36 @@
 <template>
   <v-container fluid class="chat-container">
     <!-- HEADER -->
-    <v-row>
-      <v-col cols="12">
-        <div class="text-h5 font-weight-bold">AI Database Assistant</div>
-        <div class="grey--text">Ask questions about your database schema</div>
+    <v-row class="mb-6">
+      <v-col cols="auto">
+        <v-btn icon text color="primary" @click="$router.back()">
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
+      </v-col>
+
+      <v-col>
+        <div>
+          <h1 class="text-h5 font-weight-bold mb-1 d-flex align-center">
+            AI Database Assistant
+          </h1>
+
+          <p class="text-subtitle-2 grey--text mb-0">
+            Ask questions about your database schema and generate SQL queries
+          </p>
+        </div>
+      </v-col>
+
+      <v-col cols="auto">
+        <!-- <v-btn
+          small
+          outlined
+          rounded
+          color="red"
+          @click="clearChats"
+          v-if="chats.length"
+        >
+          Clear Chat
+        </v-btn> -->
       </v-col>
     </v-row>
 
@@ -53,6 +79,7 @@
 
             <v-btn
               small
+              rounded
               color="success"
               class="mt-2"
               @click="openRunDialog(c.generatedQuery)"
@@ -72,6 +99,7 @@
             v-model="question"
             label="Ask database..."
             dense
+            rounded
             outlined
             hide-details
             @keyup.enter="ask"
@@ -79,7 +107,7 @@
         </v-col>
 
         <v-col cols="2">
-          <v-btn color="primary" block :loading="sending" @click="ask">
+          <v-btn rounded color="primary" block :loading="sending" @click="ask">
             Ask
           </v-btn>
         </v-col>

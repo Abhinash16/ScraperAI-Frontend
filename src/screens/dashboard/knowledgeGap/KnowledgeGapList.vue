@@ -1,92 +1,154 @@
 <template>
-  <v-container fluid>
-    <!-- HEADER -->
-    <v-row class="mb-4">
-      <v-col cols="12">
-        <div class="text-h5 font-weight-bold">Knowledge Gaps</div>
-      </v-col>
-    </v-row>
+  <div>
+    <!-- FULL SCREEN LOADER -->
+    <v-overlay :value="loading" opacity="0.25">
+      <v-progress-circular indeterminate size="70" width="6" color="primary" />
+    </v-overlay>
 
-    <!-- FILTERS -->
-    <v-card outlined class="pa-4 mb-4 rounded-xl">
-      <v-row>
-        <v-col cols="12" md="4">
-          <v-text-field
-            v-model="search"
-            label="Search Question"
-            outlined
-            clearable
-            @keyup.enter="loadGaps"
-          />
-        </v-col>
+    <v-card outlined rounded="xl">
+      <!-- HEADER -->
+      <div class="d-flex justify-space-between align-center pa-4 flex-wrap">
+        <div>
+          <div class="text-h6 font-weight-bold">Knowledge Gaps</div>
 
-        <v-col cols="12" md="3">
-          <v-select
-            v-model="status"
-            :items="statuses"
-            label="Status"
-            outlined
-            clearable
-          />
-        </v-col>
-
-        <v-col cols="12" md="2">
-          <v-select
-            v-model="limit"
-            :items="[10, 20, 50, 100]"
-            label="Limit"
-            outlined
-          />
-        </v-col>
-
-        <v-col cols="12" md="3" class="d-flex align-center">
-          <v-btn color="primary" @click="loadGaps"> Apply </v-btn>
-
-          <v-btn class="ml-2" @click="resetFilters"> Reset </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
-
-    <!-- TABLE -->
-    <v-card outlined class="rounded-xl">
-      <v-data-table
-        :headers="headers"
-        :items="rows"
-        :items-per-page="limit"
-        :loading="loading"
-        hide-default-footer
-        class="elevation-0"
-      >
-        <template v-slot:[`item.question`]="{ item }">
-          <div class="font-weight-medium">
-            {{ item.question }}
+          <div class="text-body-2 grey--text">
+            {{ total }} unanswered questions detected by AI.
           </div>
-        </template>
+        </div>
 
-        <template v-slot:[`item.status`]="{ item }">
-          <v-chip
-            small
-            :color="item.status === 'pending' ? 'orange' : 'green'"
-            dark
+        <div>
+          <v-btn
+            color="primary"
+            outlined
+            rounded
+            depressed
+            class="mt-2 mt-md-0"
+            @click="loadGaps"
           >
-            {{ item.status }}
-          </v-chip>
-        </template>
-
-        <template v-slot:[`item.createdAt`]="{ item }">
-          {{ formatDate(item.createdAt) }}
-        </template>
-
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-btn small text color="primary" @click="openGap(item)">
-            View
+            Refresh
           </v-btn>
-        </template>
-      </v-data-table>
+        </div>
+      </div>
 
-      <!-- PAGINATION -->
       <v-divider></v-divider>
 
+      <!-- FILTERS -->
+      <div class="pa-4">
+        <v-row dense align="center">
+          <!-- Search -->
+          <v-col cols="12" sm="6" md="3">
+            <v-text-field
+              v-model="search"
+              label="Search Question"
+              outlined
+              dense
+              clearable
+              hide-details
+              @keyup.enter="loadGaps"
+            />
+          </v-col>
+
+          <!-- Status -->
+          <v-col cols="12" sm="6" md="3">
+            <v-select
+              v-model="status"
+              :items="statuses"
+              label="Status"
+              outlined
+              dense
+              clearable
+              hide-details
+            />
+          </v-col>
+
+          <!-- Limit -->
+          <v-col cols="12" sm="6" md="2">
+            <v-select
+              v-model="limit"
+              :items="[10, 20, 50, 100]"
+              label="Limit"
+              outlined
+              dense
+              hide-details
+            />
+          </v-col>
+
+          <!-- Buttons -->
+          <v-col cols="12" sm="6" md="4">
+            <div class="d-flex flex-wrap gap-2">
+              <v-btn color="primary" rounded depressed @click="loadGaps">
+                Apply
+              </v-btn>
+
+              <v-btn text rounded @click="resetFilters"> Reset </v-btn>
+            </div>
+          </v-col>
+        </v-row>
+      </div>
+
+      <v-divider></v-divider>
+
+      <!-- EMPTY STATE -->
+      <div v-if="!loading && rows.length === 0" class="pa-10 text-center">
+        <v-icon large color="grey lighten-1"> mdi-brain </v-icon>
+
+        <div class="grey--text mt-3">No knowledge gaps found.</div>
+      </div>
+
+      <!-- TABLE -->
+      <v-simple-table v-else>
+        <thead>
+          <tr>
+            <th>Question</th>
+            <th>Phone</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr v-for="item in rows" :key="item._id">
+            <td class="font-weight-medium">
+              {{ item.question }}
+            </td>
+
+            <td>
+              {{ item.phone }}
+            </td>
+
+            <td>
+              <v-chip
+                small
+                outlined
+                :color="item.status === 'pending' ? 'warning' : 'success'"
+              >
+                {{ item.status }}
+              </v-chip>
+            </td>
+
+            <td>
+              {{ formatDate(item.createdAt) }}
+            </td>
+
+            <td>
+              <v-btn
+                small
+                rounded
+                depressed
+                color="primary"
+                @click="openGap(item)"
+              >
+                View
+              </v-btn>
+            </td>
+          </tr>
+        </tbody>
+      </v-simple-table>
+
+      <v-divider></v-divider>
+
+      <!-- PAGINATION -->
       <v-row class="pa-4">
         <v-col cols="6">
           <div class="grey--text text-caption">
@@ -95,15 +157,30 @@
         </v-col>
 
         <v-col cols="6" class="text-right">
-          <v-btn small :disabled="offset === 0" @click="prevPage"> Prev </v-btn>
+          <v-btn
+            small
+            rounded
+            depressed
+            :disabled="offset === 0"
+            @click="prevPage"
+          >
+            Prev
+          </v-btn>
 
-          <v-btn small class="ml-2" :disabled="!hasMore" @click="nextPage">
+          <v-btn
+            small
+            rounded
+            depressed
+            class="ml-2"
+            :disabled="!hasMore"
+            @click="nextPage"
+          >
             Next
           </v-btn>
         </v-col>
       </v-row>
     </v-card>
-  </v-container>
+  </div>
 </template>
 
 <script>

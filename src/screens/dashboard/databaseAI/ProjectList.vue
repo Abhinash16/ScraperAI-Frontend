@@ -112,11 +112,11 @@
             <v-divider class="my-4" />
 
             <div class="d-flex justify-space-between">
-              <v-btn small text color="primary" @click="openConfig(p)">
+              <v-btn small rounded text color="primary" @click="openConfig(p)">
                 Configure
               </v-btn>
 
-              <v-btn small text color="primary" @click="openChat(p)">
+              <v-btn small rounded text color="primary" @click="openChat(p)">
                 Open AI Chat
               </v-btn>
             </div>

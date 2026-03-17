@@ -121,25 +121,27 @@
                 </div>
               </td>
               <td>
-                <v-text-field
-                  v-model.number="page.refreshInterval"
-                  type="number"
-                  label="seconds"
-                  dense
-                  hide-details
-                  style="max-width: 120px"
-                ></v-text-field>
+                <div class="d-flex">
+                  <v-text-field
+                    v-model.number="page.refreshInterval"
+                    type="number"
+                    label="seconds"
+                    dense
+                    hide-details
+                    style="min-width: 50px"
+                  ></v-text-field>
 
-                <v-btn
-                  small
-                  rounded
-                  color="primary"
-                  depressed
-                  class="ml-2"
-                  @click="updateRefreshInterval(page)"
-                >
-                  Update
-                </v-btn>
+                  <v-btn
+                    small
+                    rounded
+                    color="primary"
+                    depressed
+                    class="ml-2"
+                    @click="updateRefreshInterval(page)"
+                  >
+                    Update
+                  </v-btn>
+                </div>
               </td>
             </tr>
           </tbody>
