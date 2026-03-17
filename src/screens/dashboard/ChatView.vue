@@ -118,18 +118,24 @@
               :key="message._id || message.timestamp"
               no-gutters
               class="mb-3"
-              :justify="message.sender === 'client' ? 'end' : 'start'"
+              :justify="message.sender === 'user' ? 'start' : 'end'"
             >
               <v-col cols="auto" style="max-width: 75%">
                 <v-card
-                  :color="message.sender === 'client' ? 'primary' : 'white'"
+                  :color="message.sender === 'user' ? 'white' : 'primary'"
                   :dark="message.sender === 'client'"
                   class="pa-3 rounded-xl"
                   elevation="1"
                 >
                   <div>
                     <!-- TEXT MESSAGE -->
-                    <div v-if="message.type === 'text'" class="text-body-2">
+                    <div
+                      v-if="message.type === 'text'"
+                      :class="[
+                        'text-body-2',
+                        message.sender === 'user' ? '' : 'white--text',
+                      ]"
+                    >
                       {{ message.text }}
                     </div>
 
