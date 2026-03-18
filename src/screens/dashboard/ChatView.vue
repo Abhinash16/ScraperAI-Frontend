@@ -13,6 +13,7 @@
               <div class="d-flex">
                 <div class="font-weight-bold">Chat Room: {{ chatId }}</div>
                 <v-chip
+                  @click="testSound"
                   v-if="!loading"
                   small
                   class="ml-2 text-capitalize text-caption"
@@ -246,25 +247,19 @@
               v-if="showTypingIndicator"
               no-gutters
               class="mb-3"
-              :justify="typingMessage === 'User is typing...' ? 'start' : 'end'"
+              :justify="typingSender === 'user' ? 'start' : 'end'"
             >
               <v-col cols="auto">
                 <v-card
-                  :color="
-                    typingMessage === 'User is typing...' ? 'white' : 'primary'
-                  "
-                  :dark="typingMessage === 'AI is typing...'"
+                  :color="typingSender === 'user' ? 'white' : 'primary'"
+                  :dark="typingSender !== 'user'"
                   outlined
                   class="pa-3 rounded-xl"
                 >
                   <div class="typing muted-text">
-                    <v-icon
-                      color="white"
-                      size="10"
-                      v-if="typingMessage == 'AI is typing...'"
+                    <v-icon color="white" size="10" v-if="typingSender === 'ai'"
                       >mdi-robot</v-icon
                     >
-
                     {{ typingMessage }}
                   </div>
                 </v-card>
@@ -412,7 +407,7 @@ export default {
       typingTimeout: null,
       notificationSound: null,
       typingMessage: null,
-
+      platform: "unknown",
       previewDialog: false,
       previewUrl: "",
       previewType: "", // "image" | "video"
@@ -426,6 +421,21 @@ export default {
 
   created() {
     this.notificationSound = new Audio("/message.wav");
+
+    const unlockAudio = () => {
+      this.notificationSound
+        .play()
+        .then(() => {
+          this.notificationSound.pause();
+          this.notificationSound.currentTime = 0;
+        })
+        .catch(() => {});
+
+      window.removeEventListener("click", unlockAudio);
+    };
+
+    window.addEventListener("click", unlockAudio);
+
     this.initializeChat();
   },
 
@@ -449,6 +459,14 @@ export default {
     },
   },
 
+  computed: {
+    typingSender() {
+      if (this.typingState.agent) return "agent";
+      if (this.typingState.ai) return "ai";
+      if (this.typingState.user) return "user";
+      return null;
+    },
+  },
   methods: {
     handleTyping() {
       if (!this.socket) return;
@@ -479,6 +497,31 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+
+    playSound(sound) {
+      if (!sound) return;
+
+      try {
+        // reset if already playing
+        sound.pause();
+        sound.currentTime = 0;
+
+        const playPromise = sound.play();
+
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // autoplay blocked or interrupted
+            console.log("Sound play blocked");
+          });
+        }
+      } catch (err) {
+        console.log("Sound error:", err);
+      }
+    },
+
+    testSound() {
+      this.playSound(this.notificationSound);
     },
 
     async connectSocket() {
@@ -515,13 +558,11 @@ export default {
           if (message) {
             // play sound only if user message
             if (message.sender === "user" && this.notificationSound) {
-              this.notificationSound.currentTime = 0;
-              this.notificationSound.play().catch(() => {});
+              if (document.hidden) {
+                this.playSound(this.notificationSound);
+              }
             }
-            // if (message.sender === "user" && document.hidden) {
-            //   this.notificationSound.currentTime = 0;
-            //   this.notificationSound.play().catch(() => {});
-            // }
+
             this.messages.push(message);
           }
         });
