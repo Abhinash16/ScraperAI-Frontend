@@ -45,7 +45,7 @@
                 ></v-switch>
 
                 <div class="green-text" v-if="showTypingIndicator">
-                  typing...
+                  {{ typingMessage }}
                 </div>
               </div>
             </div>
@@ -241,10 +241,32 @@
               </v-col>
             </v-row>
 
-            <v-row v-if="showTypingIndicator" no-gutters class="mb-3">
+            <!-- i want  this to show on the right when AI is typing...-->
+            <v-row
+              v-if="showTypingIndicator"
+              no-gutters
+              class="mb-3"
+              :justify="typingMessage === 'User is typing...' ? 'start' : 'end'"
+            >
               <v-col cols="auto">
-                <v-card class="pa-3 rounded-xl">
-                  <div class="typing muted-text">typing....</div>
+                <v-card
+                  :color="
+                    typingMessage === 'User is typing...' ? 'white' : 'primary'
+                  "
+                  :dark="typingMessage === 'AI is typing...'"
+                  outlined
+                  class="pa-3 rounded-xl"
+                >
+                  <div class="typing muted-text">
+                    <v-icon
+                      color="white"
+                      size="10"
+                      v-if="typingMessage == 'AI is typing...'"
+                      >mdi-robot</v-icon
+                    >
+
+                    {{ typingMessage }}
+                  </div>
                 </v-card>
               </v-col>
             </v-row>
@@ -389,10 +411,16 @@ export default {
       isTyping: false,
       typingTimeout: null,
       notificationSound: null,
+      typingMessage: null,
 
       previewDialog: false,
       previewUrl: "",
       previewType: "", // "image" | "video"
+      typingState: {
+        user: false,
+        agent: false,
+        ai: false,
+      },
     };
   },
 
@@ -466,7 +494,7 @@ export default {
           this.socket.disconnect();
         }
 
-        this.socket = io("https://ai-api.on-track.in", {
+        this.socket = io("http://localhost:4000", {
           transports: ["websocket"],
         });
 
@@ -502,19 +530,32 @@ export default {
           this.showError("Socket connection failed");
         });
 
-        this.socket.on("typing", (data) => {
-          if (data.sender === "user") {
-            this.showTypingIndicator = true;
-          }
+        this.socket.on("typing", ({ sender }) => {
+          this.typingState[sender] = true;
+          this.updateTypingUI();
         });
 
-        this.socket.on("stopTyping", (data) => {
-          if (data.sender === "user") {
-            this.showTypingIndicator = false;
-          }
+        this.socket.on("stopTyping", ({ sender }) => {
+          this.typingState[sender] = false;
+          this.updateTypingUI();
         });
       } catch (error) {
         this.showError("Unable to connect chat socket");
+      }
+    },
+    updateTypingUI() {
+      if (this.typingState.agent) {
+        this.showTypingIndicator = true;
+        this.typingMessage = "Agent is typing...";
+      } else if (this.typingState.ai) {
+        this.showTypingIndicator = true;
+        this.typingMessage = "AI is typing...";
+      } else if (this.typingState.user) {
+        this.showTypingIndicator = true;
+        this.typingMessage = "User is typing...";
+      } else {
+        this.showTypingIndicator = false;
+        this.typingMessage = null;
       }
     },
 
