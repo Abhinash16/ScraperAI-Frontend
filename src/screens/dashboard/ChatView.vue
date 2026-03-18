@@ -125,7 +125,7 @@
                   :color="message.sender === 'user' ? 'white' : 'primary'"
                   :dark="message.sender === 'client'"
                   class="pa-3 rounded-xl"
-                  elevation="1"
+                  elevation="0"
                 >
                   <div>
                     <!-- TEXT MESSAGE -->
