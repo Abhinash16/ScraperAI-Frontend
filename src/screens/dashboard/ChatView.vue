@@ -278,7 +278,7 @@
           <v-card-actions class="pa-4">
             <v-text-field
               v-model="newMessage"
-              :disabled="ticketStatus === 'resolved'"
+              :disabled="ticketStatus === 'resolved' || platform === 'whatsapp'"
               @keyup.enter="sendMessage"
               @input="handleTyping"
               placeholder="Type your message..."
@@ -571,6 +571,7 @@ export default {
 
         this.ticketStatus = chat.ticketStatus || "open";
         this.aiEnabledLocal = chat.aiEnabled || false;
+        this.platform = chat.platform || "unknown";
 
         // important
         this.chatMongoId = chat._id;
