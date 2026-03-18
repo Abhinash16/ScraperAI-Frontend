@@ -12,6 +12,16 @@
           <div class="text-h6 font-weight-bold">Context Chunks</div>
           <div class="text-body-2 grey--text">{{ total }} records</div>
         </div>
+        <v-btn
+          color="primary"
+          depressed
+          rounded
+          class="text-capitalize font-weight-bold"
+          @click="openManualDialog"
+        >
+          <v-icon left small>mdi-plus</v-icon>
+          Add Content Manual
+        </v-btn>
       </div>
 
       <v-divider />
@@ -153,6 +163,52 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+
+    <!-- ADD MANUAL CONTENT DIALOG -->
+    <v-dialog v-model="manualDialog" max-width="600">
+      <v-card>
+        <v-card-title class="d-flex align-center">
+          Add Manual Content
+          <v-spacer />
+          <v-btn icon @click="manualDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+
+        <v-divider />
+
+        <v-card-text>
+          <v-text-field
+            v-model="manualForm.title"
+            label="Title"
+            outlined
+            dense
+            class="mb-3"
+          />
+
+          <v-textarea
+            v-model="manualForm.content"
+            label="Content"
+            outlined
+            rows="6"
+          />
+        </v-card-text>
+
+        <v-divider />
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn text @click="manualDialog = false">Cancel</v-btn>
+          <v-btn
+            color="primary"
+            @click="submitManualContent"
+            :loading="manualLoading"
+          >
+            Submit
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -169,6 +225,12 @@ export default {
       page: 1,
       limit: 10,
       totalPages: 1,
+      manualDialog: false,
+      manualLoading: false,
+      manualForm: {
+        title: "",
+        content: "",
+      },
 
       search: "",
       type: null,
@@ -257,6 +319,35 @@ export default {
     deleteChunk(id) {
       if (!confirm("Delete this chunk?")) return;
       apiClient.delete(`/chunks/${id}`).then(() => this.fetchData());
+    },
+
+    openManualDialog() {
+      this.manualDialog = true;
+      this.manualForm = { title: "", content: "" };
+    },
+
+    async submitManualContent() {
+      if (!this.manualForm.title || !this.manualForm.content) {
+        alert("Title and Content are required");
+        return;
+      }
+
+      this.manualLoading = true;
+
+      try {
+        await apiClient.post("/content/scrape/manual", {
+          title: this.manualForm.title,
+          content: this.manualForm.content,
+        });
+
+        this.manualDialog = false;
+        this.fetchData(); // refresh table
+      } catch (err) {
+        console.error(err);
+        alert("Failed to add content");
+      }
+
+      this.manualLoading = false;
     },
 
     viewChunk(chunk) {
