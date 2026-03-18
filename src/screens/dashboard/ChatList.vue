@@ -4,23 +4,55 @@
       {{ chats.length }}/{{ total }} Chats Loaded
     </v-chip>
 
-    <div class="d-flex">
-      <v-chip-group
-        v-model="selectedTicketStatus"
-        active-class="primary--text"
-        column
-        @change="fetchChats(false)"
-      >
-        <v-chip value="" outlined>All</v-chip>
-        <v-chip value="open" outlined color="orange">Open</v-chip>
-        <v-chip value="resolved" outlined color="green">Resolved</v-chip>
-      </v-chip-group>
+    <div class="d-flex align-center flex-wrap mb-2">
+      <!-- Status Filter -->
+      <v-card outlined rounded="xl" class="px-2 pa-1 mr-2 d-flex flex-column">
+        <div class="text-caption grey--text">Status</div>
+
+        <v-chip-group
+          v-model="selectedTicketStatus"
+          active-class="primary--text"
+          @change="fetchChats(false)"
+          row
+        >
+          <v-chip small outlined value="">All</v-chip>
+          <v-chip small outlined color="orange" value="open">Open</v-chip>
+          <v-chip small outlined color="green" value="resolved">
+            Resolved
+          </v-chip>
+        </v-chip-group>
+      </v-card>
+
+      <!-- Platform Filter -->
+      <v-card outlined rounded="xl" class="px-2 pa-1 mr-2 d-flex flex-column">
+        <div class="text-caption grey--text">Platform</div>
+
+        <v-chip-group
+          v-model="selectedPlatform"
+          active-class="primary--text"
+          @change="fetchChats(false)"
+          row
+        >
+          <v-chip small outlined value="">All</v-chip>
+
+          <v-chip small outlined color="green" value="whatsapp">
+            <v-icon x-small left>mdi-whatsapp</v-icon>
+            WhatsApp
+          </v-chip>
+
+          <v-chip small outlined color="blue" value="webchat">
+            <v-icon x-small left>mdi-web</v-icon>
+            Other
+          </v-chip>
+        </v-chip-group>
+      </v-card>
     </div>
 
     <v-row>
       <!-- Chat List -->
       <v-col cols="12" md="5" class="mt-0">
         <v-card
+          ref="chatScroll"
           elevation="0"
           outlined
           class="rounded-xl px-4"
@@ -40,17 +72,40 @@
               >
                 <v-row align="center" class="pa-4" no-gutters>
                   <v-col cols="auto" class="mr-3">
-                    <v-avatar
-                      :color="
-                        selectedChatId === chat.chatId
-                          ? '#cde6ff'
-                          : 'grey lighten-3'
-                      "
-                      size="44"
-                      rounded="xl"
-                    >
-                      <v-icon color="black">mdi-account-circle</v-icon>
-                    </v-avatar>
+                    <div style="position: relative; display: inline-block">
+                      <!-- Main Avatar -->
+                      <v-avatar
+                        size="44"
+                        rounded="xl"
+                        :color="
+                          selectedChatId === chat.chatId
+                            ? '#cde6ff'
+                            : 'grey lighten-3'
+                        "
+                      >
+                        <v-icon color="black">mdi-account-circle</v-icon>
+                      </v-avatar>
+
+                      <!-- Platform Badge -->
+                      <v-avatar
+                        size="16"
+                        :color="chat.platform === 'whatsapp' ? 'green' : 'blue'"
+                        style="
+                          position: absolute;
+                          bottom: -2px;
+                          right: -2px;
+                          border: 2px solid white;
+                        "
+                      >
+                        <v-icon size="10" color="white">
+                          {{
+                            chat.platform === "whatsapp"
+                              ? "mdi-whatsapp"
+                              : "mdi-web"
+                          }}
+                        </v-icon>
+                      </v-avatar>
+                    </div>
                   </v-col>
 
                   <v-col>
@@ -78,18 +133,9 @@
               <div class="grey--text mt-2">No conversations found</div>
             </div>
           </div>
-          <div class="text-center py-4" v-if="hasMore && chats.length">
-            <v-btn
-              outlined
-              color="primary"
-              @click="loadMoreChats"
-              :loading="loadingMore"
-              :disabled="loadingMore"
-            >
-              Load More
-            </v-btn>
+          <div v-if="loadingMore" class="text-center py-2">
+            <v-progress-circular indeterminate size="20" color="primary" />
           </div>
-
           <div
             v-if="!hasMore && chats.length"
             class="text-center grey--text py-2"
@@ -162,10 +208,30 @@ export default {
     limit: 10,
     total: 0,
     hasMore: true,
+    selectedPlatform: "",
+    loadingMore: false,
   }),
 
   created() {
     this.fetchChats();
+  },
+
+  mounted() {
+    this.$nextTick(() => {
+      const container = this.$refs.chatScroll?.$el; // ✅ FIX
+
+      if (container) {
+        container.addEventListener("scroll", this.handleScroll);
+      }
+    });
+  },
+
+  beforeDestroy() {
+    const container = this.$refs.chatScroll?.$el; // ✅ FIX
+
+    if (container) {
+      container.removeEventListener("scroll", this.handleScroll);
+    }
   },
 
   methods: {
@@ -185,6 +251,11 @@ export default {
 
         if (this.selectedTicketStatus) {
           url += `&ticketStatus=${this.selectedTicketStatus}`;
+        }
+
+        // ✅ platform filter
+        if (this.selectedPlatform) {
+          url += `&platform=${this.selectedPlatform}`;
         }
 
         const { data } = await apiClient.get(url);
@@ -222,6 +293,21 @@ export default {
       this.fetchChats(true);
     },
 
+    handleScroll() {
+      const container = this.$refs.chatScroll?.$el; // ✅ FIX
+
+      if (!container || this.loading || this.loadingMore || !this.hasMore)
+        return;
+
+      const threshold = 100;
+
+      if (
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - threshold
+      ) {
+        this.fetchChats(true);
+      }
+    },
     viewChat(chat) {
       // this.$router.push("/dashboard/chat/" + chat.chatId);
       this.selectedChatId = chat.chatId;

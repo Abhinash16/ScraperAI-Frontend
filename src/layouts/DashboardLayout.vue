@@ -261,6 +261,11 @@ export default {
         icon: "mdi-database-search-outline",
       },
       {
+        name: "Content Chunks",
+        link: "/dashboard/content-chunks",
+        icon: "mdi-text-box-multiple-outline",
+      },
+      {
         name: "Call Analysis",
         link: "/dashboard/call-batches",
         icon: "mdi-phone-outline",

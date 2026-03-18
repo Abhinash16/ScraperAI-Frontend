@@ -127,6 +127,11 @@ const routes = [
         component: () =>
           import("../screens/dashboard/knowledgeGap/KnowledgeGapView.vue"),
       },
+      {
+        path: "content-chunks",
+        name: "ContentChunksList",
+        component: () => import("../screens/dashboard/ContentChunksList.vue"),
+      },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },
