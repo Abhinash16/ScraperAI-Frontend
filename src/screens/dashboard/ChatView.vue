@@ -494,7 +494,7 @@ export default {
           this.socket.disconnect();
         }
 
-        this.socket = io("http://localhost:4000", {
+        this.socket = io("https://ai-api.on-track.in", {
           transports: ["websocket"],
         });
 
