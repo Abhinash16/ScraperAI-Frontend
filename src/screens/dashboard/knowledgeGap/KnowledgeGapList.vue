@@ -76,13 +76,6 @@
 
       <v-divider></v-divider>
 
-      <!-- EMPTY STATE -->
-      <div v-if="!loading && rows.length === 0" class="pa-10 text-center">
-        <v-icon large color="grey lighten-1"> mdi-brain </v-icon>
-
-        <div class="grey--text mt-3">No knowledge gaps found.</div>
-      </div>
-
       <!-- TABLE -->
       <v-data-table
         :headers="headers"
@@ -110,7 +103,15 @@
           <v-chip
             small
             outlined
-            :color="item.status === 'pending' ? 'warning' : 'success'"
+            :color="
+              item.status === 'pending'
+                ? 'warning'
+                : item.status === 'answered'
+                ? 'success'
+                : item.status === 'deferred'
+                ? 'grey'
+                : 'grey'
+            "
           >
             {{ item.status }}
           </v-chip>
@@ -125,15 +126,40 @@
 
         <!-- Actions -->
         <template v-slot:[`item.actions`]="{ item }">
-          <v-btn small rounded depressed color="primary" @click="openGap(item)">
-            View
-          </v-btn>
+          <div class="d-flex align-center">
+            <!-- Defer -->
+            <v-btn
+              small
+              rounded
+              outlined
+              color="warning"
+              class="mr-2"
+              :disabled="item.status === 'deferred'"
+              @click="openDeferDialog(item)"
+            >
+              Defer
+            </v-btn>
+
+            <!-- View -->
+            <v-btn
+              small
+              rounded
+              depressed
+              color="primary"
+              @click="openGap(item)"
+            >
+              View
+            </v-btn>
+          </div>
         </template>
 
         <!-- Empty -->
         <template v-slot:no-data>
-          <div class="pa-10 text-center grey--text">
-            No knowledge gaps found.
+          <!-- EMPTY STATE -->
+          <div v-if="!loading && rows.length === 0" class="pa-10 text-center">
+            <v-icon large color="grey lighten-1"> mdi-brain </v-icon>
+
+            <div class="grey--text mt-3">No knowledge gaps found.</div>
           </div>
         </template>
 
@@ -145,6 +171,50 @@
         </template>
       </v-data-table>
     </v-card>
+    <v-dialog v-model="deferDialog" max-width="420" persistent>
+      <v-card rounded="xl">
+        <v-card-title class="d-flex align-center">
+          <v-icon color="warning" class="mr-2">mdi-alert-outline</v-icon>
+          Confirm Action
+        </v-card-title>
+
+        <v-card-text class="text-body-2">
+          Are you sure you want to mark this knowledge gap as
+          <strong>Deferred</strong>?
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+
+          <v-btn text @click="deferDialog = false">Cancel</v-btn>
+
+          <v-btn
+            color="warning"
+            depressed
+            rounded
+            :loading="deferLoading"
+            @click="confirmDefer"
+          >
+            Yes, Defer
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="2000"
+      top
+      right
+    >
+      {{ snackbar.text }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="snackbar.show = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -170,10 +240,20 @@ export default {
       hasMore: false,
 
       options: {},
+      deferDialog: false,
+      deferLoading: false,
+      selectedGap: null,
+
+      snackbar: {
+        show: false,
+        text: "",
+        color: "success",
+      },
 
       statuses: [
         { text: "Pending", value: "pending" },
         { text: "Answered", value: "answered" },
+        { text: "Deferred", value: "deferred" },
       ],
 
       headers: [
@@ -233,6 +313,46 @@ export default {
       }
 
       this.loading = false;
+    },
+
+    openDeferDialog(item) {
+      this.selectedGap = item;
+      this.deferDialog = true;
+    },
+
+    async confirmDefer() {
+      if (!this.selectedGap) return;
+
+      this.deferLoading = true;
+
+      try {
+        await apiClient.put(
+          `/content/knowledge-gap/${this.selectedGap._id}/defer`,
+        );
+
+        // ✅ Update UI instantly
+        this.selectedGap.status = "deferred";
+
+        // ✅ Success Snackbar
+        this.snackbar = {
+          show: true,
+          text: "Knowledge gap marked as deferred",
+          color: "success",
+        };
+
+        this.deferDialog = false;
+      } catch (err) {
+        console.error(err);
+
+        // ❌ Error Snackbar
+        this.snackbar = {
+          show: true,
+          text: "Failed to defer knowledge gap",
+          color: "error",
+        };
+      } finally {
+        this.deferLoading = false;
+      }
     },
 
     resetFilters() {

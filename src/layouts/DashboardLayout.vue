@@ -248,7 +248,7 @@ export default {
       {
         name: "Scraped Pages",
         link: "/dashboard/scraped-pages",
-        icon: "mdi-database-search-outline",
+        icon: "mdi-file-document-outline",
       },
       {
         name: "DB Query Generator",
@@ -258,7 +258,7 @@ export default {
       {
         name: "Knowledge Gap",
         link: "/dashboard/knowledge-gap/",
-        icon: "mdi-database-search-outline",
+        icon: "mdi-lightbulb-on-outline",
       },
       {
         name: "Content Chunks",
