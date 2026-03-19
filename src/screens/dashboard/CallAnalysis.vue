@@ -22,55 +22,43 @@
 
       <!-- Batch Table -->
 
-      <v-simple-table>
-        <thead>
-          <tr>
-            <th>Batch Name</th>
-            <th>Total Calls</th>
-            <th>Average Quality Score</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th></th>
-          </tr>
-        </thead>
+      <v-data-table :headers="headers" :items="batches" :loading="loading">
+        <!-- Avg Score -->
+        <template v-slot:[`item.averageQualityScore`]="{ item }">
+          <span
+            :class="item.averageQualityScore >= 4 ? 'green--text' : 'red--text'"
+          >
+            {{ Math.round(item.averageQualityScore * 100) / 100 || "-" }}
+          </span>
+        </template>
 
-        <tbody>
-          <tr v-for="batch in batches" :key="batch._id">
-            <td>{{ batch.batchName }}</td>
+        <!-- Status -->
+        <template v-slot:[`item.status`]="{ item }">
+          <v-chip small outlined :color="statusColor(item.status)">
+            {{ item.status }}
+          </v-chip>
+        </template>
 
-            <td>{{ batch.totalCalls }}</td>
-            <td>
-              <span
-                :class="
-                  batch.averageQualityScore >= 4 ? 'green--text' : 'red--text'
-                "
-              >
-                {{ Math.round(batch.averageQualityScore * 100) / 100 || "-" }}
-              </span>
-            </td>
+        <!-- Created -->
+        <template v-slot:[`item.createdAt`]="{ item }">
+          <span class="text-caption">
+            {{ formatDate(item.createdAt) }}
+          </span>
+        </template>
 
-            <td>
-              <v-chip small outlined color="primary">
-                {{ batch.status }}
-              </v-chip>
-            </td>
-
-            <td>{{ formatDate(batch.createdAt) }}</td>
-
-            <td>
-              <v-btn
-                small
-                rounded
-                depressed
-                color="primary"
-                @click="$router.push(`/batch-analysis/${batch._id}`)"
-              >
-                View Calls
-              </v-btn>
-            </td>
-          </tr>
-        </tbody>
-      </v-simple-table>
+        <!-- Actions -->
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-btn
+            small
+            rounded
+            depressed
+            color="primary"
+            @click="$router.push(`/batch-analysis/${item._id}`)"
+          >
+            View Calls
+          </v-btn>
+        </template>
+      </v-data-table>
     </v-card>
 
     <!-- Upload Batch -->
@@ -299,6 +287,14 @@ export default {
 
       batchName: "",
       callsJson: "",
+      headers: [
+        { text: "Batch Name", value: "batchName" },
+        { text: "Total Calls", value: "totalCalls" },
+        { text: "Avg Score", value: "averageQualityScore" },
+        { text: "Status", value: "status" },
+        { text: "Created", value: "createdAt" },
+        { text: "Actions", value: "actions", sortable: false },
+      ],
       callHeaders: [
         { text: "Agent", value: "agentName" },
         { text: "Recording", value: "recordingUrl" },

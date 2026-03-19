@@ -61,18 +61,6 @@
             />
           </v-col>
 
-          <!-- Limit -->
-          <v-col cols="12" sm="6" md="2">
-            <v-select
-              v-model="limit"
-              :items="[10, 20, 50, 100]"
-              label="Limit"
-              outlined
-              dense
-              hide-details
-            />
-          </v-col>
-
           <!-- Buttons -->
           <v-col cols="12" sm="6" md="4">
             <div class="d-flex flex-wrap gap-2">
@@ -96,89 +84,66 @@
       </div>
 
       <!-- TABLE -->
-      <v-simple-table v-else>
-        <thead>
-          <tr>
-            <th>Question</th>
-            <th>Phone</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+      <v-data-table
+        :headers="headers"
+        :items="rows"
+        :loading="loading"
+        :options.sync="options"
+        :server-items-length="total"
+        :items-per-page="limit"
+        class="elevation-0"
+      >
+        <!-- Question -->
+        <template v-slot:[`item.question`]="{ item }">
+          <span class="font-weight-medium">
+            {{ item.question }}
+          </span>
+        </template>
 
-        <tbody>
-          <tr v-for="item in rows" :key="item._id">
-            <td class="font-weight-medium">
-              {{ item.question }}
-            </td>
+        <!-- Phone -->
+        <template v-slot:[`item.phone`]="{ item }">
+          {{ item.phone || "-" }}
+        </template>
 
-            <td>
-              {{ item.phone }}
-            </td>
+        <!-- Status -->
+        <template v-slot:[`item.status`]="{ item }">
+          <v-chip
+            small
+            outlined
+            :color="item.status === 'pending' ? 'warning' : 'success'"
+          >
+            {{ item.status }}
+          </v-chip>
+        </template>
 
-            <td>
-              <v-chip
-                small
-                outlined
-                :color="item.status === 'pending' ? 'warning' : 'success'"
-              >
-                {{ item.status }}
-              </v-chip>
-            </td>
+        <!-- Created -->
+        <template v-slot:[`item.createdAt`]="{ item }">
+          <span class="text-caption">
+            {{ formatDate(item.createdAt) }}
+          </span>
+        </template>
 
-            <td>
-              {{ formatDate(item.createdAt) }}
-            </td>
+        <!-- Actions -->
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-btn small rounded depressed color="primary" @click="openGap(item)">
+            View
+          </v-btn>
+        </template>
 
-            <td>
-              <v-btn
-                small
-                rounded
-                depressed
-                color="primary"
-                @click="openGap(item)"
-              >
-                View
-              </v-btn>
-            </td>
-          </tr>
-        </tbody>
-      </v-simple-table>
-
-      <v-divider></v-divider>
-
-      <!-- PAGINATION -->
-      <v-row class="pa-4">
-        <v-col cols="6">
-          <div class="grey--text text-caption">
-            Showing {{ rows.length }} of {{ total }}
+        <!-- Empty -->
+        <template v-slot:no-data>
+          <div class="pa-10 text-center grey--text">
+            No knowledge gaps found.
           </div>
-        </v-col>
+        </template>
 
-        <v-col cols="6" class="text-right">
-          <v-btn
-            small
-            rounded
-            depressed
-            :disabled="offset === 0"
-            @click="prevPage"
-          >
-            Prev
-          </v-btn>
-
-          <v-btn
-            small
-            rounded
-            depressed
-            class="ml-2"
-            :disabled="!hasMore"
-            @click="nextPage"
-          >
-            Next
-          </v-btn>
-        </v-col>
-      </v-row>
+        <!-- Custom Footer Text -->
+        <template v-slot:[`footer.page-text`]>
+          <div class="text-caption grey--text">
+            {{ pageStart }} - {{ pageEnd }} of {{ total }}
+          </div>
+        </template>
+      </v-data-table>
     </v-card>
   </div>
 </template>
@@ -204,6 +169,8 @@ export default {
 
       hasMore: false,
 
+      options: {},
+
       statuses: [
         { text: "Pending", value: "pending" },
         { text: "Answered", value: "answered" },
@@ -221,6 +188,27 @@ export default {
 
   mounted() {
     this.loadGaps();
+  },
+  computed: {
+    pageStart() {
+      return this.total === 0 ? 0 : this.offset + 1;
+    },
+    pageEnd() {
+      return Math.min(this.offset + this.rows.length, this.total);
+    },
+  },
+  watch: {
+    options: {
+      handler(val) {
+        if (!val.page || !val.itemsPerPage) return; // ✅ prevent early trigger
+
+        this.limit = val.itemsPerPage;
+        this.offset = (val.page - 1) * this.limit;
+
+        this.loadGaps();
+      },
+      deep: true,
+    },
   },
 
   methods: {
@@ -245,17 +233,6 @@ export default {
       }
 
       this.loading = false;
-    },
-
-    nextPage() {
-      this.offset += this.limit;
-      this.loadGaps();
-    },
-
-    prevPage() {
-      this.offset -= this.limit;
-      if (this.offset < 0) this.offset = 0;
-      this.loadGaps();
     },
 
     resetFilters() {

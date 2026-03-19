@@ -64,8 +64,9 @@
         :headers="headers"
         :items="chunks"
         :loading="loading"
+        :options.sync="options"
+        :server-items-length="total"
         :items-per-page="limit"
-        hide-default-footer
         class="elevation-0"
       >
         <template v-slot:item="{ item }">
@@ -111,32 +112,12 @@
         <template v-slot:no-data>
           <div class="pa-10 text-center grey--text">No data found</div>
         </template>
+        <template v-slot:[`footer.page-text`]>
+          <div class="text-caption grey--text">
+            Page {{ page }} of {{ totalPages }} • {{ total }} total
+          </div>
+        </template>
       </v-data-table>
-
-      <v-divider />
-
-      <!-- PAGINATION -->
-      <div class="d-flex justify-space-between align-center pa-4">
-        <div class="text-caption grey--text">
-          Page {{ page }} of {{ totalPages }} • {{ total }} total
-        </div>
-
-        <div>
-          <v-btn small text :disabled="page === 1" @click="prevPage">
-            Prev
-          </v-btn>
-
-          <v-btn
-            small
-            text
-            class="ml-2"
-            :disabled="page === totalPages"
-            @click="nextPage"
-          >
-            Next
-          </v-btn>
-        </div>
-      </div>
     </v-card>
 
     <!-- VIEW DIALOG -->
@@ -247,7 +228,7 @@ export default {
       selectedChunk: {},
 
       debouncedSearch: null,
-
+      options: {},
       headers: [
         { text: "Title", value: "title" },
         { text: "URL", value: "url" },
@@ -270,8 +251,13 @@ export default {
       this.fetchData();
     },
 
-    page() {
-      this.fetchData();
+    options: {
+      handler(val) {
+        this.page = val.page;
+        this.limit = val.itemsPerPage;
+        this.fetchData();
+      },
+      deep: true,
     },
   },
 
@@ -353,14 +339,6 @@ export default {
     viewChunk(chunk) {
       this.selectedChunk = chunk;
       this.viewDialog = true;
-    },
-
-    nextPage() {
-      if (this.page < this.totalPages) this.page++;
-    },
-
-    prevPage() {
-      if (this.page > 1) this.page--;
     },
 
     truncateContent(text) {
