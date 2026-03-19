@@ -10,9 +10,12 @@
       </h3>
       <v-spacer></v-spacer>
       <template v-if="step === 'edit'">
-        <v-btn text class="mr-2" @click="step = 'template'">
+        <v-btn text depressed rounded class="mr-2" @click="step = 'template'">
           Change Template
         </v-btn>
+        <v-btn depressed rounded class="mr-2" @click="blogPreview()"
+          >Preview</v-btn
+        >
         <v-btn
           color="primary"
           @click="savePost"
@@ -66,7 +69,7 @@
     <template v-else>
       <v-row>
         <!-- LEFT COLUMN: FORM -->
-        <v-col cols="12" md="7" class="pr-md-4">
+        <v-col cols="12" md="8" class="pr-md-4">
           <v-card outlined rounded="xl" class="pa-4">
             <v-form ref="form" v-model="valid">
               <!-- Title -->
@@ -334,79 +337,6 @@
             </v-form>
           </v-card>
         </v-col>
-
-        <!-- RIGHT COLUMN: LIVE PREVIEW -->
-        <v-col cols="12" md="5" class="pl-md-4">
-          <v-card outlined rounded="xl" class="pa-4" color="#EFF2FB">
-            <div class="d-flex align-center mb-3">
-              <v-icon left color="primary">mdi-eye</v-icon>
-              <span class="text-subtitle-2 font-weight-bold">Live Preview</span>
-            </div>
-            <v-divider class="mb-4"></v-divider>
-
-            <!-- Preview content -->
-            <div class="preview-content">
-              <!-- Title -->
-              <h1 class="text-h4 font-weight-bold mb-2">
-                {{ form.title || "Untitled" }}
-              </h1>
-
-              <!-- Subtitle -->
-              <h2
-                v-if="form.subtitle"
-                class="text-h6 grey--text text--darken-1 mb-3"
-              >
-                {{ form.subtitle }}
-              </h2>
-
-              <!-- Featured Image -->
-              <v-img
-                v-if="form.featured_image_url"
-                :src="form.featured_image_url"
-                max-height="200"
-                contain
-                class="mb-4"
-              ></v-img>
-
-              <!-- Metadata (date, categories, tags) -->
-              <div class="d-flex flex-wrap align-center mb-4">
-                <v-icon small left class="mr-1">mdi-calendar</v-icon>
-                <span class="text-caption mr-4">{{
-                  form.published_at || "Not set"
-                }}</span>
-
-                <v-icon small left class="mr-1">mdi-folder</v-icon>
-                <span class="text-caption mr-4">{{
-                  form.categories.join(", ") || "Uncategorized"
-                }}</span>
-
-                <v-icon small left class="mr-1">mdi-tag</v-icon>
-                <span class="text-caption">{{
-                  form.tags.join(", ") || "No tags"
-                }}</span>
-              </div>
-
-              <!-- Excerpt (if any) -->
-              <div v-if="form.excerpt" class="mb-4">
-                <v-divider class="mb-2"></v-divider>
-                <p class="text-body-2 font-italic grey--text">
-                  {{ form.excerpt }}
-                </p>
-                <v-divider class="mt-2"></v-divider>
-              </div>
-
-              <!-- Rendered Content (HTML from Quill) -->
-              <div class="mt-4">
-                <div
-                  v-if="form.content"
-                  class="ql-editor"
-                  v-html="form.content"
-                ></div>
-                <p v-else class="grey--text">No content yet.</p>
-              </div>
-            </div>
-          </v-card>
-        </v-col>
       </v-row>
     </template>
 
@@ -450,6 +380,105 @@
     <v-snackbar v-model="snackbar" color="success" timeout="2000">
       {{ snackbarText }}
     </v-snackbar>
+
+    <v-dialog
+      v-model="openblogPreviewDialog"
+      fullscreen
+      hide-overlay
+      transition="dialog-bottom-transition"
+    >
+      <v-card flat color="#EFF2FB">
+        <!-- HEADER -->
+        <v-toolbar flat color="white" dense>
+          <v-btn icon @click="openblogPreviewDialog = false">
+            <v-icon>mdi-arrow-left</v-icon>
+          </v-btn>
+
+          <v-toolbar-title class="font-weight-bold"> Preview </v-toolbar-title>
+
+          <v-spacer></v-spacer>
+        </v-toolbar>
+
+        <v-divider></v-divider>
+
+        <!-- CONTENT -->
+        <v-container>
+          <v-row justify="center">
+            <v-col cols="12" md="8" lg="7">
+              <!-- Blog Card -->
+              <v-card outlined rounded="xl" class="pa-6">
+                <!-- Title -->
+                <h1 class="text-h4 font-weight-bold mb-2">
+                  {{ form.title || "Untitled" }}
+                </h1>
+
+                <!-- Subtitle -->
+                <h2
+                  v-if="form.subtitle"
+                  class="text-subtitle-1 grey--text text--darken-1 mb-4"
+                >
+                  {{ form.subtitle }}
+                </h2>
+
+                <!-- Metadata -->
+                <div
+                  class="d-flex flex-wrap align-center text-caption grey--text mb-4"
+                >
+                  <div class="d-flex align-center mr-4 mb-2">
+                    <v-icon small class="mr-1">mdi-calendar</v-icon>
+                    {{ form.published_at || "Not set" }}
+                  </div>
+
+                  <div class="d-flex align-center mr-4 mb-2">
+                    <v-icon small class="mr-1">mdi-folder</v-icon>
+                    {{
+                      form.categories?.length
+                        ? form.categories.join(", ")
+                        : "Uncategorized"
+                    }}
+                  </div>
+
+                  <div class="d-flex align-center mb-2">
+                    <v-icon small class="mr-1">mdi-tag</v-icon>
+                    {{ form.tags?.length ? form.tags.join(", ") : "No tags" }}
+                  </div>
+                </div>
+
+                <!-- Featured Image -->
+                <v-img
+                  v-if="form.featured_image_url"
+                  :src="form.featured_image_url"
+                  aspect-ratio="16/9"
+                  class="mb-6 rounded-lg"
+                  cover
+                ></v-img>
+
+                <!-- Excerpt -->
+                <div v-if="form.excerpt" class="mb-6">
+                  <v-divider class="mb-3"></v-divider>
+                  <p class="text-body-2 font-italic grey--text text--darken-1">
+                    {{ form.excerpt }}
+                  </p>
+                  <v-divider class="mt-3"></v-divider>
+                </div>
+
+                <!-- Content -->
+                <div class="blog-content">
+                  <div
+                    v-if="form.content"
+                    class="ql-editor pa-0"
+                    v-html="form.content"
+                  ></div>
+                  <p v-else class="grey--text text-center py-6">
+                    No content yet.
+                  </p>
+                </div>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -559,6 +588,7 @@ export default {
       snackbarText: "",
       quill: null,
       quillRange: null,
+      openblogPreviewDialog: false,
     };
   },
 
@@ -698,6 +728,10 @@ export default {
       } finally {
         this.uploading = false;
       }
+    },
+
+    blogPreview() {
+      this.openblogPreviewDialog = true;
     },
   },
 };
