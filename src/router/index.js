@@ -132,6 +132,16 @@ const routes = [
         name: "ContentChunksList",
         component: () => import("../screens/dashboard/ContentChunksList.vue"),
       },
+      {
+        path: "/blog-list",
+        name: "Blog List",
+        component: () => import("../screens/dashboard/blogs/BlogLists.vue"),
+      },
+      {
+        path: "/blog-create",
+        name: "Blog Create",
+        component: () => import("../screens/dashboard/blogs/CreateBlog.vue"),
+      },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },

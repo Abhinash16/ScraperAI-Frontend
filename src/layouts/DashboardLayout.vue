@@ -14,9 +14,11 @@
             :key="index"
             text
             rounded
+            :to="link.path"
+            router
             class="text-capitalize font-weight-bold grey--text text--darken-2 px-6"
           >
-            {{ link }}
+            {{ link.name }}
           </v-btn>
         </div>
 
@@ -223,7 +225,12 @@ export default {
     mobileDrawer: false,
     activeNav: 0,
     logoutDialog: false,
-    links: ["Overview", "Documentation", "API Reference"],
+    links: [
+      { name: "Overview", path: "/" },
+      { name: "Documentation", path: "/docs" },
+      { name: "API Reference", path: "/api" },
+      { name: "Blog", path: "/blog-list" },
+    ],
     sideNavs: [
       {
         name: "Dashboard",
