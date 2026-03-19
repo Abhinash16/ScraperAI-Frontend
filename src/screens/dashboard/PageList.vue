@@ -60,92 +60,111 @@
         </div>
 
         <!-- Pages Table -->
-        <v-simple-table v-else>
-          <thead>
-            <tr>
-              <th>id</th>
-              <th>Title</th>
-              <th>Url</th>
-              <th>Status</th>
-              <th>Scraped At</th>
-              <th>TTL</th>
-            </tr>
-          </thead>
+        <v-data-table
+          :headers="headers"
+          :items="pages"
+          :loading="loading"
+          :items-per-page="10"
+          class="elevation-0"
+        >
+          <!-- ID -->
+          <template v-slot:[`item._id`]="{ item }">
+            <span class="text-caption">{{ item._id }}</span>
+          </template>
 
-          <tbody>
-            <tr v-for="page in pages" :key="page.url">
-              <td>{{ page._id }}</td>
-              <td>{{ page.title }}</td>
-              <td>
-                <a :href="page.url" target="_blank">{{ page.url }}</a>
-              </td>
-              <td>
-                <v-chip
-                  small
-                  :color="
-                    page.status === 'done'
-                      ? 'success'
-                      : page.status === 'error'
-                      ? 'error'
-                      : page.status === 'pending' || page.status === 'ongoing'
-                      ? 'warning'
-                      : 'grey'
-                  "
-                  outlined
-                >
-                  {{ page.status }}
-                </v-chip>
-              </td>
-              <td>
-                <!-- Action state -->
-                <div v-if="['pending', 'error'].includes(page.status)">
-                  <v-btn
-                    small
-                    rounded
-                    depressed
-                    color="primary"
-                    @click="scrapePage(page.url)"
-                  >
-                    {{ page.status === "error" ? "Retry" : "Scrape Now" }}
-                  </v-btn>
-                </div>
+          <!-- Title -->
+          <template v-slot:[`item.title`]="{ item }">
+            {{ item.title || "-" }}
+          </template>
 
-                <!-- Completed state -->
-                <div v-else-if="page.status === 'done'">
-                  {{ formatDate(page.createdAt) }}
-                </div>
+          <!-- URL -->
+          <template v-slot:[`item.url`]="{ item }">
+            <a
+              :href="item.url"
+              target="_blank"
+              class="text-truncate d-inline-block"
+              style="max-width: 250px"
+            >
+              {{ item.url }}
+            </a>
+          </template>
 
-                <!-- Ongoing -->
-                <div v-else class="text-caption grey--text">
-                  Scraping in progress…
-                </div>
-              </td>
-              <td>
-                <div class="d-flex">
-                  <v-text-field
-                    v-model.number="page.refreshInterval"
-                    type="number"
-                    label="seconds"
-                    dense
-                    hide-details
-                    style="min-width: 50px"
-                  ></v-text-field>
+          <!-- Status -->
+          <template v-slot:[`item.status`]="{ item }">
+            <v-chip
+              small
+              outlined
+              :color="
+                item.status === 'done'
+                  ? 'success'
+                  : item.status === 'error'
+                  ? 'error'
+                  : item.status === 'pending' || item.status === 'ongoing'
+                  ? 'warning'
+                  : 'grey'
+              "
+            >
+              {{ item.status }}
+            </v-chip>
+          </template>
 
-                  <v-btn
-                    small
-                    rounded
-                    color="primary"
-                    depressed
-                    class="ml-2"
-                    @click="updateRefreshInterval(page)"
-                  >
-                    Update
-                  </v-btn>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </v-simple-table>
+          <!-- Scraped At / Action -->
+          <template v-slot:[`item.createdAt`]="{ item }">
+            <!-- Pending/Error -->
+            <div v-if="['pending', 'error'].includes(item.status)">
+              <v-btn
+                small
+                rounded
+                depressed
+                color="primary"
+                @click="scrapePage(item.url)"
+              >
+                {{ item.status === "error" ? "Retry" : "Scrape Now" }}
+              </v-btn>
+            </div>
+
+            <!-- Done -->
+            <div v-else-if="item.status === 'done'">
+              {{ formatDate(item.createdAt) }}
+            </div>
+
+            <!-- Ongoing -->
+            <div v-else class="text-caption grey--text">
+              Scraping in progress…
+            </div>
+          </template>
+
+          <!-- TTL -->
+          <template v-slot:[`item.refreshInterval`]="{ item }">
+            <div class="d-flex align-center">
+              <v-text-field
+                v-model.number="item.refreshInterval"
+                type="number"
+                dense
+                hide-details
+                style="max-width: 120px"
+              />
+
+              <v-btn
+                small
+                rounded
+                color="primary"
+                depressed
+                class="ml-2"
+                @click="updateRefreshInterval(item)"
+              >
+                Update
+              </v-btn>
+            </div>
+          </template>
+
+          <!-- Empty -->
+          <template v-slot:no-data>
+            <div class="pa-10 text-center grey--text">
+              No pages found. Upload a sitemap or URL to begin.
+            </div>
+          </template>
+        </v-data-table>
       </div>
     </v-card>
 
@@ -426,6 +445,14 @@ export default {
 
       jsonFile: null,
       csvFile: null,
+      headers: [
+        { text: "ID", value: "_id" },
+        { text: "Title", value: "title" },
+        { text: "URL", value: "url" },
+        { text: "Status", value: "status" },
+        { text: "Scraped At / Action", value: "createdAt" },
+        { text: "TTL (sec)", value: "refreshInterval", sortable: false },
+      ],
     };
   },
   mounted() {
