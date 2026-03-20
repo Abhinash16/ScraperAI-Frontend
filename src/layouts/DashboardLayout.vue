@@ -229,7 +229,6 @@ export default {
       { name: "Overview", path: "/" },
       { name: "Documentation", path: "/docs" },
       { name: "API Reference", path: "/api" },
-      { name: "Blog", path: "/blog-list" },
     ],
     sideNavs: [
       {
@@ -286,6 +285,11 @@ export default {
         name: "Security",
         link: "/dashboard/security",
         icon: "mdi-shield-lock-outline",
+      },
+      {
+        name: "Blogs",
+        link: "/dashboard/blogs",
+        icon: "mdi-newspaper-variant-outline",
       },
     ],
   }),
