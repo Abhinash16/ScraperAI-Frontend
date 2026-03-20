@@ -133,19 +133,19 @@ const routes = [
         component: () => import("../screens/dashboard/ContentChunksList.vue"),
       },
       {
-        path: "/blog-list",
-        name: "blog-list",
+        path: "blogs",
+        name: "blogs",
         component: () => import("../screens/dashboard/blogs/BlogLists.vue"),
       },
       {
-        path: "/blog-create",
-        name: "blog-create",
-        component: () => import("../screens/dashboard/blogs/CreateBlog.vue"),
+        path: "blogs/create",
+        name: "create-blog",
+        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
       },
       {
-        path: "/edit-blog/:id",
+        path: "blogs/:id",
         name: "edit-blog",
-        component: () => import("../screens/dashboard/blogs/CreateBlog.vue"),
+        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
       },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
