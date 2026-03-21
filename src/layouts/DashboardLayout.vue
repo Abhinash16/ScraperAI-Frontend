@@ -285,6 +285,31 @@ export default {
         ],
       },
       {
+        section: "Business Insights",
+        items: [
+          {
+            name: "SEO Growth Report",
+            link: "/dashboard/seo-growth-report",
+            icon: "mdi-chart-line",
+          },
+          {
+            name: "Chatbot Knowledge Score",
+            link: "/dashboard/chatbot-knowledge-score",
+            icon: "mdi-robot-outline",
+          },
+          {
+            name: "Keyword Research",
+            link: "/dashboard/keyword-research",
+            icon: "mdi-magnify",
+          },
+          {
+            name: "Competitor Intelligence",
+            link: "/dashboard/competitor-intelligence",
+            icon: "mdi-account-search",
+          },
+        ],
+      },
+      {
         section: "Data",
         items: [
           {
