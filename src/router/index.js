@@ -147,6 +147,11 @@ const routes = [
         name: "edit-blog",
         component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
       },
+      {
+        path: "documentation",
+        name: "documentation",
+        component: () => import("../screens/dashboard/DocumentationPage.vue"),
+      },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },

@@ -227,7 +227,7 @@ export default {
     logoutDialog: false,
     links: [
       { name: "Overview", path: "/" },
-      { name: "Documentation", path: "/docs" },
+      { name: "Documentation", path: "/dashboard/documentation" },
       { name: "API Reference", path: "/api" },
     ],
     sideNavs: [
