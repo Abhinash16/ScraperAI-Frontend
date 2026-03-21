@@ -16,8 +16,22 @@
           </div>
         </div>
         <v-spacer></v-spacer>
-        <v-btn text class="text-capitalize font-weight-bold">Features</v-btn>
-        <v-btn text class="text-capitalize font-weight-bold mr-2"
+        <v-btn
+          text
+          class="text-capitalize font-weight-bold"
+          @click="scrollToSection('features')"
+          >Features</v-btn
+        >
+        <v-btn
+          text
+          class="text-capitalize font-weight-bold mr-2"
+          @click="scrollToSection('services')"
+          >Services</v-btn
+        >
+        <v-btn
+          text
+          class="text-capitalize font-weight-bold mr-2"
+          @click="scrollToSection('prices')"
           >Pricing</v-btn
         >
         <v-btn
@@ -69,8 +83,9 @@
               <v-btn
                 x-large
                 rounded
+                depressed
                 color="primary"
-                class="px-10 py-6 elevation-8 mr-4 text-capitalize font-weight-bold"
+                class="px-10 py-6 mr-4 text-capitalize font-weight-bold"
                 @click="redirectToSignup"
               >
                 Get Started Free
@@ -99,7 +114,7 @@
     </v-sheet>
 
     <div>
-      <v-container class="py-16">
+      <v-container class="py-16" id="features">
         <div class="text-center mb-16">
           <h2 class="text-h3 font-weight-black secondary--text mb-4">
             Built for Scale
@@ -113,27 +128,43 @@
         <v-row>
           <v-col v-for="(feature, i) in features" :key="i" cols="12" md="6">
             <v-card
+              hover
               flat
-              class="pa-8 h-100 feature-card border rounded-xl transition-swing elevation-1"
+              outlined
+              class="pa-6 h-100 rounded-xl transition-swing d-flex flex-column"
+              style="border: 1.5px solid #f0f0f0 !important"
             >
-              <v-avatar :color="feature.color + '15'" size="64" class="mb-6">
-                <v-icon :color="feature.color" size="32">{{
-                  feature.icon
-                }}</v-icon>
+              <v-avatar
+                :color="feature.color + '15'"
+                size="72"
+                class="rounded-lg"
+              >
+                <v-icon :color="feature.color" size="36">
+                  {{ feature.icon }}
+                </v-icon>
               </v-avatar>
-              <h3 class="text-h5 font-weight-bold mb-3 secondary--text">
+
+              <h3 class="text-h5 my-4 font-weight-black secondary--text">
                 {{ feature.title }}
               </h3>
-              <p class="grey--text text--darken-1 text-body1 mb-6">
+
+              <p
+                class="text-body-1 grey--text text--darken-2"
+                style="line-height: 1.7"
+              >
                 {{ feature.desc }}
               </p>
-              <div class="d-flex flex-wrap">
+
+              <v-spacer></v-spacer>
+
+              <div class="d-flex flex-wrap mt-auto">
                 <v-chip
                   v-for="tag in feature.tags"
                   :key="tag"
-                  x-small
-                  class="mr-2 mb-2 font-weight-bold grey--text text--darken-2"
-                  color="grey lighten-4"
+                  small
+                  class="mr-2 font-weight-bold"
+                  :color="feature.color + '12'"
+                  :text-color="feature.color"
                 >
                   {{ tag }}
                 </v-chip>
@@ -191,26 +222,50 @@
                   >
                 </div>
                 <v-timeline dense align-top>
+                  <!-- User -->
                   <v-timeline-item color="primary" small>
                     <v-card
                       color="rgba(255,255,255,0.05)"
                       class="pa-3 rounded-lg"
                     >
-                      <span class="text-body-2 white--text"
-                        >How do I setup the REST API?</span
-                      >
+                      <span class="text-body-2 white--text">
+                        How do I setup the REST API?
+                      </span>
                     </v-card>
                   </v-timeline-item>
+
+                  <!-- AI -->
                   <v-timeline-item color="success" small>
                     <v-card color="primary" class="pa-3 rounded-lg">
-                      <span class="text-body-2 white--text"
-                        >Just wrap your endpoint with our Bearer token. Check
-                        the
+                      <span class="text-body-2 white--text">
+                        Just wrap your endpoint with our Bearer token. Check the
                         <a href="#" class="white--text font-weight-black"
                           >/v1/auth</a
                         >
-                        docs I found on your sitemap!</span
-                      >
+                        docs.
+                      </span>
+                    </v-card>
+                  </v-timeline-item>
+
+                  <!-- User -->
+                  <v-timeline-item color="primary" small>
+                    <v-card
+                      color="rgba(255,255,255,0.05)"
+                      class="pa-3 rounded-lg"
+                    >
+                      <span class="text-body-2 white--text">
+                        Can I track API usage and analytics?
+                      </span>
+                    </v-card>
+                  </v-timeline-item>
+
+                  <!-- AI -->
+                  <v-timeline-item color="success" small>
+                    <v-card color="primary" class="pa-3 rounded-lg">
+                      <span class="text-body-2 white--text">
+                        Yes You get real-time insights like requests, latency,
+                        and errors in the dashboard.
+                      </span>
                     </v-card>
                   </v-timeline-item>
                 </v-timeline>
@@ -220,8 +275,204 @@
         </v-container>
       </v-sheet>
 
+      <v-container class="py-16" id="services">
+        <div class="text-center mb-16">
+          <h2 class="text-h3 font-weight-black secondary--text mb-4">
+            Integrated Intelligence Services
+          </h2>
+          <p class="text-h6 grey--text mx-auto" style="max-width: 700px">
+            Explore our specialized BI solutions designed for modern
+            enterprises.
+          </p>
+        </div>
+
+        <v-row>
+          <v-col v-for="(service, i) in services" :key="i" cols="12" md="3">
+            <v-card
+              hover
+              flat
+              outlined
+              class="pa-6 h-100 rounded-xl transition-swing d-flex flex-column"
+              style="border: 1.5px solid #f0f0f0 !important"
+            >
+              <v-avatar
+                :color="service.color + '15'"
+                size="72"
+                class="rounded-lg"
+              >
+                <v-icon :color="service.color" size="36">
+                  {{ service.icon }}
+                </v-icon>
+              </v-avatar>
+
+              <h3 class="text-h5 my-4 font-weight-black secondary--text">
+                {{ service.title }}
+              </h3>
+
+              <p
+                class="text-body-1 grey--text text--darken-2"
+                style="line-height: 1.7"
+              >
+                {{ service.desc }}
+              </p>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+
+      <v-sheet color="secondary" class="py-16 mt-10 overflow-hidden" dark>
+        <v-container>
+          <v-row align="center">
+            <v-col cols="12" md="5">
+              <h2 class="text-h3 font-weight-black mb-6">
+                Analytics that drive growth.
+              </h2>
+              <p class="text-h6 mb-8 opacity-70 font-weight-regular">
+                Don't just chat—understand. Our dashboard tracks user intent,
+                resolution rates, and knowledge gaps so you can optimize your
+                documentation in real-time.
+              </p>
+              <v-list color="transparent" dense>
+                <v-list-item
+                  v-for="item in [
+                    'Real-time Sentiment Analysis',
+                    'Automated Intent Tagging',
+                    'Resolution Rate Tracking',
+                  ]"
+                  :key="item"
+                  class="px-0"
+                >
+                  <v-list-item-icon class="mr-3">
+                    <v-icon color="primary lighten-2"
+                      >mdi-chart-timeline-variant</v-icon
+                    >
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title class="font-weight-bold">{{
+                      item
+                    }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+            </v-col>
+
+            <v-col cols="12" md="7">
+              <v-card
+                color="#1e293b"
+                class="rounded-xl pa-6 border-chat elevation-20"
+              >
+                <div class="d-flex align-center mb-6">
+                  <div class="chat-dot red mr-2"></div>
+                  <div class="chat-dot yellow mr-2"></div>
+                  <div class="chat-dot green"></div>
+                  <v-spacer></v-spacer>
+                  <v-chip x-small color="success" class="font-weight-black"
+                    >AI ANALYTICS LIVE</v-chip
+                  >
+                </div>
+
+                <v-row>
+                  <v-col cols="12" sm="6">
+                    <div
+                      class="pa-4 rounded-lg mb-4"
+                      style="background: rgba(255, 255, 255, 0.05)"
+                    >
+                      <div class="text-caption grey--text text--lighten-1 mb-1">
+                        USER SATISFACTION
+                      </div>
+                      <div class="text-h4 font-weight-black">98.2%</div>
+                      <v-progress-linear
+                        color="success"
+                        value="98"
+                        class="mt-2"
+                        rounded
+                        height="6"
+                      ></v-progress-linear>
+                    </div>
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <div
+                      class="pa-4 rounded-lg mb-4"
+                      style="background: rgba(255, 255, 255, 0.05)"
+                    >
+                      <div class="text-caption grey--text text--lighten-1 mb-1">
+                        AVG. RESPONSE TIME
+                      </div>
+                      <div class="text-h4 font-weight-black">1.2s</div>
+                      <v-progress-linear
+                        color="primary"
+                        value="30"
+                        class="mt-2"
+                        rounded
+                        height="6"
+                      ></v-progress-linear>
+                    </div>
+                  </v-col>
+                </v-row>
+
+                <v-card
+                  color="rgba(255,255,255,0.03)"
+                  class="pa-4 rounded-lg border-1"
+                >
+                  <div class="text-subtitle-2 mb-4 font-weight-bold">
+                    Top Trending Topics
+                  </div>
+
+                  <div
+                    v-for="(topic, i) in [
+                      {
+                        name: 'API Authentication',
+                        count: '450 hits',
+                        color: 'blue',
+                      },
+                      {
+                        name: 'Pricing Plans',
+                        count: '312 hits',
+                        color: 'purple',
+                      },
+                      {
+                        name: 'React Integration',
+                        count: '289 hits',
+                        color: 'cyan',
+                      },
+                    ]"
+                    :key="i"
+                    class="d-flex align-center mb-3"
+                  >
+                    <v-icon :color="topic.color" small class="mr-3"
+                      >mdi-circle-medium</v-icon
+                    >
+                    <span class="text-body-2">{{ topic.name }}</span>
+                    <v-spacer></v-spacer>
+                    <span class="text-caption opacity-60">{{
+                      topic.count
+                    }}</span>
+                  </div>
+                </v-card>
+
+                <div
+                  class="mt-6 d-flex align-end justify-space-between"
+                  style="height: 60px"
+                >
+                  <div
+                    v-for="n in 12"
+                    :key="n"
+                    :style="{
+                      height: Math.floor(Math.random() * 100) + '%',
+                      width: '6%',
+                      background: 'rgba(255,255,255,0.1)',
+                      borderRadius: '4px 4px 0 0',
+                    }"
+                  ></div>
+                </div>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-sheet>
+
       <!-- Roadmap Section -->
-      <v-sheet color="grey lighten-5" class="py-20 mt-4">
+      <v-sheet color="grey lighten-5" class="py-16 mt-10 overflow-hidden">
         <v-container>
           <v-row justify="center" class="mb-12">
             <v-col cols="12" class="text-center">
@@ -239,26 +490,48 @@
             <v-col cols="12" md="8">
               <v-row class="mb-8">
                 <v-col cols="12" sm="6">
-                  <v-card flat class="elevation-1 pa-8">
-                    <v-avatar size="60" color="primary lighten-5" class="mb-6">
-                      <v-icon size="32" color="primary">mdi-copilot</v-icon>
+                  <v-card
+                    hover
+                    flat
+                    outlined
+                    class="pa-6 h-100 rounded-xl transition-swing d-flex flex-column"
+                  >
+                    <v-avatar color="#EEF4FC" size="72" class="rounded-lg">
+                      <v-icon color="primary" size="36">mdi-chat</v-icon>
                     </v-avatar>
-                    <h3 class="text-h6 font-weight-bold mb-3">AI Copilot</h3>
-                    <p class="grey--text text--darken-1 text-body2">
+
+                    <h3 class="text-h5 my-4 font-weight-black secondary--text">
+                      AI Copilot
+                    </h3>
+
+                    <p
+                      class="text-body-1 grey--text text--darken-2"
+                      style="line-height: 1.7"
+                    >
                       Smart assistant for your support team. Real-time
                       suggestions and automated responses with human oversight.
                     </p>
                   </v-card>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-card flat class="elevation-1 pa-8">
-                    <v-avatar size="60" color="primary lighten-5" class="mb-6">
-                      <v-icon size="32" color="primary">mdi-chart-line</v-icon>
+                  <v-card
+                    hover
+                    flat
+                    outlined
+                    class="pa-6 h-100 rounded-xl transition-swing d-flex flex-column"
+                  >
+                    <v-avatar color="#F1F7F0" size="72" class="rounded-lg">
+                      <v-icon color="green" size="36">mdi-chart-line</v-icon>
                     </v-avatar>
-                    <h3 class="text-h6 font-weight-bold mb-3">
+
+                    <h3 class="text-h5 my-4 font-weight-black secondary--text">
                       Data Analytics
                     </h3>
-                    <p class="grey--text text--darken-1 text-body2">
+
+                    <p
+                      class="text-body-1 grey--text text--darken-2"
+                      style="line-height: 1.7"
+                    >
                       Deep insights into customer behavior, satisfaction trends,
                       and support performance metrics.
                     </p>
@@ -270,38 +543,177 @@
         </v-container>
       </v-sheet>
 
-      <v-sheet color="secondary" dark class="py-16">
+      <v-sheet
+        color="secondary"
+        dark
+        class="py-16 mt-10 overflow-hidden"
+        id="prices"
+      >
         <v-container>
-          <v-row>
-            <v-col
-              v-for="(service, i) in services"
-              :key="i"
-              cols="12"
-              sm="6"
-              md="3"
-              class="text-center"
-            >
-              <v-icon size="48" color="primary lighten-2" class="mb-4">
-                {{ service.icon }}
-              </v-icon>
-              <h4 class="text-uppercase font-weight-bold subtitle-1 mb-2">
-                {{ service.title }}
-              </h4>
-              <v-divider
+          <div class="text-center mb-16">
+            <h2 class="text-h3 font-weight-black mb-4">
+              Simple, transparent pricing
+            </h2>
+            <p class="text-h6 opacity-70 font-weight-regular">
+              Flexible plans designed for the Indian tech ecosystem.
+            </p>
+          </div>
+
+          <v-row align="center" justify="center">
+            <v-col cols="12" md="4">
+              <v-card
+                color="#1e293b"
+                class="rounded-xl pa-8 border-pricing elevation-10 text-center"
+              >
+                <div class="text-overline font-weight-bold mb-2 primary--text">
+                  STARTER
+                </div>
+                <div class="text-h3 font-weight-black mb-1">₹0</div>
+                <div class="text-caption opacity-60 mb-6">
+                  Free forever for developers
+                </div>
+
+                <v-divider class="mb-6 opacity-20"></v-divider>
+
+                <v-list color="transparent" dense class="text-left mb-8">
+                  <v-list-item
+                    v-for="feat in [
+                      '1,000 messages/mo',
+                      '1 Data Source',
+                      'Community Support',
+                    ]"
+                    :key="feat"
+                    class="px-0"
+                  >
+                    <v-icon color="success" class="mr-3" small
+                      >mdi-check</v-icon
+                    >
+                    <span class="text-body-2">{{ feat }}</span>
+                  </v-list-item>
+                </v-list>
+
+                <v-btn
+                  block
+                  x-large
+                  rounded
+                  depressed
+                  outlined
+                  color="primary"
+                  class="font-weight-bold"
+                >
+                  Get Started
+                </v-btn>
+              </v-card>
+            </v-col>
+
+            <v-col cols="12" md="4">
+              <v-card
                 color="primary"
-                class="mx-auto mb-4"
-                style="max-width: 30px"
-              ></v-divider>
-              <p class="body-2 grey--text text--lighten-1 px-4">
-                {{ service.desc }}
-              </p>
+                class="rounded-xl pa-10 elevation-24 text-center transform-scale-105"
+                style="z-index: 2"
+              >
+                <v-chip
+                  small
+                  color="white"
+                  class="primary--text font-weight-black mb-4"
+                  >BEST VALUE</v-chip
+                >
+                <div class="text-overline font-weight-bold mb-2 white--text">
+                  PRO
+                </div>
+                <div class="text-h3 font-weight-black mb-1 white--text">
+                  ₹6,999
+                </div>
+                <div class="text-caption white--text opacity-80 mb-6">
+                  Per month, billed yearly
+                </div>
+
+                <v-divider
+                  class="mb-6"
+                  style="background: rgba(255, 255, 255, 0.2)"
+                ></v-divider>
+
+                <v-list color="transparent" dense class="text-left mb-8">
+                  <v-list-item
+                    v-for="feat in [
+                      'Unlimited messages',
+                      'Priority RAG Pipeline',
+                      'GST Invoicing',
+                      'Custom Branding',
+                    ]"
+                    :key="feat"
+                    class="px-0"
+                  >
+                    <v-icon color="white" class="mr-3" small>mdi-check</v-icon>
+                    <span class="text-body-2 white--text">{{ feat }}</span>
+                  </v-list-item>
+                </v-list>
+
+                <v-btn
+                  block
+                  x-large
+                  rounded
+                  depressed
+                  color="white"
+                  class="primary--text font-weight-black"
+                >
+                  Start 14-Day Trial
+                </v-btn>
+              </v-card>
+            </v-col>
+
+            <v-col cols="12" md="4">
+              <v-card
+                color="#1e293b"
+                class="rounded-xl pa-8 border-pricing elevation-10 text-center"
+              >
+                <div class="text-overline font-weight-bold mb-2 primary--text">
+                  ENTERPRISE
+                </div>
+                <div class="text-h3 font-weight-black mb-1">Custom</div>
+                <div class="text-caption opacity-60 mb-6">
+                  For high-scale organizations
+                </div>
+
+                <v-divider class="mb-6 opacity-20"></v-divider>
+
+                <v-list color="transparent" dense class="text-left mb-8">
+                  <v-list-item
+                    v-for="feat in [
+                      'On-premise Deployment',
+                      'Dedicated Account Manager',
+                      'SLA Guarantee',
+                      '24/7 Phone Support',
+                    ]"
+                    :key="feat"
+                    class="px-0"
+                  >
+                    <v-icon color="success" class="mr-3" small
+                      >mdi-check</v-icon
+                    >
+                    <span class="text-body-2">{{ feat }}</span>
+                  </v-list-item>
+                </v-list>
+
+                <v-btn
+                  block
+                  x-large
+                  outlined
+                  rounded
+                  depressed
+                  color="primary"
+                  class="font-weight-bold"
+                >
+                  Contact Sales
+                </v-btn>
+              </v-card>
             </v-col>
           </v-row>
         </v-container>
       </v-sheet>
 
       <v-container class="py-16 text-center">
-        <v-card color="primary" dark class="pa-12 rounded-xl elevation-12">
+        <v-card color="primary" dark class="pa-12 rounded-xl elevation-0">
           <h2 class="text-h3 font-weight-bold mb-6">
             Ready to automate your support?
           </h2>
@@ -311,6 +723,7 @@
           <v-btn
             x-large
             light
+            depressed
             rounded
             class="px-12 font-weight-bold"
             @click="redirectToSignup"
@@ -327,7 +740,7 @@
           <v-col cols="12" md="4" class="mb-6">
             <v-img
               src="../../assets/13.png"
-              max-width="120"
+              max-width="42"
               class="mb-4 rounded-lg"
             ></v-img>
             <p class="grey--text pr-md-12">
@@ -456,26 +869,32 @@ export default {
         tags: ["GDPR Ready", "SOC 2", "Data Privacy"],
       },
     ],
+
     services: [
       {
-        icon: "mdi-keyboard-outline",
-        title: "Trendy Design",
-        desc: "Sleek, modern interfaces that blend seamlessly with your existing brand identity.",
+        icon: "mdi-chart-box",
+        color: "#43A047",
+        title: "Data Visualization",
+        desc: "Beautiful, interactive dashboards that tell a story with your data.",
       },
       {
-        icon: "mdi-camera-outline",
-        title: "Visual Assets",
-        desc: "Automated image processing for products mentioned within the chat flow.",
+        icon: "mdi-robot",
+
+        color: "#1976D2",
+        title: "Chat Assistant",
+        desc: "Ask questions in plain English and get instant visual answers.",
       },
       {
-        icon: "mdi-pencil-outline",
-        title: "Brand Making",
-        desc: "Customizable tones and styles to ensure the AI speaks your company's language.",
+        icon: "mdi-phone",
+        color: "#FB8C00",
+        title: "Call Analysis",
+        desc: "Extract business intelligence from customer conversations.",
       },
       {
         icon: "mdi-puzzle-outline",
-        title: "24/7 Support",
-        desc: "Your support never sleeps. Answer queries instantly at any time of day.",
+        color: "#8E24AA",
+        title: "Embedded Analytics",
+        desc: "White‑label dashboards you can embed directly into your product.",
       },
     ],
   }),
@@ -489,6 +908,13 @@ export default {
   methods: {
     redirectToSignup() {
       this.$router.push(this.isLoggedIn ? "/dashboard" : "/login");
+    },
+
+    scrollToSection(sectionId) {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
     },
   },
 };

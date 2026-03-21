@@ -147,6 +147,11 @@ const routes = [
         name: "edit-blog",
         component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
       },
+      {
+        path: "whatsapp-bot",
+        name: "whatsapp-bot",
+        component: () => import("../screens/dashboard/WhatsappBot.vue"),
+      },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },
