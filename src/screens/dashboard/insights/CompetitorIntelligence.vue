@@ -34,11 +34,11 @@
 
           <!-- STRENGTHS -->
           <v-card class="pa-4 mb-4 green lighten-5 rounded-lg" elevation="0">
-            <div class="text-subtitle-2 success--text font-weight-bold mb-2">
+            <div class="text-subtitle-2 success--text font-weight-bold mb-3">
               Strengths
             </div>
 
-            <v-list dense>
+            <v-list dense class="rounded-lg">
               <v-list-item v-for="(s, i) in c.strengths" :key="i">
                 <v-list-item-icon>
                   <v-icon color="success"> mdi-trending-up </v-icon>
@@ -53,11 +53,11 @@
 
           <!-- WEAKNESSES -->
           <v-card class="pa-4 red lighten-5 rounded-lg" elevation="0">
-            <div class="text-subtitle-2 red--text font-weight-bold mb-2">
+            <div class="text-subtitle-2 red--text font-weight-bold mb-3">
               Weaknesses
             </div>
 
-            <v-list dense>
+            <v-list dense class="rounded-lg">
               <v-list-item v-for="(w, i) in c.weaknesses" :key="i">
                 <v-list-item-icon>
                   <v-icon color="red"> mdi-alert-circle </v-icon>
