@@ -44,12 +44,12 @@
             class="hover-card"
             @click="selectTemplate(template)"
           >
-            <v-img
+            <!-- <v-img
               v-if="template.preview"
               :src="template.preview"
               height="180"
               class="grey lighten-2"
-            />
+            /> -->
             <v-card-text>
               <p class="font-weight-bold text-body-1 mb-1">
                 {{ template.name }}
@@ -167,7 +167,7 @@
       overlay-color="#2c3e50"
       overlay-opacity="0.8"
     >
-      <v-card rounded="xl">
+      <v-card rounded="xl" :loading="loading">
         <!-- Header -->
         <v-card-title class="d-flex align-center pb-0">
           <v-avatar color="#eff2fb" rounded="xl" size="50" class="mr-4">
@@ -280,6 +280,7 @@ export default {
         tags: [],
         category: "",
       },
+      loading: false,
     };
   },
 
@@ -395,6 +396,7 @@ export default {
     },
 
     async publish(mode) {
+      this.loading = true;
       try {
         await apiClient.post(`/blogs/publish/${this.form.id}`, {
           publishMode: mode,
@@ -405,6 +407,8 @@ export default {
       } catch (error) {
         const errMsg = error.response?.data?.error;
         this.show(`Publish failed${errMsg ? `: ${errMsg}` : ""}`);
+      } finally {
+        this.loading = false;
       }
     },
 
