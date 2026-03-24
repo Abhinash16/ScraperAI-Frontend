@@ -121,7 +121,7 @@
         </div>
 
         <!-- IMPORTANT NOTE -->
-        <v-alert dense outlined type="info" class="mt-4">
+        <v-alert dense rounded="xl" outlined type="info" class="mt-4">
           Make sure your API key is active. If chatbot doesn't appear, check
           browser console.
         </v-alert>
@@ -178,7 +178,7 @@
           </v-timeline-item>
         </v-timeline>
 
-        <v-alert dense outlined type="success" class="mt-4">
+        <v-alert dense rounded="xl" outlined type="success" class="mt-4">
           Once configured, your chatbot can answer questions like:
           <br />
           "Show all users created last week"

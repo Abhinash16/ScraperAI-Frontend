@@ -277,6 +277,11 @@ export default {
         icon: "mdi-phone-outline",
       },
       {
+        name: "Chat Analytics",
+        link: "/dashboard/chat-analytics",
+        icon: "mdi-chart-line",
+      },
+      {
         name: "Integration",
         link: "/dashboard/integration",
         icon: "mdi-puzzle-outline",
