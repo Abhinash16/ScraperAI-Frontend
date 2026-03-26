@@ -1,17 +1,17 @@
 <template>
   <div>
     <!-- HEADER -->
-    <v-row>
+    <!-- <v-row>
       <v-col cols="12">
         <div class="text-h5 font-weight-bold">Chatbot Knowledge Score</div>
         <div class="grey--text">
           AI training readiness based on your website knowledge
         </div>
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <!-- LOADING -->
-    <v-row v-if="loading" class="mt-4">
+    <v-row v-if="loading" class="">
       <v-col cols="12">
         <v-card class="pa-6 rounded-xl" elevation="0">
           <v-skeleton-loader type="card, list-item, list-item" />
@@ -22,7 +22,7 @@
     <!-- REPORT -->
     <div v-if="report">
       <!-- TRAINING SCORE HERO -->
-      <v-row class="mt-4">
+      <v-row class="">
         <v-col cols="12">
           <v-card elevation="0" class="pa-6 rounded-xl purple lighten-5">
             <div class="text-overline deep-purple--text">

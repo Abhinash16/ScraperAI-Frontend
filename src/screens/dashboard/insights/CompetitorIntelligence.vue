@@ -1,15 +1,15 @@
 <template>
   <div>
     <!-- HEADER -->
-    <v-row>
+    <!-- <v-row>
       <v-col cols="12">
         <div class="text-h5 font-weight-bold">Competitor Intelligence</div>
         <div class="grey--text">AI analysis of your market competitors</div>
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <!-- LOADING -->
-    <v-row v-if="loading" class="mt-4">
+    <v-row v-if="loading" class="">
       <v-col cols="12">
         <v-card class="pa-6 rounded-xl" elevation="0">
           <v-skeleton-loader type="card, list-item, list-item" />
@@ -18,7 +18,7 @@
     </v-row>
 
     <!-- COMPETITOR CARDS -->
-    <v-row v-if="report" class="mt-4">
+    <v-row v-if="report" class="">
       <v-col v-for="c in report.competitors" :key="c.name" cols="12" md="6">
         <v-card class="pa-6 rounded-xl competitor-card" elevation="0">
           <!-- COMPETITOR HEADER -->
@@ -34,11 +34,11 @@
 
           <!-- STRENGTHS -->
           <v-card class="pa-4 mb-4 green lighten-5 rounded-lg" elevation="0">
-            <div class="text-subtitle-2 success--text font-weight-bold mb-2">
+            <div class="text-subtitle-2 success--text font-weight-bold mb-3">
               Strengths
             </div>
 
-            <v-list dense>
+            <v-list dense class="rounded-lg">
               <v-list-item v-for="(s, i) in c.strengths" :key="i">
                 <v-list-item-icon>
                   <v-icon color="success"> mdi-trending-up </v-icon>
@@ -53,11 +53,11 @@
 
           <!-- WEAKNESSES -->
           <v-card class="pa-4 red lighten-5 rounded-lg" elevation="0">
-            <div class="text-subtitle-2 red--text font-weight-bold mb-2">
+            <div class="text-subtitle-2 red--text font-weight-bold mb-3">
               Weaknesses
             </div>
 
-            <v-list dense>
+            <v-list dense class="rounded-lg">
               <v-list-item v-for="(w, i) in c.weaknesses" :key="i">
                 <v-list-item-icon>
                   <v-icon color="red"> mdi-alert-circle </v-icon>

@@ -1,17 +1,17 @@
 <template>
   <div>
     <!-- HEADER -->
-    <v-row>
+    <!-- <v-row>
       <v-col cols="12">
         <div class="text-h5 font-weight-bold">Keyword Research</div>
         <div class="grey--text">
           AI-powered keyword discovery and SEO opportunities
         </div>
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <!-- LOADING -->
-    <v-row v-if="loading" class="mt-4">
+    <v-row v-if="loading" class="">
       <v-col cols="12">
         <v-card class="pa-6 rounded-xl" elevation="0">
           <v-skeleton-loader
@@ -23,7 +23,7 @@
 
     <div v-if="report">
       <!-- KEYWORD OVERVIEW -->
-      <v-row class="mt-4">
+      <v-row class="">
         <v-col cols="12" md="4">
           <v-card
             class="pa-6 rounded-xl blue lighten-5 metric-card"

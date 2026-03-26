@@ -1,15 +1,15 @@
 <template>
   <div>
     <!-- PAGE HEADER -->
-    <v-row>
+    <!-- <v-row>
       <v-col cols="12">
         <div class="text-h5 font-weight-bold">Opportunity Analysis</div>
         <div class="grey--text">AI-powered market opportunity insights</div>
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <!-- LOADING -->
-    <v-row v-if="loading" class="mt-4">
+    <v-row v-if="loading" class="">
       <v-col cols="12">
         <v-card class="pa-6 rounded-xl" elevation="0">
           <v-skeleton-loader
@@ -22,7 +22,7 @@
     <!-- REPORT -->
     <div v-if="report">
       <!-- OPPORTUNITY SCORE -->
-      <v-row class="mt-4">
+      <v-row class="">
         <v-col cols="12">
           <v-card elevation="0" class="pa-6 rounded-xl blue lighten-5">
             <div class="text-overline primary--text">AI Opportunity Score</div>

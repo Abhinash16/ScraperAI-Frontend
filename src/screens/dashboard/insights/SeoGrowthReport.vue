@@ -1,17 +1,17 @@
 <template>
   <div>
     <!-- HEADER -->
-    <v-row>
+    <!-- <v-row>
       <v-col cols="12">
         <div class="text-h5 font-weight-bold">SEO Growth Report</div>
         <div class="grey--text">
           AI analysis of your website's search visibility
         </div>
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <!-- LOADING -->
-    <v-row v-if="loading" class="mt-4">
+    <v-row v-if="loading" class="">
       <v-col cols="12">
         <v-card class="pa-6 rounded-xl" elevation="0">
           <v-skeleton-loader
@@ -24,7 +24,7 @@
     <!-- REPORT -->
     <div v-if="report">
       <!-- SEO SCORE HERO -->
-      <v-row class="mt-4">
+      <v-row class="">
         <v-col cols="12">
           <v-card elevation="0" class="pa-6 rounded-xl green lighten-5">
             <div class="text-overline success--text">SEO Health Score</div>
