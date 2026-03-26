@@ -11,6 +11,7 @@
           ></v-tab
         >
         <v-tab tab-value="db-settings">Database </v-tab>
+        <v-tab tab-value="webhook">Webhook</v-tab>
       </v-tabs>
     </v-card>
 
@@ -377,6 +378,103 @@
       </v-card>
     </div>
 
+    <div v-if="currentTab == 'webhook'">
+      <v-card
+        class="pa-4 my-6"
+        rounded="xl"
+        outlined
+        color="#eff2fb"
+        max-width="800"
+      >
+        <!-- Header -->
+        <div class="d-flex align-center mb-6">
+          <v-avatar
+            height="50"
+            width="50"
+            rounded="xl"
+            color="#cde6ff"
+            class="d-flex align-center justify-center mr-4"
+          >
+            <v-icon large color="black">mdi-webhook</v-icon>
+          </v-avatar>
+
+          <div>
+            <h3 class="black--text">Webhook Settings</h3>
+            <div class="text-caption black--text">
+              Select and update webhook configuration
+            </div>
+          </div>
+        </div>
+
+        <!-- SELECT WEBHOOK -->
+        <v-select
+          v-model="selectedIntent"
+          :items="webhookOptions"
+          label="Select Webhook"
+          outlined
+          dense
+          @change="loadWebhookData"
+        />
+
+        <!-- FORM -->
+        <v-card outlined class="pa-4 mt-4" rounded="xl" v-if="selectedIntent">
+          <v-switch v-model="webhook.enabled" label="Enable Webhook" inset />
+
+          <v-text-field
+            v-model="webhook.url"
+            label="Webhook URL"
+            outlined
+            dense
+          />
+
+          <v-select
+            v-model="webhook.method"
+            :items="['POST', 'GET', 'PUT']"
+            label="Method"
+            outlined
+            dense
+          />
+
+          <v-textarea
+            v-model="webhook.headersText"
+            label="Headers (JSON)"
+            outlined
+            dense
+          />
+
+          <v-text-field
+            v-model="webhook.timeout"
+            label="Timeout"
+            type="number"
+            outlined
+            dense
+          />
+
+          <div>
+            <v-alert
+              type="info"
+              outlined
+              dense
+              rounded="xl"
+              class="mt-4 mb-0 d-inline-flex align-center"
+            >
+              After 3 attempts, your webhook will be disabled.
+            </v-alert>
+          </div>
+          <v-btn
+            color="primary"
+            class="mt-2"
+            rounded
+            :disabled="!webhook.url"
+            @click="updateWebhook"
+            :loading="loading"
+          >
+            Update Webhook
+          </v-btn>
+        </v-card>
+      </v-card>
+    </div>
+
     <v-dialog
       v-model="connectChatGptDialog"
       max-width="550"
@@ -473,7 +571,7 @@
             color="primary"
             @click="updateChatGptSettings"
             :loading="loading"
-            :disabled="!chatgptApiKey "
+            :disabled="!chatgptApiKey"
             depressed
             rounded
             class="text-none font-weight-bold"
@@ -628,8 +726,18 @@
       </v-card>
     </v-dialog>
 
-    <v-snackbar v-model="snackbar" color="success" timeout="2000">
+    <v-snackbar v-model="copySnackbar" color="success" timeout="2000">
       Code Copied!
+    </v-snackbar>
+
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      timeout="3000"
+      top
+      right
+    >
+      {{ snackbarText }}
     </v-snackbar>
   </div>
 </template>
@@ -662,8 +770,23 @@ export default {
       dbModels: ["Mongodb"],
       selectedDbModel: "Mongodb",
       connectDBDialog: false,
-      snackbar: false,
       deleteConfirmDialog: false,
+      selectedIntent: null,
+
+      webhookOptions: ["escalate", "upsell", "followup"],
+
+      webhook: {
+        enabled: true,
+        url: "",
+        method: "POST",
+        headersText: "",
+        timeout: 5000,
+      },
+
+      snackbar: false,
+      snackbarText: "",
+      snackbarColor: "success",
+      copySnackbar: false,
     };
   },
 
@@ -672,6 +795,11 @@ export default {
   },
 
   methods: {
+    showSnackbar(message, color = "success") {
+      this.snackbarText = message;
+      this.snackbarColor = color;
+      this.snackbar = true;
+    },
     removeDbUri() {
       this.deleteConfirmDialog = true;
     },
@@ -742,16 +870,78 @@ export default {
       }
     },
 
+    loadWebhookData() {
+      const webhookData =
+        this.currentLoggedInUser.webhooks?.[this.selectedIntent];
+
+      if (!webhookData) return;
+
+      this.webhook = {
+        enabled: webhookData.enabled ?? true,
+        url: webhookData.url || "",
+        method: webhookData.method || "POST",
+        headersText: JSON.stringify(webhookData.headers || {}, null, 2),
+        timeout: webhookData.timeout || 5000,
+      };
+    },
+
+    async updateWebhook() {
+      this.loading = true;
+
+      try {
+        let headers = {};
+
+        // ✅ Parse headers safely
+        if (this.webhook.headersText) {
+          try {
+            headers = JSON.parse(this.webhook.headersText);
+          } catch (e) {
+            this.showSnackbar("Invalid JSON in headers", "error");
+            return;
+          }
+        }
+
+        // ✅ Prevent enabling without URL
+        if (this.webhook.enabled && !this.webhook.url) {
+          this.showSnackbar("Please enter webhook URL first", "error");
+          return;
+        }
+
+        const payload = {
+          intent: this.selectedIntent,
+          url: this.webhook.url,
+          method: this.webhook.method,
+          headers, // ✅ FIXED (send parsed object)
+          timeout: Number(this.webhook.timeout),
+          enabled: this.webhook.enabled,
+        };
+
+        const { data } = await apiClient.put("/clients/webhook", payload);
+
+        this.showSnackbar(data.message || "Webhook updated");
+
+        // refresh user
+        this.currentLoggedInUserInfo();
+      } catch (err) {
+        this.showSnackbar(
+          err.response?.data?.message || "Webhook update failed",
+          "error",
+        );
+      } finally {
+        this.loading = false; // ✅ always runs
+      }
+    },
+
     copyCode() {
       const text = this.$refs.codeBlock.innerText;
       navigator.clipboard.writeText(text);
-      this.snackbar = true;
+      this.copySnackbar = true;
     },
 
     copyApiKey() {
       const key = this.currentLoggedInUser.apiKey;
       navigator.clipboard.writeText(key);
-      this.snackbar = true;
+      this.copySnackbar = true;
       this.snackbarText = "API Key copied!";
     },
 
@@ -763,7 +953,7 @@ export default {
       }">${closingTag}`;
 
       navigator.clipboard.writeText(text);
-      this.snackbar = true;
+      this.copySnackbar = true;
     },
 
     viewInstallationGuide() {
