@@ -152,6 +152,15 @@ const routes = [
         name: "whatsapp-bot",
         component: () => import("../screens/dashboard/WhatsappBot.vue"),
       },
+        path: "documentation",
+        name: "documentation",
+        component: () => import("../screens/dashboard/DocumentationPage.vue"),
+      },
+      {
+        path: "chat-analytics",
+        name: "Chat Analytics",
+        component: () => import("../screens/dashboard/AnalyticsDashboard.vue"),
+      },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },

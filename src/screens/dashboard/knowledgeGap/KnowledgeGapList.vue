@@ -64,7 +64,13 @@
           <!-- Buttons -->
           <v-col cols="12" sm="6" md="4">
             <div class="d-flex flex-wrap gap-2">
-              <v-btn color="primary" rounded depressed @click="loadGaps">
+              <v-btn
+                color="primary"
+                class="mr-2"
+                rounded
+                depressed
+                @click="loadGaps"
+              >
                 Apply
               </v-btn>
 

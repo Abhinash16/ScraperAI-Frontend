@@ -224,7 +224,7 @@ export default {
 
     links: [
       { name: "Overview", path: "/" },
-      { name: "Documentation", path: "/docs" },
+      { name: "Documentation", path: "/dashboard/documentation" },
       { name: "API Reference", path: "/api" },
     ],
 
@@ -262,6 +262,11 @@ export default {
             link: "/dashboard/opportunity-analysis",
             icon: "mdi-chart-line",
           },
+          {
+            name: "Chat Analytics",
+        link: "/dashboard/chat-analytics",
+        icon: "mdi-chart-line",
+          }
         ],
       },
       {
@@ -342,8 +347,16 @@ export default {
             link: "/dashboard/security",
             icon: "mdi-shield-lock-outline",
           },
-        ],
+          {
+        name: "Integration",
+        link: "/dashboard/integration",
+        icon: "mdi-puzzle-outline",
       },
+          
+        ],
+        
+      },
+      
       {
         section: "Other",
         items: [
