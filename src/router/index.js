@@ -152,6 +152,7 @@ const routes = [
         name: "whatsapp-bot",
         component: () => import("../screens/dashboard/WhatsappBot.vue"),
       },
+      {
         path: "documentation",
         name: "documentation",
         component: () => import("../screens/dashboard/DocumentationPage.vue"),
@@ -160,6 +161,30 @@ const routes = [
         path: "chat-analytics",
         name: "Chat Analytics",
         component: () => import("../screens/dashboard/AnalyticsDashboard.vue"),
+      },
+      {
+        path: "forms",
+        name: "FormsList",
+        component: () => import("../screens/dashboard/forms/FormList.vue"),
+      },
+
+      {
+        path: "forms/create",
+        name: "CreateForm",
+        component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
+      },
+
+      {
+        path: "forms/:id/edit",
+        name: "EditForm",
+        component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
+      },
+
+      {
+        path: "forms/:id/submissions",
+        name: "FormSubmissions",
+        component: () =>
+          import("../screens/dashboard/forms/FormSubmissions.vue"),
       },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication

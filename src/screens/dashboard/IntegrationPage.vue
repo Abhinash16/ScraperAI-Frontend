@@ -407,14 +407,16 @@
         </div>
 
         <!-- SELECT WEBHOOK -->
-        <v-select
-          v-model="selectedIntent"
-          :items="webhookOptions"
-          label="Select Webhook"
-          outlined
-          dense
-          @change="loadWebhookData"
-        />
+        <div>
+          <v-select
+            v-model="selectedIntent"
+            :items="webhookOptions"
+            label="Select Webhook"
+            outlined
+            dense
+            @change="loadWebhookData"
+          />
+        </div>
 
         <!-- FORM -->
         <v-card outlined class="pa-4 mt-4" rounded="xl" v-if="selectedIntent">
