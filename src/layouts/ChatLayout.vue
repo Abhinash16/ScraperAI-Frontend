@@ -19,10 +19,15 @@
             rounded
             :to="link.path"
             class="text-capitalize font-weight-bold grey--text text--darken-2 px-6"
+            exact
+            
           >
             {{ link.name }}
           </v-btn>
         </div>
+
+       
+
         <v-avatar
           @click="$router.push('/dashboard/profile')"
           size="36"
@@ -37,12 +42,70 @@
       </v-container>
     </v-app-bar>
 
-    
+    <!-- MOBILE DRAWER -->
+    <v-navigation-drawer v-model="mobileDrawer" app temporary right>
+      <v-list dense nav>
+        <div v-for="(group, gIndex) in sideNavs" :key="gIndex">
+          <!-- Clickable Section -->
+          <v-subheader
+            class="d-flex align-center justify-space-between text-uppercase font-weight-black grey--text text--darken-1 mt-4 mb-2"
+            style="font-size: 10px; letter-spacing: 1px; cursor: pointer"
+            @click="toggleSection(gIndex)"
+          >
+            {{ group.section }}
+
+            <v-icon small>
+              {{ openSections[gIndex] ? "mdi-chevron-up" : "mdi-chevron-down" }}
+            </v-icon>
+          </v-subheader>
+
+          <!-- Expandable Items -->
+          <v-expand-transition>
+            <div v-show="openSections[gIndex]">
+              <v-list-item-group color="primary">
+                <v-list-item
+                  v-for="(item, index) in group.items"
+                  :key="index"
+                  :to="item.link"
+                  exact
+                  active-class="primary--text font-weight-bold white"
+                  class="mb-2 rounded-lg"
+                >
+                  <v-list-item-icon class="mr-4">
+                    <v-icon small>{{ item.icon }}</v-icon>
+                  </v-list-item-icon>
+
+                  <v-list-item-content>
+                    <v-list-item-title class="body-2">
+                      {{ item.name }}
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list-item-group>
+            </div>
+          </v-expand-transition>
+        </div>
+
+        <v-divider class="my-4"></v-divider>
+
+        <v-list-item @click="logoutDialog = true">
+          <v-list-item-icon>
+            <v-icon color="error">mdi-logout</v-icon>
+          </v-list-item-icon>
+          <v-list-item-title class="error--text"> Logout </v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
     <!-- MAIN -->
     <v-container fluid>
-      <!-- ================= UNAUTHORIZED MESSAGE ================= -->
         <v-card min-height="85vh" flat class="rounded-xl pa-8">
+            <div class="d-flex align-center">
+              <h2 class="text-h5 font-weight-black secondary--text">
+                {{ currentRouteName }}
+              </h2>
+            </div>
+
             <router-view></router-view>
           </v-card>
     </v-container>
@@ -86,9 +149,9 @@ export default {
     openSections: { 0: true },
 
     links: [
-      { name: "Dashboard", path: "/dashboard" },
-      // { name: "Documentation", path: "/dashboard/documentation" },
-      // { name: "API Reference", path: "/api" },
+      { name: "Chat Home", path: "/dashboard/chat" },
+      { name: "Chat Insights", path: "/dashboard/chat/insights" },
+      { name: "API Reference", path: "/api" },
     ],
 
     sideNavs: [
@@ -96,8 +159,8 @@ export default {
         section: "Main Menu",
         items: [
           {
-            name: "Dashboard",
-            link: "/dashboard/",
+            name: "Chat Home",
+            link: "/dashboard/chat",
             icon: "mdi-view-dashboard-outline",
           },
           {

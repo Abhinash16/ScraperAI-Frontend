@@ -45,11 +45,11 @@
       height="70"
     >
       <v-container class="py-0 fill-height" fluid>
-        <v-avatar size="40" color="primary" tile class="mr-2 rounded-lg">
+        <v-avatar @click="$router.push('/dashboard')" size="40" color="primary" tile class="mr-2 rounded-lg">
           <v-img src="../assets/13.png"></v-img>
         </v-avatar>
 
-        <h3 class="font-weight-black secondary--text">scraperAI</h3>
+        <h3 @click="$router.push('/dashboard')" class="font-weight-black secondary--text">scraperAI</h3>
 
         <v-spacer></v-spacer>
 

@@ -17,10 +17,10 @@ const routes = [
     path: "/dashboard",
     component: () => import("../layouts/DashboardLayout.vue"),
     children: [
-      {
-        path: "/",
-        component: () => import("../screens/dashboard/CompanyInsights.vue"),
-      },
+      // {
+      //   path: "/",
+      //   component: () => import("../screens/dashboard/CompanyInsights.vue"),
+      // },
       {
         path: "/",
         component: () => import("../screens/dashboard/DasboardHome.vue"),
@@ -47,14 +47,7 @@ const routes = [
         component: () => import("../screens/dashboard/SecurityPage.vue"),
         meta: { hideTab: true },
       },
-      {
-        path: "chat",
-        component: () => import("../screens/dashboard/ChatList.vue"),
-      },
-      {
-        path: "chat/:chatId",
-        component: () => import("../screens/dashboard/ChatView.vue"),
-      },
+
       {
         path: "try-chat",
         component: () => import("../screens/dashboard/TryChat.vue"),
@@ -167,6 +160,26 @@ const routes = [
   },
 
   {
+    path: "/dashboard/chat",
+    component: () => import("../layouts/ChatLayout.vue"),
+    children: [
+      
+      {
+        path: "/",
+        component: () => import("../screens/dashboard/ChatList.vue"),
+      },
+      {
+        path: "insights",
+        component: () => import("../screens/dashboard/AnalyticsDashboard.vue"),
+      },
+      {
+        path: "/:chatId",
+        component: () => import("../screens/dashboard/ChatView.vue"),
+      },
+    ],
+  },
+
+  {
     path: "/dashboard/forms",
     component: () => import("../layouts/FormsDashboardLayout.vue"),
     meta: { requiresAuth: true },
@@ -195,23 +208,23 @@ const routes = [
     ],
   },
 
-  {
-    path: "/dashboard/forms/create",
-    name: "/dashboardCreateForm",
-    component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
-  },
+  // {
+  //   path: "/dashboard/forms/create",
+  //   name: "/dashboardCreateForm",
+  //   component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
+  // },
 
-  {
-    path: "/dashboard/forms/:id/edit",
-    name: "EditForm",
-    component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
-  },
+  // {
+  //   path: "/dashboard/forms/:id/edit",
+  //   name: "EditForm",
+  //   component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
+  // },
 
-  {
-    path: "/dashboard/forms/:id/submissions",
-    name: "FormSubmissions",
-    component: () => import("../screens/dashboard/forms/FormSubmissions.vue"),
-  },
+  // {
+  //   path: "/dashboard/forms/:id/submissions",
+  //   name: "FormSubmissions",
+  //   component: () => import("../screens/dashboard/forms/FormSubmissions.vue"),
+  // },
 ];
 
 const router = new VueRouter({
