@@ -1,10 +1,10 @@
 <template>
   <v-container class="pa-6">
     <!-- HEADER -->
-    <v-row class="mb-6 align-center">
+    <v-row class="align-center mb-4">
       <v-col>
         <h1 class="text-h5 font-weight-bold">Forms</h1>
-        <p class="text-subtitle-2 grey--text">
+        <p class="text-subtitle-2 grey--text mb-0">
           Manage and track all your forms
         </p>
       </v-col>
@@ -21,112 +21,137 @@
       </v-col>
     </v-row>
 
-    <!-- STATS -->
-    <v-card outlined rounded="xl" class="pa-4 mb-6">
-      <div class="d-flex justify-space-between align-center">
-        <div>
-          <div class="text-h6 font-weight-bold">Total Forms</div>
-          <div class="text-caption grey--text">
-            Overview of your created forms
+    <!-- LOADING -->
+    <v-row v-if="loading" justify="center" class="py-10">
+      <v-progress-circular indeterminate size="40" />
+    </v-row>
+
+    <!-- EMPTY STATE -->
+    <div v-else-if="!forms.length" class="text-center py-10 grey--text">
+      <v-icon size="40" class="mb-2">mdi-file-document-outline</v-icon>
+      <div>No forms created yet</div>
+    </div>
+
+    <!-- CARDS -->
+    <v-row v-else dense>
+      <v-col v-for="form in forms" :key="form._id" cols="12">
+        <v-card
+          class="pa-4 form-card"
+          outlined
+          rounded="xl"
+          elevation="0"
+          @click="viewSubmissions(form._id)"
+        >
+          <!-- Top -->
+          <div class="d-flex justify-space-between align-center">
+            <!-- LEFT -->
+            <div>
+              <div class="text-subtitle-1 font-weight-bold">
+                {{ form.name }}
+              </div>
+              <div class="text-caption grey--text">
+                {{ formatDate(form.createdAt) }}
+              </div>
+            </div>
+
+            <!-- RIGHT ACTIONS -->
+            <div class="d-flex">
+              <!-- EDIT -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn icon small v-on="on" @click.stop="editForm(form._id)">
+                    <v-icon small>mdi-pencil</v-icon>
+                  </v-btn>
+                </template>
+                <span>Edit</span>
+              </v-tooltip>
+
+              <!-- SHARE -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn icon small v-on="on" @click.stop="copyLink(form._id)">
+                    <v-icon small>mdi-link-variant</v-icon>
+                  </v-btn>
+                </template>
+                <span>Share Link</span>
+              </v-tooltip>
+
+              <!-- DELETE -->
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn icon small v-on="on" @click.stop="confirmDelete(form)">
+                    <v-icon small color="red">mdi-delete</v-icon>
+                  </v-btn>
+                </template>
+                <span>Delete</span>
+              </v-tooltip>
+            </div>
           </div>
-        </div>
+        </v-card>
+      </v-col>
+    </v-row>
 
-        <div class="text-h4 font-weight-bold primary--text">
-          {{ forms.length }}
-        </div>
-      </div>
-    </v-card>
-
-    <!-- TABLE -->
-    <v-card outlined rounded="xl">
-      <div class="pa-4">
-        <div class="text-h6 font-weight-bold">Form List</div>
-        <div class="text-caption grey--text">
-          View, edit, and manage your forms
-        </div>
-      </div>
-
-      <v-divider />
-
-      <!-- EMPTY STATE -->
-      <div
-        v-if="!forms.length && !loading"
-        class="text-center py-10 grey--text"
-      >
-        No forms created yet
-      </div>
-
-      <!-- TABLE -->
-      <v-data-table
-        v-else
-        :headers="headers"
-        :items="forms"
-        :loading="loading"
-        class="elevation-0"
-      >
-        <!-- NAME -->
-        <template v-slot:[`item.name`]="{ item }">
-          <div class="font-weight-medium">
-            {{ item.name }}
-          </div>
-        </template>
-
-        <!-- DATE -->
-        <template v-slot:[`item.createdAt`]="{ item }">
-          <span class="grey--text">
-            {{ formatDate(item.createdAt) }}
-          </span>
-        </template>
-
-        <!-- ACTIONS -->
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn icon small v-on="on" @click="editForm(item._id)">
-                <v-icon small>mdi-pencil</v-icon>
-              </v-btn>
-            </template>
-            <span>Edit</span>
-          </v-tooltip>
-
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn icon small v-on="on" @click="viewSubmissions(item._id)">
-                <v-icon small color="primary">mdi-eye</v-icon>
-              </v-btn>
-            </template>
-            <span>View Submissions</span>
-          </v-tooltip>
-
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn icon small v-on="on" @click="confirmDelete(item)">
-                <v-icon small color="red">mdi-delete</v-icon>
-              </v-btn>
-            </template>
-            <span>Delete</span>
-          </v-tooltip>
-        </template>
-      </v-data-table>
-    </v-card>
+    <!-- PAGINATION -->
+    <v-row v-if="pagination.totalPages > 1" class="mt-8" justify="center">
+      <v-pagination
+        v-model="pagination.page"
+        :length="pagination.totalPages"
+        circle
+        color="primary"
+        @input="fetchForms"
+      />
+    </v-row>
 
     <!-- DELETE CONFIRM -->
-    <v-dialog v-model="deleteDialog" max-width="400">
-      <v-card rounded="xl">
-        <div class="pa-4">
-          <div class="text-h6 font-weight-bold">Delete Form</div>
-          <div class="text-caption grey--text">
-            Are you sure you want to delete this form?
+    <v-dialog
+      v-model="deleteDialog"
+      max-width="350"
+      rounded="xl"
+      overlay-color="#2c3e50"
+      overlay-opacity="0.8"
+    >
+      <v-card class="text-center" rounded="xl">
+        <v-card-text>
+          <!-- Icon -->
+          <v-avatar color="error lighten-5" size="70" class="my-4">
+            <v-icon color="error" size="40"> mdi-delete-outline </v-icon>
+          </v-avatar>
+
+          <!-- Title -->
+          <div class="text-h6 font-weight-bold black--text mb-2">
+            Delete Form?
           </div>
-        </div>
 
-        <v-divider />
+          <!-- Description -->
+          <p class="text-body-2 grey--text text--darken-1">
+            This action will permanently delete the form and all its data. This
+            cannot be undone.
+          </p>
+        </v-card-text>
 
-        <div class="pa-4 d-flex justify-end">
-          <v-btn text @click="deleteDialog = false">Cancel</v-btn>
+        <!-- Actions -->
+        <v-card-actions class="justify-center pb-4">
+          <v-btn
+            @click="deleteDialog = false"
+            text
+            rounded
+            large
+            class="px-6 mr-2 text-none"
+          >
+            Cancel
+          </v-btn>
 
-          <v-btn color="red" @click="deleteForm"> Delete </v-btn>
-        </div>
+          <v-btn
+            @click="deleteForm"
+            color="error"
+            depressed
+            rounded
+            large
+            class="px-8 text-none font-weight-bold"
+          >
+            Yes, Delete
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-container>
@@ -144,11 +169,12 @@ export default {
       deleteDialog: false,
       selectedForm: null,
 
-      headers: [
-        { text: "Form Name", value: "name" },
-        { text: "Created", value: "createdAt" },
-        { text: "Actions", value: "actions", sortable: false },
-      ],
+      pagination: {
+        page: 1,
+        limit: 9, // Multiple of 3 looks best for grids
+        total: 0,
+        totalPages: 0,
+      },
     };
   },
 
@@ -160,8 +186,15 @@ export default {
     async fetchForms() {
       this.loading = true;
       try {
-        const { data } = await apiClient.get("/forms/outreach/forms");
+        const { data } = await apiClient.get("/forms/outreach/forms", {
+          params: {
+            page: this.pagination.page,
+            limit: this.pagination.limit,
+          },
+        });
+
         this.forms = data.data || [];
+        this.pagination = data.pagination || this.pagination;
       } catch (err) {
         console.error(err);
       } finally {
@@ -183,6 +216,10 @@ export default {
 
     viewSubmissions(id) {
       this.$router.push(`/dashboard/forms/${id}/submissions`);
+    },
+
+    copyLink(id) {
+      navigator.clipboard.writeText(`${window.location.origin}/form/${id}`);
     },
 
     confirmDelete(form) {

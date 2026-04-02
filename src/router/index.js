@@ -162,32 +162,55 @@ const routes = [
         name: "Chat Analytics",
         component: () => import("../screens/dashboard/AnalyticsDashboard.vue"),
       },
+    ],
+    meta: { requiresAuth: true }, // Indicate that this route requires authentication
+  },
+
+  {
+    path: "/dashboard/forms",
+    component: () => import("../layouts/FormsDashboardLayout.vue"),
+    meta: { requiresAuth: true },
+    children: [
       {
-        path: "forms",
+        path: "",
         name: "FormsList",
         component: () => import("../screens/dashboard/forms/FormList.vue"),
       },
-
       {
-        path: "forms/create",
+        path: "create",
         name: "CreateForm",
         component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
       },
-
       {
-        path: "forms/:id/edit",
+        path: ":id/edit",
         name: "EditForm",
         component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
       },
-
       {
-        path: "forms/:id/submissions",
+        path: ":id/submissions",
         name: "FormSubmissions",
         component: () =>
           import("../screens/dashboard/forms/FormSubmissions.vue"),
       },
     ],
-    meta: { requiresAuth: true }, // Indicate that this route requires authentication
+  },
+
+  {
+    path: "/dashboard/forms/create",
+    name: "/dashboardCreateForm",
+    component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
+  },
+
+  {
+    path: "/dashboard/forms/:id/edit",
+    name: "EditForm",
+    component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
+  },
+
+  {
+    path: "/dashboard/forms/:id/submissions",
+    name: "FormSubmissions",
+    component: () => import("../screens/dashboard/forms/FormSubmissions.vue"),
   },
 ];
 

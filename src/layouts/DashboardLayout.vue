@@ -264,9 +264,9 @@ export default {
           },
           {
             name: "Chat Analytics",
-        link: "/dashboard/chat-analytics",
-        icon: "mdi-chart-line",
-          }
+            link: "/dashboard/chat-analytics",
+            icon: "mdi-chart-line",
+          },
         ],
       },
       {
@@ -348,15 +348,13 @@ export default {
             icon: "mdi-shield-lock-outline",
           },
           {
-        name: "Integration",
-        link: "/dashboard/integration",
-        icon: "mdi-puzzle-outline",
-      },
-          
+            name: "Integration",
+            link: "/dashboard/integration",
+            icon: "mdi-puzzle-outline",
+          },
         ],
-        
       },
-      
+
       {
         section: "Other",
         items: [
@@ -364,6 +362,11 @@ export default {
             name: "Blogs",
             link: "/dashboard/blogs",
             icon: "mdi-newspaper-variant-outline",
+          },
+          {
+            name: "Forms",
+            link: "/dashboard/forms",
+            icon: "mdi-list-box-outline",
           },
         ],
       },

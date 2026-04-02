@@ -1,7 +1,7 @@
 <template>
   <v-container class="pa-6">
     <!-- HEADER -->
-    <v-row class="mb-6 align-center">
+    <v-row class="mb-2 align-center">
       <v-col>
         <h1 class="text-h5 font-weight-bold">Form Builder</h1>
         <p class="text-subtitle-2 grey--text">
@@ -23,18 +23,19 @@
     </v-row>
 
     <!-- FORM NAME -->
-    <v-card outlined rounded="xl" class="pa-4 mb-6">
+    <v-card outlined rounded="lg" class="pa-4 mb-6">
       <v-text-field
         v-model="form.name"
         label="Form Name"
         outlined
         dense
+        hide-details=""
         :rules="[(v) => !!v || 'Form name is required']"
       />
     </v-card>
 
     <!-- FIELDS -->
-    <v-card outlined rounded="xl" class="pa-4 mb-6">
+    <v-card outlined rounded="lg" class="pa-4 mb-6">
       <div class="d-flex justify-space-between align-center mb-3">
         <div>
           <div class="text-h6 font-weight-bold">Fields</div>
@@ -43,7 +44,13 @@
           </div>
         </div>
 
-        <v-btn color="primary" small rounded @click="openFieldDialog()">
+        <v-btn
+          color="primary"
+          depressed
+          small
+          rounded
+          @click="openFieldDialog()"
+        >
           + Add Field
         </v-btn>
       </div>
@@ -63,7 +70,7 @@
         outlined
         rounded="lg"
       >
-        <div class="d-flex justify-space-between">
+        <div class="d-flex justify-space-between align-center">
           <div>
             <div class="font-weight-medium">
               {{ field.label || "Untitled Field" }}
@@ -87,7 +94,7 @@
     </v-card>
 
     <!-- STAGES -->
-    <v-card outlined rounded="xl" class="pa-4 mb-6">
+    <v-card outlined rounded="lg" class="pa-4 mb-6">
       <div class="d-flex justify-space-between align-center mb-3">
         <div>
           <div class="text-h6 font-weight-bold">Stages</div>
@@ -96,22 +103,38 @@
           </div>
         </div>
 
-        <v-btn small color="primary" rounded @click="addStage">
+        <v-btn depressed small color="primary" rounded @click="addStage">
           + Add Stage
         </v-btn>
       </div>
 
       <v-divider class="mb-4" />
 
-      <v-text-field
-        v-for="(stage, i) in form.stages"
-        :key="i"
-        v-model="stage.stage_name"
-        :label="'Stage ' + (i + 1)"
-        outlined
-        dense
-        class="mb-2"
-      />
+      <div>
+        <v-row
+          v-for="(stage, i) in form.stages"
+          :key="i"
+          align="center"
+          no-gutters
+        >
+          <v-col>
+            <v-text-field
+              v-model="stage.stage_name"
+              :label="'Stage ' + (i + 1)"
+              outlined
+              dense
+              hide-details
+              class="my-2"
+            />
+          </v-col>
+
+          <v-col cols="auto" class="d-flex ml-2 align-center">
+            <v-btn icon color="secondary" @click="removeStage(i)">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </div>
     </v-card>
 
     <!-- FIELD DIALOG -->
@@ -123,7 +146,7 @@
           </div>
         </div>
 
-        <v-divider />
+        <v-divider class="mb-5" />
 
         <v-card-text>
           <v-text-field
@@ -139,9 +162,14 @@
             label="Field Type"
             outlined
             dense
+            hide-details="auto"
           />
 
-          <v-switch v-model="fieldForm.required" label="Required" />
+          <v-switch
+            v-model="fieldForm.required"
+            hide-details="auto"
+            label="Required"
+          />
 
           <v-combobox
             v-if="isOptionField"
@@ -149,13 +177,18 @@
             multiple
             chips
             label="Options"
+            hide-details="auto"
           />
         </v-card-text>
 
         <div class="pa-4 d-flex justify-end">
-          <v-btn text @click="fieldDialog = false">Cancel</v-btn>
+          <v-btn rounded class="mr-2" text @click="fieldDialog = false"
+            >Cancel</v-btn
+          >
 
-          <v-btn color="primary" @click="saveField"> Save </v-btn>
+          <v-btn depressed rounded color="primary" @click="saveField">
+            Save
+          </v-btn>
         </div>
       </v-card>
     </v-dialog>
@@ -232,6 +265,10 @@ export default {
 
     addStage() {
       this.form.stages.push({ stage_name: "" });
+    },
+
+    removeStage(index) {
+      this.form.stages.splice(index, 1);
     },
 
     async loadForm() {
