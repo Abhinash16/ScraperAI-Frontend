@@ -3,11 +3,22 @@
     <!-- TOP BAR -->
     <v-app-bar app flat color="white" light elevate-on-scroll>
       <v-container class="py-0 fill-height" fluid>
-        <v-avatar @click="$router.push('/dashboard')" size="40" color="primary" tile class="mr-2 rounded-lg">
+        <v-avatar
+          @click="$router.push('/dashboard')"
+          size="40"
+          color="primary"
+          tile
+          class="mr-2 rounded-lg"
+        >
           <v-img src="../assets/13.png"></v-img>
         </v-avatar>
 
-        <h3 @click="$router.push('/dashboard')" class="font-weight-black secondary--text">scraperAI</h3>
+        <h3
+          @click="$router.push('/dashboard')"
+          class="font-weight-black secondary--text"
+        >
+          scraperAI
+        </h3>
 
         <v-spacer></v-spacer>
 
@@ -30,21 +41,15 @@
         >
           <v-icon color="black">mdi-account</v-icon>
         </v-avatar>
-
-        <v-btn icon class="hidden-md-and-up" @click="mobileDrawer = true">
-          <v-icon>mdi-menu</v-icon>
-        </v-btn>
       </v-container>
     </v-app-bar>
-
-    
 
     <!-- MAIN -->
     <v-container fluid>
       <!-- ================= UNAUTHORIZED MESSAGE ================= -->
-        <v-card min-height="85vh" flat class="rounded-xl pa-8">
-            <router-view></router-view>
-          </v-card>
+      <v-card min-height="85vh" flat class="rounded-xl pa-8">
+        <router-view></router-view>
+      </v-card>
     </v-container>
 
     <!-- LOGOUT DIALOG -->

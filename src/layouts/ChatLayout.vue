@@ -1,298 +1,130 @@
 <template>
-  <v-app id="inspire" style="background-color: #eff2fb">
-    <!-- TOP BAR -->
-    <v-app-bar app flat color="white" light elevate-on-scroll>
-      <v-container class="py-0 fill-height" fluid>
-        <v-avatar @click="$router.push('/dashboard')" size="40" color="primary" tile class="mr-2 rounded-lg">
+  <v-app id="inspire" class="grey lighten-4">
+    <!-- ✅ SIDEBAR -->
+    <v-navigation-drawer
+      v-model="drawer"
+      :mini-variant="isDesktop && mini"
+      :expand-on-hover="isDesktop"
+      :permanent="isDesktop"
+      :temporary="!isDesktop"
+      app
+      floating
+      color="white"
+      class="elevation-2"
+      width="260"
+    >
+      <!-- LOGO -->
+      <v-list-item class="px-2 pt-1">
+        <v-list-item-avatar color="primary" class="rounded-lg">
           <v-img src="../assets/13.png"></v-img>
-        </v-avatar>
-
-        <h3 @click="$router.push('/dashboard')" class="font-weight-black secondary--text">scraperAI</h3>
-
-        <v-spacer></v-spacer>
-
-        <div class="hidden-sm-and-down">
-          <v-btn
-            v-for="(link, index) in links"
-            :key="index"
-            text
-            rounded
-            :to="link.path"
-            class="text-capitalize font-weight-bold grey--text text--darken-2 px-6"
-            exact
-            
-          >
-            {{ link.name }}
-          </v-btn>
-        </div>
-
-       
-
-        <v-avatar
-          @click="$router.push('/dashboard/profile')"
-          size="36"
-          class="ml-4 grey lighten-3"
+        </v-list-item-avatar>
+        <v-list-item-title
+          class="text-h6 font-weight-black secondary--text ml-2"
         >
-          <v-icon color="black">mdi-account</v-icon>
-        </v-avatar>
+          scraperAI
+        </v-list-item-title>
+      </v-list-item>
 
-        <v-btn icon class="hidden-md-and-up" @click="mobileDrawer = true">
-          <v-icon>mdi-menu</v-icon>
-        </v-btn>
-      </v-container>
-    </v-app-bar>
-
-    <!-- MOBILE DRAWER -->
-    <v-navigation-drawer v-model="mobileDrawer" app temporary right>
-      <v-list dense nav>
-        <div v-for="(group, gIndex) in sideNavs" :key="gIndex">
-          <!-- Clickable Section -->
+      <!-- NAV ITEMS -->
+      <v-list nav dense>
+        <template v-for="(group, gIndex) in sideNavs">
           <v-subheader
-            class="d-flex align-center justify-space-between text-uppercase font-weight-black grey--text text--darken-1 mt-4 mb-2"
-            style="font-size: 10px; letter-spacing: 1px; cursor: pointer"
-            @click="toggleSection(gIndex)"
+            v-if="!mini || !isDesktop"
+            :key="`sub-${gIndex}`"
+            class="text-uppercase text-caption font-weight-bold"
           >
             {{ group.section }}
-
-            <v-icon small>
-              {{ openSections[gIndex] ? "mdi-chevron-up" : "mdi-chevron-down" }}
-            </v-icon>
           </v-subheader>
 
-          <!-- Expandable Items -->
-          <v-expand-transition>
-            <div v-show="openSections[gIndex]">
-              <v-list-item-group color="primary">
-                <v-list-item
-                  v-for="(item, index) in group.items"
-                  :key="index"
-                  :to="item.link"
-                  exact
-                  active-class="primary--text font-weight-bold white"
-                  class="mb-2 rounded-lg"
-                >
-                  <v-list-item-icon class="mr-4">
-                    <v-icon small>{{ item.icon }}</v-icon>
-                  </v-list-item-icon>
+          <v-list-item
+            v-for="(item, iIndex) in group.items"
+            :key="`${gIndex}-${iIndex}`"
+            :to="item.link"
+            router
+            active-class="primary--text blue lighten-5 my-1"
+            class="rounded-lg mb-2"
+            @click="handleItemClick"
+            exact
+          >
+            <v-list-item-icon>
+              <v-icon size="22">{{ item.icon }}</v-icon>
+            </v-list-item-icon>
 
-                  <v-list-item-content>
-                    <v-list-item-title class="body-2">
-                      {{ item.name }}
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list-item-group>
-            </div>
-          </v-expand-transition>
-        </div>
-
-        <v-divider class="my-4"></v-divider>
-
-        <v-list-item @click="logoutDialog = true">
-          <v-list-item-icon>
-            <v-icon color="error">mdi-logout</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title class="error--text"> Logout </v-list-item-title>
-        </v-list-item>
+            <v-list-item-content>
+              <v-list-item-title class="font-weight-bold">
+                {{ item.name }}
+              </v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </template>
       </v-list>
     </v-navigation-drawer>
 
-    <!-- MAIN -->
-    <v-container fluid>
-        <v-card min-height="85vh" flat class="rounded-xl pa-8">
-            <div class="d-flex align-center">
-              <h2 class="text-h5 font-weight-black secondary--text">
-                {{ currentRouteName }}
-              </h2>
-            </div>
+    <!-- ✅ TOP BAR -->
+    <v-app-bar
+      app
+      flat
+      height="64"
+      color="rgba(255,255,255,0.85)"
+      style="backdrop-filter: blur(10px)"
+      class="px-2"
+    >
+      <!-- Mobile menu -->
+      <v-app-bar-nav-icon v-if="!isDesktop" @click="drawer = !drawer" />
 
-            <router-view></router-view>
-          </v-card>
-    </v-container>
+      <v-toolbar-title class="grey--text text--darken-4 font-weight-bold">
+        {{ currentRouteName }}
+      </v-toolbar-title>
 
-    <!-- LOGOUT DIALOG -->
-    <v-dialog v-model="logoutDialog" max-width="360">
-      <v-card rounded="xl" class="text-center">
-        <v-card-text class="pt-6">
-          <v-avatar color="error lighten-5" size="64" class="mb-4">
-            <v-icon color="error" size="36"> mdi-alert-octagon-outline </v-icon>
-          </v-avatar>
+      <v-spacer></v-spacer>
 
-          <div class="text-h6 font-weight-bold mb-2">Confirm Logout</div>
+      <!-- Right side -->
 
-          <div class="text-body-2 grey--text">
-            Are you sure you want to log out?
-          </div>
-        </v-card-text>
+      <v-avatar size="36" color="grey lighten-3" class="ml-2">
+        <v-icon color="black">mdi-account-outline</v-icon>
+      </v-avatar>
+    </v-app-bar>
 
-        <div class="justify-center pb-6">
-          <v-btn text rounded @click="logoutDialog = false" class="mr-2">
-            Cancel
-          </v-btn>
+    <!-- ✅ MAIN CONTENT -->
 
-          <v-btn rounded depressed color="error" @click="confirmLogout">
-            Yes, Logout
-          </v-btn>
-        </div>
+    <v-container fluid class="pa-4">
+      <v-card rounded="xl" elevation="0" class="pa-6" style="min-height: 80vh">
+        <router-view />
       </v-card>
-    </v-dialog>
+    </v-container>
   </v-app>
 </template>
 
 <script>
-import { setAuthToken } from "@/service/axios";
-
 export default {
   data: () => ({
-    mobileDrawer: false,
-    logoutDialog: false,
-    openSections: { 0: true },
-
-    links: [
-      { name: "Chat Home", path: "/dashboard/chat" },
-      { name: "Chat Insights", path: "/dashboard/chat/insights" },
-      { name: "API Reference", path: "/api" },
-    ],
-
+    drawer: false,
+    mini: true,
+    isDesktop: false,
     sideNavs: [
       {
-        section: "Main Menu",
+        section: "Main",
         items: [
           {
-            name: "Chat Home",
+            name: "Home",
             link: "/dashboard/chat",
             icon: "mdi-view-dashboard-outline",
           },
           {
-            name: "Your Profile",
-            link: "/dashboard/profile",
-            icon: "mdi-account-outline",
-          },
-        ],
-      },
-      {
-        section: "Analysis",
-        items: [
-          {
-            name: "Call Analysis",
-            link: "/dashboard/call-batches",
-            icon: "mdi-phone-outline",
-          },
-          {
-            name: "Knowledge Gap",
-            link: "/dashboard/knowledge-gap/",
-            icon: "mdi-lightbulb-on-outline",
-          },
-          {
-            name: "Opportunity Analysis",
-            link: "/dashboard/opportunity-analysis",
-            icon: "mdi-chart-line",
-          },
-          {
-            name: "Chat Analytics",
-            link: "/dashboard/chat-analytics",
-            icon: "mdi-chart-line",
-          },
-        ],
-      },
-      {
-        section: "Services",
-        items: [
-          {
-            name: "Chats",
-            link: "/dashboard/chat",
-            icon: "mdi-message-text-outline",
-          },
-          {
-            name: "DB Query Generator",
-            link: "/dashboard/database-ai/projects",
-            icon: "mdi-database-search-outline",
-          },
-          {
-            name: "WhatsApp Bot",
-            link: "/dashboard/whatsapp-bot",
-            icon: "mdi-whatsapp",
-          },
-        ],
-      },
-      {
-        section: "Business Insights",
-        items: [
-          {
-            name: "SEO Growth Report",
-            link: "/dashboard/seo-growth-report",
+            name: "Chat Insights",
+            link: "/dashboard/chat/insights",
             icon: "mdi-chart-line",
           },
           {
             name: "Chatbot Knowledge Score",
-            link: "/dashboard/chatbot-knowledge-score",
+            link: "/dashboard/chat/chatbot-knowledge-score",
             icon: "mdi-robot-outline",
           },
-          {
-            name: "Keyword Research",
-            link: "/dashboard/keyword-research",
-            icon: "mdi-magnify",
-          },
-          {
-            name: "Competitor Intelligence",
-            link: "/dashboard/competitor-intelligence",
-            icon: "mdi-account-search",
-          },
-        ],
-      },
-      {
-        section: "Data",
-        items: [
-          {
-            name: "Page List",
-            link: "/dashboard/page-list",
-            icon: "mdi-format-list-bulleted",
-          },
-          {
-            name: "Scraped Pages",
-            link: "/dashboard/scraped-pages",
-            icon: "mdi-file-document-outline",
-          },
-          {
-            name: "Content Chunks",
-            link: "/dashboard/content-chunks",
-            icon: "mdi-text-box-multiple-outline",
-          },
-        ],
-      },
-      {
-        section: "Settings",
-        items: [
-          {
-            name: "Integration",
-            link: "/dashboard/integration",
-            icon: "mdi-puzzle-outline",
-          },
-          {
-            name: "Security",
-            link: "/dashboard/security",
-            icon: "mdi-shield-lock-outline",
-          },
-          {
-            name: "Integration",
-            link: "/dashboard/integration",
-            icon: "mdi-puzzle-outline",
-          },
-        ],
-      },
 
-      {
-        section: "Other",
-        items: [
           {
-            name: "Blogs",
-            link: "/dashboard/blogs",
-            icon: "mdi-newspaper-variant-outline",
-          },
-          {
-            name: "Forms",
-            link: "/dashboard/forms",
-            icon: "mdi-list-box-outline",
+            name: "Whatsapp Bot",
+            link: "/dashboard/chat/whatsapp-bot",
+            icon: "mdi-whatsapp",
           },
         ],
       },
@@ -301,35 +133,41 @@ export default {
 
   computed: {
     currentRouteName() {
-      for (const group of this.sideNavs) {
-        const found = group.items.find((n) => n.link === this.$route.path);
-        if (found) return found.name;
-      }
-      return "";
+      const allItems = this.sideNavs.flatMap((g) => g.items);
+      const found = allItems.find((n) => n.link === this.$route.path);
+      return found ? found.name : "Dashboard";
     },
   },
 
-  methods: {
-    confirmLogout() {
-      this.logoutDialog = false;
-      localStorage.removeItem("user-token");
-      setAuthToken(null);
-      this.$router.push("/login");
-    },
+  created() {
+    // ✅ Fix initial state BEFORE render (no flicker)
+    this.isDesktop = this.$vuetify.breakpoint.lgAndUp;
+    this.drawer = this.isDesktop;
+  },
 
-    toggleSection(index) {
-      this.$set(this.openSections, index, !this.openSections[index]);
+  mounted() {
+    // ✅ Handle screen resize properly
+    this.$watch(
+      () => this.$vuetify.breakpoint.lgAndUp,
+      (val) => {
+        this.isDesktop = val;
+        this.drawer = val; // open desktop, close mobile
+      },
+    );
+  },
+
+  methods: {
+    handleItemClick() {
+      if (!this.isDesktop) {
+        this.drawer = false;
+      }
     },
   },
 };
 </script>
 
-<style>
-.sticky-sidebar {
-  position: sticky;
-  top: 88px;
-}
-.v-list-item--active::before {
-  opacity: 0 !important;
+<style scoped>
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

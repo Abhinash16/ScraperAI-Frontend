@@ -87,11 +87,11 @@ const routes = [
         component: () =>
           import("../screens/dashboard/insights/SeoGrowthReport.vue"),
       },
-      {
-        path: "chatbot-knowledge-score",
-        component: () =>
-          import("../screens/dashboard/insights/ChatbotKnowledgeScore.vue"),
-      },
+      // {
+      //   path: "chatbot-knowledge-score",
+      //   component: () =>
+      //     import("../screens/dashboard/insights/ChatbotKnowledgeScore.vue"),
+      // },
 
       {
         path: "database-ai/projects",
@@ -140,11 +140,11 @@ const routes = [
         name: "edit-blog",
         component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
       },
-      {
-        path: "whatsapp-bot",
-        name: "whatsapp-bot",
-        component: () => import("../screens/dashboard/WhatsappBot.vue"),
-      },
+      // {
+      //   path: "whatsapp-bot",
+      //   name: "whatsapp-bot",
+      //   component: () => import("../screens/dashboard/WhatsappBot.vue"),
+      // },
       {
         path: "documentation",
         name: "documentation",
@@ -163,9 +163,8 @@ const routes = [
     path: "/dashboard/chat",
     component: () => import("../layouts/ChatLayout.vue"),
     children: [
-      
       {
-        path: "/",
+        path: "",
         component: () => import("../screens/dashboard/ChatList.vue"),
       },
       {
@@ -173,7 +172,16 @@ const routes = [
         component: () => import("../screens/dashboard/AnalyticsDashboard.vue"),
       },
       {
-        path: "/:chatId",
+        path: "chatbot-knowledge-score",
+        component: () =>
+          import("../screens/dashboard/insights/ChatbotKnowledgeScore.vue"),
+      },
+      {
+        path: "whatsapp-bot",
+        component: () => import("../screens/dashboard/WhatsappBot.vue"),
+      },
+      {
+        path: ":chatId",
         component: () => import("../screens/dashboard/ChatView.vue"),
       },
     ],
@@ -230,6 +238,14 @@ const routes = [
 const router = new VueRouter({
   mode: "history",
   routes,
+
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition; // browser back/forward
+    } else {
+      return { x: 0, y: 0 }; // always go top
+    }
+  },
 });
 
 // Define a function to check if the user is logged in
