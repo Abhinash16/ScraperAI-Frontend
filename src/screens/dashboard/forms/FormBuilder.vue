@@ -1,14 +1,26 @@
 <template>
   <div>
     <!-- HEADER -->
-    <v-row class="mb-2 align-center">
-      <v-col>
-        <h1 class="text-h5 font-weight-bold">Form Builder</h1>
-        <p class="text-subtitle-2 grey--text">
-          Create dynamic forms like Google Forms
-        </p>
+    <v-row class="mb-6 align-center">
+      <!-- Back Button -->
+      <v-col cols="auto">
+        <v-btn icon text color="primary" @click="$router.back()">
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
       </v-col>
 
+      <!-- Title + Description -->
+      <v-col>
+        <div>
+          <h1 class="text-h5 font-weight-bold mb-1">Form Builder</h1>
+
+          <p class="text-subtitle-2 grey--text mb-0">
+            Create dynamic forms, manage fields, and define stages
+          </p>
+        </div>
+      </v-col>
+
+      <!-- Save Button -->
       <v-col cols="auto">
         <v-btn
           color="primary"
@@ -16,7 +28,9 @@
           depressed
           @click="saveForm"
           :loading="loading"
+          :disabled="!isFormValid"
         >
+          <v-icon left small>mdi-content-save</v-icon>
           Save Form
         </v-btn>
       </v-col>
@@ -34,9 +48,24 @@
       />
     </v-card>
 
-    <!-- FIELDS -->
-    <v-card outlined rounded="lg" class="pa-4 mb-6">
-      <div class="d-flex justify-space-between align-center mb-3">
+    <!-- TABS HEADER -->
+    <v-card outlined rounded="lg" class="mb-4">
+      <v-tabs v-model="tab" color="primary">
+        <v-tab>Fields</v-tab>
+        <v-tab>Stages</v-tab>
+      </v-tabs>
+    </v-card>
+
+    <!-- ================= FIELDS TAB ================= -->
+    <v-card
+      v-if="tab === 0"
+      outlined
+      rounded="xl"
+      class="pa-5 mb-6"
+      color="#f8f9fd"
+    >
+      <!-- HEADER -->
+      <div class="d-flex justify-space-between align-center mb-4">
         <div>
           <div class="text-h6 font-weight-bold">Fields</div>
           <div class="text-caption grey--text">
@@ -44,13 +73,7 @@
           </div>
         </div>
 
-        <v-btn
-          color="primary"
-          depressed
-          small
-          rounded
-          @click="openFieldDialog()"
-        >
+        <v-btn color="primary" small rounded depressed @click="openFieldDialog">
           + Add Field
         </v-btn>
       </div>
@@ -62,21 +85,26 @@
         No fields added yet
       </div>
 
-      <!-- FIELD LIST -->
+      <!-- LIST -->
       <v-card
         v-for="(field, i) in form.fields"
         :key="i"
         class="mb-3 pa-4"
         outlined
         rounded="lg"
+        elevation="0"
       >
         <div class="d-flex justify-space-between align-center">
           <div>
             <div class="font-weight-medium">
               {{ field.label || "Untitled Field" }}
             </div>
+
             <div class="text-caption grey--text">
-              {{ field.type }} • {{ field.required ? "Required" : "Optional" }}
+              {{ field.type }} •
+              <span :class="field.required ? 'red--text' : ''">
+                {{ field.required ? "Required" : "Optional" }}
+              </span>
             </div>
           </div>
 
@@ -93,9 +121,16 @@
       </v-card>
     </v-card>
 
-    <!-- STAGES -->
-    <v-card outlined rounded="lg" class="pa-4 mb-6">
-      <div class="d-flex justify-space-between align-center mb-3">
+    <!-- ================= STAGES TAB ================= -->
+    <v-card
+      v-if="tab === 1"
+      outlined
+      rounded="xl"
+      class="pa-5 mb-6"
+      color="#f8f9fd"
+    >
+      <!-- HEADER -->
+      <div class="d-flex justify-space-between align-center mb-4">
         <div>
           <div class="text-h6 font-weight-bold">Stages</div>
           <div class="text-caption grey--text">
@@ -103,38 +138,52 @@
           </div>
         </div>
 
-        <v-btn depressed small color="primary" rounded @click="addStage">
+        <v-btn color="primary" small rounded depressed @click="addStage">
           + Add Stage
         </v-btn>
       </div>
 
       <v-divider class="mb-4" />
 
-      <div>
-        <v-row
-          v-for="(stage, i) in form.stages"
-          :key="i"
-          align="center"
-          no-gutters
-        >
+      <!-- EMPTY -->
+      <div v-if="!form.stages.length" class="text-center grey--text py-6">
+        No stages added yet
+      </div>
+
+      <!-- LIST -->
+      <v-card
+        v-for="(stage, i) in form.stages"
+        :key="i"
+        class="mb-3 pa-3"
+        outlined
+        rounded="lg"
+        elevation="0"
+      >
+        <v-row align="center" no-gutters>
           <v-col>
             <v-text-field
               v-model="stage.stage_name"
               :label="'Stage ' + (i + 1)"
               outlined
               dense
+              :error="!stage.stage_name"
+              :error-messages="!stage.stage_name ? 'Stage name required' : ''"
               hide-details
-              class="my-2"
             />
           </v-col>
 
-          <v-col cols="auto" class="d-flex ml-2 align-center">
-            <v-btn icon color="secondary" @click="removeStage(i)">
-              <v-icon>mdi-close</v-icon>
+          <v-col cols="auto" class="ml-2">
+            <v-btn
+              icon
+              color="error"
+              :disabled="stage.isDefault || stage.stage_name === 'New'"
+              @click="removeStage(i)"
+            >
+              <v-icon>mdi-delete</v-icon>
             </v-btn>
           </v-col>
         </v-row>
-      </div>
+      </v-card>
     </v-card>
 
     <!-- FIELD DIALOG -->
@@ -192,6 +241,40 @@
         </div>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="stageDeleteDialog" max-width="500">
+      <v-card rounded="xl">
+        <v-card-title class="text-h6 font-weight-bold">
+          Move Leads Before Deleting
+        </v-card-title>
+
+        <v-card-text>
+          <p>
+            All leads with stage
+            <strong>{{ stageToDelete?.stage_name }}</strong>
+            will be moved to:
+          </p>
+
+          <v-select
+            v-model="moveToStageId"
+            :items="filteredStages"
+            item-text="stage_name"
+            item-value="_id"
+            label="Select Stage"
+            outlined
+            dense
+          />
+        </v-card-text>
+
+        <v-card-actions class="justify-end">
+          <v-btn text @click="stageDeleteDialog = false">Cancel</v-btn>
+
+          <v-btn color="error" @click="confirmStageDelete">
+            Delete & Move
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -202,11 +285,14 @@ export default {
   data() {
     return {
       loading: false,
+      tab: 0,
 
       form: {
         name: "",
         fields: [],
-        stages: [],
+        stages: [
+          { stage_name: "New", isDefault: true }, // ✅ default stage
+        ],
       },
 
       fieldTypes: ["text", "number", "select", "radio", "checkbox"],
@@ -214,6 +300,12 @@ export default {
       fieldDialog: false,
       fieldForm: {},
       editIndex: null,
+
+      // ✅ Stage delete handling
+      stageDeleteDialog: false,
+      stageToDelete: null,
+      moveToStageId: null,
+      deletedStageMapping: [],
     };
   },
 
@@ -221,15 +313,41 @@ export default {
     isOptionField() {
       return ["select", "radio", "checkbox"].includes(this.fieldForm.type);
     },
+
+    isEditMode() {
+      return !!this.$route.params.id;
+    },
+
+    filteredStages() {
+      if (!this.stageToDelete) return [];
+
+      return this.form.stages.filter((s) => s._id !== this.stageToDelete._id);
+    },
+    isFormValid() {
+      // ✅ Form name check
+      if (!this.form.name || !this.form.name.trim()) return false;
+
+      // ✅ Stage validation (no empty names)
+      const hasEmptyStage = this.form.stages.some(
+        (s) => !s.stage_name || !s.stage_name.trim(),
+      );
+
+      if (hasEmptyStage) return false;
+
+      return true;
+    },
   },
 
   mounted() {
-    if (this.$route.params.id) {
+    if (this.isEditMode) {
       this.loadForm();
+    } else {
+      this.deletedStageMapping = []; // clean state
     }
   },
 
   methods: {
+    // ================= FIELD =================
     openFieldDialog() {
       this.fieldForm = {
         label: "",
@@ -248,7 +366,10 @@ export default {
     },
 
     saveField() {
-      if (!this.fieldForm.label) return alert("Label required");
+      if (!this.fieldForm.label) {
+        this.$toast.error("Label required");
+        return;
+      }
 
       if (this.editIndex !== null) {
         this.form.fields.splice(this.editIndex, 1, this.fieldForm);
@@ -263,48 +384,124 @@ export default {
       this.form.fields.splice(i, 1);
     },
 
+    // ================= STAGES =================
     addStage() {
-      this.form.stages.push({ stage_name: "" });
+      this.form.stages.push({
+        stage_name: "",
+        isDefault: false,
+      });
     },
 
     removeStage(index) {
-      this.form.stages.splice(index, 1);
+      const stage = this.form.stages[index];
+
+      if (stage.isDefault || stage.stage_name === "New") {
+        this.$toast.error("Default stage cannot be deleted");
+        return;
+      }
+
+      if (!stage._id) {
+        this.form.stages.splice(index, 1);
+        return;
+      }
+
+      this.stageToDelete = {
+        ...stage,
+        index,
+      };
+
+      // ✅ SET DEFAULT SELECTED STAGE
+      const availableStages = this.form.stages.filter(
+        (s) => s._id !== stage._id,
+      );
+
+      if (availableStages.length) {
+        this.moveToStageId = availableStages[0]._id; // 👈 first stage selected
+      }
+
+      this.stageDeleteDialog = true;
     },
 
+    confirmStageDelete() {
+      if (!this.moveToStageId) {
+        this.$toast.error("Please select a stage");
+        return;
+      }
+
+      // store mapping
+      this.deletedStageMapping.push({
+        fromStageId: this.stageToDelete._id,
+        toStageId: this.moveToStageId,
+      });
+
+      // remove from UI
+      this.form.stages.splice(this.stageToDelete.index, 1);
+
+      this.stageDeleteDialog = false;
+      this.moveToStageId = null;
+    },
+
+    // ================= LOAD =================
     async loadForm() {
-      const { data } = await apiClient.get(`/forms/${this.$route.params.id}`);
-      this.form = data.data;
+      try {
+        const { data } = await apiClient.get(`/forms/${this.$route.params.id}`);
+
+        this.form = data.data;
+
+        // ✅ Ensure default stage exists
+        if (!this.form.stages || !this.form.stages.length) {
+          this.form.stages = [{ stage_name: "New", isDefault: true }];
+        }
+      } catch (err) {
+        console.error(err);
+        this.$toast.error("Failed to load form");
+      }
     },
 
+    // ================= SAVE =================
     async saveForm() {
+      if (!this.isFormValid) {
+        this.$toast.error("Please fill all required fields");
+        return;
+      }
       try {
-        if (!this.form.name) return alert("Form name required");
+        if (!this.form.name) {
+          this.$toast.error("Form name required");
+          return;
+        }
 
         this.loading = true;
 
         const payload = {
           name: this.form.name,
+
           fields: this.form.fields.map((f) => ({
             label: f.label,
             type: f.type,
             required: f.required,
             options: f.options || [],
           })),
+
           stages: this.form.stages.map((s, i) => ({
+            _id: s._id, // ✅ IMPORTANT for update
             stage_name: s.stage_name,
             order: i + 1,
           })),
+
+          deletedStageMapping: this.deletedStageMapping,
         };
 
-        if (this.$route.params.id) {
+        if (this.isEditMode) {
           await apiClient.put(`/forms/${this.$route.params.id}/edit`, payload);
         } else {
           await apiClient.post("/forms/create", payload);
         }
 
-        this.$router.push("/dashboard/forms");
+        this.$toast.success("Form saved successfully");
       } catch (err) {
-        console.error(err);
+        const message = err?.response?.data?.message || "Error saving form";
+
+        this.$toast.error(message);
       } finally {
         this.loading = false;
       }

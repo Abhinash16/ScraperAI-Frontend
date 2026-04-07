@@ -52,6 +52,12 @@
               <div class="text-caption grey--text">
                 {{ formatDate(form.createdAt) }}
               </div>
+
+              <div class="mt-1">
+                <v-chip small outlined color="primary" class="text-caption">
+                  {{ form.totalLeads || 0 }} Leads
+                </v-chip>
+              </div>
             </div>
 
             <!-- RIGHT ACTIONS -->
@@ -142,14 +148,39 @@
           </v-btn>
 
           <v-btn
-            @click="deleteForm"
+            @click="deleteForm(false)"
             color="error"
             depressed
             rounded
             large
-            class="px-8 text-none font-weight-bold"
           >
             Yes, Delete
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="deleteWarningDialog" max-width="400">
+      <v-card rounded="xl" class="text-center pa-4">
+        <v-card-text>
+          <v-avatar color="red lighten-5" size="70" class="mb-4">
+            <v-icon color="red" size="40">mdi-alert</v-icon>
+          </v-avatar>
+
+          <div class="text-h6 font-weight-bold mb-2">Warning!</div>
+
+          <p class="grey--text">
+            <strong>{{ leadCount }}</strong> leads in this form will be deleted.
+            <br />
+            This action is irreversible.
+          </p>
+        </v-card-text>
+
+        <v-card-actions class="justify-center">
+          <v-btn text @click="deleteWarningDialog = false"> Cancel </v-btn>
+
+          <v-btn color="error" depressed @click="deleteForm(true)">
+            Delete Anyway
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -175,6 +206,8 @@ export default {
         total: 0,
         totalPages: 0,
       },
+      deleteWarningDialog: false,
+      leadCount: 0,
     };
   },
 
@@ -224,16 +257,41 @@ export default {
 
     confirmDelete(form) {
       this.selectedForm = form;
-      this.deleteDialog = true;
+
+      // ✅ If leads exist → show warning directly
+      if (form.totalLeads > 0) {
+        this.leadCount = form.totalLeads;
+        this.deleteWarningDialog = true;
+      } else {
+        this.deleteDialog = true;
+      }
     },
 
-    async deleteForm() {
+    async deleteForm(force = false) {
       try {
-        await apiClient.delete(`/forms/${this.selectedForm._id}`);
+        const { data } = await apiClient.delete(
+          `/forms/${this.selectedForm._id}`,
+          {
+            params: { forceDelete: force },
+          },
+        );
+
+        // 🔥 If backend says confirmation needed
+        if (data.requireConfirmation) {
+          this.leadCount = data.totalLeads;
+          this.deleteDialog = false;
+          this.deleteWarningDialog = true;
+          return;
+        }
+
+        // ✅ success
         this.deleteDialog = false;
+        this.deleteWarningDialog = false;
         this.fetchForms();
+        this.$toast.success("Form deleted successfully");
       } catch (err) {
         console.error(err);
+        this.$toast.error("Error deleting form");
       }
     },
   },

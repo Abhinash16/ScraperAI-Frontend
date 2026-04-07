@@ -2,11 +2,25 @@
   <div>
     <!-- HEADER -->
 
-    <v-row class="align-center">
+    <v-row class="mb-6 align-center">
+      <!-- Back Button -->
+      <v-col cols="auto">
+        <v-btn icon text color="primary" @click="$router.back()">
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
+      </v-col>
+
+      <!-- Title + Subtitle -->
       <v-col>
         <div class="d-flex align-center">
-          <h1 class="text-h5 font-weight-bold mr-3">{{ formName }}</h1>
+          <h1 class="text-h5 font-weight-bold mb-1">
+            {{ formName || "Untitled Form" }}
+          </h1>
         </div>
+
+        <p class="text-subtitle-2 grey--text mb-0">
+          Manage submissions, track stages, and analyze responses
+        </p>
       </v-col>
     </v-row>
 
@@ -15,6 +29,7 @@
       <v-col v-for="stage in stages" :key="stage.stageId" cols="auto">
         <v-btn
           class="ma-1"
+          rounded
           :color="selectedStage === stage.stageId ? 'primary' : 'grey'"
           :outlined="selectedStage !== stage.stageId"
           @click="selectStage(stage)"
@@ -26,7 +41,7 @@
 
       <!-- ➕ Add Stage Button -->
       <v-col cols="auto">
-        <v-btn color="success" class="ma-1" outlined @click="addStage">
+        <v-btn color="success" rounded class="ma-1" outlined @click="addStage">
           + Add Stage
         </v-btn>
       </v-col>
@@ -75,10 +90,6 @@
             <v-btn icon small @click="openCommentDialog(item)">
               <v-icon small>mdi-comment-processing-outline</v-icon>
             </v-btn>
-
-            <v-btn icon small @click="openChangeStatusDialog(item)">
-              <v-icon small>mdi-dots-horizontal</v-icon>
-            </v-btn>
           </div>
         </template>
       </v-data-table>
@@ -89,89 +100,48 @@
       <v-progress-circular indeterminate size="50" />
     </v-overlay>
 
-    <!-- CHANGE STAGE DIALOG -->
-    <v-dialog v-model="changeStageDialog" max-width="500">
-      <v-card rounded="xl">
-        <div class="pa-4">
-          <div class="text-h6 font-weight-bold">Change Stage</div>
-        </div>
-
-        <v-divider class="mb-5" />
-
-        <v-card-text>
-          <!-- Stage Select -->
-          <v-select
-            v-model="selectedStageId"
-            :items="stages"
-            item-text="stage"
-            item-value="stageId"
-            label="Select Stage"
-            dense
-            outlined
-            hide-details="auto"
-          />
-
-          <!-- Comment -->
-          <v-textarea
-            v-model="comment"
-            label="Add Comment"
-            rows="3"
-            outlined
-            dense
-            class="mt-4"
-            hide-details="auto"
-          />
-        </v-card-text>
-
-        <div class="pa-4 d-flex justify-end">
-          <v-btn rounded class="mr-2" text @click="changeStageDialog = false"
-            >Cancel</v-btn
-          >
-
-          <v-btn depressed rounded color="primary" @click="submitStageChange">
-            Save
-          </v-btn>
-        </div>
-      </v-card>
-    </v-dialog>
-
     <!-- COMMENTS DIALOG -->
-    <v-dialog v-model="commentDialog" max-width="500">
+    <v-dialog v-model="commentDialog" rounded="xl" max-width="520">
       <v-card rounded="xl" :loading="loading">
-        <div class="pa-4">
-          <div class="text-h6 font-weight-bold">Comments</div>
+        <!-- HEADER -->
+        <div class="pa-4 d-flex align-center justify-space-between">
+          <div>
+            <div class="text-h6 font-weight-bold">Activity</div>
+            <div class="text-caption grey--text">
+              Update stage & add comments
+            </div>
+          </div>
+
+          <v-btn icon @click="commentDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
         </div>
 
         <v-divider />
 
-        <!-- COMMENTS LIST -->
+        <!-- COMMENTS -->
         <v-card-text
-          style="max-height: 300px; overflow-y: auto"
+          style="max-height: 260px; overflow-y: auto"
           class="pa-4 grey lighten-5"
         >
-          <div
-            v-if="comments.length === 0"
-            class="text-center grey--text pa-10"
-          >
-            <v-icon color="grey lighten-2" large>mdi-message-off</v-icon>
-            <p>No comments yet</p>
+          <div v-if="!comments.length" class="text-center grey--text py-8">
+            <v-icon large color="grey lighten-2">mdi-message-off</v-icon>
+            <div>No activity yet</div>
           </div>
 
           <v-card
             v-for="c in comments"
             :key="c._id"
-            flat
             outlined
-            class="mb-3 rounded-lg"
+            class="mb-3"
+            rounded="lg"
+            elevation="0"
           >
             <v-card-text class="pa-3">
-              <div class="d-flex justify-space-between mb-1">
-                <span class="text-body-2 black--text">
-                  {{ c.message }}
-                </span>
-                <span class="caption grey--text">{{
-                  formatDate(c.createdAt)
-                }}</span>
+              <div class="text-body-2">{{ c.message }}</div>
+
+              <div class="text-caption grey--text mt-1">
+                {{ formatDate(c.createdAt) }}
               </div>
             </v-card-text>
           </v-card>
@@ -179,28 +149,42 @@
 
         <v-divider />
 
-        <!-- ADD COMMENT -->
+        <!-- FORM -->
         <div class="pa-4">
-          <v-textarea
-            v-model="newComment"
-            label="Write a comment"
+          <!-- Stage -->
+          <v-select
+            v-model="selectedStageId"
+            :items="stages"
+            item-text="stage"
+            item-value="stageId"
+            label="Change Stage"
             dense
             outlined
-            rows="2"
-            hide-details="auto"
+            class="mb-3"
           />
 
+          <!-- Comment -->
+          <v-textarea
+            v-model="comment"
+            label="Add comment (optional)"
+            rows="2"
+            dense
+            outlined
+          />
+
+          <!-- ACTION -->
           <div class="d-flex justify-end mt-4">
+            <v-btn text rounded @click="commentDialog = false"> Cancel </v-btn>
+
             <v-btn
+              color="primary"
               depressed
               rounded
               class="ml-2"
-              text
-              @click="commentDialog = false"
-              >Close</v-btn
+              :loading="loading"
+              @click="submitStageAndComment"
             >
-            <v-btn depressed rounded color="primary" @click="addComment">
-              Send
+              Save Changes
             </v-btn>
           </div>
         </div>
@@ -331,35 +315,9 @@ export default {
       console.log("View:", item);
     },
 
-    openChangeStatusDialog(item) {
-      this.selectedItem = item;
-      this.selectedStageId = item.current_stage?._id || null;
-      this.comment = "";
-      this.changeStageDialog = true;
-    },
-
-    async submitStageChange() {
-      if (!this.selectedItem || !this.selectedStageId) return;
-
-      try {
-        await apiClient.put(
-          `/forms/submissions/${this.selectedItem._id}/stage`,
-          {
-            stageId: this.selectedStageId,
-            comment: this.comment, // 👈 send comment
-          },
-        );
-
-        this.changeStageDialog = false;
-
-        this.load();
-      } catch (err) {
-        console.error("Stage update failed", err);
-      }
-    },
-
     async openCommentDialog(item) {
       this.selectedItem = item;
+      this.selectedStageId = item.current_stage?._id || null;
       this.commentDialog = true;
       this.newComment = "";
 
@@ -372,22 +330,34 @@ export default {
       }
     },
 
-    async addComment() {
+    async submitStageAndComment() {
+      if (!this.selectedItem || !this.selectedStageId) return;
+
       this.loading = true;
-      if (!this.newComment.trim()) return;
 
       try {
-        await apiClient.post(`/forms/comment`, {
-          app_id: this.selectedItem.app_id,
-          message: this.newComment,
-        });
+        // 1️⃣ Update stage + comment together
+        await apiClient.put(
+          `/forms/submissions/${this.selectedItem._id}/stage`,
+          {
+            stageId: this.selectedStageId,
+            comment: this.comment?.trim() || null,
+          },
+        );
 
-        this.newComment = "";
+        // 2️⃣ Reset input
+        this.comment = "";
 
-        // reload comments
-        this.openCommentDialog(this.selectedItem);
+        // 3️⃣ Reload comments (stay in dialog)
+        const { data } = await apiClient.get(
+          `/forms/${this.selectedItem.app_id}/comment`,
+        );
+        this.comments = data.data || [];
+
+        // 4️⃣ Refresh table
+        this.load();
       } catch (err) {
-        console.error("Failed to add comment", err);
+        console.error("Failed to update stage/comment", err);
       } finally {
         this.loading = false;
       }
