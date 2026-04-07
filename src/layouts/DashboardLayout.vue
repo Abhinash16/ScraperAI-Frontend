@@ -3,11 +3,22 @@
     <!-- TOP BAR -->
     <v-app-bar app flat color="white" light elevate-on-scroll>
       <v-container class="py-0 fill-height" fluid>
-        <v-avatar @click="$router.push('/dashboard')" size="40" color="primary" tile class="mr-2 rounded-lg">
+        <v-avatar
+          @click="$router.push('/dashboard')"
+          size="40"
+          color="primary"
+          tile
+          class="mr-2 rounded-lg"
+        >
           <v-img src="../assets/13.png"></v-img>
         </v-avatar>
 
-        <h3 @click="$router.push('/dashboard')" class="font-weight-black secondary--text">scraperAI</h3>
+        <h3
+          @click="$router.push('/dashboard')"
+          class="font-weight-black secondary--text"
+        >
+          scraperAI
+        </h3>
 
         <v-spacer></v-spacer>
 
@@ -23,28 +34,77 @@
             {{ link.name }}
           </v-btn>
         </div>
-        <v-avatar
-          @click="$router.push('/dashboard/profile')"
-          size="36"
-          class="ml-4 grey lighten-3"
-        >
-          <v-icon color="black">mdi-account</v-icon>
-        </v-avatar>
+        <v-menu v-model="menu" offset-y left>
+          <template v-slot:activator="{ on, attrs }">
+            <v-avatar
+              v-bind="attrs"
+              v-on="on"
+              size="36"
+              color="primary"
+              class="ml-4 grey lighten-3"
+            >
+              <v-icon color="black">mdi-account</v-icon>
+            </v-avatar>
+          </template>
 
-        <v-btn icon class="hidden-md-and-up" @click="mobileDrawer = true">
-          <v-icon>mdi-menu</v-icon>
-        </v-btn>
+          <v-card width="240">
+            <!-- Menu Options -->
+            <v-list dense>
+              <!-- Profile -->
+              <v-list-item @click="goToProfile()">
+                <v-list-item-icon>
+                  <v-icon>mdi-account-circle</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title class="font-weight-bold">
+                  Profile
+                </v-list-item-title>
+              </v-list-item>
+
+              <!-- Integration -->
+              <v-list-item @click="goToIntegration()">
+                <v-list-item-icon>
+                  <v-icon>mdi-puzzle-outline</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title class="font-weight-bold">
+                  Integration
+                </v-list-item-title>
+              </v-list-item>
+
+              <!-- Security -->
+              <v-list-item @click="goToSecurity()">
+                <v-list-item-icon>
+                  <v-icon>mdi-shield-lock-outline</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title class="font-weight-bold">
+                  Security
+                </v-list-item-title>
+              </v-list-item>
+            </v-list>
+            <v-divider></v-divider>
+
+            <!-- Logout -->
+            <v-card-actions>
+              <v-btn
+                text
+                color="red"
+                block
+                @click="logoutDialog = true"
+                class="font-weight-bold"
+              >
+                Logout
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-menu>
       </v-container>
     </v-app-bar>
-
-    
 
     <!-- MAIN -->
     <v-container fluid>
       <!-- ================= UNAUTHORIZED MESSAGE ================= -->
-        <v-card min-height="85vh" flat class="rounded-xl pa-8">
-            <router-view></router-view>
-          </v-card>
+      <v-card min-height="85vh" flat class="rounded-xl pa-8">
+        <router-view></router-view>
+      </v-card>
     </v-container>
 
     <!-- LOGOUT DIALOG -->
@@ -90,6 +150,8 @@ export default {
       // { name: "Documentation", path: "/dashboard/documentation" },
       // { name: "API Reference", path: "/api" },
     ],
+
+    menu: false,
 
     sideNavs: [
       {
@@ -256,6 +318,24 @@ export default {
 
     toggleSection(index) {
       this.$set(this.openSections, index, !this.openSections[index]);
+    },
+
+    goToProfile() {
+      if (this.$route.path !== "/dashboard/profile") {
+        this.$router.push("/dashboard/profile");
+      }
+    },
+
+    goToIntegration() {
+      if (this.$route.path !== "/dashboard/integration") {
+        this.$router.push("/dashboard/integration");
+      }
+    },
+
+    goToSecurity() {
+      if (this.$route.path !== "/dashboard/security") {
+        this.$router.push("/dashboard/security");
+      }
     },
   },
 };

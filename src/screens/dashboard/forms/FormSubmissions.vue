@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="pa-6">
+  <div>
     <!-- HEADER -->
 
     <v-row class="align-center">
@@ -176,7 +176,7 @@
         </div>
       </v-card>
     </v-dialog>
-  </v-container>
+  </div>
 </template>
 
 <script>

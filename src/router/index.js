@@ -52,21 +52,7 @@ const routes = [
         path: "try-chat",
         component: () => import("../screens/dashboard/TryChat.vue"),
       },
-      {
-        path: "call-batches",
-        component: () => import("../screens/dashboard/CallAnalysis.vue"),
-        meta: { tab: 1 },
-      },
-      {
-        path: "/call-analysis/report/:id",
-        name: "CallAnalysisReport",
-        component: () => import("../screens/dashboard/CallAnalysisReport.vue"),
-      },
-      {
-        path: "/batch-analysis/:id",
-        name: "BatchAnalysis",
-        component: () => import("../screens/dashboard/BatchCallAnalysis.vue"),
-      },
+
       {
         path: "opportunity-analysis",
         component: () =>
@@ -87,27 +73,12 @@ const routes = [
         component: () =>
           import("../screens/dashboard/insights/SeoGrowthReport.vue"),
       },
-      {
-        path: "chatbot-knowledge-score",
-        component: () =>
-          import("../screens/dashboard/insights/ChatbotKnowledgeScore.vue"),
-      },
+      // {
+      //   path: "chatbot-knowledge-score",
+      //   component: () =>
+      //     import("../screens/dashboard/insights/ChatbotKnowledgeScore.vue"),
+      // },
 
-      {
-        path: "database-ai/projects",
-        component: () =>
-          import("../screens/dashboard/databaseAI/ProjectList.vue"),
-      },
-      {
-        path: "database-ai/project/:id/config",
-        component: () =>
-          import("../screens/dashboard/databaseAI/ProjectConfig.vue"),
-      },
-      {
-        path: "database-ai/project/:id/chat",
-        component: () =>
-          import("../screens/dashboard/databaseAI/QueryChat.vue"),
-      },
       {
         path: "knowledge-gap",
         name: "KnowledgeGapList",
@@ -125,21 +96,7 @@ const routes = [
         name: "ContentChunksList",
         component: () => import("../screens/dashboard/ContentChunksList.vue"),
       },
-      {
-        path: "blogs",
-        name: "blogs",
-        component: () => import("../screens/dashboard/blogs/BlogLists.vue"),
-      },
-      {
-        path: "blogs/create",
-        name: "create-blog",
-        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
-      },
-      {
-        path: "blogs/:id",
-        name: "edit-blog",
-        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
-      },
+
       {
         path: "whatsapp-bot",
         name: "whatsapp-bot",
@@ -159,13 +116,13 @@ const routes = [
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },
 
+  // chat dashboard
   {
     path: "/dashboard/chat",
     component: () => import("../layouts/ChatLayout.vue"),
     children: [
-      
       {
-        path: "/",
+        path: "",
         component: () => import("../screens/dashboard/ChatList.vue"),
       },
       {
@@ -173,12 +130,22 @@ const routes = [
         component: () => import("../screens/dashboard/AnalyticsDashboard.vue"),
       },
       {
-        path: "/:chatId",
+        path: "chatbot-knowledge-score",
+        component: () =>
+          import("../screens/dashboard/insights/ChatbotKnowledgeScore.vue"),
+      },
+      {
+        path: "whatsapp-bot",
+        component: () => import("../screens/dashboard/WhatsappBot.vue"),
+      },
+      {
+        path: ":chatId",
         component: () => import("../screens/dashboard/ChatView.vue"),
       },
     ],
   },
 
+  // forms dashboard
   {
     path: "/dashboard/forms",
     component: () => import("../layouts/FormsDashboardLayout.vue"),
@@ -208,6 +175,78 @@ const routes = [
     ],
   },
 
+  // blogs dashboard
+  {
+    path: "/dashboard/blogs",
+    component: () => import("../layouts/BlogLayout.vue"),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "",
+        name: "blogs",
+        component: () => import("../screens/dashboard/blogs/BlogLists.vue"),
+      },
+      {
+        path: "create",
+        name: "create-blog",
+        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
+      },
+      {
+        path: ":id",
+        name: "edit-blog",
+        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
+      },
+    ],
+  },
+
+  // db query generator dashboard
+  {
+    path: "/dashboard",
+    component: () => import("../layouts/DbQueryLayout.vue"),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "database-ai/projects",
+        component: () =>
+          import("../screens/dashboard/databaseAI/ProjectList.vue"),
+      },
+      {
+        path: "database-ai/project/:id/config",
+        component: () =>
+          import("../screens/dashboard/databaseAI/ProjectConfig.vue"),
+      },
+      {
+        path: "database-ai/project/:id/chat",
+        component: () =>
+          import("../screens/dashboard/databaseAI/QueryChat.vue"),
+      },
+    ],
+  },
+
+  // call analysis dashboard
+  {
+    path: "/dashboard",
+    component: () => import("../layouts/CallAnalysisLayout.vue"),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "call-batches",
+        component: () => import("../screens/dashboard/CallAnalysis.vue"),
+        meta: { tab: 1 },
+      },
+      {
+        path: "/call-analysis/report/:id",
+        name: "CallAnalysisReport",
+        component: () => import("../screens/dashboard/CallAnalysisReport.vue"),
+      },
+      {
+        path: "/batch-analysis/:id",
+        name: "BatchAnalysis",
+        component: () => import("../screens/dashboard/BatchCallAnalysis.vue"),
+      },
+    ],
+  },
+
   // {
   //   path: "/dashboard/forms/create",
   //   name: "/dashboardCreateForm",
@@ -230,6 +269,14 @@ const routes = [
 const router = new VueRouter({
   mode: "history",
   routes,
+
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition; // browser back/forward
+    } else {
+      return { x: 0, y: 0 }; // always go top
+    }
+  },
 });
 
 // Define a function to check if the user is logged in

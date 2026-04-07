@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- HEADER -->
-    <div class="d-flex align-center mb-4">
+    <div class="d-flex align-center mb-6">
       <v-btn icon @click="$router.back(-1)">
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
