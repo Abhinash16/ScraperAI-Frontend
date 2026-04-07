@@ -52,21 +52,7 @@ const routes = [
         path: "try-chat",
         component: () => import("../screens/dashboard/TryChat.vue"),
       },
-      {
-        path: "call-batches",
-        component: () => import("../screens/dashboard/CallAnalysis.vue"),
-        meta: { tab: 1 },
-      },
-      {
-        path: "/call-analysis/report/:id",
-        name: "CallAnalysisReport",
-        component: () => import("../screens/dashboard/CallAnalysisReport.vue"),
-      },
-      {
-        path: "/batch-analysis/:id",
-        name: "BatchAnalysis",
-        component: () => import("../screens/dashboard/BatchCallAnalysis.vue"),
-      },
+
       {
         path: "opportunity-analysis",
         component: () =>
@@ -94,21 +80,6 @@ const routes = [
       // },
 
       {
-        path: "database-ai/projects",
-        component: () =>
-          import("../screens/dashboard/databaseAI/ProjectList.vue"),
-      },
-      {
-        path: "database-ai/project/:id/config",
-        component: () =>
-          import("../screens/dashboard/databaseAI/ProjectConfig.vue"),
-      },
-      {
-        path: "database-ai/project/:id/chat",
-        component: () =>
-          import("../screens/dashboard/databaseAI/QueryChat.vue"),
-      },
-      {
         path: "knowledge-gap",
         name: "KnowledgeGapList",
         component: () =>
@@ -125,26 +96,7 @@ const routes = [
         name: "ContentChunksList",
         component: () => import("../screens/dashboard/ContentChunksList.vue"),
       },
-      {
-        path: "blogs",
-        name: "blogs",
-        component: () => import("../screens/dashboard/blogs/BlogLists.vue"),
-      },
-      {
-        path: "blogs/create",
-        name: "create-blog",
-        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
-      },
-      {
-        path: "blogs/:id",
-        name: "edit-blog",
-        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
-      },
-      // {
-      //   path: "whatsapp-bot",
-      //   name: "whatsapp-bot",
-      //   component: () => import("../screens/dashboard/WhatsappBot.vue"),
-      // },
+
       {
         path: "whatsapp-bot",
         name: "whatsapp-bot",
@@ -164,6 +116,7 @@ const routes = [
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },
 
+  // chat dashboard
   {
     path: "/dashboard/chat",
     component: () => import("../layouts/ChatLayout.vue"),
@@ -192,6 +145,7 @@ const routes = [
     ],
   },
 
+  // forms dashboard
   {
     path: "/dashboard/forms",
     component: () => import("../layouts/FormsDashboardLayout.vue"),
@@ -217,6 +171,78 @@ const routes = [
         name: "FormSubmissions",
         component: () =>
           import("../screens/dashboard/forms/FormSubmissions.vue"),
+      },
+    ],
+  },
+
+  // blogs dashboard
+  {
+    path: "/dashboard/blogs",
+    component: () => import("../layouts/BlogLayout.vue"),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "",
+        name: "blogs",
+        component: () => import("../screens/dashboard/blogs/BlogLists.vue"),
+      },
+      {
+        path: "create",
+        name: "create-blog",
+        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
+      },
+      {
+        path: ":id",
+        name: "edit-blog",
+        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
+      },
+    ],
+  },
+
+  // db query generator dashboard
+  {
+    path: "/dashboard",
+    component: () => import("../layouts/DbQueryLayout.vue"),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "database-ai/projects",
+        component: () =>
+          import("../screens/dashboard/databaseAI/ProjectList.vue"),
+      },
+      {
+        path: "database-ai/project/:id/config",
+        component: () =>
+          import("../screens/dashboard/databaseAI/ProjectConfig.vue"),
+      },
+      {
+        path: "database-ai/project/:id/chat",
+        component: () =>
+          import("../screens/dashboard/databaseAI/QueryChat.vue"),
+      },
+    ],
+  },
+
+  // call analysis dashboard
+  {
+    path: "/dashboard",
+    component: () => import("../layouts/CallAnalysisLayout.vue"),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "call-batches",
+        component: () => import("../screens/dashboard/CallAnalysis.vue"),
+        meta: { tab: 1 },
+      },
+      {
+        path: "/call-analysis/report/:id",
+        name: "CallAnalysisReport",
+        component: () => import("../screens/dashboard/CallAnalysisReport.vue"),
+      },
+      {
+        path: "/batch-analysis/:id",
+        name: "BatchAnalysis",
+        component: () => import("../screens/dashboard/BatchCallAnalysis.vue"),
       },
     ],
   },

@@ -197,7 +197,7 @@ export default {
         items: [
           {
             name: "Home",
-            link: "/dashboard/forms",
+            link: "/dashboard/database-ai/projects",
             icon: "mdi-view-dashboard-outline",
           },
         ],

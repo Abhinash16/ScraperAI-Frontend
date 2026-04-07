@@ -197,7 +197,7 @@ export default {
         items: [
           {
             name: "Home",
-            link: "/dashboard/forms",
+            link: "/dashboard/blogs",
             icon: "mdi-view-dashboard-outline",
           },
         ],

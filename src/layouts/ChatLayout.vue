@@ -80,9 +80,68 @@
 
       <!-- Right side -->
 
-      <v-avatar size="36" color="grey lighten-3" class="ml-2">
-        <v-icon color="black">mdi-account-outline</v-icon>
-      </v-avatar>
+      <v-menu v-model="menu" offset-y left>
+        <template v-slot:activator="{ on, attrs }">
+          <v-avatar
+            v-bind="attrs"
+            v-on="on"
+            size="36"
+            color="primary"
+            class="ml-4 grey lighten-3"
+          >
+            <v-icon color="black">mdi-account</v-icon>
+          </v-avatar>
+        </template>
+
+        <v-card width="240">
+          <!-- Menu Options -->
+          <v-list dense>
+            <!-- Profile -->
+            <v-list-item @click="goToProfile()">
+              <v-list-item-icon>
+                <v-icon>mdi-account-circle</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title class="font-weight-bold">
+                Profile
+              </v-list-item-title>
+            </v-list-item>
+
+            <!-- Integration -->
+            <v-list-item @click="goToIntegration()">
+              <v-list-item-icon>
+                <v-icon>mdi-puzzle-outline</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title class="font-weight-bold">
+                Integration
+              </v-list-item-title>
+            </v-list-item>
+
+            <!-- Security -->
+            <v-list-item @click="goToSecurity()">
+              <v-list-item-icon>
+                <v-icon>mdi-shield-lock-outline</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title class="font-weight-bold">
+                Security
+              </v-list-item-title>
+            </v-list-item>
+          </v-list>
+          <v-divider></v-divider>
+
+          <!-- Logout -->
+          <v-card-actions>
+            <v-btn
+              text
+              color="red"
+              block
+              @click="logoutDialog = true"
+              class="font-weight-bold"
+            >
+              Logout
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-menu>
     </v-app-bar>
 
     <!-- ✅ MAIN CONTENT -->
@@ -92,15 +151,46 @@
         <router-view />
       </v-card>
     </v-container>
+
+    <!-- LOGOUT DIALOG -->
+    <v-dialog v-model="logoutDialog" max-width="360">
+      <v-card rounded="xl" class="text-center">
+        <v-card-text class="pt-6">
+          <v-avatar color="error lighten-5" size="64" class="mb-4">
+            <v-icon color="error" size="36"> mdi-alert-octagon-outline </v-icon>
+          </v-avatar>
+
+          <div class="text-h6 font-weight-bold mb-2">Confirm Logout</div>
+
+          <div class="text-body-2 grey--text">
+            Are you sure you want to log out?
+          </div>
+        </v-card-text>
+
+        <div class="justify-center pb-6">
+          <v-btn text rounded @click="logoutDialog = false" class="mr-2">
+            Cancel
+          </v-btn>
+
+          <v-btn rounded depressed color="error" @click="confirmLogout">
+            Yes, Logout
+          </v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
 <script>
+import { setAuthToken } from "@/service/axios";
+
 export default {
   data: () => ({
     drawer: false,
     mini: true,
     isDesktop: false,
+    menu: false,
+    logoutDialog: false,
     sideNavs: [
       {
         section: "Main",
@@ -161,6 +251,31 @@ export default {
       if (!this.isDesktop) {
         this.drawer = false;
       }
+    },
+
+    goToProfile() {
+      if (this.$route.path !== "/dashboard/profile") {
+        this.$router.push("/dashboard/profile");
+      }
+    },
+
+    goToIntegration() {
+      if (this.$route.path !== "/dashboard/integration") {
+        this.$router.push("/dashboard/integration");
+      }
+    },
+
+    goToSecurity() {
+      if (this.$route.path !== "/dashboard/security") {
+        this.$router.push("/dashboard/security");
+      }
+    },
+
+    confirmLogout() {
+      this.logoutDialog = false;
+      localStorage.removeItem("user-token");
+      setAuthToken(null);
+      this.$router.push("/login");
     },
   },
 };

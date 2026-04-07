@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-6">
+  <div>
     <!-- HEADER -->
     <v-row class="mb-2 align-center">
       <v-col>
@@ -192,7 +192,7 @@
         </div>
       </v-card>
     </v-dialog>
-  </v-container>
+  </div>
 </template>
 
 <script>
