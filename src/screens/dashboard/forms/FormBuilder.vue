@@ -1,14 +1,26 @@
 <template>
-  <v-container class="pa-6">
+  <div>
     <!-- HEADER -->
-    <v-row class="mb-2 align-center">
-      <v-col>
-        <h1 class="text-h5 font-weight-bold">Form Builder</h1>
-        <p class="text-subtitle-2 grey--text">
-          Create dynamic forms like Google Forms
-        </p>
+    <v-row class="mb-6 align-center">
+      <!-- Back Button -->
+      <v-col cols="auto">
+        <v-btn icon text color="primary" @click="$router.back()">
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
       </v-col>
 
+      <!-- Title + Description -->
+      <v-col>
+        <div>
+          <h1 class="text-h5 font-weight-bold mb-1">Form Builder</h1>
+
+          <p class="text-subtitle-2 grey--text mb-0">
+            Create dynamic forms, manage fields, and define stages
+          </p>
+        </div>
+      </v-col>
+
+      <!-- Save Button -->
       <v-col cols="auto">
         <v-btn
           color="primary"
@@ -18,6 +30,7 @@
           :loading="loading"
           :disabled="!isFormValid"
         >
+          <v-icon left small>mdi-content-save</v-icon>
           Save Form
         </v-btn>
       </v-col>
@@ -262,7 +275,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -382,23 +395,29 @@ export default {
     removeStage(index) {
       const stage = this.form.stages[index];
 
-      // ❌ Prevent deleting default stage
       if (stage.isDefault || stage.stage_name === "New") {
         this.$toast.error("Default stage cannot be deleted");
         return;
       }
 
-      // ✅ NEW STAGE (not saved yet → no _id)
       if (!stage._id) {
         this.form.stages.splice(index, 1);
         return;
       }
 
-      // ✅ EXISTING STAGE (has _id → show dialog)
       this.stageToDelete = {
         ...stage,
         index,
       };
+
+      // ✅ SET DEFAULT SELECTED STAGE
+      const availableStages = this.form.stages.filter(
+        (s) => s._id !== stage._id,
+      );
+
+      if (availableStages.length) {
+        this.moveToStageId = availableStages[0]._id; // 👈 first stage selected
+      }
 
       this.stageDeleteDialog = true;
     },
@@ -479,7 +498,6 @@ export default {
         }
 
         this.$toast.success("Form saved successfully");
-        this.$router.push("/dashboard/forms");
       } catch (err) {
         const message = err?.response?.data?.message || "Error saving form";
 

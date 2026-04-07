@@ -2,11 +2,25 @@
   <div>
     <!-- HEADER -->
 
-    <v-row class="align-center">
+    <v-row class="mb-6 align-center">
+      <!-- Back Button -->
+      <v-col cols="auto">
+        <v-btn icon text color="primary" @click="$router.back()">
+          <v-icon>mdi-arrow-left</v-icon>
+        </v-btn>
+      </v-col>
+
+      <!-- Title + Subtitle -->
       <v-col>
         <div class="d-flex align-center">
-          <h1 class="text-h5 font-weight-bold mr-3">{{ formName }}</h1>
+          <h1 class="text-h5 font-weight-bold mb-1">
+            {{ formName || "Untitled Form" }}
+          </h1>
         </div>
+
+        <p class="text-subtitle-2 grey--text mb-0">
+          Manage submissions, track stages, and analyze responses
+        </p>
       </v-col>
     </v-row>
 
