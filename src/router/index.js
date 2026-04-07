@@ -192,6 +192,16 @@ const routes = [
         component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
       },
       {
+        path: "connect-github",
+        name: "github-config",
+        component: () => import("../screens/dashboard/blogs/GithubConfig.vue"),
+      },
+      {
+        path: "help-guide",
+        name: "help-guide",
+        component: () => import("../screens/dashboard/blogs/HelpGuide.vue"),
+      },
+      {
         path: ":id",
         name: "edit-blog",
         component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),

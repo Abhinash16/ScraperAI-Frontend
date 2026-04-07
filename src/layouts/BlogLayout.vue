@@ -200,6 +200,11 @@ export default {
             link: "/dashboard/blogs",
             icon: "mdi-view-dashboard-outline",
           },
+          {
+            name: "Connect Github",
+            link: "/dashboard/blogs/connect-github",
+            icon: "mdi-github",
+          },
         ],
       },
     ],
