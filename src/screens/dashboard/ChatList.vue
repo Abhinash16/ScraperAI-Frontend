@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-chip color="primary" text-color="white" small class="mb-2">
+    <v-chip color="primary" outlined small class="mb-2">
       {{ chats.length }}/{{ total }} Chats Loaded
     </v-chip>
 

@@ -171,23 +171,23 @@ export default {
             },
           ],
         },
-        Settings: {
-          color: "blue-grey",
-          items: [
-            {
-              name: "Integration",
-              link: "/dashboard/integration",
-              icon: "mdi-puzzle-outline",
-              description: "API and Webhooks",
-            },
-            {
-              name: "Security",
-              link: "/dashboard/security",
-              icon: "mdi-shield-lock-outline",
-              description: "Access and Auth",
-            },
-          ],
-        },
+        // Settings: {
+        //   color: "blue-grey",
+        //   items: [
+        //     {
+        //       name: "Integration",
+        //       link: "/dashboard/integration",
+        //       icon: "mdi-puzzle-outline",
+        //       description: "API and Webhooks",
+        //     },
+        //     {
+        //       name: "Security",
+        //       link: "/dashboard/security",
+        //       icon: "mdi-shield-lock-outline",
+        //       description: "Access and Auth",
+        //     },
+        //   ],
+        // },
       },
     };
   },
