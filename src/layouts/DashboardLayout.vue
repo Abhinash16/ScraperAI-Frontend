@@ -3,11 +3,22 @@
     <!-- TOP BAR -->
     <v-app-bar app flat color="white" light elevate-on-scroll>
       <v-container class="py-0 fill-height" fluid>
-        <v-avatar size="40" color="primary" tile class="mr-2 rounded-lg">
+        <v-avatar
+          @click="$router.push('/dashboard')"
+          size="40"
+          color="primary"
+          tile
+          class="mr-2 rounded-lg"
+        >
           <v-img src="../assets/13.png"></v-img>
         </v-avatar>
 
-        <h3 class="font-weight-black secondary--text">scraperAI</h3>
+        <h3
+          @click="$router.push('/dashboard')"
+          class="font-weight-black secondary--text"
+        >
+          scraperAI
+        </h3>
 
         <v-spacer></v-spacer>
 
@@ -23,18 +34,6 @@
             {{ link.name }}
           </v-btn>
         </div>
-
-        <v-btn
-          to="/dashboard/try-chat"
-          color="primary"
-          depressed
-          rounded
-          class="text-capitalize font-weight-bold ml-4"
-        >
-          <v-icon small class="mr-1">mdi-sparkles</v-icon>
-          Try Chat
-        </v-btn>
-
         <v-avatar
           @click="$router.push('/dashboard/profile')"
           size="36"
@@ -42,146 +41,15 @@
         >
           <v-icon color="black">mdi-account</v-icon>
         </v-avatar>
-
-        <v-btn icon class="hidden-md-and-up" @click="mobileDrawer = true">
-          <v-icon>mdi-menu</v-icon>
-        </v-btn>
       </v-container>
     </v-app-bar>
-
-    <!-- MOBILE DRAWER -->
-    <v-navigation-drawer v-model="mobileDrawer" app temporary right>
-      <v-list dense nav>
-        <div v-for="(group, gIndex) in sideNavs" :key="gIndex">
-          <!-- Clickable Section -->
-          <v-subheader
-            class="d-flex align-center justify-space-between text-uppercase font-weight-black grey--text text--darken-1 mt-4 mb-2"
-            style="font-size: 10px; letter-spacing: 1px; cursor: pointer"
-            @click="toggleSection(gIndex)"
-          >
-            {{ group.section }}
-
-            <v-icon small>
-              {{ openSections[gIndex] ? "mdi-chevron-up" : "mdi-chevron-down" }}
-            </v-icon>
-          </v-subheader>
-
-          <!-- Expandable Items -->
-          <v-expand-transition>
-            <div v-show="openSections[gIndex]">
-              <v-list-item-group color="primary">
-                <v-list-item
-                  v-for="(item, index) in group.items"
-                  :key="index"
-                  :to="item.link"
-                  exact
-                  active-class="primary--text font-weight-bold white"
-                  class="mb-2 rounded-lg"
-                >
-                  <v-list-item-icon class="mr-4">
-                    <v-icon small>{{ item.icon }}</v-icon>
-                  </v-list-item-icon>
-
-                  <v-list-item-content>
-                    <v-list-item-title class="body-2">
-                      {{ item.name }}
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list-item-group>
-            </div>
-          </v-expand-transition>
-        </div>
-
-        <v-divider class="my-4"></v-divider>
-
-        <v-list-item @click="logoutDialog = true">
-          <v-list-item-icon>
-            <v-icon color="error">mdi-logout</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title class="error--text"> Logout </v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
 
     <!-- MAIN -->
     <v-container fluid>
       <!-- ================= UNAUTHORIZED MESSAGE ================= -->
-      <v-row>
-        <!-- SIDEBAR -->
-        <v-col cols="12" md="3" lg="2" class="hidden-sm-and-down">
-          <v-sheet color="transparent" class="sticky-sidebar">
-            <v-list flat rounded color="transparent">
-              <div v-for="(group, gIndex) in sideNavs" :key="gIndex">
-                <!-- Clickable Section -->
-                <v-subheader
-                  class="d-flex align-center justify-space-between text-uppercase font-weight-black grey--text text--darken-1 mt-4 mb-2"
-                  style="font-size: 10px; letter-spacing: 1px; cursor: pointer"
-                  @click="toggleSection(gIndex)"
-                >
-                  {{ group.section }}
-
-                  <v-icon small>
-                    {{
-                      openSections[gIndex]
-                        ? "mdi-chevron-up"
-                        : "mdi-chevron-down"
-                    }}
-                  </v-icon>
-                </v-subheader>
-
-                <!-- Expandable Items -->
-                <v-expand-transition>
-                  <div v-show="openSections[gIndex]">
-                    <v-list-item-group color="primary">
-                      <v-list-item
-                        v-for="(item, index) in group.items"
-                        :key="index"
-                        :to="item.link"
-                        exact
-                        active-class="primary--text font-weight-bold white"
-                        class="mb-2 rounded-lg"
-                      >
-                        <v-list-item-icon class="mr-4">
-                          <v-icon small>{{ item.icon }}</v-icon>
-                        </v-list-item-icon>
-
-                        <v-list-item-content>
-                          <v-list-item-title class="body-2">
-                            {{ item.name }}
-                          </v-list-item-title>
-                        </v-list-item-content>
-                      </v-list-item>
-                    </v-list-item-group>
-                  </div>
-                </v-expand-transition>
-              </div>
-
-              <v-divider class="my-6 mx-4"></v-divider>
-
-              <v-list-item @click="logoutDialog = true">
-                <v-list-item-icon class="mr-4">
-                  <v-icon small>mdi-logout</v-icon>
-                </v-list-item-icon>
-                <v-list-item-title class="body-2"> Logout </v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-sheet>
-        </v-col>
-
-        <!-- CONTENT -->
-        <v-col cols="12" md="9" lg="10">
-          <v-card min-height="85vh" flat class="rounded-xl pa-8">
-            <div class="d-flex align-center mb-8">
-              <h2 class="text-h5 font-weight-black secondary--text">
-                {{ currentRouteName }}
-              </h2>
-            </div>
-
-            <router-view></router-view>
-          </v-card>
-        </v-col>
-      </v-row>
+      <v-card min-height="85vh" flat class="rounded-xl pa-8">
+        <router-view></router-view>
+      </v-card>
     </v-container>
 
     <!-- LOGOUT DIALOG -->
@@ -223,9 +91,9 @@ export default {
     openSections: { 0: true },
 
     links: [
-      { name: "Overview", path: "/" },
-      { name: "Documentation", path: "/dashboard/documentation" },
-      { name: "API Reference", path: "/api" },
+      { name: "Dashboard", path: "/dashboard" },
+      // { name: "Documentation", path: "/dashboard/documentation" },
+      // { name: "API Reference", path: "/api" },
     ],
 
     sideNavs: [
@@ -264,9 +132,9 @@ export default {
           },
           {
             name: "Chat Analytics",
-        link: "/dashboard/chat-analytics",
-        icon: "mdi-chart-line",
-          }
+            link: "/dashboard/chat-analytics",
+            icon: "mdi-chart-line",
+          },
         ],
       },
       {
@@ -348,15 +216,13 @@ export default {
             icon: "mdi-shield-lock-outline",
           },
           {
-        name: "Integration",
-        link: "/dashboard/integration",
-        icon: "mdi-puzzle-outline",
-      },
-          
+            name: "Integration",
+            link: "/dashboard/integration",
+            icon: "mdi-puzzle-outline",
+          },
         ],
-        
       },
-      
+
       {
         section: "Other",
         items: [
@@ -364,6 +230,11 @@ export default {
             name: "Blogs",
             link: "/dashboard/blogs",
             icon: "mdi-newspaper-variant-outline",
+          },
+          {
+            name: "Forms",
+            link: "/dashboard/forms",
+            icon: "mdi-list-box-outline",
           },
         ],
       },

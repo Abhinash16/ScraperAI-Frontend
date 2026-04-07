@@ -1,12 +1,6 @@
 <template>
   <div>
-    <v-card
-      class="pa-4 my-6"
-      rounded="xl"
-      outlined
-      color="#eff2fb"
-      max-width="800"
-    >
+    <v-card class="pa-4" rounded="xl" outlined color="#eff2fb" max-width="800">
       <!-- HEADER -->
       <div class="d-flex align-center mb-6">
         <v-avatar

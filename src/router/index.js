@@ -17,10 +17,10 @@ const routes = [
     path: "/dashboard",
     component: () => import("../layouts/DashboardLayout.vue"),
     children: [
-      {
-        path: "/",
-        component: () => import("../screens/dashboard/CompanyInsights.vue"),
-      },
+      // {
+      //   path: "/",
+      //   component: () => import("../screens/dashboard/CompanyInsights.vue"),
+      // },
       {
         path: "/",
         component: () => import("../screens/dashboard/DasboardHome.vue"),
@@ -47,14 +47,7 @@ const routes = [
         component: () => import("../screens/dashboard/SecurityPage.vue"),
         meta: { hideTab: true },
       },
-      {
-        path: "chat",
-        component: () => import("../screens/dashboard/ChatList.vue"),
-      },
-      {
-        path: "chat/:chatId",
-        component: () => import("../screens/dashboard/ChatView.vue"),
-      },
+
       {
         path: "try-chat",
         component: () => import("../screens/dashboard/TryChat.vue"),
@@ -94,11 +87,11 @@ const routes = [
         component: () =>
           import("../screens/dashboard/insights/SeoGrowthReport.vue"),
       },
-      {
-        path: "chatbot-knowledge-score",
-        component: () =>
-          import("../screens/dashboard/insights/ChatbotKnowledgeScore.vue"),
-      },
+      // {
+      //   path: "chatbot-knowledge-score",
+      //   component: () =>
+      //     import("../screens/dashboard/insights/ChatbotKnowledgeScore.vue"),
+      // },
 
       {
         path: "database-ai/projects",
@@ -147,6 +140,11 @@ const routes = [
         name: "edit-blog",
         component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
       },
+      // {
+      //   path: "whatsapp-bot",
+      //   name: "whatsapp-bot",
+      //   component: () => import("../screens/dashboard/WhatsappBot.vue"),
+      // },
       {
         path: "whatsapp-bot",
         name: "whatsapp-bot",
@@ -165,11 +163,94 @@ const routes = [
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },
+
+  {
+    path: "/dashboard/chat",
+    component: () => import("../layouts/ChatLayout.vue"),
+    children: [
+      {
+        path: "",
+        component: () => import("../screens/dashboard/ChatList.vue"),
+      },
+      {
+        path: "insights",
+        component: () => import("../screens/dashboard/AnalyticsDashboard.vue"),
+      },
+      {
+        path: "chatbot-knowledge-score",
+        component: () =>
+          import("../screens/dashboard/insights/ChatbotKnowledgeScore.vue"),
+      },
+      {
+        path: "whatsapp-bot",
+        component: () => import("../screens/dashboard/WhatsappBot.vue"),
+      },
+      {
+        path: ":chatId",
+        component: () => import("../screens/dashboard/ChatView.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "/dashboard/forms",
+    component: () => import("../layouts/FormsDashboardLayout.vue"),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "",
+        name: "FormsList",
+        component: () => import("../screens/dashboard/forms/FormList.vue"),
+      },
+      {
+        path: "create",
+        name: "CreateForm",
+        component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
+      },
+      {
+        path: ":id/edit",
+        name: "EditForm",
+        component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
+      },
+      {
+        path: ":id/submissions",
+        name: "FormSubmissions",
+        component: () =>
+          import("../screens/dashboard/forms/FormSubmissions.vue"),
+      },
+    ],
+  },
+
+  // {
+  //   path: "/dashboard/forms/create",
+  //   name: "/dashboardCreateForm",
+  //   component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
+  // },
+
+  // {
+  //   path: "/dashboard/forms/:id/edit",
+  //   name: "EditForm",
+  //   component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
+  // },
+
+  // {
+  //   path: "/dashboard/forms/:id/submissions",
+  //   name: "FormSubmissions",
+  //   component: () => import("../screens/dashboard/forms/FormSubmissions.vue"),
+  // },
 ];
 
 const router = new VueRouter({
   mode: "history",
   routes,
+
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition; // browser back/forward
+    } else {
+      return { x: 0, y: 0 }; // always go top
+    }
+  },
 });
 
 // Define a function to check if the user is logged in
