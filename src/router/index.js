@@ -146,6 +146,11 @@ const routes = [
       //   component: () => import("../screens/dashboard/WhatsappBot.vue"),
       // },
       {
+        path: "whatsapp-bot",
+        name: "whatsapp-bot",
+        component: () => import("../screens/dashboard/WhatsappBot.vue"),
+      },
+      {
         path: "documentation",
         name: "documentation",
         component: () => import("../screens/dashboard/DocumentationPage.vue"),
