@@ -125,26 +125,7 @@ const routes = [
         name: "ContentChunksList",
         component: () => import("../screens/dashboard/ContentChunksList.vue"),
       },
-      {
-        path: "blogs",
-        name: "blogs",
-        component: () => import("../screens/dashboard/blogs/BlogLists.vue"),
-      },
-      {
-        path: "blogs/create",
-        name: "create-blog",
-        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
-      },
-      {
-        path: "blogs/:id",
-        name: "edit-blog",
-        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
-      },
-      // {
-      //   path: "whatsapp-bot",
-      //   name: "whatsapp-bot",
-      //   component: () => import("../screens/dashboard/WhatsappBot.vue"),
-      // },
+
       {
         path: "whatsapp-bot",
         name: "whatsapp-bot",
@@ -164,6 +145,7 @@ const routes = [
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },
 
+  // chat dashboard
   {
     path: "/dashboard/chat",
     component: () => import("../layouts/ChatLayout.vue"),
@@ -192,6 +174,7 @@ const routes = [
     ],
   },
 
+  // forms dashboard
   {
     path: "/dashboard/forms",
     component: () => import("../layouts/FormsDashboardLayout.vue"),
@@ -217,6 +200,30 @@ const routes = [
         name: "FormSubmissions",
         component: () =>
           import("../screens/dashboard/forms/FormSubmissions.vue"),
+      },
+    ],
+  },
+
+  // forms dashboard
+  {
+    path: "/dashboard/blogs",
+    component: () => import("../layouts/BlogLayout.vue"),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "",
+        name: "blogs",
+        component: () => import("../screens/dashboard/blogs/BlogLists.vue"),
+      },
+      {
+        path: "create",
+        name: "create-blog",
+        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
+      },
+      {
+        path: ":id",
+        name: "edit-blog",
+        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
       },
     ],
   },
