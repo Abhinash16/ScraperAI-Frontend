@@ -384,10 +384,22 @@ export default {
         );
         const d = res.data.data || [];
 
-        this.lineOptions.xaxis.categories = d.map((i) => i.date);
         this.lineSeries = [
-          { name: "Active Chats", data: d.map((i) => i.count) },
+          {
+            name: "Active Chats",
+            data: d.map((i) => ({
+              x: new Date(i.date).getTime(), // important
+              y: i.count,
+            })),
+          },
         ];
+
+        this.lineOptions = {
+          ...this.lineOptions,
+          xaxis: {
+            type: "datetime",
+          },
+        };
       } catch (error) {
         console.error("Trend error:", error);
       }
@@ -416,8 +428,22 @@ export default {
         );
         const d = res.data.data || [];
 
-        this.msgOptions.xaxis.categories = d.map((i) => i.date);
-        this.msgSeries = [{ name: "Messages", data: d.map((i) => i.count) }];
+        this.msgSeries = [
+          {
+            name: "Messages",
+            data: d.map((i) => ({
+              x: new Date(i.date).getTime(),
+              y: i.count,
+            })),
+          },
+        ];
+
+        this.msgOptions = {
+          ...this.msgOptions,
+          xaxis: {
+            type: "datetime",
+          },
+        };
       } catch (error) {
         console.error("Messages error:", error);
       }
