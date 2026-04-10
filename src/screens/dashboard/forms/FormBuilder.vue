@@ -397,7 +397,15 @@ export default {
         ],
       },
 
-      fieldTypes: ["text", "number", "select", "radio", "checkbox", "link"],
+      fieldTypes: [
+        "text",
+        "number",
+        "select",
+        "radio",
+        "checkbox",
+        "textarea",
+        "link",
+      ],
 
       fieldDialog: false,
       fieldForm: {},
