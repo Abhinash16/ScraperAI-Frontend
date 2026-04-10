@@ -238,7 +238,7 @@ export default {
 
       const fields = responseFields.map((x) => ({
         text: x.label,
-        value: x.label,
+        value: x.key,
       }));
 
       this.dynamicFields = fields;

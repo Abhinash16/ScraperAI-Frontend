@@ -60,7 +60,7 @@
             />
           </v-col>
 
-          <v-col cols="12" md="3">
+          <!-- <v-col cols="12" md="3">
             <v-select
               v-model="selectedStage"
               :items="stages"
@@ -71,7 +71,7 @@
               dense
               clearable
             />
-          </v-col>
+          </v-col> -->
 
           <v-col cols="12" md="3" class="d-flex">
             <v-btn color="primary" block @click="applyFilters">
@@ -199,7 +199,6 @@
         </v-card>
       </v-col>
     </v-row>
-    ```
   </div>
 </template>
 
@@ -377,7 +376,7 @@ export default {
 
         // ✅ map to apex format
         const seriesData = data.map((i) => ({
-          x: new Date(i.date).getTime(), // dynamic date from API
+          x: new Date(i.date + "T00:00:00").getTime(), // dynamic date from API
           y: i.count,
         }));
 

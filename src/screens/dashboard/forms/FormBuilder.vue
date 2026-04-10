@@ -53,6 +53,8 @@
       <v-tabs v-model="tab" color="primary">
         <v-tab>Fields</v-tab>
         <v-tab>Stages</v-tab>
+        <v-tab v-if="form.fields.length > 1">Preview</v-tab>
+        <v-tab v-if="form.fields.length > 1">API Integration</v-tab>
       </v-tabs>
     </v-card>
 
@@ -186,6 +188,101 @@
       </v-card>
     </v-card>
 
+    <v-card
+      v-if="tab === 2"
+      outlined
+      rounded="xl"
+      class="pa-0 mb-6"
+      color="#f8f9fd"
+      height="600"
+    >
+      <iframe
+        :src="`${baseURL}/forms/f/${$route.params.id}`"
+        width="100%"
+        height="100%"
+        style="border: none; border-radius: 12px"
+      ></iframe>
+    </v-card>
+    <v-card
+      v-if="tab === 3"
+      outlined
+      rounded="xl"
+      class="pa-5 mb-6"
+      color="#f8f9fd"
+    >
+      <!-- HEADER -->
+      <div class="d-flex justify-space-between align-center mb-4">
+        <div>
+          <div class="text-h6 font-weight-bold">API Integration</div>
+          <div class="text-caption grey--text">
+            Send form responses to external API
+          </div>
+        </div>
+
+        <v-switch v-model="integration.enabled" label="Enable" inset />
+      </div>
+
+      <v-divider class="mb-4" />
+
+      <div v-if="integration.enabled">
+        <!-- API URL -->
+        <v-text-field
+          v-model="integration.url"
+          label="API Endpoint URL"
+          placeholder="https://api.example.com/submit"
+          outlined
+          dense
+        />
+
+        <!-- METHOD -->
+        <v-select
+          v-model="integration.method"
+          :items="['POST', 'PUT']"
+          label="HTTP Method"
+          outlined
+          dense
+        />
+
+        <!-- HEADERS -->
+        <div class="mt-4">
+          <div class="font-weight-medium mb-2">Headers</div>
+
+          <v-row
+            v-for="(header, i) in integration.headers"
+            :key="i"
+            class="mb-2"
+          >
+            <v-col cols="5">
+              <v-text-field v-model="header.key" label="Key" outlined dense />
+            </v-col>
+
+            <v-col cols="5">
+              <v-text-field
+                v-model="header.value"
+                label="Value"
+                outlined
+                dense
+              />
+            </v-col>
+
+            <v-col cols="2" class="d-flex align-center">
+              <v-btn icon @click="removeHeader(i)">
+                <v-icon color="red">mdi-delete</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+
+          <v-btn small text color="primary" @click="addHeader">
+            + Add Header
+          </v-btn>
+        </div>
+      </div>
+
+      <div v-else class="text-center grey--text py-6">
+        Enable API integration to configure
+      </div>
+    </v-card>
+
     <!-- FIELD DIALOG -->
     <v-dialog v-model="fieldDialog" max-width="500">
       <v-card rounded="xl">
@@ -208,25 +305,29 @@
           <v-select
             v-model="fieldForm.type"
             :items="fieldTypes"
+            item-text="text"
+            item-value="value"
             label="Field Type"
             outlined
             dense
-            hide-details="auto"
           />
 
-          <v-switch
-            v-model="fieldForm.required"
-            hide-details="auto"
-            label="Required"
-          />
+          <v-switch v-model="fieldForm.required" label="Required" />
 
+          <!-- OPTIONS -->
           <v-combobox
             v-if="isOptionField"
             v-model="fieldForm.options"
             multiple
             chips
             label="Options"
-            hide-details="auto"
+          />
+
+          <!-- LINK TEXT -->
+          <v-text-field
+            v-if="fieldForm.type === 'link'"
+            v-model="fieldForm.link_text"
+            label="Link Text"
           />
         </v-card-text>
 
@@ -284,6 +385,7 @@ import apiClient from "@/service/axios";
 export default {
   data() {
     return {
+      baseURL: process.env.VUE_APP_API_BASE_URL,
       loading: false,
       tab: 0,
 
@@ -295,7 +397,7 @@ export default {
         ],
       },
 
-      fieldTypes: ["text", "number", "select", "radio", "checkbox"],
+      fieldTypes: ["text", "number", "select", "radio", "checkbox", "link"],
 
       fieldDialog: false,
       fieldForm: {},
@@ -306,6 +408,13 @@ export default {
       stageToDelete: null,
       moveToStageId: null,
       deletedStageMapping: [],
+
+      integration: {
+        enabled: false,
+        url: "",
+        method: "POST",
+        headers: [],
+      },
     };
   },
 
@@ -480,6 +589,7 @@ export default {
             type: f.type,
             required: f.required,
             options: f.options || [],
+            link_text: f.link_text || "",
           })),
 
           stages: this.form.stages.map((s, i) => ({
@@ -489,6 +599,7 @@ export default {
           })),
 
           deletedStageMapping: this.deletedStageMapping,
+          integration: this.integration,
         };
 
         if (this.isEditMode) {
@@ -505,6 +616,13 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    addHeader() {
+      this.integration.headers.push({ key: "", value: "" });
+    },
+
+    removeHeader(i) {
+      this.integration.headers.splice(i, 1);
     },
   },
 };
