@@ -53,8 +53,7 @@
       <v-tabs v-model="tab" color="primary">
         <v-tab>Fields</v-tab>
         <v-tab>Stages</v-tab>
-        <v-tab v-if="form.fields.length > 1">Share Link</v-tab>
-        <v-tab v-if="form.fields.length > 1">API Integration</v-tab>
+        <v-tab v-if="form.fields.length > 1">Share</v-tab>
       </v-tabs>
     </v-card>
 
@@ -219,43 +218,26 @@
           height="100%"
           style="border: none; border-radius: 12px"
         ></iframe>
-      </v-container>
-    </v-card>
-    <v-card
-      v-if="tab === 3"
-      outlined
-      rounded="xl"
-      class="pa-5 mb-6"
-      color="#f8f9fd"
-    >
-      <!-- HEADER -->
-      <div class="d-flex justify-space-between align-center mb-4">
-        <div>
-          <div class="text-h6 font-weight-bold">API URL</div>
-          <div class="text-caption grey--text">
-            <!-- api/forms/{{FORM_ID}}/submit -->
-            You can set a webhook URL to send form responses directly to your
-            server:
-          </div>
 
+        <div class="d-flex justify-space-between align-center mb-4">
           <div>
-            API:
-            <strong>{{
-              `${baseURL}/forms/${$route.params.id}/submit`
-            }}</strong>
+            <div class="text-h6 font-weight-bold">API</div>
+            <div class="text-caption grey--text">
+              You can set a webhook URL to send form responses directly to your
+              server:
+            </div>
+
+            <div>
+              API:
+              <strong>{{
+                `${baseURL}/forms/${$route.params.id}/submit`
+              }}</strong>
+            </div>
           </div>
+
+          <v-switch v-model="integration.enabled" label="Enable" inset />
         </div>
-
-        <v-switch v-model="integration.enabled" label="Enable" inset />
-      </div>
-
-      <v-divider class="mb-4" />
-
-      <div v-if="integration.enabled"></div>
-
-      <div v-else class="text-center grey--text py-6">
-        Enable API integration to configure
-      </div>
+      </v-container>
     </v-card>
 
     <!-- FIELD DIALOG -->
@@ -351,6 +333,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    
   </div>
 </template>
 
