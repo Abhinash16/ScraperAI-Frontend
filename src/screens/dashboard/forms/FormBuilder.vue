@@ -53,6 +53,7 @@
       <v-tabs v-model="tab" color="primary">
         <v-tab>Fields</v-tab>
         <v-tab>Stages</v-tab>
+        <v-tab v-if="form.fields.length > 1">Share</v-tab>
       </v-tabs>
     </v-card>
 
@@ -186,6 +187,59 @@
       </v-card>
     </v-card>
 
+    <v-card
+      v-if="tab === 2"
+      outlined
+      rounded="xl"
+      class="pa-0 mb-6"
+      color="#f8f9fd"
+      height="600"
+    >
+      <v-container>
+        <h1>Share Link</h1>
+        <div>
+          Your form is now published and ready to be shared with the world! Copy
+          this link to share your form on social media, messaging apps or via
+          email.
+        </div>
+
+        <div>
+          {{ `${baseURL}/forms/f/${$route.params.id}` }}
+
+          <v-btn @click="copyLink($route.params.id)">Copy</v-btn>
+        </div>
+
+        <!-- show preview of form here using iframe  -->
+        <!-- 👇 Iframe preview -->
+
+        <iframe
+          :src="`${baseURL}/forms/f/${$route.params.id}`"
+          width="100%"
+          height="100%"
+          style="border: none; border-radius: 12px"
+        ></iframe>
+
+        <div class="d-flex justify-space-between align-center mb-4">
+          <div>
+            <div class="text-h6 font-weight-bold">API</div>
+            <div class="text-caption grey--text">
+              You can set a webhook URL to send form responses directly to your
+              server:
+            </div>
+
+            <div>
+              API:
+              <strong>{{
+                `${baseURL}/forms/${$route.params.id}/submit`
+              }}</strong>
+            </div>
+          </div>
+
+          <v-switch v-model="integration.enabled" label="Enable" inset />
+        </div>
+      </v-container>
+    </v-card>
+
     <!-- FIELD DIALOG -->
     <v-dialog v-model="fieldDialog" max-width="500">
       <v-card rounded="xl">
@@ -208,25 +262,29 @@
           <v-select
             v-model="fieldForm.type"
             :items="fieldTypes"
+            item-text="text"
+            item-value="value"
             label="Field Type"
             outlined
             dense
-            hide-details="auto"
           />
 
-          <v-switch
-            v-model="fieldForm.required"
-            hide-details="auto"
-            label="Required"
-          />
+          <v-switch v-model="fieldForm.required" label="Required" />
 
+          <!-- OPTIONS -->
           <v-combobox
             v-if="isOptionField"
             v-model="fieldForm.options"
             multiple
             chips
             label="Options"
-            hide-details="auto"
+          />
+
+          <!-- LINK TEXT -->
+          <v-text-field
+            v-if="fieldForm.type === 'link'"
+            v-model="fieldForm.link_text"
+            label="Link Text"
           />
         </v-card-text>
 
@@ -275,6 +333,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    
   </div>
 </template>
 
@@ -284,6 +343,7 @@ import apiClient from "@/service/axios";
 export default {
   data() {
     return {
+      baseURL: process.env.VUE_APP_API_BASE_URL,
       loading: false,
       tab: 0,
 
@@ -295,7 +355,15 @@ export default {
         ],
       },
 
-      fieldTypes: ["text", "number", "select", "radio", "checkbox"],
+      fieldTypes: [
+        "text",
+        "number",
+        "select",
+        "radio",
+        "checkbox",
+        "textarea",
+        "link",
+      ],
 
       fieldDialog: false,
       fieldForm: {},
@@ -306,6 +374,13 @@ export default {
       stageToDelete: null,
       moveToStageId: null,
       deletedStageMapping: [],
+
+      integration: {
+        enabled: false,
+        url: "",
+        method: "POST",
+        headers: [],
+      },
     };
   },
 
@@ -347,6 +422,10 @@ export default {
   },
 
   methods: {
+    copyLink(id) {
+      let baseUrl = process.env.VUE_APP_API_BASE_URL;
+      navigator.clipboard.writeText(`${baseUrl}/forms/f/${id}`);
+    },
     // ================= FIELD =================
     openFieldDialog() {
       this.fieldForm = {
@@ -480,6 +559,7 @@ export default {
             type: f.type,
             required: f.required,
             options: f.options || [],
+            link_text: f.link_text || "",
           })),
 
           stages: this.form.stages.map((s, i) => ({
@@ -489,6 +569,7 @@ export default {
           })),
 
           deletedStageMapping: this.deletedStageMapping,
+          integration: this.integration,
         };
 
         if (this.isEditMode) {
@@ -505,6 +586,13 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    addHeader() {
+      this.integration.headers.push({ key: "", value: "" });
+    },
+
+    removeHeader(i) {
+      this.integration.headers.splice(i, 1);
     },
   },
 };

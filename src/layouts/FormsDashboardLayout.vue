@@ -14,7 +14,7 @@
       width="260"
     >
       <!-- LOGO -->
-      <v-list-item class="px-2 pt-1">
+      <v-list-item class="px-2 pt-1" to="/dashboard" link>
         <v-list-item-avatar color="primary" class="rounded-lg">
           <v-img src="../assets/13.png"></v-img>
         </v-list-item-avatar>

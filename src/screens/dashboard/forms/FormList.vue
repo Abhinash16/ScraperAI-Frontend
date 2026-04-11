@@ -62,6 +62,19 @@
 
             <!-- RIGHT ACTIONS -->
             <div class="d-flex">
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    icon
+                    small
+                    v-on="on"
+                    @click.stop="viewAnalytics(form._id)"
+                  >
+                    <v-icon small>mdi-chart-line</v-icon>
+                  </v-btn>
+                </template>
+                <span>Analytics</span>
+              </v-tooltip>
               <!-- EDIT -->
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
@@ -250,9 +263,13 @@ export default {
     viewSubmissions(id) {
       this.$router.push(`/dashboard/forms/${id}/submissions`);
     },
+    viewAnalytics(id) {
+      this.$router.push(`/dashboard/forms/${id}/analytics`);
+    },
 
     copyLink(id) {
-      navigator.clipboard.writeText(`${window.location.origin}/form/${id}`);
+      let baseUrl = process.env.VUE_APP_API_BASE_URL;
+      navigator.clipboard.writeText(`${baseUrl}/forms/f/${id}`);
     },
 
     confirmDelete(form) {

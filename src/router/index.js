@@ -172,6 +172,11 @@ const routes = [
         component: () =>
           import("../screens/dashboard/forms/FormSubmissions.vue"),
       },
+      {
+        path: ":id/analytics",
+        name: "FormAnalytics",
+        component: () => import("../screens/dashboard/forms/FormAnalytics.vue"),
+      },
     ],
   },
 
