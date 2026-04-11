@@ -53,7 +53,7 @@
       <v-tabs v-model="tab" color="primary">
         <v-tab>Fields</v-tab>
         <v-tab>Stages</v-tab>
-        <v-tab v-if="form.fields.length > 1">Preview</v-tab>
+        <v-tab v-if="form.fields.length > 1">Share Link</v-tab>
         <v-tab v-if="form.fields.length > 1">API Integration</v-tab>
       </v-tabs>
     </v-card>
@@ -196,12 +196,30 @@
       color="#f8f9fd"
       height="600"
     >
-      <iframe
-        :src="`${baseURL}/forms/f/${$route.params.id}`"
-        width="100%"
-        height="100%"
-        style="border: none; border-radius: 12px"
-      ></iframe>
+      <v-container>
+        <h1>Share Link</h1>
+        <div>
+          Your form is now published and ready to be shared with the world! Copy
+          this link to share your form on social media, messaging apps or via
+          email.
+        </div>
+
+        <div>
+          {{ `${baseURL}/forms/f/${$route.params.id}` }}
+
+          <v-btn @click="copyLink($route.params.id)">Copy</v-btn>
+        </div>
+
+        <!-- show preview of form here using iframe  -->
+        <!-- 👇 Iframe preview -->
+
+        <iframe
+          :src="`${baseURL}/forms/f/${$route.params.id}`"
+          width="100%"
+          height="100%"
+          style="border: none; border-radius: 12px"
+        ></iframe>
+      </v-container>
     </v-card>
     <v-card
       v-if="tab === 3"
@@ -213,9 +231,18 @@
       <!-- HEADER -->
       <div class="d-flex justify-space-between align-center mb-4">
         <div>
-          <div class="text-h6 font-weight-bold">API Integration</div>
+          <div class="text-h6 font-weight-bold">API URL</div>
           <div class="text-caption grey--text">
-            Send form responses to external API
+            <!-- api/forms/{{FORM_ID}}/submit -->
+            You can set a webhook URL to send form responses directly to your
+            server:
+          </div>
+
+          <div>
+            API:
+            <strong>{{
+              `${baseURL}/forms/${$route.params.id}/submit`
+            }}</strong>
           </div>
         </div>
 
@@ -224,59 +251,7 @@
 
       <v-divider class="mb-4" />
 
-      <div v-if="integration.enabled">
-        <!-- API URL -->
-        <v-text-field
-          v-model="integration.url"
-          label="API Endpoint URL"
-          placeholder="https://api.example.com/submit"
-          outlined
-          dense
-        />
-
-        <!-- METHOD -->
-        <v-select
-          v-model="integration.method"
-          :items="['POST', 'PUT']"
-          label="HTTP Method"
-          outlined
-          dense
-        />
-
-        <!-- HEADERS -->
-        <div class="mt-4">
-          <div class="font-weight-medium mb-2">Headers</div>
-
-          <v-row
-            v-for="(header, i) in integration.headers"
-            :key="i"
-            class="mb-2"
-          >
-            <v-col cols="5">
-              <v-text-field v-model="header.key" label="Key" outlined dense />
-            </v-col>
-
-            <v-col cols="5">
-              <v-text-field
-                v-model="header.value"
-                label="Value"
-                outlined
-                dense
-              />
-            </v-col>
-
-            <v-col cols="2" class="d-flex align-center">
-              <v-btn icon @click="removeHeader(i)">
-                <v-icon color="red">mdi-delete</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
-
-          <v-btn small text color="primary" @click="addHeader">
-            + Add Header
-          </v-btn>
-        </div>
-      </div>
+      <div v-if="integration.enabled"></div>
 
       <div v-else class="text-center grey--text py-6">
         Enable API integration to configure
@@ -464,6 +439,10 @@ export default {
   },
 
   methods: {
+    copyLink(id) {
+      let baseUrl = process.env.VUE_APP_API_BASE_URL;
+      navigator.clipboard.writeText(`${baseUrl}/forms/f/${id}`);
+    },
     // ================= FIELD =================
     openFieldDialog() {
       this.fieldForm = {

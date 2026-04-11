@@ -268,7 +268,8 @@ export default {
     },
 
     copyLink(id) {
-      navigator.clipboard.writeText(`${window.location.origin}/form/${id}`);
+      let baseUrl = process.env.VUE_APP_API_BASE_URL;
+      navigator.clipboard.writeText(`${baseUrl}/forms/f/${id}`);
     },
 
     confirmDelete(form) {

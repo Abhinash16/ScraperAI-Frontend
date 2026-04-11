@@ -3,9 +3,10 @@
     <!-- Tabs Card -->
     <v-card outlined rounded="lg" class="mb-6">
       <v-tabs v-model="currentTab" color="primary" grow>
-        <v-tab value="profile">Profile</v-tab>
-        <v-tab value="security">Security</v-tab>
-        <v-tab value="api-keys">
+         <v-tab value="0">Profile</v-tab>
+        <v-tab value="1">Company Profile</v-tab>
+        <v-tab value="2">Security</v-tab>
+        <v-tab value="3">
           API Keys
           <v-chip class="ml-2" x-small outlined color="warning">
             Legacy
@@ -17,6 +18,52 @@
     <!-- ================= PROFILE ================= -->
     <v-card
       v-if="currentTab === 0"
+      class="pa-6 my-6"
+      rounded="xl"
+      outlined
+      color="#eff2fb"
+      max-width="800"
+    >
+      <div class="d-flex align-center mb-6">
+        <v-avatar rounded="xl" color="#cde6ff" size="50" class="mr-4">
+          <v-icon color="black">mdi-account</v-icon>
+        </v-avatar>
+        <div>
+          <h3 class="black--text">User Details</h3>
+          <div class="text-caption black--text">
+            View your personal information associated with this account.
+          </div>
+        </div>
+      </div>
+
+      <!-- Let's create a view-only section -->
+      <v-row>
+        <v-col cols="12" md="6">
+          <div class="label">Name</div>
+          <div>{{ currentUser.user.name }}</div>
+        </v-col>
+
+        <v-col cols="12" md="6">
+          <div class="label">Email</div>
+          <div>{{ currentUser.user.email }}</div>
+        </v-col>
+
+        <v-col cols="12" md="6">
+          <div class="label">Phone</div>
+          <div>{{ currentUser.user.phone || 'N/A' }}</div>
+        </v-col>
+
+        <v-col cols="12" md="6"> 
+          <div class="label">Status</div>
+          <div>{{ currentUser.user.status === 1 ? 'Active' : 'Inactive' }}</div>
+        </v-col>
+      </v-row>
+     
+    </v-card>
+    
+    <!-- ================= COMPANY PROFILE ================= -->
+    <v-card
+      v-if="currentTab === 1"
       class="pa-6 my-6"
       rounded="xl"
       outlined
@@ -116,7 +163,7 @@
 
     <!-- ================= SECURITY ================= -->
     <v-card
-      v-if="currentTab === 1"
+      v-if="currentTab === 2"
       class="pa-6 my-6"
       rounded="xl"
       outlined
@@ -166,7 +213,7 @@
 
     <!-- ================= API KEYS ================= -->
     <v-card
-      v-if="currentTab === 2"
+      v-if="currentTab === 3"
       class="pa-6 my-6"
       rounded="xl"
       outlined
@@ -239,7 +286,7 @@ import { setAuthToken } from "@/service/axios";
 export default {
   data() {
     return {
-      currentTab: "0",
+      currentTab: 0,
       currentUser: null,
 
       name: "",
@@ -266,7 +313,7 @@ export default {
   },
 
   mounted() {
-    this.currentTab = this.$route.query.tab || "profile";
+    this.currentTab = parseInt(this.$route.query.tab) || 0;
     this.fetchCurrentUser();
   },
 
