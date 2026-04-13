@@ -22,15 +22,26 @@
           Manage submissions, track stages, and analyze responses
         </p>
       </v-col>
+      <!-- ➕ Edit  Button -->
+      <v-col cols="auto" class="justify-end">
+        <v-btn color="success" rounded class="ma-1" outlined @click="EditForm">
+          Edit Form
+        </v-btn>
+      </v-col>
     </v-row>
 
-    <v-row dense class="mb-4 flex-nowrap overflow-auto">
-      <!-- Stage Buttons -->
-      <v-col v-for="stage in stages" :key="stage.stageId" cols="auto">
+    <v-row dense align="center" class="mb-2">
+      <!-- Stage Buttons (Left side, scrollable) -->
+      <v-col class="d-flex flex-nowrap overflow-auto">
         <v-btn
-          class="ma-1"
+          v-for="stage in stages"
+          :key="stage.stageId"
+          class="mr-2"
           rounded
-          :color="selectedStage === stage.stageId ? 'primary' : 'grey'"
+          small
+          :color="
+            selectedStage === stage.stageId ? 'primary' : 'grey lighten-2'
+          "
           :outlined="selectedStage !== stage.stageId"
           @click="selectStage(stage)"
           depressed
@@ -39,10 +50,49 @@
         </v-btn>
       </v-col>
 
-      <!-- ➕ Add Stage Button -->
-      <v-col cols="auto">
-        <v-btn color="success" rounded class="ma-1" outlined @click="addStage">
-          + Add Stage
+      <!-- Filters (Right side) -->
+      <v-col cols="auto" class="d-flex align-center">
+        <!-- From Date -->
+        <v-menu v-model="fromMenu" :close-on-content-click="false" offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              v-model="startDate"
+              label="From"
+              readonly
+              dense
+              outlined
+              class="mr-2"
+              style="max-width: 140px"
+              v-bind="attrs"
+              v-on="on"
+              hide-details="auto"
+            />
+          </template>
+          <v-date-picker v-model="startDate" @input="fromMenu = false" />
+        </v-menu>
+
+        <!-- To Date -->
+        <v-menu v-model="toMenu" :close-on-content-click="false" offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              v-model="endDate"
+              label="To"
+              readonly
+              dense
+              outlined
+              class="mr-2"
+              style="max-width: 140px"
+              v-bind="attrs"
+              v-on="on"
+              hide-details="auto"
+            />
+          </template>
+          <v-date-picker v-model="endDate" @input="toMenu = false" />
+        </v-menu>
+
+        <!-- Apply -->
+        <v-btn rounded color="primary" dressed @click="applyDateFilter">
+          Apply
         </v-btn>
       </v-col>
     </v-row>
@@ -82,6 +132,13 @@
           <v-chip small :color="getStageColor(item.current_stage)" dark>
             {{ item.current_stage?.stage_name || "New" }}
           </v-chip>
+        </template>
+
+        <!-- CREATED AT -->
+        <template v-slot:[`item.createdAt`]="{ item }">
+          <span class="text-caption">
+            {{ formatDate(item.createdAt) }}
+          </span>
         </template>
 
         <!-- ACTION -->
@@ -215,6 +272,11 @@ export default {
       commentDialog: false,
       comments: [],
       newComment: "",
+
+      startDate: null,
+      endDate: null,
+      fromMenu: false,
+      toMenu: false,
     };
   },
 
@@ -229,16 +291,27 @@ export default {
       const responseData = data.data || [];
       const responseFields = data.fields || [];
 
-      this.submissions = responseData.map((item) => ({
-        _id: item._id,
-        app_id: item.app_id, // ✅ FIX
-        current_stage: item.current_stage,
-        ...item.submitted_data,
-      }));
+      // ✅ FIX: normalize keys (case issue)
+      this.submissions = responseData.map((item) => {
+        const normalizedData = {};
 
+        Object.keys(item.submitted_data || {}).forEach((key) => {
+          normalizedData[key.toLowerCase()] = item.submitted_data[key];
+        });
+
+        return {
+          _id: item._id,
+          app_id: item.app_id,
+          current_stage: item.current_stage,
+          createdAt: item.createdAt, // ✅ IMPORTANT for date filter
+          ...normalizedData,
+        };
+      });
+
+      // ✅ FIX: match lowercase keys
       const fields = responseFields.map((x) => ({
         text: x.label,
-        value: x.key,
+        value: x.key.toLowerCase(),
       }));
 
       this.dynamicFields = fields;
@@ -246,6 +319,7 @@ export default {
       this.headers = [
         ...fields,
         { text: "Stage", value: "stage", width: 140 },
+        { text: "Created At", value: "createdAt" },
         { text: "Action", value: "action", sortable: false, width: 80 },
       ];
     },
@@ -262,7 +336,11 @@ export default {
         this.selectedStage = "all";
 
         const { data } = await apiClient.get(`forms/${id}/submissions`, {
-          params: { stageId: "all" },
+          params: {
+            stageId: this.selectedStage || "all",
+            startDate: this.startDate,
+            endDate: this.endDate,
+          },
         });
 
         this.mapResponse(data);
@@ -283,6 +361,8 @@ export default {
         const { data } = await apiClient.get(`forms/${id}/submissions`, {
           params: {
             stageId: stage.stageId,
+            startDate: this.startDate,
+            endDate: this.endDate,
           },
         });
 
@@ -294,7 +374,7 @@ export default {
       }
     },
 
-    addStage() {
+    EditForm() {
       const id = this.$route.params.id;
       this.$router.push(`/dashboard/forms/${id}/edit`);
     },
@@ -372,6 +452,9 @@ export default {
         minute: "2-digit",
         hour12: true, // ✅ AM/PM
       });
+    },
+    applyDateFilter() {
+      this.load(); // reload with filters
     },
   },
 };
