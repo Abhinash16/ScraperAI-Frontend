@@ -213,7 +213,7 @@
         <!-- 👇 Iframe preview -->
 
         <iframe
-          :src="`${baseURL}/forms/f/${$route.params.id}`"
+          :src="`${baseURL}/forms/f/${$route.params.id}?preview=true`"
           width="100%"
           height="100%"
           style="border: none; border-radius: 12px"
@@ -333,7 +333,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    
   </div>
 </template>
 
