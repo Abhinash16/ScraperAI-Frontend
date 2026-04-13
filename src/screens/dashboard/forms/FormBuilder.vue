@@ -225,7 +225,7 @@
         <!-- ================= IFRAME PREVIEW ================= -->
         <v-card outlined rounded="lg" class="mb-6">
           <iframe
-            :src="shareLink"
+            :src="`${baseURL}/forms/f/${$route.params.id}?preview=true`"
             width="100%"
             height="400"
             style="border: none; border-radius: 12px"
