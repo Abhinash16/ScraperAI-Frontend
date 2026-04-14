@@ -34,7 +34,7 @@
             {{ link.name }}
           </v-btn>
         </div>
-        <v-menu v-model="menu" offset-y left>
+        <v-menu v-model="menu" offset-y left content-class="custom-menu">
           <template v-slot:activator="{ on, attrs }">
             <v-avatar
               v-bind="attrs"
@@ -53,7 +53,7 @@
               <!-- Profile -->
               <v-list-item @click="goToProfile()">
                 <v-list-item-icon>
-                  <v-icon>mdi-account-circle</v-icon>
+                  <v-icon>mdi-account-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title class="font-weight-bold">
                   Profile
@@ -77,6 +77,19 @@
                 </v-list-item-icon>
                 <v-list-item-title class="font-weight-bold">
                   Security
+                </v-list-item-title>
+              </v-list-item>
+
+              <!-- Security -->
+              <v-list-item
+                v-if="currentUser && hasPermission('user:manage')"
+                @click="goToUserList()"
+              >
+                <v-list-item-icon>
+                  <v-icon>mdi-account-multiple-outline</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title class="font-weight-bold">
+                  User List
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -138,6 +151,7 @@
 
 <script>
 import { setAuthToken } from "@/service/axios";
+import apiClient from "@/service/axios";
 
 export default {
   data: () => ({
@@ -152,6 +166,7 @@ export default {
     ],
 
     menu: false,
+    currentUser: null,
 
     sideNavs: [
       {
@@ -308,6 +323,10 @@ export default {
     },
   },
 
+  mounted() {
+    this.fetchCurrentUser();
+  },
+
   methods: {
     confirmLogout() {
       this.logoutDialog = false;
@@ -337,6 +356,31 @@ export default {
         this.$router.push("/dashboard/security");
       }
     },
+
+    goToUserList() {
+      if (this.$route.path !== "/dashboard/user-list") {
+        this.$router.push("/dashboard/user-list");
+      }
+    },
+
+    async fetchCurrentUser() {
+      try {
+        const { data } = await apiClient.get("/clients/currentUser");
+        this.currentUser = {
+          user: data.data.user,
+          permissions: data.data.user.roleId.permissions,
+        };
+      } catch (err) {
+        console.error("Failed to fetch user");
+      }
+    },
+
+    hasPermission(perm) {
+      return (
+        this.currentUser.permissions.includes("*") ||
+        this.currentUser.permissions.includes(perm)
+      );
+    },
   },
 };
 </script>
@@ -348,5 +392,11 @@ export default {
 }
 .v-list-item--active::before {
   opacity: 0 !important;
+}
+
+.custom-menu {
+  border-radius: 10px !important;
+  border: 1px solid #e3e3e3;
+  box-shadow: none !important;
 }
 </style>

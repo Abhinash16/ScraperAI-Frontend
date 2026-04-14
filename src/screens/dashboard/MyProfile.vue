@@ -13,7 +13,6 @@
             Legacy
           </v-chip>
         </v-tab>
-        <v-tab v-if="hasPermission('user:manage')" value="4"> Team </v-tab>
       </v-tabs>
     </v-card>
 
@@ -269,9 +268,6 @@
       </div>
     </v-card>
 
-    <!-- ================= TEAM MANAGEMENT ================= -->
-    <TeamManagement v-if="currentTab === 4" />
-
     <!-- Loader -->
     <v-overlay :value="loading" opacity="0.25">
       <v-progress-circular indeterminate size="64" />
@@ -287,11 +283,8 @@
 <script>
 import apiClient from "@/service/axios";
 import { setAuthToken } from "@/service/axios";
-import TeamManagement from "./TeamManagement.vue";
+
 export default {
-  components: {
-    TeamManagement,
-  },
   data() {
     return {
       currentTab: 0,
