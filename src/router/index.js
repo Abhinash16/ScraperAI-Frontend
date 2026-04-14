@@ -305,7 +305,7 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // This route requires authentication, check if logged in
     if (!isAuthenticated()) {
-      alert("no");
+      alert("You need to be logged in to access this page."); // Optional: Show an alert or notification
       // Not logged in, redirect to login page
       next({
         path: "/login",
