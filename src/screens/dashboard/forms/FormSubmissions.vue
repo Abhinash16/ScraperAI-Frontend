@@ -68,7 +68,11 @@
               hide-details="auto"
             />
           </template>
-          <v-date-picker v-model="startDate" @input="fromMenu = false" />
+          <v-date-picker
+            v-model="startDate"
+            @input="fromMenu = false"
+            :max="today"
+          />
         </v-menu>
 
         <!-- To Date -->
@@ -87,7 +91,11 @@
               hide-details="auto"
             />
           </template>
-          <v-date-picker v-model="endDate" @input="toMenu = false" />
+          <v-date-picker
+            v-model="endDate"
+            @input="toMenu = false"
+            :min="startDate"
+          />
         </v-menu>
 
         <!-- Apply -->
@@ -109,47 +117,98 @@
       </div>
 
       <!-- TABLE -->
-      <v-data-table
-        v-else
-        :items="submissions"
-        :headers="headers"
-        :loading="loading"
-      >
-        <!-- DYNAMIC FIELDS -->
-        <template
-          v-for="(field, index) in dynamicFields"
-          v-slot:[`item.${field.value}`]="{ item }"
+      <div v-else>
+        <v-data-table
+          :items="submissions"
+          :headers="headers"
+          :loading="loading"
+          dense
+          class="elevation-0"
+          style="overflow-x: auto"
         >
-          <div :key="index" class="py-1">
-            <span class="text-body-2">
-              {{ item[field.value] || "-" }}
+          <!-- DYNAMIC FIELDS -->
+          <template
+            v-for="(field, index) in dynamicFields"
+            v-slot:[`item.${field.value}`]="{ item }"
+          >
+            <div :key="index" class="py-1">
+              <!-- LINK TYPE -->
+              <template v-if="field.type === 'link' && item[field.value]">
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <a
+                      :href="
+                        item[field.value].startsWith('http')
+                          ? item[field.value]
+                          : 'https://' + item[field.value]
+                      "
+                      target="_blank"
+                      v-bind="attrs"
+                      v-on="on"
+                      style="
+                        max-width: 180px;
+                        display: inline-block;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        color: #1976d2;
+                      "
+                    >
+                      {{ item[field.value] }}
+                    </a>
+                  </template>
+                  <span>{{ item[field.value] }}</span>
+                </v-tooltip>
+              </template>
+
+              <!-- NORMAL TEXT -->
+              <template v-else>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <span
+                      v-bind="attrs"
+                      v-on="on"
+                      style="
+                        max-width: 180px;
+                        display: inline-block;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                      "
+                    >
+                      {{ item[field.value] || "-" }}
+                    </span>
+                  </template>
+                  <span>{{ item[field.value] || "-" }}</span>
+                </v-tooltip>
+              </template>
+            </div>
+          </template>
+
+          <!-- STAGE -->
+          <template v-slot:[`item.stage`]="{ item }">
+            <v-chip small :color="getStageColor(item.current_stage)" dark>
+              {{ item.current_stage?.stage_name || "New" }}
+            </v-chip>
+          </template>
+
+          <!-- CREATED AT -->
+          <template v-slot:[`item.createdAt`]="{ item }">
+            <span class="text-caption">
+              {{ formatDate(item.createdAt) }}
             </span>
-          </div>
-        </template>
+          </template>
 
-        <!-- STAGE -->
-        <template v-slot:[`item.stage`]="{ item }">
-          <v-chip small :color="getStageColor(item.current_stage)" dark>
-            {{ item.current_stage?.stage_name || "New" }}
-          </v-chip>
-        </template>
-
-        <!-- CREATED AT -->
-        <template v-slot:[`item.createdAt`]="{ item }">
-          <span class="text-caption">
-            {{ formatDate(item.createdAt) }}
-          </span>
-        </template>
-
-        <!-- ACTION -->
-        <template v-slot:[`item.action`]="{ item }">
-          <div class="d-flex align-center">
-            <v-btn icon small @click="openCommentDialog(item)">
-              <v-icon small>mdi-comment-processing-outline</v-icon>
-            </v-btn>
-          </div>
-        </template>
-      </v-data-table>
+          <!-- ACTION -->
+          <template v-slot:[`item.action`]="{ item }">
+            <div class="d-flex justify-center">
+              <v-btn icon small @click="openCommentDialog(item)">
+                <v-icon small>mdi-comment-processing-outline</v-icon>
+              </v-btn>
+            </div>
+          </template>
+        </v-data-table>
+      </div>
     </v-card>
 
     <!-- LOADER -->
@@ -195,10 +254,27 @@
             elevation="0"
           >
             <v-card-text class="pa-3">
-              <div class="text-body-2">{{ c.message }}</div>
+              <div class="d-flex align-start">
+                <v-avatar size="24" class="mr-2" color="primary">
+                  <span class="white--text text-caption">
+                    {{ c.userId?.name?.charAt(0).toUpperCase() }}
+                  </span>
+                </v-avatar>
 
-              <div class="text-caption grey--text mt-1">
-                {{ formatDate(c.createdAt) }}
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-space-between">
+                    <div class="font-weight-medium">
+                      {{ c.userId?.name || "User" }}
+                    </div>
+                    <div class="text-caption grey--text">
+                      {{ formatDate(c.createdAt) }}
+                    </div>
+                  </div>
+
+                  <div class="text-body-2 mt-1">
+                    {{ c.message }}
+                  </div>
+                </div>
               </div>
             </v-card-text>
           </v-card>
@@ -256,6 +332,7 @@ import apiClient from "@/service/axios";
 export default {
   data() {
     return {
+      today: new Date().toISOString().substr(0, 10),
       submissions: [],
       loading: false,
       headers: [],

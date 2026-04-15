@@ -216,7 +216,12 @@
               hide-details
             />
 
-            <v-btn color="primary" class="ml-2" @click="copyLink(form._id)">
+            <v-btn
+              color="primary"
+              rounded
+              class="ml-2"
+              @click="copyLink(form._id)"
+            >
               Copy
             </v-btn>
           </div>
@@ -252,12 +257,11 @@
             class="mb-4"
           />
 
-          <!-- PAYLOAD -->
-          <div class="mb-2 d-flex justify-space-between align-center">
-            <div class="font-weight-medium">Sample Payload</div>
+          <div class="d-flex justify-space-between align-center mb-2">
+            <div class="font-weight-medium">CURL</div>
 
-            <v-btn small color="primary" outlined @click="copyPayload">
-              Copy Payload
+            <v-btn small color="primary" rounded outlined @click="copyCurl">
+              Copy cURL
             </v-btn>
           </div>
 
@@ -267,7 +271,7 @@
             dark
             style="font-family: monospace; font-size: 13px"
           >
-            <pre>{{ payloadExample }}</pre>
+            <pre>{{ curlExample }}</pre>
           </v-card>
 
           <!-- TOGGLE -->
@@ -462,14 +466,19 @@ export default {
         : "";
     },
 
-    payloadExample() {
+    curlExample() {
+      if (!this.form._id) return "";
+
       const payload = {};
 
       this.form.fields.forEach((f) => {
-        payload[f.key || f.label.toLowerCase()] = "";
+        payload[f.key || f.label.toLowerCase().replace(/\s+/g, "_")] =
+          this.getSampleValue(f.type);
       });
 
-      return JSON.stringify(payload, null, 2);
+      return `curl --location '${this.submitApi}' \\
+--header 'Content-Type: application/json' \\
+--data '${JSON.stringify(payload, null, 2)}'`;
     },
   },
 
@@ -639,9 +648,27 @@ export default {
     removeHeader(i) {
       this.integration.headers.splice(i, 1);
     },
-    copyPayload() {
-      navigator.clipboard.writeText(this.payloadExample);
-      this.$toast.success("Payload copied!");
+    getSampleValue(type) {
+      switch (type) {
+        case "number":
+          return 123;
+        case "text":
+          return "sample text";
+        case "link":
+          return "https://example.com";
+        case "textarea":
+          return "long text here";
+        case "select":
+        case "radio":
+        case "checkbox":
+          return "option_1";
+        default:
+          return "value";
+      }
+    },
+    copyCurl() {
+      navigator.clipboard.writeText(this.curlExample);
+      this.$toast.success("cURL copied!");
     },
   },
 };
