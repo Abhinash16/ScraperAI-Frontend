@@ -1,69 +1,68 @@
 <template>
-  <v-card
-    class="pa-6 my-6"
-    rounded="xl"
-    outlined
-    color="#eff2fb"
-    max-width="1000"
-  >
-    <!-- Header -->
-    <div class="d-flex align-center justify-space-between mb-6">
-      <div class="d-flex align-center">
-        <v-avatar rounded="xl" color="#cde6ff" size="50" class="mr-4">
-          <v-icon color="black">mdi-account-multiple</v-icon>
-        </v-avatar>
-        <div>
-          <h3 class="black--text">Team Management</h3>
-          <div class="text-caption black--text">
-            Manage your team members and roles
+  <div>
+    <!-- loading -->
+    <v-overlay :value="loading" opacity="0.2">
+      <v-progress-circular indeterminate size="60" color="primary" />
+    </v-overlay>
+
+    <v-card outlined rounded="xl">
+      <!-- Header -->
+      <div class="d-flex justify-space-between align-center pa-4 flex-wrap">
+        <div class="d-flex align-center">
+          <div>
+            <div class="text-h6 font-weight-bold">User Management</div>
+            <div class="text-body-2 grey--text">
+              {{ users.length }} users in your team
+            </div>
           </div>
         </div>
+
+        <v-btn color="primary" rounded depressed @click="openAddUser">
+          + Add User
+        </v-btn>
       </div>
 
-      <v-btn color="primary" depressed rounded @click="openAddUser">
-        + Add User
-      </v-btn>
-    </div>
+      <v-divider />
 
-    <!-- TABLE -->
-    <v-data-table :headers="headers" :items="users">
-      <!-- eslint-disable-next-line vue/valid-v-slot -->
-      <template v-slot:item.role="{ item }">
-        <v-chip small :color="getRoleColor(item.roleId?.name)" outlined>
-          {{ item.roleId?.name }}
-        </v-chip>
-      </template>
+      <!-- TABLE -->
+      <v-data-table :headers="headers" :items="users">
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <template v-slot:item.role="{ item }">
+          <v-chip small :color="getRoleColor(item.roleId?.name)" outlined>
+            {{ item.roleId?.name }}
+          </v-chip>
+        </template>
 
-      <!-- eslint-disable-next-line vue/valid-v-slot -->
-      <template v-slot:item.status="{ item }">
-        <span :class="item.status === 1 ? 'green--text' : 'red--text'">
-          {{ item.status === 1 ? "Active" : "Disabled" }}
-        </span>
-      </template>
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <template v-slot:item.status="{ item }">
+          <span :class="item.status === 1 ? 'green--text' : 'red--text'">
+            {{ item.status === 1 ? "Active" : "Disabled" }}
+          </span>
+        </template>
 
-      <!-- eslint-disable-next-line vue/valid-v-slot -->
-      <template v-slot:item.actions="{ item }">
-        <v-btn
-          icon
-          small
-          @click="editUser(item)"
-          :disabled="item.roleId?.name === 'owner'"
-        >
-          <v-icon small>mdi-pencil</v-icon>
-        </v-btn>
+        <!-- eslint-disable-next-line vue/valid-v-slot -->
+        <template v-slot:item.actions="{ item }">
+          <v-btn
+            icon
+            small
+            @click="editUser(item)"
+            :disabled="item.roleId?.name === 'owner'"
+          >
+            <v-icon small>mdi-pencil</v-icon>
+          </v-btn>
 
-        <v-btn
-          icon
-          small
-          color="red"
-          @click="openDelete(item._id)"
-          :disabled="item.roleId?.name === 'owner'"
-        >
-          <v-icon small>mdi-delete</v-icon>
-        </v-btn>
-      </template>
-    </v-data-table>
-
+          <v-btn
+            icon
+            small
+            color="red"
+            @click="openDelete(item._id)"
+            :disabled="item.roleId?.name === 'owner'"
+          >
+            <v-icon small>mdi-delete</v-icon>
+          </v-btn>
+        </template>
+      </v-data-table>
+    </v-card>
     <!-- ADD USER -->
     <v-dialog v-model="addDialog" max-width="500" persistent>
       <v-card rounded="xl" :loading="loading">
@@ -211,7 +210,7 @@
     >
       {{ snackbar.message }}
     </v-snackbar>
-  </v-card>
+  </div>
 </template>
 
 <script>
@@ -265,13 +264,27 @@ export default {
 
   methods: {
     async fetchUsers() {
-      const { data } = await apiClient.get("/users");
-      this.users = data.data;
+      try {
+        this.loading = true;
+        const { data } = await apiClient.get("/users");
+        this.users = data.data;
+      } catch {
+        this.showSnackbar("Failed to load user", "error");
+      } finally {
+        this.loading = false;
+      }
     },
 
     async fetchRoles() {
-      const { data } = await apiClient.get("/users/roles");
-      this.roles = data.data;
+      try {
+        this.loading = true;
+        const { data } = await apiClient.get("/users/roles");
+        this.roles = data.data;
+      } catch {
+        this.showSnackbar("Failed to load role", "error");
+      } finally {
+        this.loading = false;
+      }
     },
 
     openAddUser() {
