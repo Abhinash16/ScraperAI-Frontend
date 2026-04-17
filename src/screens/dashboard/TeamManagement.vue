@@ -17,9 +17,21 @@
           </div>
         </div>
 
-        <v-btn color="primary" rounded depressed @click="openAddUser">
-          + Add User
-        </v-btn>
+        <div>
+          <v-btn
+            outlined
+            color="primary"
+            class="mr-2"
+            rounded
+            @click="roleDialog = true"
+          >
+            Manage Roles
+          </v-btn>
+
+          <v-btn color="primary" rounded depressed @click="openAddUser">
+            + Add User
+          </v-btn>
+        </div>
       </div>
 
       <v-divider />
@@ -200,6 +212,8 @@
       </v-card>
     </v-dialog>
 
+    <RoleManagement v-model="roleDialog" />
+
     <!-- SNACKBAR -->
     <v-snackbar
       v-model="snackbar.show"
@@ -215,8 +229,12 @@
 
 <script>
 import apiClient from "@/service/axios";
+import RoleManagement from "@/components/RoleManagement.vue";
 
 export default {
+  components: {
+    RoleManagement,
+  },
   data() {
     return {
       users: [],
@@ -255,6 +273,7 @@ export default {
         { text: "Status", value: "status" },
         { text: "Actions", value: "actions", sortable: false },
       ],
+      roleDialog: false,
     };
   },
 
