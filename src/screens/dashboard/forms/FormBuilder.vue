@@ -53,7 +53,7 @@
       <v-tabs v-model="tab" color="primary">
         <v-tab>Fields</v-tab>
         <v-tab>Stages</v-tab>
-        <v-tab v-if="form.fields.length > 1">Share</v-tab>
+        <v-tab v-if="form._id">Share</v-tab>
       </v-tabs>
     </v-card>
 
@@ -188,55 +188,101 @@
     </v-card>
 
     <v-card
-      v-if="tab === 2"
+      v-if="tab === 2 && form._id"
       outlined
       rounded="xl"
-      class="pa-0 mb-6"
+      class="pa-6 mb-6"
       color="#f8f9fd"
-      height="600"
     >
       <v-container>
-        <h1>Share Link</h1>
-        <div>
-          Your form is now published and ready to be shared with the world! Copy
-          this link to share your form on social media, messaging apps or via
-          email.
+        <!-- HEADER -->
+        <div class="mb-6">
+          <div class="text-h5 font-weight-bold">Share Form</div>
+          <div class="text-caption grey--text">
+            Share your form using the link below or integrate via API
+          </div>
         </div>
 
-        <div>
-          {{ `${baseURL}/forms/f/${$route.params.id}` }}
+        <!-- ================= SHARE LINK ================= -->
+        <v-card outlined rounded="lg" class="pa-4 mb-6">
+          <div class="text-subtitle-1 font-weight-medium mb-2">Public Link</div>
 
-          <v-btn @click="copyLink($route.params.id)">Copy</v-btn>
-        </div>
+          <div class="d-flex align-center">
+            <v-text-field
+              :value="shareLink"
+              readonly
+              dense
+              outlined
+              hide-details
+            />
 
-        <!-- show preview of form here using iframe  -->
-        <!-- 👇 Iframe preview -->
+            <v-btn
+              color="primary"
+              rounded
+              class="ml-2"
+              @click="copyLink(form._id)"
+            >
+              Copy
+            </v-btn>
+          </div>
+        </v-card>
 
-        <iframe
-          :src="`${baseURL}/forms/f/${$route.params.id}`"
-          width="100%"
-          height="100%"
-          style="border: none; border-radius: 12px"
-        ></iframe>
+        <!-- ================= IFRAME PREVIEW ================= -->
+        <v-card outlined rounded="lg" class="mb-6">
+          <iframe
+            :src="`${baseURL}/forms/f/${$route.params.id}?preview=true`"
+            width="100%"
+            height="400"
+            style="border: none; border-radius: 12px"
+          ></iframe>
+        </v-card>
 
-        <div class="d-flex justify-space-between align-center mb-4">
-          <div>
-            <div class="text-h6 font-weight-bold">API</div>
-            <div class="text-caption grey--text">
-              You can set a webhook URL to send form responses directly to your
-              server:
-            </div>
-
-            <div>
-              API:
-              <strong>{{
-                `${baseURL}/forms/${$route.params.id}/submit`
-              }}</strong>
-            </div>
+        <!-- ================= API SECTION ================= -->
+        <v-card outlined rounded="lg" class="pa-4 mb-6">
+          <div class="text-subtitle-1 font-weight-medium mb-2">
+            API Integration
           </div>
 
-          <v-switch v-model="integration.enabled" label="Enable" inset />
-        </div>
+          <div class="text-caption grey--text mb-4">
+            Submit form responses programmatically using the API below
+          </div>
+
+          <!-- API URL -->
+          <v-text-field
+            :value="submitApi"
+            label="API Endpoint"
+            readonly
+            outlined
+            dense
+            class="mb-4"
+          />
+
+          <div class="d-flex justify-space-between align-center mb-2">
+            <div class="font-weight-medium">CURL</div>
+
+            <v-btn small color="primary" rounded outlined @click="copyCurl">
+              Copy cURL
+            </v-btn>
+          </div>
+
+          <v-card
+            class="pa-3"
+            color="black"
+            dark
+            style="font-family: monospace; font-size: 13px"
+          >
+            <pre>{{ curlExample }}</pre>
+          </v-card>
+
+          <!-- TOGGLE -->
+          <div class="d-flex justify-space-between align-center mt-4">
+            <div class="text-caption grey--text">
+              Enable webhook integration
+            </div>
+
+            <v-switch v-model="integration.enabled" inset />
+          </div>
+        </v-card>
       </v-container>
     </v-card>
 
@@ -333,7 +379,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    
   </div>
 </template>
 
@@ -410,6 +455,30 @@ export default {
       if (hasEmptyStage) return false;
 
       return true;
+    },
+    shareLink() {
+      return this.form._id ? `${this.baseURL}/forms/f/${this.form._id}` : "";
+    },
+
+    submitApi() {
+      return this.form._id
+        ? `${this.baseURL}/forms/${this.form._id}/submit`
+        : "";
+    },
+
+    curlExample() {
+      if (!this.form._id) return "";
+
+      const payload = {};
+
+      this.form.fields.forEach((f) => {
+        payload[f.key || f.label.toLowerCase().replace(/\s+/g, "_")] =
+          this.getSampleValue(f.type);
+      });
+
+      return `curl --location '${this.submitApi}' \\
+--header 'Content-Type: application/json' \\
+--data '${JSON.stringify(payload, null, 2)}'`;
     },
   },
 
@@ -543,31 +612,14 @@ export default {
         this.$toast.error("Please fill all required fields");
         return;
       }
-      try {
-        if (!this.form.name) {
-          this.$toast.error("Form name required");
-          return;
-        }
 
+      try {
         this.loading = true;
 
         const payload = {
           name: this.form.name,
-
-          fields: this.form.fields.map((f) => ({
-            label: f.label,
-            type: f.type,
-            required: f.required,
-            options: f.options || [],
-            link_text: f.link_text || "",
-          })),
-
-          stages: this.form.stages.map((s, i) => ({
-            _id: s._id, // ✅ IMPORTANT for update
-            stage_name: s.stage_name,
-            order: i + 1,
-          })),
-
+          fields: this.form.fields,
+          stages: this.form.stages,
           deletedStageMapping: this.deletedStageMapping,
           integration: this.integration,
         };
@@ -575,13 +627,15 @@ export default {
         if (this.isEditMode) {
           await apiClient.put(`/forms/${this.$route.params.id}/edit`, payload);
         } else {
-          await apiClient.post("/forms/create", payload);
+          const res = await apiClient.post("/forms/create", payload);
+
+          // ✅ 1. Set form ID (IMPORTANT)
+          this.form._id = res.data.data._id;
         }
 
         this.$toast.success("Form saved successfully");
       } catch (err) {
         const message = err?.response?.data?.message || "Error saving form";
-
         this.$toast.error(message);
       } finally {
         this.loading = false;
@@ -593,6 +647,28 @@ export default {
 
     removeHeader(i) {
       this.integration.headers.splice(i, 1);
+    },
+    getSampleValue(type) {
+      switch (type) {
+        case "number":
+          return 123;
+        case "text":
+          return "sample text";
+        case "link":
+          return "https://example.com";
+        case "textarea":
+          return "long text here";
+        case "select":
+        case "radio":
+        case "checkbox":
+          return "option_1";
+        default:
+          return "value";
+      }
+    },
+    copyCurl() {
+      navigator.clipboard.writeText(this.curlExample);
+      this.$toast.success("cURL copied!");
     },
   },
 };

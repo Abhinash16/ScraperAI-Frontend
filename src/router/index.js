@@ -112,6 +112,14 @@ const routes = [
         name: "Chat Analytics",
         component: () => import("../screens/dashboard/AnalyticsDashboard.vue"),
       },
+      {
+        path: "user-list",
+        name: "User List",
+        component: () => import("../screens/dashboard/TeamManagement.vue"),
+        meta: {
+          permission: "user:manage",
+        },
+      },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },
@@ -300,24 +308,48 @@ function isAuthenticated() {
   return !!localStorage.getItem("user-token");
 }
 
+import apiClient from "@/service/axios";
+
 // Add a global beforeEach guard
-router.beforeEach((to, from, next) => {
+let currentUser = null; // cache
+
+router.beforeEach(async (to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     // This route requires authentication, check if logged in
     if (!isAuthenticated()) {
-      alert("no");
-      // Not logged in, redirect to login page
-      next({
+      alert("You need to be logged in to access this page.");
+      return next({
         path: "/login",
-        query: { redirect: to.fullPath }, // Optionally pass the intended path for later redirection
+        query: { redirect: to.fullPath },
       });
     } else {
-      // Logged in, proceed to the route
-      next();
+      // ✅ ADD THIS BLOCK ONLY
+      try {
+        if (to.meta.permission) {
+          // fetch user only once
+          if (!currentUser) {
+            const { data } = await apiClient.get("/clients/currentUser");
+            currentUser = data.data;
+          }
+
+          const permissions = currentUser?.user?.roleId?.permissions || [];
+
+          const hasAccess =
+            permissions.includes("*") ||
+            permissions.includes(to.meta.permission);
+
+          if (!hasAccess) {
+            return next("/dashboard"); // ❌ block
+          }
+        }
+
+        next(); // ✅ continue
+      } catch (err) {
+        next("/login");
+      }
     }
   } else {
-    // This route does not require authentication
-    next(); // Make sure to always call next()!
+    next();
   }
 });
 

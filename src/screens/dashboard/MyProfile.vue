@@ -3,8 +3,9 @@
     <!-- Tabs Card -->
     <v-card outlined rounded="lg" class="mb-6">
       <v-tabs v-model="currentTab" color="primary" grow>
-         <v-tab value="0">Profile</v-tab>
+        <v-tab value="0">Profile</v-tab>
         <v-tab value="1">Company Profile</v-tab>
+
         <v-tab value="2">Security</v-tab>
         <v-tab value="3">
           API Keys
@@ -50,17 +51,16 @@
 
         <v-col cols="12" md="6">
           <div class="label">Phone</div>
-          <div>{{ currentUser.user.phone || 'N/A' }}</div>
+          <div>{{ currentUser.user.phone || "N/A" }}</div>
         </v-col>
 
-        <v-col cols="12" md="6"> 
+        <v-col cols="12" md="6">
           <div class="label">Status</div>
-          <div>{{ currentUser.user.status === 1 ? 'Active' : 'Inactive' }}</div>
+          <div>{{ currentUser.user.status === 1 ? "Active" : "Inactive" }}</div>
         </v-col>
       </v-row>
-     
     </v-card>
-    
+
     <!-- ================= COMPANY PROFILE ================= -->
     <v-card
       v-if="currentTab === 1"
@@ -283,6 +283,7 @@
 <script>
 import apiClient from "@/service/axios";
 import { setAuthToken } from "@/service/axios";
+
 export default {
   data() {
     return {
@@ -374,6 +375,13 @@ export default {
           "Failed to update profile information";
         this.snackbar = true;
       }
+    },
+
+    hasPermission(perm) {
+      return (
+        this.currentUser?.role?.permissions?.includes("*") ||
+        this.currentUser?.role?.permissions?.includes(perm)
+      );
     },
   },
 };
