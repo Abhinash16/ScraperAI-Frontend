@@ -327,7 +327,7 @@ export default {
 
       const { data } = await apiClient.get("/call-analysis/batches");
 
-      this.batches = data;
+      this.batches = data?.data;
 
       this.loading = false;
     },

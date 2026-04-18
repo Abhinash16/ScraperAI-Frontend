@@ -228,8 +228,8 @@ export default {
     const id = this.$route.params.id;
 
     try {
-      const res = await apiClient.get(`/call-analysis/report/${id}`);
-      this.report = res.data;
+      const {data} = await apiClient.get(`/call-analysis/report/${id}`);
+      this.report = data?.data;
     } catch (err) {
       console.error(err);
     }
