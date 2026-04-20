@@ -105,110 +105,128 @@
       </v-col>
     </v-row>
 
-    <!-- CARD -->
-    <v-card class="rounded-xl elevation-0" outlined>
-      <!-- EMPTY STATE -->
+    <!-- TABLE SECTION -->
+    <v-card outlined rounded="xl">
+      <div class="pa-4 d-flex justify-space-between align-center">
+        <div>
+          <div class="text-h6 font-weight-bold">Submissions</div>
+          <div class="text-caption grey--text">
+            {{ submissions.length }} records found
+          </div>
+        </div>
+      </div>
+
+      <v-divider />
+
+      <!-- EMPTY -->
       <div
         v-if="!submissions.length && !loading"
         class="text-center py-12 grey--text"
       >
-        <v-icon size="48" class="mb-2">mdi-database-off-outline</v-icon>
-        <div class="text-subtitle-2">No submissions yet</div>
+        <v-icon size="50">mdi-database-off-outline</v-icon>
+        <div class="mt-2">No submissions yet</div>
       </div>
 
       <!-- TABLE -->
-      <div v-else>
-        <v-data-table
-          :items="submissions"
-          :headers="headers"
-          :loading="loading"
-          dense
-          class="elevation-0"
-          style="overflow-x: auto"
+      <v-data-table
+        v-else
+        :items="submissions"
+        :headers="headers"
+        :loading="loading"
+        :page.sync="page"
+        :items-per-page="limit"
+        :server-items-length="totalItems"
+        @update:page="load"
+        @update:items-per-page="onLimitChange"
+        height="600"
+        fixed-header
+        class="elevation-0"
+        :footer-props="{
+          itemsPerPageOptions: [10, 20, 50, 100],
+        }"
+      >
+        <!-- DYNAMIC FIELDS -->
+        <template
+          v-for="(field, index) in dynamicFields"
+          v-slot:[`item.${field.value}`]="{ item }"
         >
-          <!-- DYNAMIC FIELDS -->
-          <template
-            v-for="(field, index) in dynamicFields"
-            v-slot:[`item.${field.value}`]="{ item }"
-          >
-            <div :key="index" class="py-1">
-              <!-- LINK TYPE -->
-              <template v-if="field.type === 'link' && item[field.value]">
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <a
-                      :href="
-                        item[field.value].startsWith('http')
-                          ? item[field.value]
-                          : 'https://' + item[field.value]
-                      "
-                      target="_blank"
-                      v-bind="attrs"
-                      v-on="on"
-                      style="
-                        max-width: 180px;
-                        display: inline-block;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                        color: #1976d2;
-                      "
-                    >
-                      {{ item[field.value] }}
-                    </a>
-                  </template>
-                  <span>{{ item[field.value] }}</span>
-                </v-tooltip>
-              </template>
+          <div :key="index" class="py-1">
+            <!-- LINK TYPE -->
+            <template v-if="field.type === 'link' && item[field.value]">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <a
+                    :href="
+                      item[field.value].startsWith('http')
+                        ? item[field.value]
+                        : 'https://' + item[field.value]
+                    "
+                    target="_blank"
+                    v-bind="attrs"
+                    v-on="on"
+                    style="
+                      max-width: 180px;
+                      display: inline-block;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                      color: #1976d2;
+                    "
+                  >
+                    {{ item[field.value] }}
+                  </a>
+                </template>
+                <span>{{ item[field.value] }}</span>
+              </v-tooltip>
+            </template>
 
-              <!-- NORMAL TEXT -->
-              <template v-else>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <span
-                      v-bind="attrs"
-                      v-on="on"
-                      style="
-                        max-width: 180px;
-                        display: inline-block;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                      "
-                    >
-                      {{ item[field.value] || "-" }}
-                    </span>
-                  </template>
-                  <span>{{ item[field.value] || "-" }}</span>
-                </v-tooltip>
-              </template>
-            </div>
-          </template>
+            <!-- NORMAL TEXT -->
+            <template v-else>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <span
+                    v-bind="attrs"
+                    v-on="on"
+                    style="
+                      max-width: 180px;
+                      display: inline-block;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    {{ item[field.value] || "-" }}
+                  </span>
+                </template>
+                <span>{{ item[field.value] || "-" }}</span>
+              </v-tooltip>
+            </template>
+          </div>
+        </template>
 
-          <!-- STAGE -->
-          <template v-slot:[`item.stage`]="{ item }">
-            <v-chip small :color="getStageColor(item.current_stage)" dark>
-              {{ item.current_stage?.stage_name || "New" }}
-            </v-chip>
-          </template>
+        <!-- STAGE -->
+        <template v-slot:[`item.stage`]="{ item }">
+          <v-chip small :color="getStageColor(item.current_stage)" dark>
+            {{ item.current_stage?.stage_name || "New" }}
+          </v-chip>
+        </template>
 
-          <!-- CREATED AT -->
-          <template v-slot:[`item.createdAt`]="{ item }">
-            <span class="text-caption">
-              {{ formatDate(item.createdAt) }}
-            </span>
-          </template>
+        <!-- CREATED AT -->
+        <template v-slot:[`item.createdAt`]="{ item }">
+          <span class="text-caption">
+            {{ formatDate(item.createdAt) }}
+          </span>
+        </template>
 
-          <!-- ACTION -->
-          <template v-slot:[`item.action`]="{ item }">
-            <div class="d-flex justify-center">
-              <v-btn icon small @click="openCommentDialog(item)">
-                <v-icon small>mdi-comment-processing-outline</v-icon>
-              </v-btn>
-            </div>
-          </template>
-        </v-data-table>
-      </div>
+        <!-- ACTION -->
+        <template v-slot:[`item.action`]="{ item }">
+          <div class="d-flex justify-center">
+            <v-btn icon small @click="openCommentDialog(item)">
+              <v-icon small>mdi-comment-processing-outline</v-icon>
+            </v-btn>
+          </div>
+        </template>
+      </v-data-table>
     </v-card>
 
     <!-- LOADER -->
@@ -354,6 +372,10 @@ export default {
       endDate: null,
       fromMenu: false,
       toMenu: false,
+      page: 1,
+      limit: 10,
+      totalPages: 1,
+      totalItems: 0,
     };
   },
 
@@ -364,7 +386,8 @@ export default {
   methods: {
     mapResponse(data) {
       this.formName = data.formName || "";
-
+      this.totalPages = data.pagination?.totalPages || 1;
+      this.totalItems = data.pagination?.total || 0;
       const responseData = data.data || [];
       const responseFields = data.fields || [];
 
@@ -414,6 +437,8 @@ export default {
 
         const { data } = await apiClient.get(`forms/${id}/submissions`, {
           params: {
+            page: this.page,
+            limit: this.limit,
             stageId: this.selectedStage || "all",
             startDate: this.startDate,
             endDate: this.endDate,
@@ -430,7 +455,7 @@ export default {
 
     async selectStage(stage) {
       this.selectedStage = stage.stageId;
-
+      this.page = 1;
       const id = this.$route.params.id;
       this.loading = true;
 
@@ -513,8 +538,10 @@ export default {
 
         // 4️⃣ Refresh table
         this.load();
+        this.$toast.success("Stage and comment updated successfully");
       } catch (err) {
         console.error("Failed to update stage/comment", err);
+        this.$toast.error("Failed to update stage/comment");
       } finally {
         this.loading = false;
       }
@@ -531,7 +558,13 @@ export default {
       });
     },
     applyDateFilter() {
+      this.page = 1;
       this.load(); // reload with filters
+    },
+    onLimitChange(val) {
+      this.limit = val;
+      this.page = 1;
+      this.load();
     },
   },
 };
