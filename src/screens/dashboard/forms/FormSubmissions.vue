@@ -349,8 +349,9 @@ import apiClient from "@/service/axios";
 
 export default {
   data() {
+    const today = new Date().toISOString().substr(0, 10);
     return {
-      today: new Date().toISOString().substr(0, 10),
+      today,
       submissions: [],
       loading: false,
       headers: [],
@@ -368,8 +369,8 @@ export default {
       comments: [],
       newComment: "",
 
-      startDate: null,
-      endDate: null,
+      startDate: today,
+      endDate: today,
       fromMenu: false,
       toMenu: false,
       page: 1,
@@ -432,8 +433,11 @@ export default {
         const stagesRes = await apiClient.get(`forms/${id}/stages/stats`);
         this.stages = stagesRes.data.data || [];
 
-        // default = ALL (better UX)
-        this.selectedStage = "all";
+        if (this.stages.length > 1) {
+          this.selectedStage = this.stages[1].stageId;
+        } else if (this.stages.length) {
+          this.selectedStage = this.stages[0].stageId; // fallback
+        }
 
         const { data } = await apiClient.get(`forms/${id}/submissions`, {
           params: {
