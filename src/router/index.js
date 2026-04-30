@@ -5,6 +5,7 @@ import SitemapForm from "@/components/SitemapForm.vue";
 import LandingPage from "@/pages/landing/LandingPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
+import NotFoundPage from "@/pages/NotFoundPage.vue";
 
 Vue.use(VueRouter);
 
@@ -287,6 +288,11 @@ const routes = [
   //   name: "FormSubmissions",
   //   component: () => import("../screens/dashboard/forms/FormSubmissions.vue"),
   // },
+
+  {
+    path: "*",
+    component: NotFoundPage,
+  },
 ];
 
 const router = new VueRouter({
