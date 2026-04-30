@@ -192,7 +192,7 @@
               Add an extra layer of security to your account.
             </div>
           </div>
-          <v-btn outlined color="primary" small> Enable </v-btn>
+          <v-btn outlined rounded color="primary" small> Enable </v-btn>
         </div>
       </v-card>
 
@@ -204,8 +204,20 @@
               End all active sessions across devices.
             </div>
           </div>
-          <v-btn outlined color="error" small @click="logout">
+          <v-btn outlined rounded color="error" small @click="logout">
             Log out all
+          </v-btn>
+        </div>
+      </v-card>
+      <v-card v-if="canResetPassword" outlined rounded="xl" class="pa-4 mt-4">
+        <div class="d-flex justify-space-between align-center">
+          <div>
+            <div class="font-weight-medium">Change Password</div>
+            <div class="text-caption">Update your account password</div>
+          </div>
+
+          <v-btn outlined rounded color="primary" small @click="openResetSelf">
+            Change
           </v-btn>
         </div>
       </v-card>
@@ -273,6 +285,17 @@
       <v-progress-circular indeterminate size="64" />
     </v-overlay>
 
+    <ResetPasswordDialog
+      v-if="currentUser && currentUser.user"
+      v-model="resetDialog"
+      :userId="currentUser.user._id"
+      title="Change Password"
+      @success="
+        snackbarMessage = 'Password updated successfully';
+        snackbar = true;
+      "
+    />
+
     <!-- Snackbar -->
     <v-snackbar v-model="snackbar" timeout="3000" top right color="success">
       {{ snackbarMessage }}
@@ -284,7 +307,12 @@
 import apiClient from "@/service/axios";
 import { setAuthToken } from "@/service/axios";
 
+import ResetPasswordDialog from "@/components/ResetPasswordDialog.vue";
+
 export default {
+  components: {
+    ResetPasswordDialog,
+  },
   data() {
     return {
       currentTab: 0,
@@ -302,6 +330,7 @@ export default {
       loading: false,
       snackbar: false,
       snackbarMessage: "",
+      resetDialog: false,
     };
   },
 
@@ -310,6 +339,15 @@ export default {
       if (!this.currentUser?.apiKey) return "—";
       const key = this.currentUser.apiKey;
       return `${key.slice(0, 6)}••••••••${key.slice(-4)}`;
+    },
+    canResetPassword() {
+      if (!this.currentUser || !this.currentUser.role) return false;
+
+      const permissions = this.currentUser.role.permissions || [];
+
+      return (
+        permissions.includes("*") || permissions.includes("user:reset-password")
+      );
     },
   },
 
@@ -382,6 +420,9 @@ export default {
         this.currentUser?.role?.permissions?.includes("*") ||
         this.currentUser?.role?.permissions?.includes(perm)
       );
+    },
+    openResetSelf() {
+      this.resetDialog = true;
     },
   },
 };

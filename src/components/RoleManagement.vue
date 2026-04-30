@@ -111,6 +111,7 @@ export default {
         "chat:reply",
         "analytics:view",
         "user:manage",
+        "user:reset-password",
         "role:manage",
         "call:read",
         "call:reply",

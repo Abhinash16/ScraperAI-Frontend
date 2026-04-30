@@ -104,7 +104,7 @@
             <div class="text-overline orange--text">Training Status</div>
 
             <div class="mt-2">
-              <v-chip :color="statusColor" dark large>
+              <v-chip :color="statusColor" dark>
                 {{ report.status }}
               </v-chip>
             </div>

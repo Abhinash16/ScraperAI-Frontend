@@ -72,6 +72,15 @@
           >
             <v-icon small>mdi-delete</v-icon>
           </v-btn>
+          <v-btn
+            icon
+            small
+            color="orange"
+            @click="openResetPassword(item)"
+            :disabled="item.roleId?.name === 'owner'"
+          >
+            <v-icon small>mdi-lock-reset</v-icon>
+          </v-btn>
         </template>
       </v-data-table>
     </v-card>
@@ -212,6 +221,12 @@
       </v-card>
     </v-dialog>
 
+    <ResetPasswordDialog
+      v-model="resetDialog"
+      :userId="selectedUserId"
+      @success="showSnackbar('Password updated', 'success')"
+    />
+
     <RoleManagement v-model="roleDialog" />
 
     <!-- SNACKBAR -->
@@ -230,10 +245,12 @@
 <script>
 import apiClient from "@/service/axios";
 import RoleManagement from "@/components/RoleManagement.vue";
+import ResetPasswordDialog from "@/components/ResetPasswordDialog.vue";
 
 export default {
   components: {
     RoleManagement,
+    ResetPasswordDialog,
   },
   data() {
     return {
@@ -274,6 +291,8 @@ export default {
         { text: "Actions", value: "actions", sortable: false },
       ],
       roleDialog: false,
+      resetDialog: false,
+      selectedUserId: null,
     };
   },
 
@@ -393,6 +412,10 @@ export default {
         default:
           return "grey";
       }
+    },
+    openResetPassword(user) {
+      this.selectedUserId = user._id;
+      this.resetDialog = true;
     },
   },
 };

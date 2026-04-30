@@ -1,56 +1,68 @@
 <template>
   <div>
-    <v-chip color="primary" outlined small class="mb-2">
+    <v-chip color="primary" outlined small class="mb-4">
       {{ chats.length }}/{{ total }} Chats Loaded
     </v-chip>
 
-    <div class="d-flex align-center flex-wrap mb-2">
+    <v-row>
       <!-- Status Filter -->
-      <v-card outlined rounded="xl" class="px-2 pa-1 mr-2 d-flex flex-column">
-        <div class="text-caption grey--text">Status</div>
-
-        <v-chip-group
-          v-model="selectedTicketStatus"
-          active-class="primary--text"
-          @change="fetchChats(false)"
-          row
+      <v-col cols="12" md="3">
+        <v-card
+          outlined
+          rounded="xl"
+          class="px-2 pa-1 h-100 d-flex flex-column"
         >
-          <v-chip small outlined value="">All</v-chip>
-          <v-chip small outlined color="orange" value="open">Open</v-chip>
-          <v-chip small outlined color="green" value="resolved">
-            Resolved
-          </v-chip>
-        </v-chip-group>
-      </v-card>
+          <div class="text-caption grey--text mb-1">Status</div>
+
+          <v-chip-group
+            v-model="selectedTicketStatus"
+            active-class="primary--text"
+            @change="fetchChats(false)"
+            row
+          >
+            <v-chip small outlined value="">All</v-chip>
+            <v-chip small outlined color="orange" value="open">Open</v-chip>
+            <v-chip small outlined color="green" value="resolved">
+              Resolved
+            </v-chip>
+          </v-chip-group>
+        </v-card>
+      </v-col>
 
       <!-- Platform Filter -->
-      <v-card outlined rounded="xl" class="px-2 pa-1 mr-2 d-flex flex-column">
-        <div class="text-caption grey--text">Platform</div>
-
-        <v-chip-group
-          v-model="selectedPlatform"
-          active-class="primary--text"
-          @change="fetchChats(false)"
-          row
+      <v-col cols="12" md="3">
+        <v-card
+          outlined
+          rounded="xl"
+          class="px-2 pa-1 h-100 d-flex flex-column"
         >
-          <v-chip small outlined value="">All</v-chip>
+          <div class="text-caption grey--text mb-1">Platform</div>
 
-          <v-chip small outlined color="green" value="whatsapp">
-            <v-icon x-small left>mdi-whatsapp</v-icon>
-            WhatsApp
-          </v-chip>
+          <v-chip-group
+            v-model="selectedPlatform"
+            active-class="primary--text"
+            @change="fetchChats(false)"
+            row
+          >
+            <v-chip small outlined value="">All</v-chip>
 
-          <v-chip small outlined color="blue" value="webchat">
-            <v-icon x-small left>mdi-web</v-icon>
-            Other
-          </v-chip>
-        </v-chip-group>
-      </v-card>
-    </div>
+            <v-chip small outlined color="green" value="whatsapp">
+              <v-icon x-small left>mdi-whatsapp</v-icon>
+              WhatsApp
+            </v-chip>
+
+            <v-chip small outlined color="blue" value="webchat">
+              <v-icon x-small left>mdi-web</v-icon>
+              Other
+            </v-chip>
+          </v-chip-group>
+        </v-card>
+      </v-col>
+    </v-row>
 
     <v-row>
       <!-- Chat List -->
-      <v-col cols="12" md="5" class="mt-0">
+      <v-col cols="12" md="6" class="mt-0">
         <v-card
           ref="chatScroll"
           elevation="0"
@@ -146,7 +158,7 @@
       </v-col>
 
       <!-- Right Side (Empty for now) -->
-      <v-col cols="12" md="7" class="hidden-sm-and-down">
+      <v-col cols="12" md="6" class="hidden-sm-and-down">
         <chat-view
           v-if="selectedChatId"
           :chatId="selectedChatId"

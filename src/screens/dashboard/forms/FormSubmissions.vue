@@ -30,185 +30,219 @@
       </v-col>
     </v-row>
 
-    <v-row dense align="center" class="mb-2">
-      <!-- Stage Buttons (Left side, scrollable) -->
-      <v-col class="d-flex flex-nowrap overflow-auto">
-        <v-btn
-          v-for="stage in stages"
-          :key="stage.stageId"
-          class="mr-2"
-          rounded
-          small
-          :color="
-            selectedStage === stage.stageId ? 'primary' : 'grey lighten-2'
-          "
-          :outlined="selectedStage !== stage.stageId"
-          @click="selectStage(stage)"
-          depressed
-        >
-          {{ stage.stage }} ({{ stage.total }})
-        </v-btn>
-      </v-col>
+    <v-card outlined rounded="xl" class="pa-4 mb-4">
+      <v-row dense align="center">
+        <!-- ===================== Stage Buttons ===================== -->
+        <v-col cols="12" md="7">
+          <div class="d-flex flex-nowrap overflow-auto">
+            <v-btn
+              v-for="stage in stages"
+              :key="stage.stageId"
+              small
+              rounded
+              depressed
+              class="mr-2 text-capitalize"
+              :color="selectedStage === stage.stageId ? 'primary' : ''"
+              :outlined="selectedStage !== stage.stageId"
+              @click="selectStage(stage)"
+            >
+              {{ stage.stage }} ({{ stage.total }})
+            </v-btn>
+          </div>
+        </v-col>
 
-      <!-- Filters (Right side) -->
-      <v-col cols="auto" class="d-flex align-center">
-        <!-- From Date -->
-        <v-menu v-model="fromMenu" :close-on-content-click="false" offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-text-field
-              v-model="startDate"
-              label="From"
-              readonly
-              dense
-              outlined
-              class="mr-2"
-              style="max-width: 140px"
-              v-bind="attrs"
-              v-on="on"
-              hide-details="auto"
-            />
-          </template>
-          <v-date-picker
-            v-model="startDate"
-            @input="fromMenu = false"
-            :max="today"
-          />
-        </v-menu>
+        <!-- ===================== Date Filters ===================== -->
+        <v-col cols="12" md="5">
+          <v-row dense>
+            <!-- From Date -->
+            <v-col cols="12" sm="4">
+              <v-menu
+                v-model="fromMenu"
+                :close-on-content-click="false"
+                offset-y
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="startDate"
+                    label="From"
+                    readonly
+                    dense
+                    outlined
+                    hide-details
+                    v-bind="attrs"
+                    v-on="on"
+                  />
+                </template>
+                <v-date-picker
+                  v-model="startDate"
+                  @input="fromMenu = false"
+                  :max="today"
+                />
+              </v-menu>
+            </v-col>
 
-        <!-- To Date -->
-        <v-menu v-model="toMenu" :close-on-content-click="false" offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-text-field
-              v-model="endDate"
-              label="To"
-              readonly
-              dense
-              outlined
-              class="mr-2"
-              style="max-width: 140px"
-              v-bind="attrs"
-              v-on="on"
-              hide-details="auto"
-            />
-          </template>
-          <v-date-picker
-            v-model="endDate"
-            @input="toMenu = false"
-            :min="startDate"
-          />
-        </v-menu>
+            <!-- To Date -->
+            <v-col cols="12" sm="4">
+              <v-menu v-model="toMenu" :close-on-content-click="false" offset-y>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="endDate"
+                    label="To"
+                    readonly
+                    dense
+                    outlined
+                    hide-details
+                    v-bind="attrs"
+                    v-on="on"
+                  />
+                </template>
+                <v-date-picker
+                  v-model="endDate"
+                  @input="toMenu = false"
+                  :min="startDate"
+                />
+              </v-menu>
+            </v-col>
 
-        <!-- Apply -->
-        <v-btn rounded color="primary" dressed @click="applyDateFilter">
-          Apply
-        </v-btn>
-      </v-col>
-    </v-row>
+            <!-- Apply Button -->
+            <v-col cols="12" sm="4">
+              <v-btn
+                block
+                rounded
+                depressed
+                color="primary"
+                @click="applyDateFilter"
+              >
+                Apply
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-col>
+      </v-row>
+    </v-card>
 
-    <!-- CARD -->
-    <v-card class="rounded-xl elevation-0" outlined>
-      <!-- EMPTY STATE -->
+    <!-- TABLE SECTION -->
+    <v-card outlined rounded="xl">
+      <div class="pa-4 d-flex justify-space-between align-center">
+        <div>
+          <div class="text-h6 font-weight-bold">Submissions</div>
+          <div class="text-caption grey--text">
+            {{ submissions.length }} records found
+          </div>
+        </div>
+      </div>
+
+      <v-divider />
+
+      <!-- EMPTY -->
       <div
         v-if="!submissions.length && !loading"
         class="text-center py-12 grey--text"
       >
-        <v-icon size="48" class="mb-2">mdi-database-off-outline</v-icon>
-        <div class="text-subtitle-2">No submissions yet</div>
+        <v-icon size="50">mdi-database-off-outline</v-icon>
+        <div class="mt-2">No submissions yet</div>
       </div>
 
       <!-- TABLE -->
-      <div v-else>
-        <v-data-table
-          :items="submissions"
-          :headers="headers"
-          :loading="loading"
-          dense
-          class="elevation-0"
-          style="overflow-x: auto"
+      <v-data-table
+        v-else
+        :items="submissions"
+        :headers="headers"
+        :loading="loading"
+        :page.sync="page"
+        :items-per-page="limit"
+        :server-items-length="totalItems"
+        @update:page="load"
+        @update:items-per-page="onLimitChange"
+        height="600"
+        fixed-header
+        class="elevation-0"
+        :footer-props="{
+          itemsPerPageOptions: [10, 20, 50, 100],
+        }"
+      >
+        <!-- DYNAMIC FIELDS -->
+        <template
+          v-for="(field, index) in dynamicFields"
+          v-slot:[`item.${field.value}`]="{ item }"
         >
-          <!-- DYNAMIC FIELDS -->
-          <template
-            v-for="(field, index) in dynamicFields"
-            v-slot:[`item.${field.value}`]="{ item }"
-          >
-            <div :key="index" class="py-1">
-              <!-- LINK TYPE -->
-              <template v-if="field.type === 'link' && item[field.value]">
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <a
-                      :href="
-                        item[field.value].startsWith('http')
-                          ? item[field.value]
-                          : 'https://' + item[field.value]
-                      "
-                      target="_blank"
-                      v-bind="attrs"
-                      v-on="on"
-                      style="
-                        max-width: 180px;
-                        display: inline-block;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                        color: #1976d2;
-                      "
-                    >
-                      {{ item[field.value] }}
-                    </a>
-                  </template>
-                  <span>{{ item[field.value] }}</span>
-                </v-tooltip>
-              </template>
+          <div :key="index" class="py-1">
+            <!-- LINK TYPE -->
+            <template v-if="field.type === 'link' && item[field.value]">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <a
+                    :href="
+                      item[field.value].startsWith('http')
+                        ? item[field.value]
+                        : 'https://' + item[field.value]
+                    "
+                    target="_blank"
+                    v-bind="attrs"
+                    v-on="on"
+                    style="
+                      max-width: 180px;
+                      display: inline-block;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                      color: #1976d2;
+                    "
+                  >
+                    {{ item[field.value] }}
+                  </a>
+                </template>
+                <span>{{ item[field.value] }}</span>
+              </v-tooltip>
+            </template>
 
-              <!-- NORMAL TEXT -->
-              <template v-else>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <span
-                      v-bind="attrs"
-                      v-on="on"
-                      style="
-                        max-width: 180px;
-                        display: inline-block;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                      "
-                    >
-                      {{ item[field.value] || "-" }}
-                    </span>
-                  </template>
-                  <span>{{ item[field.value] || "-" }}</span>
-                </v-tooltip>
-              </template>
-            </div>
-          </template>
+            <!-- NORMAL TEXT -->
+            <template v-else>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <span
+                    v-bind="attrs"
+                    v-on="on"
+                    style="
+                      max-width: 180px;
+                      display: inline-block;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    {{ item[field.value] || "-" }}
+                  </span>
+                </template>
+                <span>{{ item[field.value] || "-" }}</span>
+              </v-tooltip>
+            </template>
+          </div>
+        </template>
 
-          <!-- STAGE -->
-          <template v-slot:[`item.stage`]="{ item }">
-            <v-chip small :color="getStageColor(item.current_stage)" dark>
-              {{ item.current_stage?.stage_name || "New" }}
-            </v-chip>
-          </template>
+        <!-- STAGE -->
+        <template v-slot:[`item.stage`]="{ item }">
+          <v-chip small :color="getStageColor(item.current_stage)" dark>
+            {{ item.current_stage?.stage_name || "New" }}
+          </v-chip>
+        </template>
 
-          <!-- CREATED AT -->
-          <template v-slot:[`item.createdAt`]="{ item }">
-            <span class="text-caption">
-              {{ formatDate(item.createdAt) }}
-            </span>
-          </template>
+        <!-- CREATED AT -->
+        <template v-slot:[`item.createdAt`]="{ item }">
+          <span class="text-caption">
+            {{ formatDate(item.createdAt) }}
+          </span>
+        </template>
 
-          <!-- ACTION -->
-          <template v-slot:[`item.action`]="{ item }">
-            <div class="d-flex justify-center">
-              <v-btn icon small @click="openCommentDialog(item)">
-                <v-icon small>mdi-comment-processing-outline</v-icon>
-              </v-btn>
-            </div>
-          </template>
-        </v-data-table>
-      </div>
+        <!-- ACTION -->
+        <template v-slot:[`item.action`]="{ item }">
+          <div class="d-flex justify-center">
+            <v-btn icon small @click="openCommentDialog(item)">
+              <v-icon small>mdi-comment-processing-outline</v-icon>
+            </v-btn>
+          </div>
+        </template>
+      </v-data-table>
     </v-card>
 
     <!-- LOADER -->
@@ -331,8 +365,9 @@ import apiClient from "@/service/axios";
 
 export default {
   data() {
+    const today = new Date().toISOString().substr(0, 10);
     return {
-      today: new Date().toISOString().substr(0, 10),
+      today,
       submissions: [],
       loading: false,
       headers: [],
@@ -350,10 +385,14 @@ export default {
       comments: [],
       newComment: "",
 
-      startDate: null,
-      endDate: null,
+      startDate: today,
+      endDate: today,
       fromMenu: false,
       toMenu: false,
+      page: 1,
+      limit: 10,
+      totalPages: 1,
+      totalItems: 0,
     };
   },
 
@@ -364,7 +403,8 @@ export default {
   methods: {
     mapResponse(data) {
       this.formName = data.formName || "";
-
+      this.totalPages = data.pagination?.totalPages || 1;
+      this.totalItems = data.pagination?.total || 0;
       const responseData = data.data || [];
       const responseFields = data.fields || [];
 
@@ -409,11 +449,16 @@ export default {
         const stagesRes = await apiClient.get(`forms/${id}/stages/stats`);
         this.stages = stagesRes.data.data || [];
 
-        // default = ALL (better UX)
-        this.selectedStage = "all";
+        if (this.stages.length > 1) {
+          this.selectedStage = this.stages[1].stageId;
+        } else if (this.stages.length) {
+          this.selectedStage = this.stages[0].stageId; // fallback
+        }
 
         const { data } = await apiClient.get(`forms/${id}/submissions`, {
           params: {
+            page: this.page,
+            limit: this.limit,
             stageId: this.selectedStage || "all",
             startDate: this.startDate,
             endDate: this.endDate,
@@ -430,7 +475,7 @@ export default {
 
     async selectStage(stage) {
       this.selectedStage = stage.stageId;
-
+      this.page = 1;
       const id = this.$route.params.id;
       this.loading = true;
 
@@ -513,8 +558,10 @@ export default {
 
         // 4️⃣ Refresh table
         this.load();
+        this.$toast.success("Stage and comment updated successfully");
       } catch (err) {
         console.error("Failed to update stage/comment", err);
+        this.$toast.error("Failed to update stage/comment");
       } finally {
         this.loading = false;
       }
@@ -531,7 +578,13 @@ export default {
       });
     },
     applyDateFilter() {
+      this.page = 1;
       this.load(); // reload with filters
+    },
+    onLimitChange(val) {
+      this.limit = val;
+      this.page = 1;
+      this.load();
     },
   },
 };
