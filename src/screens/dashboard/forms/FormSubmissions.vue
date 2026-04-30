@@ -30,80 +30,96 @@
       </v-col>
     </v-row>
 
-    <v-row dense align="center" class="mb-2">
-      <!-- Stage Buttons (Left side, scrollable) -->
-      <v-col class="d-flex flex-nowrap overflow-auto">
-        <v-btn
-          v-for="stage in stages"
-          :key="stage.stageId"
-          class="mr-2"
-          rounded
-          small
-          :color="
-            selectedStage === stage.stageId ? 'primary' : 'grey lighten-2'
-          "
-          :outlined="selectedStage !== stage.stageId"
-          @click="selectStage(stage)"
-          depressed
-        >
-          {{ stage.stage }} ({{ stage.total }})
-        </v-btn>
-      </v-col>
+    <v-card outlined rounded="xl" class="pa-4 mb-4">
+      <v-row dense align="center">
+        <!-- ===================== Stage Buttons ===================== -->
+        <v-col cols="12" md="7">
+          <div class="d-flex flex-nowrap overflow-auto">
+            <v-btn
+              v-for="stage in stages"
+              :key="stage.stageId"
+              small
+              rounded
+              depressed
+              class="mr-2 text-capitalize"
+              :color="selectedStage === stage.stageId ? 'primary' : ''"
+              :outlined="selectedStage !== stage.stageId"
+              @click="selectStage(stage)"
+            >
+              {{ stage.stage }} ({{ stage.total }})
+            </v-btn>
+          </div>
+        </v-col>
 
-      <!-- Filters (Right side) -->
-      <v-col cols="auto" class="d-flex align-center">
-        <!-- From Date -->
-        <v-menu v-model="fromMenu" :close-on-content-click="false" offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-text-field
-              v-model="startDate"
-              label="From"
-              readonly
-              dense
-              outlined
-              class="mr-2"
-              style="max-width: 140px"
-              v-bind="attrs"
-              v-on="on"
-              hide-details="auto"
-            />
-          </template>
-          <v-date-picker
-            v-model="startDate"
-            @input="fromMenu = false"
-            :max="today"
-          />
-        </v-menu>
+        <!-- ===================== Date Filters ===================== -->
+        <v-col cols="12" md="5">
+          <v-row dense>
+            <!-- From Date -->
+            <v-col cols="12" sm="4">
+              <v-menu
+                v-model="fromMenu"
+                :close-on-content-click="false"
+                offset-y
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="startDate"
+                    label="From"
+                    readonly
+                    dense
+                    outlined
+                    hide-details
+                    v-bind="attrs"
+                    v-on="on"
+                  />
+                </template>
+                <v-date-picker
+                  v-model="startDate"
+                  @input="fromMenu = false"
+                  :max="today"
+                />
+              </v-menu>
+            </v-col>
 
-        <!-- To Date -->
-        <v-menu v-model="toMenu" :close-on-content-click="false" offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-text-field
-              v-model="endDate"
-              label="To"
-              readonly
-              dense
-              outlined
-              class="mr-2"
-              style="max-width: 140px"
-              v-bind="attrs"
-              v-on="on"
-              hide-details="auto"
-            />
-          </template>
-          <v-date-picker
-            v-model="endDate"
-            @input="toMenu = false"
-            :min="startDate"
-          />
-        </v-menu>
+            <!-- To Date -->
+            <v-col cols="12" sm="4">
+              <v-menu v-model="toMenu" :close-on-content-click="false" offset-y>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="endDate"
+                    label="To"
+                    readonly
+                    dense
+                    outlined
+                    hide-details
+                    v-bind="attrs"
+                    v-on="on"
+                  />
+                </template>
+                <v-date-picker
+                  v-model="endDate"
+                  @input="toMenu = false"
+                  :min="startDate"
+                />
+              </v-menu>
+            </v-col>
 
-        <!-- Apply -->
-        <v-btn rounded color="primary" dressed @click="applyDateFilter">
-          Apply
-        </v-btn>
-      </v-col>
-    </v-row>
+            <!-- Apply Button -->
+            <v-col cols="12" sm="4">
+              <v-btn
+                block
+                rounded
+                depressed
+                color="primary"
+                @click="applyDateFilter"
+              >
+                Apply
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-col>
+      </v-row>
+    </v-card>
 
     <!-- TABLE SECTION -->
     <v-card outlined rounded="xl">

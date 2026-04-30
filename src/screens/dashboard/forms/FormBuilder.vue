@@ -219,6 +219,7 @@
             <v-btn
               color="primary"
               rounded
+              depressed
               class="ml-2"
               @click="copyLink(form._id)"
             >
@@ -315,7 +316,11 @@
             dense
           />
 
-          <v-switch v-model="fieldForm.required" label="Required" />
+          <v-switch
+            v-model="fieldForm.required"
+            label="Required"
+            hide-details="auto"
+          />
 
           <!-- OPTIONS -->
           <v-combobox

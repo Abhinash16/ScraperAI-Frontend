@@ -37,70 +37,72 @@
     </v-row>
 
     <!-- FILTERS -->
-    <v-card class="mt-4 mb-6" outlined rounded="xl">
-      <v-card-text>
-        <v-row>
-          <v-col cols="12" md="3">
-            <v-text-field
-              v-model="startDate"
-              type="date"
-              label="Start Date"
-              outlined
-              dense
-            />
-          </v-col>
+    <v-card outlined rounded="xl" class="mt-4 mb-6 pa-4">
+      <v-row dense align="center">
+        <!-- Start Date -->
+        <v-col cols="12" sm="6" md="3">
+          <v-text-field
+            v-model="startDate"
+            type="date"
+            label="Start Date"
+            outlined
+            dense
+            hide-details
+          />
+        </v-col>
 
-          <v-col cols="12" md="3">
-            <v-text-field
-              v-model="endDate"
-              type="date"
-              label="End Date"
-              outlined
-              dense
-            />
-          </v-col>
+        <!-- End Date -->
+        <v-col cols="12" sm="6" md="3">
+          <v-text-field
+            v-model="endDate"
+            type="date"
+            label="End Date"
+            outlined
+            dense
+            hide-details
+          />
+        </v-col>
 
-          <!-- <v-col cols="12" md="3">
-            <v-select
-              v-model="selectedStage"
-              :items="stages"
-              item-text="stage"
-              item-value="stageId"
-              label="Stage"
-              outlined
-              dense
-              clearable
-            />
-          </v-col> -->
-
-          <v-col cols="12" md="3" class="d-flex">
-            <v-btn color="primary" block @click="applyFilters">
-              <v-icon left>mdi-filter</v-icon>
-              Apply
-            </v-btn>
-          </v-col>
-        </v-row>
-
-        <!-- QUICK FILTERS -->
-        <div class="d-flex flex-wrap gap-2">
+        <!-- Apply Button -->
+        <v-col cols="12" sm="6" md="2">
           <v-btn
-            v-for="r in quickRanges"
-            :key="r.value"
-            small
-            :outlined="activeRange !== r.value"
-            :color="activeRange === r.value ? 'primary' : 'grey'"
-            @click="setRange(r.value)"
+            color="primary"
+            block
+            rounded
+            depressed
+            height="40"
+            @click="applyFilters"
           >
-            {{ r.label }}
+            <v-icon left small>mdi-filter</v-icon>
+            Apply
           </v-btn>
-        </div>
-      </v-card-text>
+        </v-col>
+
+        <!-- Quick Filters -->
+        <v-col cols="12" sm="6" md="4">
+          <div class="d-flex flex-wrap justify-md-end">
+            <v-btn
+              v-for="r in quickRanges"
+              :key="r.value"
+              small
+              depressed
+              rounded
+              class="mr-2 mb-2"
+              :outlined="activeRange !== r.value"
+              :color="activeRange === r.value ? 'primary' : ''"
+              @click="setRange(r.value)"
+            >
+              {{ r.label }}
+            </v-btn>
+          </div>
+        </v-col>
+      </v-row>
     </v-card>
 
     <!-- KPI -->
     <v-row class="mb-6">
       <v-col cols="12" sm="6" md="3">
-        <v-card class="stat-card">
+        <v-card outlined class="rounded-xl purple lighten-5">
           <v-card-text>
             <div class="overline">Submissions</div>
             <div class="text-h4 font-weight-bold">
@@ -111,7 +113,7 @@
       </v-col>
 
       <v-col cols="12" sm="6" md="3">
-        <v-card class="stat-card success lighten-4">
+        <v-card outlined class="rounded-xl green lighten-5">
           <v-card-text>
             <div class="overline">Completed</div>
             <div class="text-h4 font-weight-bold">
@@ -122,7 +124,7 @@
       </v-col>
 
       <v-col cols="12" sm="6" md="3">
-        <v-card class="stat-card error lighten-4">
+        <v-card outlined class="rounded-xl red lighten-5">
           <v-card-text>
             <div class="overline">Drop Off</div>
             <div class="text-h4 font-weight-bold">
@@ -133,7 +135,7 @@
       </v-col>
 
       <v-col cols="12" sm="6" md="3">
-        <v-card class="stat-card info lighten-4">
+        <v-card outlined class="rounded-xl blue lighten-5">
           <v-card-text>
             <div class="overline">Conversion</div>
             <div class="text-h4 font-weight-bold">
@@ -422,26 +424,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.stat-card {
-  border-radius: 12px;
-  transition: 0.3s;
-  border-left: 4px solid #1976d2;
-}
-
-.stat-card.success {
-  border-left-color: #4caf50;
-}
-
-.stat-card.error {
-  border-left-color: #f44336;
-}
-
-.stat-card.info {
-  border-left-color: #2196f3;
-}
-
-.gap-2 {
-  gap: 8px;
-}
-</style>
+<style scoped></style>
