@@ -72,6 +72,7 @@
             <v-btn
               rounded
               block
+              depressed
               color="primary"
               @click="applyFilters"
               class="font-weight-bold"
@@ -91,6 +92,7 @@
             :outlined="activeRange !== days.value"
             :color="activeRange === days.value ? 'primary' : 'grey'"
             small
+            depressed
             @click="setRange(days.value)"
           >
             {{ days.label }}
@@ -119,9 +121,7 @@
                   {{ stats.activeChats || 0 }}
                 </h2>
               </div>
-              <v-icon size="48" class="stat-icon-active"
-                >mdi-chat-active</v-icon
-              >
+              <v-icon size="48" class="stat-icon-active">mdi-chat</v-icon>
             </div>
           </v-card-text>
         </v-card>
