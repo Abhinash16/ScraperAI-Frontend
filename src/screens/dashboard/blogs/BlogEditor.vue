@@ -324,7 +324,7 @@ export default {
         };
       } catch {
         this.show("Failed to load blog");
-        this.$router.push("/blogs");
+        this.$router.push("/dashboard/blogs");
       }
     },
 
@@ -403,7 +403,7 @@ export default {
         });
 
         this.show("Published successfully");
-        this.$router.push("/blogs");
+        this.$router.push("/dashboard/blogs");
       } catch (error) {
         const errMsg = error.response?.data?.error;
         this.show(`Publish failed${errMsg ? `: ${errMsg}` : ""}`);
