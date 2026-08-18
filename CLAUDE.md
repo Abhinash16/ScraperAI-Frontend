@@ -39,11 +39,9 @@ The app is organized as multiple **parallel dashboard sections**, each with its 
 - `DashboardLayout.vue` — main dashboard (home, profile, sitemap/scraping setup, page list, scraped pages, integrations, security, insights, knowledge gap, content chunks, whatsapp bot, documentation, chat analytics, user/team management)
 - `ChatLayout.vue` — `/dashboard/chat/*` (chat list, chat view, chat insights, chatbot knowledge score)
 - `FormsDashboardLayout.vue` — `/dashboard/forms/*` (form list/builder/submissions/analytics)
-- `BlogLayout.vue` — `/dashboard/blogs/*` (blog list/editor, GitHub-backed publishing config)
-- `DbQueryLayout.vue` — database-ai project list/config/chat (natural-language DB querying)
 - `CallAnalysisLayout.vue` — call batch analysis and reports
 
-Screens live under `src/screens/dashboard/**`, grouped into subfolders per section (`forms/`, `blogs/`, `insights/`, `knowledgeGap/`, `databaseAI/`, `Chats/`). Standalone reusable widgets (not tied to a route) live in `src/components/`. Top-level marketing/auth pages (landing, login, signup) live in `src/pages/`.
+Screens live under `src/screens/dashboard/**`, grouped into subfolders per section (`forms/`, `insights/`, `knowledgeGap/`, `Chats/`). Standalone reusable widgets (not tied to a route) live in `src/components/`. Top-level marketing/auth pages (landing, login, signup) live in `src/pages/`.
 
 Most dashboard routes are lazy-loaded via dynamic `import()`; a few core ones (`SitemapForm`, `ScrapedPages`) are statically imported at the top of `router/index.js`.
 

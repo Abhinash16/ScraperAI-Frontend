@@ -115,8 +115,6 @@ export default {
         "role:manage",
         "call:read",
         "call:reply",
-        "blog:read",
-        "blog:manage",
         "form:read",
         "form:manage",
         "comment:read",

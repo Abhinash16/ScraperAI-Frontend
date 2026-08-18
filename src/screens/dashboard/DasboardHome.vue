@@ -82,22 +82,10 @@ export default {
               description: "Real-time AI assistance",
             },
             {
-              name: "Blogs",
-              link: "/dashboard/blogs",
-              icon: "mdi-newspaper-variant-outline",
-              description: "Content management",
-            },
-            {
               name: "Forms",
               link: "/dashboard/forms",
               icon: "mdi-list-box-outline",
               description: "Builder and responses",
-            },
-            {
-              name: "DB Query Generator",
-              link: "/dashboard/database-ai/projects",
-              icon: "mdi-database-search-outline",
-              description: "Natural language SQL",
             },
             // {
             //   name: "WhatsApp Bot",
@@ -110,35 +98,6 @@ export default {
               link: "/dashboard/call-batches",
               icon: "mdi-phone-outline",
               description: "Speech-to-text insights",
-            },
-          ],
-        },
-        "Business Insights (BETA)": {
-          color: "teal",
-          items: [
-            {
-              name: "SEO Growth Report",
-              link: "/dashboard/seo-growth-report",
-              icon: "mdi-chart-line",
-              description: "Organic traffic tracking",
-            },
-            // {
-            //   name: "Chatbot Knowledge Score",
-            //   link: "/dashboard/chatbot-knowledge-score",
-            //   icon: "mdi-robot-outline",
-            //   description: "Accuracy assessment",
-            // },
-            {
-              name: "Keyword Research",
-              link: "/dashboard/keyword-research",
-              icon: "mdi-magnify",
-              description: "SEO optimization",
-            },
-            {
-              name: "Competitor Intelligence",
-              link: "/dashboard/competitor-intelligence",
-              icon: "mdi-account-search",
-              description: "Market analysis",
             },
           ],
         },

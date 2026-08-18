@@ -58,21 +58,6 @@ const routes = [
         component: () =>
           import("../screens/dashboard/insights/OpportunityAnalysis.vue"),
       },
-      {
-        path: "keyword-research",
-        component: () =>
-          import("../screens/dashboard/insights/KeywordResearch.vue"),
-      },
-      {
-        path: "competitor-intelligence",
-        component: () =>
-          import("../screens/dashboard/insights/CompetitorIntelligence.vue"),
-      },
-      {
-        path: "seo-growth-report",
-        component: () =>
-          import("../screens/dashboard/insights/SeoGrowthReport.vue"),
-      },
       // {
       //   path: "chatbot-knowledge-score",
       //   component: () =>
@@ -184,64 +169,6 @@ const routes = [
         path: ":id/analytics",
         name: "FormAnalytics",
         component: () => import("../screens/dashboard/forms/FormAnalytics.vue"),
-      },
-    ],
-  },
-
-  // blogs dashboard
-  {
-    path: "/dashboard/blogs",
-    component: () => import("../layouts/BlogLayout.vue"),
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: "",
-        name: "blogs",
-        component: () => import("../screens/dashboard/blogs/BlogLists.vue"),
-      },
-      {
-        path: "create",
-        name: "create-blog",
-        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
-      },
-      {
-        path: "connect-github",
-        name: "github-config",
-        component: () => import("../screens/dashboard/blogs/GithubConfig.vue"),
-      },
-      {
-        path: "help-guide",
-        name: "help-guide",
-        component: () => import("../screens/dashboard/blogs/HelpGuide.vue"),
-      },
-      {
-        path: ":id",
-        name: "edit-blog",
-        component: () => import("../screens/dashboard/blogs/BlogEditor.vue"),
-      },
-    ],
-  },
-
-  // db query generator dashboard
-  {
-    path: "/dashboard",
-    component: () => import("../layouts/DbQueryLayout.vue"),
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: "database-ai/projects",
-        component: () =>
-          import("../screens/dashboard/databaseAI/ProjectList.vue"),
-      },
-      {
-        path: "database-ai/project/:id/config",
-        component: () =>
-          import("../screens/dashboard/databaseAI/ProjectConfig.vue"),
-      },
-      {
-        path: "database-ai/project/:id/chat",
-        component: () =>
-          import("../screens/dashboard/databaseAI/QueryChat.vue"),
       },
     ],
   },

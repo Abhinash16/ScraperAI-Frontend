@@ -218,11 +218,6 @@ export default {
             icon: "mdi-message-text-outline",
           },
           {
-            name: "DB Query Generator",
-            link: "/dashboard/database-ai/projects",
-            icon: "mdi-database-search-outline",
-          },
-          {
             name: "WhatsApp Bot",
             link: "/dashboard/whatsapp-bot",
             icon: "mdi-whatsapp",
@@ -233,24 +228,9 @@ export default {
         section: "Business Insights",
         items: [
           {
-            name: "SEO Growth Report",
-            link: "/dashboard/seo-growth-report",
-            icon: "mdi-chart-line",
-          },
-          {
             name: "Chatbot Knowledge Score",
             link: "/dashboard/chatbot-knowledge-score",
             icon: "mdi-robot-outline",
-          },
-          {
-            name: "Keyword Research",
-            link: "/dashboard/keyword-research",
-            icon: "mdi-magnify",
-          },
-          {
-            name: "Competitor Intelligence",
-            link: "/dashboard/competitor-intelligence",
-            icon: "mdi-account-search",
           },
         ],
       },
@@ -298,11 +278,6 @@ export default {
       {
         section: "Other",
         items: [
-          {
-            name: "Blogs",
-            link: "/dashboard/blogs",
-            icon: "mdi-newspaper-variant-outline",
-          },
           {
             name: "Forms",
             link: "/dashboard/forms",
