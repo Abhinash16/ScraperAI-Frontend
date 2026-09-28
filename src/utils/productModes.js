@@ -14,3 +14,32 @@ export const PRODUCT_MODES = {
 export function productModeInfo(mode) {
   return PRODUCT_MODES[mode] || { label: mode || "Unknown", color: "grey" };
 }
+
+// "Honda Activa 6G (actva→activa, 6g)"
+export function catalogMatchLabel(match) {
+  const matched = Array.isArray(match?.matched) ? match.matched : [];
+  const name = match?.name || match?.sku || "Unknown product";
+  return matched.length ? `${name} (${matched.join(", ")})` : name;
+}
+
+const DETECTION_LABELS = {
+  keyword: "keyword",
+  catalog: "catalog match",
+  category: "category / brand",
+};
+
+// Why a message counted as a product question, from a test result or trace.
+// Uses the server's `detectedBy`; infers it for older responses.
+export function detectionSources(result) {
+  if (!result) return [];
+  if (Array.isArray(result.detectedBy)) {
+    return result.detectedBy.map((d) => DETECTION_LABELS[d] || d);
+  }
+  const sources = [];
+  if (result.keywordIntent) sources.push(DETECTION_LABELS.keyword);
+  if ((result.catalogMatches || []).length) sources.push(DETECTION_LABELS.catalog);
+  if (!sources.length && result.isProductQuestion) {
+    sources.push(DETECTION_LABELS.category);
+  }
+  return sources;
+}

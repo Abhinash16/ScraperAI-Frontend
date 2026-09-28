@@ -22,7 +22,12 @@
         <div v-if="tokens !== undefined || trace.model" class="trace-row">
           <template v-if="tokens !== undefined">
             <span class="trace-label">Tokens</span>
-            <span class="mr-4">{{ tokens }}</span>
+            <span class="mr-4">
+              {{ tokens }}
+              <span v-if="tokensFirstCall !== undefined" class="grey--text">
+                (+{{ tokensFirstCall }} before the tool call)
+              </span>
+            </span>
           </template>
           <template v-if="trace.model">
             <span class="trace-label">Model</span>
@@ -60,14 +65,62 @@
             <v-chip x-small dark :color="modeInfo.color" class="mr-2">
               {{ modeInfo.label }}
             </v-chip>
-            <span class="trace-label">Query</span>
-            <code v-if="product.query">{{ product.query }}</code>
+            <span class="trace-label">
+              {{ queries.length > 1 ? "Searches" : "Query" }}
+            </span>
+            <template v-if="queries.length">
+              <code v-for="(q, i) in queries" :key="i" class="mr-1">{{ q }}</code>
+            </template>
             <span v-else>—</span>
+          </div>
+          <div v-if="catalogMatches.length" class="trace-row">
+            <span class="trace-label">Catalog</span>
+            <v-chip
+              v-for="(m, i) in catalogMatches"
+              :key="m.sku || i"
+              x-small
+              outlined
+              color="primary"
+              class="mr-1 my-1"
+            >
+              {{ matchLabel(m) }}
+            </v-chip>
           </div>
           <pre
             v-if="product.products !== undefined"
             class="trace-pre"
           >{{ formatJson(product.products) }}</pre>
+        </template>
+
+        <!-- AI tool calls -->
+        <template v-if="toolCalls.length">
+          <div class="trace-heading">AI tool calls</div>
+          <div v-for="(call, i) in toolCalls" :key="i" class="tool-call">
+            <button
+              type="button"
+              class="tool-toggle"
+              @click="toggleTool(i)"
+            >
+              <v-icon x-small class="mr-1">
+                {{ openTools.includes(i) ? "mdi-chevron-down" : "mdi-chevron-right" }}
+              </v-icon>
+              🔧 AI searched: '{{ call.query }}' →
+              <span :class="['ml-1', toolModeClass(call.mode)]">
+                {{ call.mode }}
+              </span>
+              <span class="grey--text ml-1">
+                ({{ (call.products || []).length }}
+                {{ (call.products || []).length === 1 ? "product" : "products" }})
+              </span>
+            </button>
+            <div v-if="call.error" class="text-caption error--text ml-4">
+              {{ call.error }}
+            </div>
+            <pre
+              v-if="openTools.includes(i)"
+              class="trace-pre"
+            >{{ formatJson(call.products || []) }}</pre>
+          </div>
         </template>
 
         <!-- Customer -->
@@ -108,7 +161,7 @@
 </template>
 
 <script>
-import { productModeInfo } from "@/utils/productModes";
+import { productModeInfo, catalogMatchLabel } from "@/utils/productModes";
 
 export default {
   name: "AnswerTrace",
@@ -117,7 +170,7 @@ export default {
     trace: { type: Object, required: true },
   },
 
-  data: () => ({ open: false }),
+  data: () => ({ open: false, openTools: [] }),
 
   computed: {
     product() {
@@ -131,6 +184,21 @@ export default {
     },
     modeInfo() {
       return productModeInfo(this.product?.mode);
+    },
+    queries() {
+      const list = this.product?.queries;
+      if (Array.isArray(list)) return list.filter(Boolean);
+      return this.product?.query ? [this.product.query] : [];
+    },
+    catalogMatches() {
+      const list = this.product?.catalogMatches;
+      return Array.isArray(list) ? list : [];
+    },
+    toolCalls() {
+      return Array.isArray(this.trace.toolCalls) ? this.trace.toolCalls : [];
+    },
+    tokensFirstCall() {
+      return this.trace.tokensFirstCall?.total_tokens;
     },
     chunkCount() {
       return (this.knowledge?.chunkIds || []).length;
@@ -147,6 +215,23 @@ export default {
   },
 
   methods: {
+    matchLabel(match) {
+      return catalogMatchLabel(match);
+    },
+    toolModeClass(mode) {
+      return (
+        {
+          live: "success--text",
+          no_match: "amber--text text--darken-3",
+          unavailable: "error--text",
+        }[mode] || "grey--text"
+      );
+    },
+    toggleTool(i) {
+      this.openTools = this.openTools.includes(i)
+        ? this.openTools.filter((x) => x !== i)
+        : [...this.openTools, i];
+    },
     formatConfidence(value) {
       return typeof value === "number" && value <= 1
         ? `${Math.round(value * 100)}%`
@@ -198,6 +283,18 @@ export default {
 .trace-label {
   color: #757575;
   margin-right: 6px;
+}
+
+.tool-call {
+  margin-bottom: 6px;
+}
+
+.tool-toggle {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  text-align: left;
+  font-size: 13px;
 }
 
 .trace-pre {

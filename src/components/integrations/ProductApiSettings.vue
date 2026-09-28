@@ -149,9 +149,9 @@
           <div class="group-title">Triggers</div>
           <v-combobox
             v-model="form.triggerKeywords"
-            label="Trigger keywords"
-            placeholder="Type a product name and press Enter"
-            hint="Words that should trigger a product search, e.g. product names. Up to 200, each 50 characters max."
+            label="Extra trigger words (optional)"
+            placeholder="Type a word and press Enter"
+            hint="Product names and aliases from your catalog are detected automatically. Add other words that should trigger a product search. Up to 200, each 50 characters max."
             persistent-hint
             multiple
             small-chips
@@ -217,6 +217,8 @@
         </v-form>
       </v-card>
 
+      <ProductCatalogCard ref="catalog" class="mb-6" />
+
       <!-- TEST PANEL -->
       <v-card outlined rounded="xl" class="pa-6">
         <div class="d-flex align-center mb-1">
@@ -273,9 +275,43 @@
             <v-chip small dark :color="modeInfo.color" class="mb-2">
               {{ modeInfo.label }}
             </v-chip>
+            <div class="text-body-2 mb-1">
+              <span class="grey--text text--darken-1">Detected by:</span>
+              <template v-if="detectedBy.length">
+                {{ detectedBy.join(" / ") }}
+              </template>
+              <span v-else class="grey--text">nothing</span>
+            </div>
+            <div v-if="catalogMatches.length" class="d-flex align-center flex-wrap mb-1">
+              <span class="text-body-2 grey--text text--darken-1 mr-2">
+                Catalog matches:
+              </span>
+              <v-chip
+                v-for="(m, i) in catalogMatches"
+                :key="m.sku || i"
+                x-small
+                outlined
+                color="primary"
+                class="mr-1 my-1"
+                :title="m.score !== undefined ? `score ${m.score}` : ''"
+              >
+                {{ matchLabel(m) }}
+              </v-chip>
+            </div>
             <div class="text-body-2">
-              <span class="grey--text text--darken-1">Search query sent:</span>
-              <code v-if="testResult.query">{{ testResult.query }}</code>
+              <span class="grey--text text--darken-1">
+                {{ queries.length > 1 ? "Searches sent:" : "Search query sent:" }}
+              </span>
+              <template v-if="queries.length">
+                <code
+                  v-for="(q, i) in queries"
+                  :key="i"
+                  class="mr-1"
+                >{{ q }}</code>
+                <span v-if="queries.length > 1" class="text-caption grey--text">
+                  (API response below is for the first)
+                </span>
+              </template>
               <span v-else class="grey--text">
                 (no product name found in the message)
               </span>
@@ -385,7 +421,12 @@ import HeadersEditor from "@/components/integrations/HeadersEditor.vue";
 import JsonTree from "@/components/integrations/JsonTree.vue";
 import OutputPanel from "@/components/integrations/OutputPanel.vue";
 import { rowsFromHeaders, headersFromRows } from "@/utils/apiHeaders";
-import { productModeInfo } from "@/utils/productModes";
+import {
+  productModeInfo,
+  catalogMatchLabel,
+  detectionSources,
+} from "@/utils/productModes";
+import ProductCatalogCard from "@/components/integrations/ProductCatalogCard.vue";
 import { formatProductCell } from "@/utils/productFormat";
 
 const ENDPOINT = "/clients/product-api-settings";
@@ -396,7 +437,7 @@ const MAX_KEYWORD_LENGTH = 50;
 export default {
   name: "ProductApiSettings",
 
-  components: { HeadersEditor, JsonTree, OutputPanel },
+  components: { HeadersEditor, JsonTree, OutputPanel, ProductCatalogCard },
 
   data() {
     return {
@@ -438,6 +479,22 @@ export default {
 
     modeInfo() {
       return productModeInfo(this.testResult?.mode);
+    },
+
+    detectedBy() {
+      return detectionSources(this.testResult);
+    },
+
+    catalogMatches() {
+      const list = this.testResult?.catalogMatches;
+      return Array.isArray(list) ? list : [];
+    },
+
+    // Older responses only had `query`.
+    queries() {
+      const list = this.testResult?.queries;
+      if (Array.isArray(list)) return list.filter(Boolean);
+      return this.testResult?.query ? [this.testResult.query] : [];
     },
 
     products() {
@@ -583,6 +640,9 @@ export default {
         const { data } = await apiClient.put(ENDPOINT, body);
         this.applyConfig(data.data);
         this.$toast.success(data.message || "Product API settings saved");
+        // Saving with the API enabled re-syncs the catalog in the background.
+        if (this.form.enabled) this.$refs.catalog?.pollAfterSave();
+        else this.$refs.catalog?.load();
       } catch (err) {
         this.saveError =
           err.response?.data?.message || "Failed to save Product API settings";
@@ -619,6 +679,10 @@ export default {
 
     formatJson(value) {
       return this.hasValue(value) ? JSON.stringify(value, null, 2) : "";
+    },
+
+    matchLabel(match) {
+      return catalogMatchLabel(match);
     },
 
     formatCell(value) {
