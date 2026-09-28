@@ -1,384 +1,491 @@
 <template>
   <div>
-    <!-- Tabs Card -->
-    <v-card outlined rounded="lg" class="mb-6">
-      <v-tabs v-model="currentTab" color="primary" grow>
-        <v-tab value="0">Profile</v-tab>
-        <v-tab value="1">Company Profile</v-tab>
-
-        <v-tab value="2">Security</v-tab>
-        <v-tab value="3">
-          API Keys
-          <v-chip class="ml-2" x-small outlined color="warning">
-            Legacy
-          </v-chip>
-        </v-tab>
-      </v-tabs>
-    </v-card>
-
-    <!-- ================= PROFILE ================= -->
-    <v-card
-      v-if="currentTab === 0"
-      class="pa-6 my-6"
-      rounded="xl"
-      outlined
-      color="#eff2fb"
-      max-width="800"
-    >
-      <div class="d-flex align-center mb-6">
-        <v-avatar rounded="xl" color="#cde6ff" size="50" class="mr-4">
-          <v-icon color="black">mdi-account</v-icon>
-        </v-avatar>
-        <div>
-          <h3 class="black--text">User Details</h3>
-          <div class="text-caption black--text">
-            View your personal information associated with this account.
+    <!-- ================= HEADER ================= -->
+    <div class="d-flex align-center flex-wrap mb-6">
+      <v-avatar size="56" color="primary" class="mr-4">
+        <span class="white--text text-h6 font-weight-bold">{{ initials }}</span>
+      </v-avatar>
+      <div class="flex-grow-1" style="min-width: 0">
+        <v-skeleton-loader v-if="loading && !account" type="heading" width="240" />
+        <template v-else>
+          <div class="text-h5 font-weight-bold text-truncate">
+            {{ user.name || "Your profile" }}
           </div>
-        </div>
+          <div class="text-body-2 grey--text text--darken-1">
+            {{ user.email }}
+            <template v-if="account && account.company_name">
+              · {{ account.company_name }}
+            </template>
+          </div>
+        </template>
       </div>
+      <v-chip v-if="roleName" small outlined color="primary" class="mt-2">
+        <v-icon x-small left>mdi-shield-account-outline</v-icon>
+        {{ roleName }}
+      </v-chip>
+    </div>
 
-      <!-- Let's create a view-only section -->
-      <v-row>
-        <v-col cols="12" md="6">
-          <div class="label">Name</div>
-          <div>{{ currentUser.user.name }}</div>
-        </v-col>
+    <v-row>
+      <!-- ================= SECTION NAV ================= -->
+      <v-col cols="12" md="3">
+        <v-card outlined rounded="xl" class="pa-2 profile-nav">
+          <v-list dense nav class="py-0">
+            <v-list-item
+              v-for="item in sections"
+              :key="item.id"
+              :class="{ 'nav-active': section === item.id }"
+              class="rounded-lg"
+              @click="setSection(item.id)"
+            >
+              <v-list-item-icon class="mr-3">
+                <v-icon small :color="section === item.id ? 'primary' : ''">
+                  {{ item.icon }}
+                </v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title class="font-weight-medium">
+                  {{ item.name }}
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card>
+      </v-col>
 
-        <v-col cols="12" md="6">
-          <div class="label">Email</div>
-          <div>{{ currentUser.user.email }}</div>
-        </v-col>
+      <!-- ================= CONTENT ================= -->
+      <v-col cols="12" md="9">
+        <div class="profile-content">
+          <v-alert
+            v-if="loadError"
+            type="error"
+            outlined
+            rounded="xl"
+          >
+            {{ loadError }}
+            <v-btn small text color="error" class="ml-2" @click="load">
+              Retry
+            </v-btn>
+          </v-alert>
 
-        <v-col cols="12" md="6">
-          <div class="label">Phone</div>
-          <div>{{ currentUser.user.phone || "N/A" }}</div>
-        </v-col>
+          <v-card v-else-if="!account" outlined rounded="xl" class="pa-6">
+            <v-progress-linear indeterminate color="primary" />
+          </v-card>
 
-        <v-col cols="12" md="6">
-          <div class="label">Status</div>
-          <div>{{ currentUser.user.status === 1 ? "Active" : "Inactive" }}</div>
-        </v-col>
-      </v-row>
-    </v-card>
+          <!-- ================= YOUR ACCOUNT ================= -->
+          <template v-else-if="section === 'account'">
+            <v-card outlined rounded="xl" class="pa-6">
+              <div class="text-subtitle-1 font-weight-bold">Your login</div>
+              <div class="text-body-2 grey--text text--darken-1 mb-6">
+                The user you're signed in as. Ask an admin to change these
+                details or your role.
+              </div>
 
-    <!-- ================= COMPANY PROFILE ================= -->
-    <v-card
-      v-if="currentTab === 1"
-      class="pa-6 my-6"
-      rounded="xl"
-      outlined
-      color="#eff2fb"
-      max-width="800"
-    >
-      <div class="d-flex align-center mb-6">
-        <v-avatar rounded="xl" color="#cde6ff" size="50" class="mr-4">
-          <v-icon color="black">mdi-account</v-icon>
-        </v-avatar>
-        <div>
-          <h3 class="black--text">Account details</h3>
-          <div class="text-caption black--text">
-            Update your personal information associated with this account.
-          </div>
-        </div>
-      </div>
+              <v-row>
+                <v-col
+                  v-for="field in accountFields"
+                  :key="field.label"
+                  cols="12"
+                  sm="6"
+                >
+                  <div class="field-label">{{ field.label }}</div>
+                  <div class="field-value">
+                    <v-chip
+                      v-if="field.chip"
+                      x-small
+                      outlined
+                      :color="field.chip"
+                    >
+                      {{ field.value }}
+                    </v-chip>
+                    <template v-else>{{ field.value || "—" }}</template>
+                  </div>
+                </v-col>
+              </v-row>
+            </v-card>
+          </template>
 
-      <v-form>
-        <v-row>
-          <v-col cols="12">
-            <v-text-field v-model="name" label="Full name" outlined dense />
-          </v-col>
+          <!-- ================= COMPANY ================= -->
+          <template v-else-if="section === 'company'">
+            <v-form ref="companyForm" @submit.prevent="saveCompany">
+              <v-card outlined rounded="xl" class="pa-6 mb-4">
+                <div class="text-subtitle-1 font-weight-bold">
+                  Company details
+                </div>
+                <div class="text-body-2 grey--text text--darken-1 mb-6">
+                  Shared by everyone in your company account.
+                </div>
 
-          <v-col cols="6">
-            <v-text-field
-              v-model="company_website"
-              label="Company website"
-              outlined
-              dense
+                <v-row dense>
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      v-model.trim="company.company_name"
+                      label="Company name"
+                      outlined
+                      dense
+                    />
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      v-model.trim="company.name"
+                      label="Account owner name"
+                      outlined
+                      dense
+                    />
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      :value="account.email"
+                      label="Account email"
+                      outlined
+                      dense
+                      disabled
+                      persistent-hint
+                      hint="Contact support to change"
+                    />
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      :value="account.phone"
+                      label="Account phone"
+                      outlined
+                      dense
+                      disabled
+                      persistent-hint
+                      hint="Contact support to change"
+                    />
+                  </v-col>
+                </v-row>
+              </v-card>
+
+              <v-card outlined rounded="xl" class="pa-6">
+                <div class="text-subtitle-1 font-weight-bold">
+                  Website and policies
+                </div>
+                <div class="text-body-2 grey--text text--darken-1 mb-6">
+                  Links the assistant can share with customers.
+                </div>
+
+                <v-row dense>
+                  <v-col v-for="link in linkFields" :key="link.key" cols="12">
+                    <v-text-field
+                      v-model.trim="company[link.key]"
+                      :label="link.label"
+                      :placeholder="link.placeholder"
+                      :prepend-inner-icon="link.icon"
+                      :rules="[urlRule]"
+                      outlined
+                      dense
+                    />
+                  </v-col>
+                </v-row>
+
+                <div class="d-flex align-center justify-end mt-2">
+                  <span v-if="companyDirty" class="text-caption grey--text mr-3">
+                    Unsaved changes
+                  </span>
+                  <v-btn
+                    v-if="companyDirty"
+                    text
+                    rounded
+                    class="mr-2"
+                    :disabled="saving"
+                    @click="resetCompany"
+                  >
+                    Discard
+                  </v-btn>
+                  <v-btn
+                    color="primary"
+                    rounded
+                    depressed
+                    type="submit"
+                    :loading="saving"
+                    :disabled="!companyDirty"
+                  >
+                    Save changes
+                  </v-btn>
+                </div>
+              </v-card>
+            </v-form>
+          </template>
+
+          <!-- ================= SECURITY ================= -->
+          <template v-else-if="section === 'security'">
+            <v-card outlined rounded="xl" class="pa-6 mb-4">
+              <div class="d-flex align-center flex-wrap">
+                <div class="flex-grow-1 mr-4 mb-2">
+                  <div class="text-subtitle-1 font-weight-bold">Password</div>
+                  <div class="text-body-2 grey--text text--darken-1">
+                    <template v-if="canResetPassword">
+                      Change the password you sign in with.
+                    </template>
+                    <template v-else>
+                      Ask an admin to reset your password.
+                    </template>
+                  </div>
+                </div>
+                <v-btn
+                  v-if="canResetPassword"
+                  color="primary"
+                  outlined
+                  rounded
+                  class="mb-2"
+                  @click="resetDialog = true"
+                >
+                  Change password
+                </v-btn>
+              </div>
+            </v-card>
+
+            <v-card outlined rounded="xl" class="pa-6 mb-4">
+              <div class="d-flex align-center flex-wrap">
+                <div class="flex-grow-1 mr-4 mb-2">
+                  <div class="d-flex align-center">
+                    <div class="text-subtitle-1 font-weight-bold mr-2">
+                      Two-factor authentication
+                    </div>
+                    <v-chip x-small outlined color="grey">Coming soon</v-chip>
+                  </div>
+                  <div class="text-body-2 grey--text text--darken-1">
+                    Add a second step when signing in.
+                  </div>
+                </div>
+              </div>
+            </v-card>
+
+            <IpAllowlist
+              v-if="hasPermission('ip:read') || hasPermission('ip:manage')"
+              :can-manage="hasPermission('ip:manage')"
+              class="mb-4"
             />
-          </v-col>
-          <v-col cols="6">
-            <v-text-field
-              v-model="company_termsandconditions_url"
-              label="Terms and conditions URL"
-              outlined
-              dense
-            />
-          </v-col>
 
-          <v-col cols="6">
-            <v-text-field
-              v-model="company_privacypolicy_url"
-              label="Privacy policy URL"
-              outlined
-              dense
-            />
-          </v-col>
-
-          <v-col cols="6">
-            <v-text-field
-              v-model="company_aboutus_url"
-              label="About us URL"
-              outlined
-              dense
-            />
-          </v-col>
-
-          <v-col cols="12">
-            <v-text-field
-              v-model="company_name"
-              label="Company Name"
-              outlined
-              dense
-            />
-          </v-col>
-
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="email"
-              label="Email address"
-              outlined
-              dense
-              disabled
-            />
-          </v-col>
-
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="phone"
-              label="Phone number"
-              outlined
-              dense
-              disabled
-            />
-          </v-col>
-        </v-row>
-
-        <div class="d-flex justify-end mt-4">
-          <v-btn color="primary" @click="updateProfileInfo" depressed rounded>
-            Save changes
-          </v-btn>
+            <v-card outlined rounded="xl" class="pa-6">
+              <div class="d-flex align-center flex-wrap">
+                <div class="flex-grow-1 mr-4 mb-2">
+                  <div class="text-subtitle-1 font-weight-bold">Sign out</div>
+                  <div class="text-body-2 grey--text text--darken-1">
+                    Sign out of the dashboard on this browser.
+                  </div>
+                </div>
+                <v-btn
+                  color="error"
+                  outlined
+                  rounded
+                  class="mb-2"
+                  @click="logout"
+                >
+                  Sign out
+                </v-btn>
+              </div>
+            </v-card>
+          </template>
         </div>
-      </v-form>
-    </v-card>
-
-    <!-- ================= SECURITY ================= -->
-    <v-card
-      v-if="currentTab === 2"
-      class="pa-6 my-6"
-      rounded="xl"
-      outlined
-      color="#eff2fb"
-      max-width="800"
-    >
-      <div class="d-flex align-center mb-6">
-        <v-avatar rounded="xl" color="#cde6ff" size="50" class="mr-4">
-          <v-icon color="black">mdi-shield-lock-outline</v-icon>
-        </v-avatar>
-        <div>
-          <h3 class="black--text">Security</h3>
-          <div class="text-caption black--text">
-            Manage authentication and active sessions.
-          </div>
-        </div>
-      </div>
-
-      <v-card outlined rounded="xl" class="pa-4 mb-6">
-        <div class="d-flex justify-space-between align-center">
-          <div>
-            <div class="font-weight-medium">
-              Multi-factor authentication (MFA)
-            </div>
-            <div class="text-caption">
-              Add an extra layer of security to your account.
-            </div>
-          </div>
-          <v-btn outlined rounded color="primary" small> Enable </v-btn>
-        </div>
-      </v-card>
-
-      <v-card outlined rounded="xl" class="pa-4">
-        <div class="d-flex justify-space-between align-center">
-          <div>
-            <div class="font-weight-medium">Log out of all devices</div>
-            <div class="text-caption">
-              End all active sessions across devices.
-            </div>
-          </div>
-          <v-btn outlined rounded color="error" small @click="logout">
-            Log out all
-          </v-btn>
-        </div>
-      </v-card>
-      <v-card v-if="canResetPassword" outlined rounded="xl" class="pa-4 mt-4">
-        <div class="d-flex justify-space-between align-center">
-          <div>
-            <div class="font-weight-medium">Change Password</div>
-            <div class="text-caption">Update your account password</div>
-          </div>
-
-          <v-btn outlined rounded color="primary" small @click="openResetSelf">
-            Change
-          </v-btn>
-        </div>
-      </v-card>
-    </v-card>
-
-    <!-- ================= API KEYS ================= -->
-    <v-card
-      v-if="currentTab === 3"
-      class="pa-6 my-6"
-      rounded="xl"
-      outlined
-      color="#eff2fb"
-      max-width="800"
-    >
-      <div class="d-flex align-center mb-6">
-        <v-avatar rounded="xl" color="#cde6ff" size="50" class="mr-4">
-          <v-icon color="black">mdi-key-variant</v-icon>
-        </v-avatar>
-        <div>
-          <h3 class="black--text">API Keys</h3>
-          <div class="text-caption black--text">
-            Manage your secret keys used to access ScraperAI APIs.
-          </div>
-        </div>
-      </div>
-
-      <v-alert
-        border="left"
-        colored-border
-        color="warning"
-        elevation="0"
-        rounded="xl"
-        class="mb-6 white black--text text-body-2"
-      >
-        Your API key will be disabled if billing lapses. Service resumes
-        automatically once payment succeeds.
-      </v-alert>
-
-      <v-card outlined color="grey darken-4" class="pa-4 mb-4" rounded="xl">
-        <div class="d-flex justify-space-between align-center mb-2">
-          <span class="text-caption grey--text text--lighten-1">
-            SECRET KEY
-          </span>
-          <v-btn x-small color="primary" depressed rounded @click="copyApiKey">
-            <v-icon x-small class="mr-1">mdi-content-copy</v-icon>
-            Copy
-          </v-btn>
-        </div>
-
-        <code
-          class="white--text d-block font-weight-light"
-          style="font-family: monospace"
-        >
-          {{ maskedApiKey }}
-        </code>
-      </v-card>
-
-      <div class="text-caption grey--text text--darken-2">
-        Never expose your API key in client-side code or public repositories.
-      </div>
-    </v-card>
-
-    <!-- Loader -->
-    <v-overlay :value="loading" opacity="0.25">
-      <v-progress-circular indeterminate size="64" />
-    </v-overlay>
+      </v-col>
+    </v-row>
 
     <ResetPasswordDialog
-      v-if="currentUser && currentUser.user"
+      v-if="user._id"
       v-model="resetDialog"
-      :userId="currentUser.user._id"
+      :userId="user._id"
       title="Change Password"
-      @success="
-        snackbarMessage = 'Password updated successfully';
-        snackbar = true;
-      "
+      @success="$toast.success('Password updated')"
     />
-
-    <!-- Snackbar -->
-    <v-snackbar v-model="snackbar" timeout="3000" top right color="success">
-      {{ snackbarMessage }}
-    </v-snackbar>
   </div>
 </template>
 
 <script>
-import apiClient from "@/service/axios";
-import { setAuthToken } from "@/service/axios";
-
+import apiClient, { setAuthToken } from "@/service/axios";
 import ResetPasswordDialog from "@/components/ResetPasswordDialog.vue";
+import IpAllowlist from "@/components/profile/IpAllowlist.vue";
+
+const SECTIONS = [
+  { id: "account", name: "Your account", icon: "mdi-account-outline" },
+  { id: "company", name: "Company", icon: "mdi-domain" },
+  { id: "security", name: "Security", icon: "mdi-shield-lock-outline" },
+];
+
+// Old links used ?tab=0..3
+const LEGACY_TABS = ["account", "company", "security"];
+
+const COMPANY_FIELDS = [
+  "name",
+  "company_name",
+  "company_website",
+  "company_termsandconditions_url",
+  "company_privacypolicy_url",
+  "company_aboutus_url",
+];
 
 export default {
-  components: {
-    ResetPasswordDialog,
-  },
+  components: { ResetPasswordDialog, IpAllowlist },
+
   data() {
     return {
-      currentTab: 0,
-      currentUser: null,
+      sections: SECTIONS,
+      linkFields: [
+        {
+          key: "company_website",
+          label: "Website",
+          placeholder: "https://example.com",
+          icon: "mdi-web",
+        },
+        {
+          key: "company_aboutus_url",
+          label: "About us page",
+          placeholder: "https://example.com/about",
+          icon: "mdi-information-outline",
+        },
+        {
+          key: "company_termsandconditions_url",
+          label: "Terms and conditions",
+          placeholder: "https://example.com/terms",
+          icon: "mdi-file-document-outline",
+        },
+        {
+          key: "company_privacypolicy_url",
+          label: "Privacy policy",
+          placeholder: "https://example.com/privacy",
+          icon: "mdi-shield-outline",
+        },
+      ],
 
-      name: "",
-      email: "",
-      phone: "",
-      company_name: "",
-      company_website: "",
-      company_termsandconditions_url: "",
-      company_privacypolicy_url: "",
-      company_aboutus_url: "",
-
+      account: null,
+      company: {},
+      savedCompany: {},
       loading: false,
-      snackbar: false,
-      snackbarMessage: "",
+      loadError: "",
+      saving: false,
       resetDialog: false,
     };
   },
 
   computed: {
-    maskedApiKey() {
-      if (!this.currentUser?.apiKey) return "—";
-      const key = this.currentUser.apiKey;
-      return `${key.slice(0, 6)}••••••••${key.slice(-4)}`;
+    section() {
+      const { section, tab } = this.$route.query;
+      if (SECTIONS.some((s) => s.id === section)) return section;
+      return LEGACY_TABS[parseInt(tab, 10)] || "account";
     },
+
+    user() {
+      return this.account?.user || {};
+    },
+
+    role() {
+      return this.account?.role || this.user.roleId || null;
+    },
+
+    roleName() {
+      return this.role?.name || "";
+    },
+
+    permissions() {
+      return this.role?.permissions || [];
+    },
+
     canResetPassword() {
-      if (!this.currentUser || !this.currentUser.role) return false;
+      return this.hasPermission("user:reset-password");
+    },
 
-      const permissions = this.currentUser.role.permissions || [];
-
+    initials() {
+      const name = (this.user.name || this.user.email || "").trim();
+      const parts = name.split(/[\s@.]+/).filter(Boolean);
       return (
-        permissions.includes("*") || permissions.includes("user:reset-password")
+        parts
+          .slice(0, 2)
+          .map((p) => p[0].toUpperCase())
+          .join("") || "?"
+      );
+    },
+
+    accountFields() {
+      const active = this.user.status === 1;
+      return [
+        { label: "Name", value: this.user.name },
+        { label: "Email", value: this.user.email },
+        { label: "Phone", value: this.user.phone },
+        { label: "Role", value: this.roleName },
+        {
+          label: "Status",
+          value: active ? "Active" : "Inactive",
+          chip: active ? "success" : "grey",
+        },
+        {
+          label: "Member since",
+          value: this.user.createdAt
+            ? this.$moment(this.user.createdAt).format("D MMM YYYY")
+            : "",
+        },
+      ];
+    },
+
+    companyDirty() {
+      return COMPANY_FIELDS.some(
+        (f) => (this.company[f] || "") !== (this.savedCompany[f] || ""),
       );
     },
   },
 
   mounted() {
-    this.currentTab = parseInt(this.$route.query.tab) || 0;
-    this.fetchCurrentUser();
+    this.load();
   },
 
   methods: {
-    async fetchCurrentUser() {
+    hasPermission(perm) {
+      return this.permissions.includes("*") || this.permissions.includes(perm);
+    },
+
+    setSection(id) {
+      if (id === this.section) return;
+      this.$router.replace({ query: { section: id } }).catch(() => {});
+    },
+
+    urlRule(v) {
+      if (!v) return true;
+      return /^https?:\/\/\S+\.\S+$/i.test(v) || "Enter a full URL starting with https://";
+    },
+
+    applyCompany(source) {
+      const values = {};
+      COMPANY_FIELDS.forEach((f) => {
+        values[f] = source?.[f] || "";
+      });
+      this.savedCompany = values;
+      this.company = { ...values };
+    },
+
+    resetCompany() {
+      this.company = { ...this.savedCompany };
+      this.$refs.companyForm?.resetValidation();
+    },
+
+    async load() {
       this.loading = true;
+      this.loadError = "";
       try {
         const { data } = await apiClient.get("/clients/currentUser");
-        const user = data.data;
-
-        this.currentUser = user;
-        this.name = user.name || "";
-        this.email = user.email || "";
-        this.phone = user.phone || "";
-        this.company_name = user.company_name || "";
-        this.company_website = user.company_website || "";
-        this.company_termsandconditions_url =
-          user.company_termsandconditions_url || "";
-        this.company_privacypolicy_url = user.company_privacypolicy_url || "";
-        this.company_aboutus_url = user.company_aboutus_url || "";
-      } catch (error) {
-        this.snackbarMessage =
-          error.response?.data?.message || "Failed to load user data";
-        this.snackbar = true;
+        this.account = data.data;
+        this.applyCompany(this.account);
+      } catch (err) {
+        this.loadError =
+          err.response?.data?.message || "Failed to load your profile";
       } finally {
         this.loading = false;
+      }
+    },
+
+    async saveCompany() {
+      if (!this.$refs.companyForm.validate()) return;
+      this.saving = true;
+      try {
+        await apiClient.put("/clients/currentUser/update", { ...this.company });
+        this.savedCompany = { ...this.company };
+        this.account = { ...this.account, ...this.company };
+        this.$toast.success("Company details saved");
+      } catch (err) {
+        this.$toast.error(
+          err.response?.data?.message || "Failed to save company details",
+        );
+      } finally {
+        this.saving = false;
       }
     },
 
@@ -387,43 +494,40 @@ export default {
       setAuthToken(null);
       this.$router.push("/login");
     },
-
-    async copyApiKey() {
-      await navigator.clipboard.writeText(this.currentUser.apiKey);
-      this.snackbarMessage = "API key copied to clipboard";
-      this.snackbar = true;
-    },
-    async updateProfileInfo() {
-      // Implementation for updating profile information
-
-      try {
-        await apiClient.put("/clients/currentUser/update", {
-          name: this.name,
-          company_name: this.company_name,
-          company_website: this.company_website,
-          company_termsandconditions_url: this.company_termsandconditions_url,
-          company_privacypolicy_url: this.company_privacypolicy_url,
-          company_aboutus_url: this.company_aboutus_url,
-        });
-        this.snackbarMessage = "Profile information updated successfully";
-        this.snackbar = true;
-      } catch (error) {
-        this.snackbarMessage =
-          error.response?.data?.message ||
-          "Failed to update profile information";
-        this.snackbar = true;
-      }
-    },
-
-    hasPermission(perm) {
-      return (
-        this.currentUser?.role?.permissions?.includes("*") ||
-        this.currentUser?.role?.permissions?.includes(perm)
-      );
-    },
-    openResetSelf() {
-      this.resetDialog = true;
-    },
   },
 };
 </script>
+
+<style scoped>
+.profile-nav {
+  position: sticky;
+  top: 88px;
+}
+
+.nav-active {
+  background: #eff2fb;
+}
+
+.nav-active .v-list-item__title {
+  color: var(--v-primary-base);
+  font-weight: 700 !important;
+}
+
+.profile-content {
+  max-width: 900px;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #757575;
+  margin-bottom: 4px;
+}
+
+.field-value {
+  font-size: 15px;
+  word-break: break-word;
+}
+</style>

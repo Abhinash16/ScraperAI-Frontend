@@ -44,8 +44,7 @@ const routes = [
       },
       {
         path: "security",
-        component: () => import("../screens/dashboard/SecurityPage.vue"),
-        meta: { hideTab: true },
+        redirect: "/dashboard/profile?section=security",
       },
 
       {

@@ -71,16 +71,6 @@
               </v-list-item>
 
               <!-- Security -->
-              <v-list-item @click="goToSecurity()">
-                <v-list-item-icon>
-                  <v-icon>mdi-shield-lock-outline</v-icon>
-                </v-list-item-icon>
-                <v-list-item-title class="font-weight-bold">
-                  Security
-                </v-list-item-title>
-              </v-list-item>
-
-              <!-- Security -->
               <v-list-item
                 v-if="currentUser && hasPermission('user:manage')"
                 @click="goToUserList()"
@@ -259,11 +249,6 @@ export default {
             icon: "mdi-puzzle-outline",
           },
           {
-            name: "Security",
-            link: "/dashboard/security",
-            icon: "mdi-shield-lock-outline",
-          },
-          {
             name: "Integration",
             link: "/dashboard/integration",
             icon: "mdi-puzzle-outline",
@@ -319,12 +304,6 @@ export default {
     goToIntegration() {
       if (this.$route.path !== "/dashboard/integration") {
         this.$router.push("/dashboard/integration");
-      }
-    },
-
-    goToSecurity() {
-      if (this.$route.path !== "/dashboard/security") {
-        this.$router.push("/dashboard/security");
       }
     },
 
