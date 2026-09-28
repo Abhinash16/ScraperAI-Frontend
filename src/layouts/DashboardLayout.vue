@@ -217,11 +217,7 @@ export default {
             link: "/dashboard/chat",
             icon: "mdi-message-text-outline",
           },
-          {
-            name: "WhatsApp Bot",
-            link: "/dashboard/whatsapp-bot",
-            icon: "mdi-whatsapp",
-          },
+
         ],
       },
       {

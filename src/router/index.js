@@ -86,8 +86,7 @@ const routes = [
 
       {
         path: "whatsapp-bot",
-        name: "whatsapp-bot",
-        component: () => import("../screens/dashboard/WhatsappBot.vue"),
+        redirect: "/dashboard/integration?section=tellephant",
       },
       {
         path: "documentation",
@@ -131,7 +130,7 @@ const routes = [
       },
       {
         path: "whatsapp-bot",
-        component: () => import("../screens/dashboard/WhatsappBot.vue"),
+        redirect: "/dashboard/integration?section=tellephant",
       },
       {
         path: ":chatId",

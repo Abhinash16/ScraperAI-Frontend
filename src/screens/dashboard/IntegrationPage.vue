@@ -116,6 +116,11 @@
             </v-card>
           </div>
 
+          <!-- ================= TELLEPHANT (WHATSAPP) ================= -->
+          <div v-if="section === 'tellephant'">
+            <TellephantSettings @saved="currentLoggedInUserInfo" />
+          </div>
+
           <!-- ================= AI PROVIDER ================= -->
           <div v-if="section === 'ai-provider'">
             <v-card outlined rounded="xl" class="pa-6 mb-4">
@@ -496,6 +501,7 @@ import apiClient from "@/service/axios";
 import CustomerApiSettings from "@/components/integrations/CustomerApiSettings.vue";
 import ProductApiSettings from "@/components/integrations/ProductApiSettings.vue";
 import HeadersEditor from "@/components/integrations/HeadersEditor.vue";
+import TellephantSettings from "@/components/integrations/TellephantSettings.vue";
 import { rowsFromHeaders, headersFromRows } from "@/utils/apiHeaders";
 import chatgptIcon from "@/assets/images/chatgpt-icon.png";
 
@@ -524,7 +530,12 @@ const API_CONFIG_TABS = [
 ];
 
 export default {
-  components: { CustomerApiSettings, ProductApiSettings, HeadersEditor },
+  components: {
+    CustomerApiSettings,
+    ProductApiSettings,
+    HeadersEditor,
+    TellephantSettings,
+  },
 
   data() {
     return {
@@ -587,7 +598,18 @@ export default {
               icon: "mdi-code-tags",
               description: "Add the scraperAI chat widget to your website.",
             },
-          ],
+            this.canManageSettings && {
+              id: "tellephant",
+              name: "Tellephant",
+              icon: "mdi-whatsapp",
+              title: "WhatsApp · Tellephant",
+              description:
+                "Connect your WhatsApp Business number and let the bot reply automatically.",
+              badge: this.currentLoggedInUser.autoWhatsappEnabled
+                ? { text: "On", color: "success" }
+                : null,
+            },
+          ].filter(Boolean),
         },
         {
           title: "AI",
