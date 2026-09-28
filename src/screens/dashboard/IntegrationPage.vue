@@ -133,19 +133,15 @@
                     <v-chip
                       x-small
                       outlined
-                      :color="currentLoggedInUser.chatgptApiKey ? 'success' : 'grey'"
+                      :color="openaiConfigured ? 'success' : 'grey'"
                     >
-                      {{
-                        currentLoggedInUser.chatgptApiKey
-                          ? "Connected"
-                          : "Not connected"
-                      }}
+                      {{ openaiConfigured ? "Connected" : "Not connected" }}
                     </v-chip>
                   </div>
                   <div class="text-body-2 grey--text text--darken-1">
                     All chats are answered using this API key and model.
-                    <span v-if="currentLoggedInUser.chatGptModel">
-                      Model: <strong>{{ currentLoggedInUser.chatGptModel }}</strong>
+                    <span v-if="openaiConfigured">
+                      Model: <strong>{{ AI_MODEL }}</strong>
                     </span>
                   </div>
                 </div>
@@ -156,11 +152,7 @@
                   class="mb-2"
                   @click="connectChatGptDialog = true"
                 >
-                  {{
-                    currentLoggedInUser.chatgptApiKey
-                      ? "Edit connection"
-                      : "Connect OpenAI"
-                  }}
+                  {{ openaiConfigured ? "Edit connection" : "Connect OpenAI" }}
                 </v-btn>
               </div>
             </v-card>
@@ -419,14 +411,20 @@
             <label
               class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
             >
-              API Key *
+              API Key{{ openaiConfigured ? "" : " *" }}
             </label>
             <div class="text-caption mb-2">
-              Securely connect your OpenAI account. Keys are encrypted.
+              {{
+                openaiConfigured
+                  ? "A key is saved. Leave this empty to keep it, or enter a new key to replace it."
+                  : "Securely connect your OpenAI account. Keys are encrypted."
+              }}
             </div>
             <v-text-field
-              v-model="chatgptApiKey"
-              placeholder="sk-..."
+              v-model.trim="chatgptApiKey"
+              :placeholder="openaiConfigured ? '•••••••• (saved)' : 'sk-...'"
+              type="password"
+              autocomplete="new-password"
               outlined
               dense
               hide-details="auto"
@@ -435,44 +433,26 @@
             ></v-text-field>
           </div>
 
-          <div class="mb-5">
+          <div class="mb-2">
             <label
               class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
             >
               AI Model
+              <v-chip x-small outlined color="grey" class="ml-1">
+                Selection coming soon
+              </v-chip>
             </label>
             <div class="text-caption mb-2">
-              Select the brain for your chatbot.
+              All chats currently use {{ AI_MODEL }}.
             </div>
-            <v-select
-              v-model="chatgptModel"
-              :items="chatGptModels"
+            <v-text-field
+              :value="AI_MODEL"
               outlined
               dense
-              hide-details="auto"
-              color="primary"
-              background-color="#f8fafc"
-            ></v-select>
-          </div>
-
-          <div class="mb-5">
-            <label
-              class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
-            >
-              System Content
-            </label>
-            <div class="text-caption mb-2">Fixed business logic reference.</div>
-            <v-textarea
-              readonly
-              hide-details="auto"
-              dense
-              v-model="chatgptContentPrompt"
-              outlined
-              rows="3"
+              disabled
+              hide-details
               background-color="#f1f3f4"
-              class="text-caption"
-              flat
-            ></v-textarea>
+            ></v-text-field>
           </div>
         </v-card-text>
 
@@ -504,6 +484,10 @@ import HeadersEditor from "@/components/integrations/HeadersEditor.vue";
 import TellephantSettings from "@/components/integrations/TellephantSettings.vue";
 import { rowsFromHeaders, headersFromRows } from "@/utils/apiHeaders";
 import chatgptIcon from "@/assets/images/chatgpt-icon.png";
+
+// The backend always answers with this model; per-client model and system
+// prompt settings aren't supported yet.
+const AI_MODEL = "gpt-4o-mini";
 
 const WEBHOOK_TYPES = [
   {
@@ -546,19 +530,7 @@ export default {
       currentLoggedInUser: {},
       connectChatGptDialog: false,
       chatgptApiKey: "",
-      chatGptModels: [
-        "gpt-1",
-        "gpt-2",
-        "gpt-3",
-        "gpt-3.5",
-        "gpt-3.5-turbo",
-        "gpt-4",
-        "gpt-4-turbo",
-        "gpt-4o-mini",
-      ],
-      chatgptModel: "gpt-3.5-turbo",
-      chatgptContentPrompt:
-        "You are a friendly and helpful customer support assistant. Provide concise answers in a conversational tone. Keep the responses very short (1-2 sentences), informative, and easy to read, as if chatting with a human. return in html if required",
+      AI_MODEL,
 
       webhookTypes: WEBHOOK_TYPES,
       apiConfigTabs: API_CONFIG_TABS,
@@ -574,6 +546,13 @@ export default {
   },
 
   computed: {
+    // chatgptConfigured replaces the raw key in /currentUser; the key
+    // fallback only covers the backend rollout.
+    openaiConfigured() {
+      const user = this.currentLoggedInUser;
+      return user.chatgptConfigured ?? !!user.chatgptApiKey;
+    },
+
     canManageSettings() {
       const permissions =
         this.currentLoggedInUser?.user?.roleId?.permissions || [];
@@ -583,7 +562,7 @@ export default {
     },
 
     navGroups() {
-      const hasKey = !!this.currentLoggedInUser.chatgptApiKey;
+      const hasKey = this.openaiConfigured;
       const activeHooks = WEBHOOK_TYPES.filter(
         (h) => this.webhookStatus(h.id) === "on",
       ).length;
@@ -756,9 +735,7 @@ export default {
         const user = data.data;
 
         this.currentLoggedInUser = user;
-        this.chatgptApiKey = user.chatgptApiKey;
-        this.chatgptModel = user.chatGptModel;
-        this.chatgptContentPrompt = user.chatgptContentPrompt;
+        this.chatgptApiKey = ""; // never pre-filled; only sent when replaced
         this.chatgptEnabled = user.chatgptEnabled;
         this.loadWebhookData();
       } catch {
@@ -793,8 +770,6 @@ export default {
         this.loading = true;
         await apiClient.post("/clients/settings/chatgpt", {
           chatgptApiKey: this.chatgptApiKey,
-          chatGptModel: this.chatgptModel,
-          chatgptContentPrompt: this.chatgptContentPrompt,
         });
         this.connectChatGptDialog = false;
         this.$toast.success("OpenAI settings saved");
