@@ -49,9 +49,11 @@ const routes = [
       },
 
       {
-        path: "try-chat",
+        path: "sandbox",
         component: () => import("../screens/dashboard/TryChat.vue"),
+        meta: { permission: "settings:manage" },
       },
+      { path: "try-chat", redirect: "/dashboard/sandbox" },
 
       {
         path: "opportunity-analysis",

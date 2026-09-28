@@ -82,6 +82,12 @@ export default {
               description: "Real-time AI assistance",
             },
             {
+              name: "Sandbox",
+              link: "/dashboard/sandbox",
+              icon: "mdi-flask-outline",
+              description: "Test your bot as a customer",
+            },
+            {
               name: "Forms",
               link: "/dashboard/forms",
               icon: "mdi-list-box-outline",

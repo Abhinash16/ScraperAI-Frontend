@@ -1,482 +1,387 @@
 <template>
   <div>
-    <v-card outlined rounded="lg">
-      <v-tabs v-model="currentTab" color="primary" grow>
-        <v-tab tab-value="general">General</v-tab>
-        <v-tab tab-value="connect-app">Connect Ai</v-tab>
-        <v-tab tab-value="api-keys"
-          >User API Keys
-          <v-chip class="ml-2" x-small outlined color="warning"
-            >Legacy</v-chip
-          ></v-tab
-        >
-        <v-tab tab-value="db-settings">Database </v-tab>
-        <v-tab tab-value="webhook">Webhook</v-tab>
-      </v-tabs>
-    </v-card>
-
-    <div v-if="currentTab == 'general'">
-      <v-card
-        class="pa-4 my-6"
-        rounded="xl"
-        outlined
-        color="#eff2fb"
-        dark
-        max-width="800"
-      >
-        <!-- Header -->
-        <div class="d-flex align-center mb-6">
-          <v-avatar
-            height="50"
-            width="50"
-            rounded="xl"
-            color="#cde6ff"
-            class="d-flex align-center justify-center mr-4"
-          >
-            <v-icon large color="black"> mdi-code-tags </v-icon>
-          </v-avatar>
-
-          <div>
-            <h3 class="black--text">Embed Script</h3>
-            <div class="text-caption black--text">
-              Add the following script to your <code>index.html</code> page, and
-              you will see a chatbot pop up on your site.
-            </div>
-          </div>
-        </div>
-
-        <!-- Code Block -->
-        <v-card outlined color="grey darken-4" class="pa-4" rounded="xl">
-          <div class="d-flex justify-space-between align-center mb-2">
-            <span class="text-caption grey--text text--lighten-1">SCRIPT</span>
-            <v-btn
-              x-small
-              color="primary"
-              @click="copyScriptCode"
-              depressed
-              rounded
-            >
-              <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
-            </v-btn>
-          </div>
-          <code
-            class="transparent white--text d-block pa-0 font-weight-light"
-            style="font-family: monospace !important"
-          >
-            &lt;script src="https://scraper.ai/chatpanel.js"
-            id="chatPanelScript" data-api-key="{{
-              currentLoggedInUser?.apiKey || "N/A"
-            }}"&gt; &lt;/script&gt;
-          </code>
-        </v-card>
-
-        <!-- Footer Links -->
-        <div class="mt-6">
-          <v-btn text color="primary" @click="viewInstallationGuide()">
-            View Installation Guide
-          </v-btn>
-        </div>
-      </v-card>
+    <!-- Page header -->
+    <div class="mb-6">
+      <div class="text-h5 font-weight-bold">Integrations</div>
+      <div class="text-body-2 grey--text text--darken-1">
+        Connect scraperAI to your website, AI provider and business systems.
+      </div>
     </div>
 
-    <div v-if="currentTab == 'connect-app'">
-      <v-card
-        class="pa-4 my-6"
-        rounded="xl"
-        outlined
-        color="#eff2fb"
-        max-width="800"
-      >
-        <div class="d-flex align-center mb-6">
-          <v-avatar
-            height="50"
-            width="50"
-            rounded="xl"
-            color="#cde6ff"
-            class="d-flex align-center justify-center mr-4"
-          >
-            <v-img src="../../assets/images/chatgpt-icon.png"></v-img>
-          </v-avatar>
-
-          <div class="flex-grow-1">
-            <div class="d-flex align-center">
-              <h3 class="black--text mr-2">Connect ChatGPT</h3>
-              <v-chip
-                v-if="currentLoggedInUser.chatgptApiKey"
-                small
-                color="success"
-                outlined
+    <v-row>
+      <!-- ================= SECTION NAV ================= -->
+      <v-col cols="12" md="3">
+        <v-card outlined rounded="xl" class="pa-2 integration-nav">
+          <template v-for="group in navGroups">
+            <div :key="group.title + '-title'" class="nav-group-title">
+              {{ group.title }}
+            </div>
+            <v-list :key="group.title" dense nav class="py-0">
+              <v-list-item
+                v-for="item in group.items"
+                :key="item.id"
+                :disabled="item.disabled"
+                :class="{ 'nav-active': section === item.id }"
+                class="rounded-lg"
+                @click="setSection(item.id)"
               >
-                Connected
-              </v-chip>
-            </div>
-            <div class="text-caption black--text">
-              Connect your OpenAI account to process your chatbot. All chats
-              will be handled by this API key.
-            </div>
-          </div>
-        </div>
-
-        <v-card outlined color="white" class="pa-4 mb-4" rounded="xl">
-          <div
-            v-if="currentLoggedInUser.chatgptApiKey"
-            class="d-flex align-center"
-          >
-            <v-btn
-              color="primary"
-              @click="connectChatGptDialog = true"
-              depressed
-              rounded
-              class="mr-2"
-            >
-              Edit Connection
-            </v-btn>
-            <v-btn
-              color="error"
-              @click="connectChatGptDialog = true"
-              outlined
-              rounded
-            >
-              Disconnect
-            </v-btn>
-          </div>
-
-          <div v-else>
-            <v-btn
-              color="primary"
-              @click="connectChatGptDialog = true"
-              depressed
-              rounded
-            >
-              Connect OpenAI
-            </v-btn>
-          </div>
+                <v-list-item-icon class="mr-3">
+                  <v-icon small :color="section === item.id ? 'primary' : ''">
+                    {{ item.icon }}
+                  </v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-medium">
+                    {{ item.name }}
+                  </v-list-item-title>
+                </v-list-item-content>
+                <v-list-item-action v-if="item.badge" class="my-0">
+                  <v-chip
+                    x-small
+                    outlined
+                    :color="item.badge.color"
+                    class="px-2"
+                  >
+                    {{ item.badge.text }}
+                  </v-chip>
+                </v-list-item-action>
+              </v-list-item>
+            </v-list>
+          </template>
         </v-card>
+      </v-col>
 
-        <v-card outlined color="white" class="pa-2 px-4" rounded="xl">
-          <v-switch
-            v-model="chatgptEnabled"
-            @change="updateChatGptStatus"
-            color="primary"
-            inset
-            hide-details
-            class="mt-0"
-          >
-            <template v-slot:label>
-              <span class="text-body-2 black--text">
-                Automated response generated by Ai without any human
-                intervention.
-              </span>
-            </template>
-          </v-switch>
-        </v-card>
-      </v-card>
-    </div>
-
-    <div v-if="currentTab == 'api-keys'">
-      <v-card
-        class="pa-4 my-6"
-        rounded="xl"
-        outlined
-        color="#eff2fb"
-        max-width="800"
-      >
-        <div class="d-flex align-center mb-6">
-          <v-avatar
-            height="50"
-            width="50"
-            rounded="xl"
-            color="#cde6ff"
-            class="d-flex align-center justify-center mr-4"
-          >
-            <v-icon large color="black"> mdi-key-variant </v-icon>
-          </v-avatar>
-
-          <div class="flex-grow-1">
-            <h3 class="black--text">API Keys</h3>
-            <div class="text-caption black--text">
-              Manage your secret keys to integrate the scraperAI services into
-              your application.
-            </div>
-          </div>
-        </div>
-
-        <v-alert
-          border="left"
-          colored-border
-          color="warning"
-          elevation="0"
-          class="white mb-6 black--text text-body-2"
-          rounded="xl"
-        >
-          Your secret key will be disabled until the payment is made or the
-          billing cycle lapses. Once we receive the payment, the key will be
-          reactivated and function normally.
-        </v-alert>
-
-        <v-card outlined color="grey darken-4" class="pa-4 mb-6" rounded="xl">
-          <div class="d-flex justify-space-between align-center mb-2">
-            <span class="text-caption grey--text text--lighten-1"
-              >SECRET KEY</span
-            >
-            <v-btn
-              x-small
-              color="primary"
-              @click="copyApiKey"
-              depressed
-              rounded
-            >
-              <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
-            </v-btn>
-          </div>
-          <code
-            class="transparent white--text d-block pa-0 font-weight-light"
-            style="font-family: monospace !important"
-          >
-            {{ currentLoggedInUser.apiKey || "N/A" }}
-          </code>
-        </v-card>
-
-        <v-card flat color="transparent" class="pa-2">
-          <div class="d-flex align-start">
-            <v-icon small color="orange darken-2" class="mr-2 mt-1"
-              >mdi-shield-alert-outline</v-icon
-            >
-            <div class="grey--text text--darken-3 text-body-2">
-              <strong>Security Warning:</strong> Do not share your API key with
-              others, or expose it in the browser or other client-side code. In
-              order to protect the security of your account, scraperAI may also
-              automatically disable any API key that has leaked publicly.
-            </div>
-          </div>
-        </v-card>
-      </v-card>
-    </div>
-
-    <div v-if="currentTab == 'db-settings'">
-      <v-card
-        class="pa-4 my-6"
-        rounded="xl"
-        outlined
-        color="#eff2fb"
-        max-width="800"
-      >
-        <div class="d-flex align-center mb-6">
-          <v-avatar
-            height="50"
-            width="50"
-            rounded="xl"
-            color="#cde6ff"
-            class="d-flex align-center justify-center mr-4"
-          >
-            <v-icon large color="black"> mdi-database-outline </v-icon>
-          </v-avatar>
-
-          <div class="flex-grow-1">
-            <div class="d-flex align-center">
-              <h3 class="black--text mr-2">Connect Database</h3>
-              <v-chip
-                v-if="currentLoggedInUser.dbUri"
-                small
-                color="success"
-                outlined
-              >
-                Connected
-              </v-chip>
-            </div>
-            <div class="text-caption black--text">
-              Connect your DB to store chat history locally. If your DB fails,
-              data will be backed up on our servers.
-            </div>
-          </div>
-        </div>
-
-        <v-card outlined color="white" class="pa-4 mb-6" rounded="xl">
-          <div v-if="currentLoggedInUser.dbUri" class="d-flex align-center">
-            <v-btn
-              color="primary"
-              @click="connectDBDialog = true"
-              depressed
-              rounded
-              class="mr-2"
-            >
-              Edit Connection
-            </v-btn>
-            <v-btn
-              :loading="loading"
-              color="error"
-              @click="removeDbUri"
-              outlined
-              rounded
-            >
-              Remove
-            </v-btn>
-          </div>
-          <div v-else>
-            <v-btn
-              color="primary"
-              @click="connectDBDialog = true"
-              depressed
-              rounded
-            >
-              Connect Database
-            </v-btn>
-          </div>
-        </v-card>
-
-        <div class="px-2 mb-4">
-          <div class="text-subtitle-2 black--text font-weight-bold mb-2">
-            Vector Search Configuration
-          </div>
-          <div class="text-body-2 black--text mb-4">
-            For efficient db queries and faster processing we perform Vector
-            Search Query, your db should include:
-          </div>
-
-          <div
-            v-for="(step, i) in [
-              'Go to Create a Vector Search Index.',
-              'Click on Start Your Index Configuration.',
-              'Select Vector Search as the index type.',
-              'Enter the Index Name.',
-              'Choose the data source: scraperAi.contentchunks.',
-              'Open the JSON Editor and paste the following configuration:',
-            ]"
-            :key="i"
-            class="d-flex align-start my-3"
-          >
-            <v-avatar
-              size="20"
-              color="primary"
-              class="mr-3 text-caption white--text"
-            >
-              {{ i + 1 }}
+      <!-- ================= CONTENT ================= -->
+      <v-col cols="12" md="9">
+        <div class="integration-content">
+          <!-- Section header -->
+          <div class="d-flex align-center mb-6">
+            <v-avatar size="48" rounded="xl" color="#cde6ff" class="mr-4">
+              <v-img
+                v-if="activeItem.image"
+                :src="activeItem.image"
+                max-width="28"
+                contain
+              />
+              <v-icon v-else color="black">{{ activeItem.icon }}</v-icon>
             </v-avatar>
-            <span class="text-body-2 black--text">{{ step }}</span>
-          </div>
-        </div>
-
-        <v-card outlined color="grey darken-4" class="pa-4" rounded="xl">
-          <div class="d-flex justify-space-between align-center mb-2">
-            <span class="text-caption grey--text text--lighten-1"
-              >JSON CONFIGURATION</span
-            >
-            <v-btn x-small color="primary" @click="copyCode" depressed rounded>
-              <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
-            </v-btn>
-          </div>
-          <code
-            class="transparent white--text d-block pa-0 font-weight-light"
-            style="font-family: monospace !important"
-            ref="codeBlock"
-          >
-            { "fields": [ { "type": "vector", "path": "embedding",
-            "numDimensions": 1536, "similarity": "cosine" }, { "type": "filter",
-            "path": "client" } ] }
-          </code>
-        </v-card>
-      </v-card>
-    </div>
-
-    <div v-if="currentTab == 'webhook'">
-      <v-card
-        class="pa-4 my-6"
-        rounded="xl"
-        outlined
-        color="#eff2fb"
-        max-width="800"
-      >
-        <!-- Header -->
-        <div class="d-flex align-center mb-6">
-          <v-avatar
-            height="50"
-            width="50"
-            rounded="xl"
-            color="#cde6ff"
-            class="d-flex align-center justify-center mr-4"
-          >
-            <v-icon large color="black">mdi-webhook</v-icon>
-          </v-avatar>
-
-          <div>
-            <h3 class="black--text">Webhook Settings</h3>
-            <div class="text-caption black--text">
-              Select and update webhook configuration
+            <div>
+              <div class="text-h6 font-weight-bold">
+                {{ activeItem.title || activeItem.name }}
+              </div>
+              <div class="text-body-2 grey--text text--darken-1">
+                {{ activeItem.description }}
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- SELECT WEBHOOK -->
-        <div>
-          <v-select
-            v-model="selectedIntent"
-            :items="webhookOptions"
-            label="Select Webhook"
-            outlined
-            dense
-            @change="loadWebhookData"
-          />
-        </div>
+          <!-- ================= WEBSITE WIDGET ================= -->
+          <div v-if="section === 'widget'">
+            <v-card outlined rounded="xl" class="pa-6">
+              <div class="text-subtitle-1 font-weight-bold mb-1">
+                Embed script
+              </div>
+              <div class="text-body-2 grey--text text--darken-1 mb-4">
+                Paste this before the closing <code>&lt;/body&gt;</code> tag of
+                your site's <code>index.html</code>. The chat widget appears on
+                every page that loads it.
+              </div>
 
-        <!-- FORM -->
-        <v-card outlined class="pa-4 mt-4" rounded="xl" v-if="selectedIntent">
-          <v-switch v-model="webhook.enabled" label="Enable Webhook" inset />
+              <div class="code-box">
+                <div class="d-flex justify-space-between align-center mb-2">
+                  <span class="code-label">HTML</span>
+                  <v-btn
+                    x-small
+                    color="primary"
+                    depressed
+                    rounded
+                    @click="copyScriptCode"
+                  >
+                    <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
+                  </v-btn>
+                </div>
+                <code class="code-text">{{ scriptTag }}</code>
+              </div>
 
-          <v-text-field
-            v-model="webhook.url"
-            label="Webhook URL"
-            outlined
-            dense
-          />
-
-          <v-select
-            v-model="webhook.method"
-            :items="['POST', 'GET', 'PUT']"
-            label="Method"
-            outlined
-            dense
-          />
-
-          <v-textarea
-            v-model="webhook.headersText"
-            label="Headers (JSON)"
-            outlined
-            dense
-          />
-
-          <v-text-field
-            v-model="webhook.timeout"
-            label="Timeout"
-            type="number"
-            outlined
-            dense
-          />
-
-          <div>
-            <v-alert
-              type="info"
-              outlined
-              dense
-              rounded="xl"
-              class="mt-4 mb-0 d-inline-flex align-center"
-            >
-              After 3 attempts, your webhook will be disabled.
-            </v-alert>
+              <v-btn
+                text
+                rounded
+                color="primary"
+                class="mt-4 px-2"
+                to="/dashboard/documentation"
+              >
+                <v-icon small class="mr-1">mdi-book-open-outline</v-icon>
+                View installation guide
+              </v-btn>
+            </v-card>
           </div>
-          <v-btn
-            color="primary"
-            class="mt-2"
-            rounded
-            :disabled="!webhook.url"
-            @click="updateWebhook"
-            :loading="loading"
-          >
-            Update Webhook
-          </v-btn>
-        </v-card>
-      </v-card>
-    </div>
 
+          <!-- ================= AI PROVIDER ================= -->
+          <div v-if="section === 'ai-provider'">
+            <v-card outlined rounded="xl" class="pa-6 mb-4">
+              <div class="d-flex align-center flex-wrap">
+                <div class="flex-grow-1 mr-4 mb-2">
+                  <div class="d-flex align-center">
+                    <div class="text-subtitle-1 font-weight-bold mr-2">
+                      OpenAI account
+                    </div>
+                    <v-chip
+                      x-small
+                      outlined
+                      :color="currentLoggedInUser.chatgptApiKey ? 'success' : 'grey'"
+                    >
+                      {{
+                        currentLoggedInUser.chatgptApiKey
+                          ? "Connected"
+                          : "Not connected"
+                      }}
+                    </v-chip>
+                  </div>
+                  <div class="text-body-2 grey--text text--darken-1">
+                    All chats are answered using this API key and model.
+                    <span v-if="currentLoggedInUser.chatGptModel">
+                      Model: <strong>{{ currentLoggedInUser.chatGptModel }}</strong>
+                    </span>
+                  </div>
+                </div>
+                <v-btn
+                  color="primary"
+                  depressed
+                  rounded
+                  class="mb-2"
+                  @click="connectChatGptDialog = true"
+                >
+                  {{
+                    currentLoggedInUser.chatgptApiKey
+                      ? "Edit connection"
+                      : "Connect OpenAI"
+                  }}
+                </v-btn>
+              </div>
+            </v-card>
+
+            <v-card outlined rounded="xl" class="pa-6">
+              <div class="d-flex align-center">
+                <div class="flex-grow-1 mr-4">
+                  <div class="text-subtitle-1 font-weight-bold">
+                    Automatic AI replies
+                  </div>
+                  <div class="text-body-2 grey--text text--darken-1">
+                    Let the AI answer customers on its own, without a human
+                    reviewing each reply.
+                  </div>
+                </div>
+                <v-switch
+                  v-model="chatgptEnabled"
+                  color="primary"
+                  inset
+                  hide-details
+                  class="mt-0 pt-0"
+                  :loading="loading"
+                  @change="updateChatGptStatus"
+                />
+              </div>
+            </v-card>
+          </div>
+
+          <!-- ================= API CONFIG ================= -->
+          <div v-if="section === 'api-config'">
+            <v-card v-if="!userLoaded" outlined rounded="xl" class="pa-6">
+              <v-progress-linear indeterminate color="primary" />
+            </v-card>
+
+            <v-alert
+              v-else-if="!canManageSettings"
+              type="warning"
+              outlined
+              rounded="xl"
+            >
+              You need the <code>settings:manage</code> permission to configure
+              APIs.
+            </v-alert>
+
+            <template v-else>
+              <v-tabs
+                :value="apiConfigTab"
+                color="primary"
+                class="sub-tabs mb-6"
+                show-arrows
+                @change="setSubTab"
+              >
+                <v-tab
+                  v-for="tab in apiConfigTabs"
+                  :key="tab.id"
+                  :tab-value="tab.id"
+                  class="text-none"
+                >
+                  <v-icon small class="mr-2">{{ tab.icon }}</v-icon>
+                  {{ tab.name }}
+                </v-tab>
+              </v-tabs>
+
+              <CustomerApiSettings v-if="apiConfigTab === 'customer-api'" />
+              <ProductApiSettings v-if="apiConfigTab === 'product-api'" />
+            </template>
+          </div>
+
+          <!-- ================= WEBHOOKS ================= -->
+          <div v-if="section === 'webhooks'">
+            <v-tabs
+              :value="webhookTab"
+              color="primary"
+              class="sub-tabs mb-6"
+              show-arrows
+              @change="setSubTab"
+            >
+              <v-tab
+                v-for="hook in webhookTypes"
+                :key="hook.id"
+                :tab-value="hook.id"
+                class="text-none"
+              >
+                {{ hook.name }}
+                <span
+                  v-if="webhookStatus(hook.id) === 'on'"
+                  class="status-dot success ml-2"
+                  title="Enabled"
+                />
+              </v-tab>
+            </v-tabs>
+
+            <v-card outlined rounded="xl" class="pa-6">
+              <div class="d-flex align-start mb-4">
+                <div class="flex-grow-1 mr-4">
+                  <div class="text-subtitle-1 font-weight-bold">
+                    {{ activeWebhook.name }} webhook
+                  </div>
+                  <div class="text-body-2 grey--text text--darken-1">
+                    {{ activeWebhook.description }}
+                  </div>
+                </div>
+                <v-switch
+                  v-model="webhook.enabled"
+                  color="primary"
+                  inset
+                  hide-details
+                  class="mt-0 pt-0"
+                  :label="webhook.enabled ? 'On' : 'Off'"
+                />
+              </div>
+
+              <v-divider class="mb-6" />
+
+              <div class="field-group-title">Endpoint</div>
+              <v-row dense>
+                <v-col cols="12" sm="3">
+                  <v-select
+                    v-model="webhook.method"
+                    :items="['POST', 'GET', 'PUT']"
+                    label="Method"
+                    outlined
+                    dense
+                  />
+                </v-col>
+                <v-col cols="12" sm="9">
+                  <v-text-field
+                    v-model.trim="webhook.url"
+                    label="Webhook URL"
+                    placeholder="https://example.com/hooks/scraperai"
+                    outlined
+                    dense
+                  />
+                </v-col>
+                <v-col cols="12" sm="4">
+                  <v-text-field
+                    v-model.number="webhook.timeout"
+                    label="Timeout (ms)"
+                    type="number"
+                    outlined
+                    dense
+                  />
+                </v-col>
+              </v-row>
+
+              <v-divider class="mb-6" />
+
+              <HeadersEditor v-model="webhook.headerRows" />
+
+              <v-alert
+                type="info"
+                text
+                dense
+                rounded="lg"
+                class="text-body-2 mt-4 mb-0"
+              >
+                After 3 failed attempts, the webhook is disabled automatically.
+              </v-alert>
+
+              <div class="d-flex justify-end mt-6">
+                <v-btn
+                  color="primary"
+                  rounded
+                  depressed
+                  :disabled="!webhook.url"
+                  :loading="webhookSaving"
+                  @click="updateWebhook"
+                >
+                  Save webhook
+                </v-btn>
+              </div>
+            </v-card>
+          </div>
+
+          <!-- ================= API KEYS ================= -->
+          <div v-if="section === 'api-keys'">
+            <v-alert
+              border="left"
+              colored-border
+              color="warning"
+              elevation="0"
+              outlined
+              rounded="xl"
+              class="text-body-2 mb-4"
+            >
+              Your secret key is disabled until payment is made or the billing
+              cycle lapses. Once we receive payment, the key is reactivated.
+            </v-alert>
+
+            <v-card outlined rounded="xl" class="pa-6">
+              <div class="code-box mb-4">
+                <div class="d-flex justify-space-between align-center mb-2">
+                  <span class="code-label">SECRET KEY</span>
+                  <v-btn
+                    x-small
+                    color="primary"
+                    depressed
+                    rounded
+                    :disabled="!currentLoggedInUser.apiKey"
+                    @click="copyApiKey"
+                  >
+                    <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
+                  </v-btn>
+                </div>
+                <code class="code-text">
+                  {{ currentLoggedInUser.apiKey || "N/A" }}
+                </code>
+              </div>
+
+              <div class="d-flex align-start">
+                <v-icon small color="orange darken-2" class="mr-2 mt-1">
+                  mdi-shield-alert-outline
+                </v-icon>
+                <div class="grey--text text--darken-3 text-body-2">
+                  <strong>Keep this key secret.</strong> Don't share it or
+                  expose it in browser or other client-side code. scraperAI may
+                  automatically disable any key that leaks publicly.
+                </div>
+              </div>
+            </v-card>
+          </div>
+        </div>
+      </v-col>
+    </v-row>
+
+    <!-- ================= OPENAI DIALOG ================= -->
     <v-dialog
       v-model="connectChatGptDialog"
       max-width="550"
@@ -583,176 +488,51 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <v-dialog
-      v-model="connectDBDialog"
-      max-width="500"
-      persistent
-      rounded="xl"
-      overlay-color="#2c3e50"
-      overlay-opacity="0.8"
-    >
-      <v-card rounded="xl" :loading="loading">
-        <v-card-title class="d-flex align-center pb-0">
-          <v-avatar color="#eff2fb" rounded="xl" size="50" class="mr-4">
-            <v-icon color="black">mdi-database-import</v-icon>
-          </v-avatar>
-          <div>
-            <div class="text-h6 font-weight-bold black--text">
-              Database Setup
-            </div>
-            <div class="text-caption grey--text text--darken-1">
-              Connect your MongoDB instance
-            </div>
-          </div>
-          <v-spacer></v-spacer>
-          <v-btn icon @click="connectDBDialog = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-
-        <v-card-text class="pt-6">
-          <div class="mb-5">
-            <label
-              class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
-            >
-              MongoDB Connection URI
-            </label>
-            <div class="text-caption mb-2">
-              Standard connection string including credentials.
-            </div>
-            <v-text-field
-              v-model="dbUri"
-              placeholder="mongodb+srv://..."
-              outlined
-              dense
-              hide-details="auto"
-              color="primary"
-              background-color="#f8fafc"
-            ></v-text-field>
-          </div>
-
-          <div class="mb-5">
-            <label
-              class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
-            >
-              Database Instance
-            </label>
-            <div class="text-caption mb-2">
-              Select the specific cluster or model configuration.
-            </div>
-            <v-select
-              v-model="selectedDbModel"
-              :items="dbModels"
-              outlined
-              dense
-              hide-details="auto"
-              color="primary"
-              background-color="#f8fafc"
-            ></v-select>
-          </div>
-
-          <v-alert
-            dense
-            text
-            type="info"
-            icon="mdi-shield-check"
-            class="rounded-lg text-caption"
-          >
-            Your credentials are encrypted. We only use this to sync chat data.
-          </v-alert>
-        </v-card-text>
-
-        <v-card-actions class="pa-4 pt-0">
-          <v-btn
-            block
-            x-large
-            color="primary"
-            @click="updateDBSettings"
-            :loading="loading"
-            depressed
-            :disabled="!dbUri"
-            rounded
-            class="text-none font-weight-bold"
-          >
-            Connect & Save
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog
-      v-model="deleteConfirmDialog"
-      max-width="350"
-      rounded="xl"
-      overlay-color="#2c3e50"
-      overlay-opacity="0.8"
-    >
-      <v-card class="text-center" rounded="xl">
-        <v-card-text>
-          <v-avatar color="error lighten-5" size="70" class="my-4">
-            <v-icon color="error" size="40">mdi-alert-octagon-outline</v-icon>
-          </v-avatar>
-
-          <div class="text-h6 font-weight-bold black--text mb-2">
-            Remove Database?
-          </div>
-          <p class="text-body-2 grey--text text--darken-1">
-            This will disconnect your MongoDB instance. Chat logs will revert to
-            being stored on our default database. This action cannot be undone.
-          </p>
-        </v-card-text>
-
-        <v-card-actions class="justify-center pb-4">
-          <v-btn
-            @click="deleteConfirmDialog = false"
-            text
-            rounded
-            large
-            class="px-6 mr-2 text-none"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            @click="updateDBSettings"
-            color="error"
-            depressed
-            rounded
-            large
-            class="px-8 text-none font-weight-bold"
-            :loading="loading"
-          >
-            Yes, Remove
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-snackbar v-model="copySnackbar" color="success" timeout="2000">
-      Code Copied!
-    </v-snackbar>
-
-    <v-snackbar
-      v-model="snackbar"
-      :color="snackbarColor"
-      timeout="3000"
-      top
-      right
-    >
-      {{ snackbarText }}
-    </v-snackbar>
   </div>
 </template>
 
 <script>
 import apiClient from "@/service/axios";
+import CustomerApiSettings from "@/components/integrations/CustomerApiSettings.vue";
+import ProductApiSettings from "@/components/integrations/ProductApiSettings.vue";
+import HeadersEditor from "@/components/integrations/HeadersEditor.vue";
+import { rowsFromHeaders, headersFromRows } from "@/utils/apiHeaders";
+import chatgptIcon from "@/assets/images/chatgpt-icon.png";
+
+const WEBHOOK_TYPES = [
+  {
+    id: "escalate",
+    name: "Escalate",
+    description: "Called when a conversation is escalated to your team.",
+  },
+  {
+    id: "upsell",
+    name: "Upsell",
+    description: "Called when the assistant spots an upsell opportunity.",
+  },
+  {
+    id: "followup",
+    name: "Follow-up",
+    description: "Called when a customer should be followed up with.",
+  },
+];
+
+// Sub-tabs under API Config. Add future API integrations here.
+const API_CONFIG_TABS = [
+  { id: "customer-api", name: "Customer API", icon: "mdi-account-search-outline" },
+  { id: "product-api", name: "Product API", icon: "mdi-tag-search-outline" },
+];
+
 export default {
+  components: { CustomerApiSettings, ProductApiSettings, HeadersEditor },
+
   data() {
     return {
       loading: false,
+      webhookSaving: false,
+      userLoaded: false,
       chatgptEnabled: false,
-      currentTab: "general",
-      currentLoggedInUser: "",
+      currentLoggedInUser: {},
       connectChatGptDialog: false,
       chatgptApiKey: "",
       chatGptModels: [
@@ -768,28 +548,162 @@ export default {
       chatgptModel: "gpt-3.5-turbo",
       chatgptContentPrompt:
         "You are a friendly and helpful customer support assistant. Provide concise answers in a conversational tone. Keep the responses very short (1-2 sentences), informative, and easy to read, as if chatting with a human. return in html if required",
-      dbUri: "",
-      dbModels: ["Mongodb"],
-      selectedDbModel: "Mongodb",
-      connectDBDialog: false,
-      deleteConfirmDialog: false,
-      selectedIntent: null,
 
-      webhookOptions: ["escalate", "upsell", "followup"],
+      webhookTypes: WEBHOOK_TYPES,
+      apiConfigTabs: API_CONFIG_TABS,
 
       webhook: {
         enabled: true,
         url: "",
         method: "POST",
-        headersText: "",
+        headerRows: [],
         timeout: 5000,
       },
-
-      snackbar: false,
-      snackbarText: "",
-      snackbarColor: "success",
-      copySnackbar: false,
     };
+  },
+
+  computed: {
+    canManageSettings() {
+      const permissions =
+        this.currentLoggedInUser?.user?.roleId?.permissions || [];
+      return (
+        permissions.includes("*") || permissions.includes("settings:manage")
+      );
+    },
+
+    navGroups() {
+      const hasKey = !!this.currentLoggedInUser.chatgptApiKey;
+      const activeHooks = WEBHOOK_TYPES.filter(
+        (h) => this.webhookStatus(h.id) === "on",
+      ).length;
+
+      const groups = [
+        {
+          title: "Channels",
+          items: [
+            {
+              id: "widget",
+              name: "Website Widget",
+              icon: "mdi-code-tags",
+              description: "Add the scraperAI chat widget to your website.",
+            },
+          ],
+        },
+        {
+          title: "AI",
+          items: [
+            {
+              id: "ai-provider",
+              name: "AI Provider",
+              icon: "mdi-robot-outline",
+              image: chatgptIcon,
+              title: "ChatGPT",
+              description: "The OpenAI account and model that power your chats.",
+              badge: hasKey ? { text: "On", color: "success" } : null,
+            },
+          ],
+        },
+        {
+          title: "Automation",
+          items: [
+            this.canManageSettings && {
+              id: "api-config",
+              name: "API Config",
+              icon: "mdi-api",
+              description:
+                "Connect your own systems so the assistant can answer with live data.",
+            },
+            {
+              id: "webhooks",
+              name: "Webhooks",
+              icon: "mdi-webhook",
+              description:
+                "Notify your systems when something happens in a conversation.",
+              badge: activeHooks
+                ? { text: `${activeHooks} on`, color: "success" }
+                : null,
+            },
+          ].filter(Boolean),
+        },
+        {
+          title: "Developer",
+          items: [
+            {
+              id: "api-keys",
+              name: "API Keys",
+              icon: "mdi-key-variant",
+              title: "Secret API Key",
+              description:
+                "Use this key to call scraperAI services from your own backend.",
+              badge: { text: "Legacy", color: "warning" },
+            },
+            {
+              id: "database",
+              name: "Database",
+              icon: "mdi-database-outline",
+              disabled: true,
+              badge: { text: "Retired", color: "grey" },
+            },
+          ],
+        },
+      ];
+
+      return groups;
+    },
+
+    navItems() {
+      return this.navGroups.flatMap((g) => g.items);
+    },
+
+    section() {
+      const requested = this.$route.query.section;
+      if (requested === "api-config") return requested; // gated inside the section
+      const item = this.navItems.find((i) => i.id === requested);
+      return item && !item.disabled ? item.id : "widget";
+    },
+
+    activeItem() {
+      if (this.section === "api-config") {
+        return {
+          icon: "mdi-api",
+          name: "API Config",
+          description:
+            "Connect your own systems so the assistant can answer with live data.",
+        };
+      }
+      return this.navItems.find((i) => i.id === this.section) || {};
+    },
+
+    apiConfigTab() {
+      const tab = this.$route.query.tab;
+      return API_CONFIG_TABS.some((t) => t.id === tab)
+        ? tab
+        : API_CONFIG_TABS[0].id;
+    },
+
+    webhookTab() {
+      const tab = this.$route.query.tab;
+      return WEBHOOK_TYPES.some((t) => t.id === tab)
+        ? tab
+        : WEBHOOK_TYPES[0].id;
+    },
+
+    activeWebhook() {
+      return WEBHOOK_TYPES.find((w) => w.id === this.webhookTab);
+    },
+
+    scriptTag() {
+      const close = "</" + "script>";
+      return `<script src="https://scraper.ai/chatpanel.js" id="chatPanelScript" data-api-key="${
+        this.currentLoggedInUser.apiKey || "YOUR_API_KEY"
+      }">${close}`;
+    },
+  },
+
+  watch: {
+    webhookTab() {
+      this.loadWebhookData();
+    },
   },
 
   mounted() {
@@ -797,19 +711,26 @@ export default {
   },
 
   methods: {
-    showSnackbar(message, color = "success") {
-      this.snackbarText = message;
-      this.snackbarColor = color;
-      this.snackbar = true;
+    setSection(id) {
+      if (id === this.section) return;
+      this.$router.replace({ query: { section: id } }).catch(() => {});
     },
-    removeDbUri() {
-      this.deleteConfirmDialog = true;
+
+    setSubTab(tab) {
+      this.$router
+        .replace({ query: { ...this.$route.query, tab } })
+        .catch(() => {});
+    },
+
+    webhookStatus(id) {
+      const hook = this.currentLoggedInUser.webhooks?.[id];
+      if (!hook || !hook.url) return "none";
+      return hook.enabled === false ? "off" : "on";
     },
 
     async currentLoggedInUserInfo() {
       try {
         const { data } = await apiClient.get("/clients/currentUser");
-
         const user = data.data;
 
         this.currentLoggedInUser = user;
@@ -817,154 +738,183 @@ export default {
         this.chatgptModel = user.chatGptModel;
         this.chatgptContentPrompt = user.chatgptContentPrompt;
         this.chatgptEnabled = user.chatgptEnabled;
-        this.dbUri = user.dbUri;
+        this.loadWebhookData();
       } catch {
-        console.log("something is wrong");
+        this.$toast.error("Failed to load integration settings");
+      } finally {
+        this.userLoaded = true;
       }
     },
 
     async updateChatGptStatus() {
       try {
         this.loading = true;
-        const { data } = await apiClient.post("/clients/settings/chatgpt", {
+        await apiClient.post("/clients/settings/chatgpt", {
           chatgptEnabled: this.chatgptEnabled,
         });
-        this.currentLoggedInUser = data;
-        this.loading = false;
+        this.$toast.success(
+          this.chatgptEnabled
+            ? "Automatic AI replies turned on"
+            : "Automatic AI replies turned off",
+        );
         this.currentLoggedInUserInfo();
-      } catch (error) {
-        console.log("🚀 ~ updateChatGptSettings ~ error:", error);
+      } catch (err) {
+        this.chatgptEnabled = !this.chatgptEnabled;
+        this.$toast.error(err.response?.data?.message || "Update failed");
+      } finally {
         this.loading = false;
-        console.log("something is wrong");
       }
     },
 
     async updateChatGptSettings() {
       try {
         this.loading = true;
-        const { data } = await apiClient.post("/clients/settings/chatgpt", {
+        await apiClient.post("/clients/settings/chatgpt", {
           chatgptApiKey: this.chatgptApiKey,
           chatGptModel: this.chatgptModel,
           chatgptContentPrompt: this.chatgptContentPrompt,
         });
-        this.currentLoggedInUser = data;
-        this.loading = false;
         this.connectChatGptDialog = false;
-      } catch (error) {
-        console.log("🚀 ~ updateChatGptSettings ~ error:", error);
+        this.$toast.success("OpenAI settings saved");
+        this.currentLoggedInUserInfo();
+      } catch (err) {
+        this.$toast.error(
+          err.response?.data?.message || "Failed to save OpenAI settings",
+        );
+      } finally {
         this.loading = false;
-        console.log("something is wrong");
-      }
-    },
-
-    async updateDBSettings() {
-      try {
-        this.loading = true;
-        const { data } = await apiClient.post("/clients/settings/db", {
-          dbUri: this.dbUri,
-        });
-        this.currentLoggedInUser = data;
-        this.loading = false;
-        this.connectDBDialog = false;
-      } catch (error) {
-        this.loading = false;
-        console.log("something is wrong");
       }
     },
 
     loadWebhookData() {
-      const webhookData =
-        this.currentLoggedInUser.webhooks?.[this.selectedIntent];
-
-      if (!webhookData) return;
+      const webhookData = this.currentLoggedInUser.webhooks?.[this.webhookTab];
 
       this.webhook = {
-        enabled: webhookData.enabled ?? true,
-        url: webhookData.url || "",
-        method: webhookData.method || "POST",
-        headersText: JSON.stringify(webhookData.headers || {}, null, 2),
-        timeout: webhookData.timeout || 5000,
+        enabled: webhookData?.enabled ?? true,
+        url: webhookData?.url || "",
+        method: webhookData?.method || "POST",
+        headerRows: rowsFromHeaders(webhookData?.headers),
+        timeout: webhookData?.timeout || 5000,
       };
     },
 
     async updateWebhook() {
-      this.loading = true;
+      if (this.webhook.enabled && !this.webhook.url) {
+        this.$toast.error("Please enter webhook URL first");
+        return;
+      }
 
+      const { headers, error } = headersFromRows(this.webhook.headerRows);
+      if (error) {
+        this.$toast.error(error);
+        return;
+      }
+
+      this.webhookSaving = true;
       try {
-        let headers = {};
-
-        // ✅ Parse headers safely
-        if (this.webhook.headersText) {
-          try {
-            headers = JSON.parse(this.webhook.headersText);
-          } catch (e) {
-            this.showSnackbar("Invalid JSON in headers", "error");
-            return;
-          }
-        }
-
-        // ✅ Prevent enabling without URL
-        if (this.webhook.enabled && !this.webhook.url) {
-          this.showSnackbar("Please enter webhook URL first", "error");
-          return;
-        }
-
-        const payload = {
-          intent: this.selectedIntent,
+        const { data } = await apiClient.put("/clients/webhook", {
+          intent: this.webhookTab,
           url: this.webhook.url,
           method: this.webhook.method,
-          headers, // ✅ FIXED (send parsed object)
+          headers,
           timeout: Number(this.webhook.timeout),
           enabled: this.webhook.enabled,
-        };
+        });
 
-        const { data } = await apiClient.put("/clients/webhook", payload);
-
-        this.showSnackbar(data.message || "Webhook updated");
-
-        // refresh user
+        this.$toast.success(data.message || "Webhook updated");
         this.currentLoggedInUserInfo();
       } catch (err) {
-        this.showSnackbar(
+        this.$toast.error(
           err.response?.data?.message || "Webhook update failed",
-          "error",
         );
       } finally {
-        this.loading = false; // ✅ always runs
+        this.webhookSaving = false;
       }
     },
 
-    copyCode() {
-      const text = this.$refs.codeBlock.innerText;
-      navigator.clipboard.writeText(text);
-      this.copySnackbar = true;
-    },
-
     copyApiKey() {
-      const key = this.currentLoggedInUser.apiKey;
-      navigator.clipboard.writeText(key);
-      this.copySnackbar = true;
-      this.snackbarText = "API Key copied!";
+      navigator.clipboard.writeText(this.currentLoggedInUser.apiKey);
+      this.$toast.success("API key copied");
     },
 
     copyScriptCode() {
-      const closingTag = "</" + "script>";
-
-      const text = `<script src="https://scraper.ai/chatpanel.js" id="chatPanelScript" data-api-key="${
-        this.currentLoggedInUser?.apiKey || "your-api-key"
-      }">${closingTag}`;
-
-      navigator.clipboard.writeText(text);
-      this.copySnackbar = true;
-    },
-
-    viewInstallationGuide() {
-      alert(
-        "Yahan pe installation guide ka video, PDF ya text dialog kuch bhi add kar sakte hain.",
-      );
+      navigator.clipboard.writeText(this.scriptTag);
+      this.$toast.success("Script copied");
     },
   },
 };
 </script>
 
-<style></style>
+<style scoped>
+.integration-nav {
+  position: sticky;
+  top: 88px;
+}
+
+.nav-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9e9e9e;
+  padding: 12px 12px 4px;
+}
+
+.nav-active {
+  background: #eff2fb;
+}
+
+.nav-active .v-list-item__title {
+  color: var(--v-primary-base);
+  font-weight: 700 !important;
+}
+
+.integration-content {
+  max-width: 900px;
+}
+
+.sub-tabs {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.field-group-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #757575;
+  margin-bottom: 12px;
+}
+
+.code-box {
+  background: #0f172a;
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+.code-label {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+}
+
+.code-text {
+  display: block;
+  background: transparent !important;
+  color: #e2e8f0 !important;
+  padding: 0 !important;
+  font-family: monospace !important;
+  font-size: 13px;
+  font-weight: 400;
+  white-space: pre-wrap;
+  word-break: break-all;
+  box-shadow: none !important;
+}
+</style>

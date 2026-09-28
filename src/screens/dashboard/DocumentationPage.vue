@@ -195,6 +195,7 @@ export default {
   data() {
     return {
       user: {},
+      customerApiUrl: "",
     };
   },
 
@@ -211,6 +212,7 @@ export default {
 
   mounted() {
     this.currentLoggedInUserInfo();
+    this.loadCustomerApiUrl();
   },
 
   methods: {
@@ -220,6 +222,16 @@ export default {
         this.user = data.data;
       } catch {
         console.log("error loading user");
+      }
+    },
+
+    async loadCustomerApiUrl() {
+      try {
+        const { data } = await apiClient.get("/clients/customer-api-settings");
+        this.customerApiUrl = data.data?.url || "";
+      } catch {
+        // needs settings:manage; leave blank for other users
+        this.customerApiUrl = "";
       }
     },
 
@@ -256,7 +268,7 @@ DB QUERY SETUP:
 4. Add Relationships
 
 Customer API:
-${this.user.customerApi?.url}
+${this.customerApiUrl || "Not configured"}
   `;
 
       const blob = new Blob([content], { type: "text/plain" });
