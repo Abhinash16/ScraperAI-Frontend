@@ -121,7 +121,7 @@ const ENDPOINT = "/clients/product-api-settings/index";
 const SOURCES = {
   api: { label: "From your catalog API", color: "success" },
   fallback: {
-    label: "Fallback: product links + names seen in searches",
+    label: "Fallback: names learned from searches",
     color: "amber darken-2",
   },
 };

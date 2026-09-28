@@ -72,14 +72,14 @@
 
               <!-- Security -->
               <v-list-item
-                v-if="currentUser && hasPermission('user:manage')"
+                v-if="currentUser && (hasPermission('user:manage') || hasPermission('role:manage'))"
                 @click="goToUserList()"
               >
                 <v-list-item-icon>
                   <v-icon>mdi-account-multiple-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title class="font-weight-bold">
-                  User List
+                  Team
                 </v-list-item-title>
               </v-list-item>
             </v-list>
@@ -308,8 +308,8 @@ export default {
     },
 
     goToUserList() {
-      if (this.$route.path !== "/dashboard/user-list") {
-        this.$router.push("/dashboard/user-list");
+      if (this.$route.path !== "/dashboard/team") {
+        this.$router.push("/dashboard/team");
       }
     },
 

@@ -98,13 +98,14 @@ const routes = [
         component: () => import("../screens/dashboard/AnalyticsDashboard.vue"),
       },
       {
-        path: "user-list",
-        name: "User List",
+        path: "team",
+        name: "Team",
         component: () => import("../screens/dashboard/TeamManagement.vue"),
         meta: {
-          permission: "user:manage",
+          permission: ["user:manage", "role:manage"],
         },
       },
+      { path: "user-list", redirect: "/dashboard/team" },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },
@@ -261,9 +262,11 @@ router.beforeEach(async (to, from, next) => {
 
           const permissions = currentUser?.user?.roleId?.permissions || [];
 
+          // meta.permission may be one key or a list (any of them)
+          const required = [].concat(to.meta.permission);
           const hasAccess =
             permissions.includes("*") ||
-            permissions.includes(to.meta.permission);
+            required.some((p) => permissions.includes(p));
 
           if (!hasAccess) {
             return next("/dashboard"); // ❌ block
