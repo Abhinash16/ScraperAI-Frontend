@@ -416,6 +416,22 @@
             />
           </v-col>
           <v-col cols="12">
+            <div class="text-subtitle-2 font-weight-bold mb-1">Prices</div>
+            <div class="text-body-2 grey--text text--darken-1 mb-2">
+              Where the bot may take prices from when it quotes one.
+            </div>
+            <v-radio-group v-model="form.rules.pricing" class="mt-0 mb-4" hide-details>
+              <v-radio v-for="p in PRICING" :key="p.value" :value="p.value" class="mb-2">
+                <template #label>
+                  <div>
+                    <div class="text-body-2 font-weight-bold black--text">{{ p.text }}</div>
+                    <div class="text-caption grey--text">{{ p.help }}</div>
+                  </div>
+                </template>
+              </v-radio>
+            </v-radio-group>
+          </v-col>
+          <v-col cols="12">
             <v-textarea
               v-model="form.rules.disclaimers"
               label="Disclaimers"
@@ -635,6 +651,24 @@ const EMOJI = [
   { value: "off", text: "No emoji" },
 ];
 
+const PRICING = [
+  {
+    value: "auto",
+    text: "Automatic (recommended)",
+    help: "Live product data when a product API is connected, otherwise prices written in your knowledge.",
+  },
+  {
+    value: "live_only",
+    text: "Live product data only",
+    help: "Never quote prices from your knowledge.",
+  },
+  {
+    value: "knowledge",
+    text: "From knowledge",
+    help: "Quote prices exactly as written in your FAQs, notes and pages.",
+  },
+];
+
 const DAYS = [
   { id: "mon", label: "Monday" },
   { id: "tue", label: "Tuesday" },
@@ -734,6 +768,7 @@ function toForm(profile = {}) {
       dont: arr(rules.dont).join("\n"),
       refuseTopics: arr(rules.refuseTopics),
       disclaimers: arr(rules.disclaimers).join("\n"),
+      pricing: PRICING.some((p) => p.value === rules.pricing) ? rules.pricing : "auto",
       escalation: {
         keywords: arr(escalation.keywords),
         confidenceThreshold:
@@ -780,6 +815,7 @@ function toProfile(form) {
       dont: lines(form.rules.dont),
       refuseTopics: clean(form.rules.refuseTopics),
       disclaimers: lines(form.rules.disclaimers),
+      pricing: form.rules.pricing,
       escalation: {
         keywords: clean(form.rules.escalation.keywords),
         confidenceThreshold: form.rules.escalation.confidenceThreshold,
@@ -808,6 +844,7 @@ export default {
       ROLES,
       TONES,
       EMOJI,
+      PRICING,
       DAYS,
       FACT_LISTS,
       LIST_MAX,

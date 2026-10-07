@@ -144,6 +144,61 @@
           }}</pre>
         </template>
 
+        <v-alert
+          v-if="trace.knowledgeGap"
+          type="warning"
+          text
+          dense
+          rounded="lg"
+          class="text-caption my-2"
+        >
+          The bot said it couldn't answer this from your knowledge, so it was
+          logged as a knowledge gap.
+        </v-alert>
+
+        <!-- Retrieval: what was searched and which blocks came back -->
+        <template v-if="retrieval">
+          <div class="trace-heading">Search</div>
+          <div v-if="retrieval.query" class="trace-row">
+            <span class="trace-label">Searched for</span>
+            <span class="mr-2">"{{ retrieval.query }}"</span>
+            <v-chip
+              v-if="retrieval.rewritten"
+              x-small
+              outlined
+              color="primary"
+              title="A follow-up question, rewritten so it makes sense on its own"
+            >
+              rewritten
+            </v-chip>
+          </div>
+          <div v-if="pricingLabel" class="trace-row">
+            <span class="trace-label">Prices from</span>
+            <span>{{ pricingLabel }}</span>
+          </div>
+          <div v-if="blocks.length" class="blocks mt-1">
+            <div
+              v-for="b in blocks"
+              :key="b.key"
+              :class="['block-row', { cited: isCited(b) }]"
+            >
+              <span class="block-key">{{ b.key }}</span>
+              <span class="mr-2">{{ blockType(b) }}</span>
+              <span class="grey--text mr-2">
+                {{ b.vectorScore != null ? `meaning ${b.vectorScore.toFixed(2)}` : "keyword only" }}
+                · {{ b.keywordRank != null ? `keyword #${b.keywordRank}` : "meaning only" }}
+              </span>
+              <v-chip v-if="isCited(b)" x-small color="success" text-color="white">
+                Used in the answer
+              </v-chip>
+            </div>
+          </div>
+        </template>
+        <div v-else-if="citations.length" class="trace-row mt-2">
+          <span class="trace-label">Used in the answer</span>
+          <span>{{ citations.join(", ") }}</span>
+        </div>
+
         <!-- Matched FAQs (curated answers, used ahead of website text) -->
         <template v-if="curated">
           <div class="trace-heading">
@@ -194,6 +249,21 @@ export default {
     knowledge() {
       return this.trace.websiteKnowledge;
     },
+    retrieval() {
+      return this.trace.retrieval || null;
+    },
+    blocks() {
+      return Array.isArray(this.retrieval?.blocks) ? this.retrieval.blocks : [];
+    },
+    citations() {
+      return Array.isArray(this.trace.citations) ? this.trace.citations : [];
+    },
+    pricingLabel() {
+      return {
+        knowledge: "Knowledge (FAQs, notes and pages)",
+        live_only: "Live product data only",
+      }[this.trace.pricing] || "";
+    },
     // null when no FAQ matched; missing on older traces
     curated() {
       return this.trace.curatedAnswers;
@@ -235,6 +305,15 @@ export default {
   },
 
   methods: {
+    isCited(block) {
+      return this.citations.includes(block.key);
+    },
+
+    blockType(block) {
+      const label = { faq: "FAQ", note: "Note", page: "Website page" }[block.type] || block.type;
+      return block.curated && block.type !== "faq" ? `${label} (curated)` : label;
+    },
+
     matchLabel(match) {
       return catalogMatchLabel(match);
     },
@@ -282,6 +361,32 @@ export default {
   border-radius: 12px;
   padding: 12px 14px;
   font-size: 13px;
+}
+
+.blocks {
+  border: 1px solid #eef1f7;
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
+.block-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 3px 0;
+  font-size: 12px;
+}
+
+.block-row.cited {
+  font-weight: 600;
+}
+
+.block-key {
+  font-family: monospace;
+  background: #eef0ff;
+  border-radius: 4px;
+  padding: 0 5px;
+  margin-right: 8px;
 }
 
 .trace-heading {
