@@ -172,6 +172,10 @@
               rewritten
             </v-chip>
           </div>
+          <div v-if="retrieval.mode" class="trace-row">
+            <span class="trace-label">Knowledge</span>
+            <span>{{ retrieval.mode === "staging" ? "New setup (staging)" : "Live" }}</span>
+          </div>
           <div v-if="pricingLabel" class="trace-row">
             <span class="trace-label">Prices from</span>
             <span>{{ pricingLabel }}</span>

@@ -45,6 +45,25 @@ export const FEATURE_GUIDES = [
     ],
   },
   {
+    id: "setup",
+    name: "Setup and go live",
+    icon: "$rocket",
+    route: "/dashboard/setup",
+    summary:
+      "A guided setup for a new bot, or for rebuilding your knowledge without downtime: import your website, review the Bot Profile and FAQs, test, then switch over.",
+    steps: [
+      "Start a setup: New client, or Rebuild my knowledge.",
+      "Work through the steps: website, Bot Profile, FAQs, issues, and tests.",
+      "When the checklist is complete, click Switch over.",
+    ],
+    thingsToKnow: [
+      "Nothing you build in a setup reaches customers until you switch over. They keep getting your current answers.",
+      "Test the new knowledge in staging: pick \"New setup (staging)\" in the sandbox and when you run tests.",
+      "Switching over deletes the old knowledge sources you're replacing, in the same step that makes the new ones live.",
+      "Every required checklist item must be done before you can go live.",
+    ],
+  },
+  {
     id: "quality",
     name: "Quality tests",
     icon: "$circle-check",

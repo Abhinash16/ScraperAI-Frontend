@@ -22,6 +22,10 @@
           <div class="d-flex align-center">
             <div class="text-h5 font-weight-bold text-truncate">{{ source.name }}</div>
             <v-chip v-if="paused" small outlined color="warning" class="ml-3">Paused</v-chip>
+            <v-chip v-if="source.stage === 'staging'" small color="deep-orange" text-color="white" class="ml-3">
+              Staging
+            </v-chip>
+            <v-chip v-if="source.retiring" small outlined class="ml-3">Being replaced</v-chip>
           </div>
           <div class="text-body-2 grey--text text--darken-1">
             {{ type.label }} · {{ stat("itemCount") }} items ·
@@ -60,6 +64,34 @@
           <v-icon small class="mr-1">$trash-2</v-icon> Delete
         </v-btn>
       </div>
+
+      <v-alert
+        v-if="source.stage === 'staging'"
+        border="left"
+        colored-border
+        color="deep-orange"
+        elevation="0"
+        outlined
+        rounded="xl"
+        class="text-body-2"
+      >
+        Part of your new setup: built and tested, but customers can't see it
+        until you switch over in
+        <router-link to="/dashboard/setup">Setup</router-link>.
+      </v-alert>
+      <v-alert
+        v-else-if="source.retiring"
+        border="left"
+        colored-border
+        color="grey"
+        elevation="0"
+        outlined
+        rounded="xl"
+        class="text-body-2"
+      >
+        Still answering customers, but your new setup replaces it: switching
+        over deletes this source.
+      </v-alert>
 
       <v-alert
         v-if="paused"

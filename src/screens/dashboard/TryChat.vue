@@ -63,6 +63,21 @@
           </v-item>
         </v-item-group>
 
+        <template v-if="setupRunning">
+          <div class="field-title">Knowledge</div>
+          <v-btn-toggle v-model="knowledgeMode" mandatory rounded color="primary" class="mb-2">
+            <v-btn value="live" class="text-none">Live knowledge</v-btn>
+            <v-btn value="staging" class="text-none">New setup (staging)</v-btn>
+          </v-btn-toggle>
+          <div class="text-caption grey--text text--darken-1 mb-6">
+            {{
+              knowledgeMode === "staging"
+                ? "Answers use the knowledge your setup is building, which customers can't see yet."
+                : "Answers use the knowledge customers get today."
+            }}
+          </div>
+        </template>
+
         <div class="field-title">Customer phone (optional)</div>
         <v-text-field
           v-model.trim="phone"
@@ -126,6 +141,7 @@
             <template v-if="sending">typing…</template>
             <template v-else>
               {{ session.phone ? `+${session.phone}` : "Anonymous visitor" }}
+              <template v-if="session.knowledgeMode === 'staging'"> · new setup (staging)</template>
             </template>
           </div>
         </div>
@@ -291,6 +307,7 @@
 </template>
 
 <script>
+import { isSetupRunning, loadSetup } from "@/utils/setup";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import AnswerTrace from "@/components/sandbox/AnswerTrace.vue";
 import {
@@ -336,6 +353,9 @@ export default {
       ],
       platform: "whatsapp",
       phone: "",
+      setupRunning: false,
+      // The Setup page links here with ?knowledge=staging
+      knowledgeMode: this.$route.query.knowledge === "staging" ? "staging" : "live",
       starting: false,
       startError: "",
       restoring: false,
@@ -366,6 +386,7 @@ export default {
 
   mounted() {
     this.restore();
+    loadSetup().then((state) => (this.setupRunning = isSetupRunning(state)));
   },
 
   methods: {
@@ -425,6 +446,7 @@ export default {
         const session = await createSandboxSession({
           platform: this.platform,
           phone: this.normalizePhone(this.phone),
+          knowledgeMode: this.setupRunning ? this.knowledgeMode : undefined,
         });
         storeSessionId(session.sessionId);
         this.session = session;

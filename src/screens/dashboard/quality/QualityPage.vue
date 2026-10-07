@@ -105,6 +105,9 @@
         </template>
         <template #[`item.profileMode`]="{ item }">
           <v-chip x-small outlined>{{ profileLabel(item.profileMode) }}</v-chip>
+          <v-chip v-if="item.knowledgeMode === 'staging'" x-small outlined color="deep-orange" class="ml-1">
+            Staging
+          </v-chip>
         </template>
         <template #[`item.passRate`]="{ item }">
           <template v-if="item.status === 'done'">
@@ -250,6 +253,16 @@
               </template>
             </v-radio>
           </v-radio-group>
+          <template v-if="setupRunning">
+            <div class="text-subtitle-2 font-weight-bold mt-5 mb-1">Knowledge</div>
+            <v-btn-toggle v-model="runForm.knowledgeMode" mandatory rounded dense color="primary">
+              <v-btn value="live" small class="text-none">Live knowledge</v-btn>
+              <v-btn value="staging" small class="text-none">New setup (staging)</v-btn>
+            </v-btn-toggle>
+            <div class="text-caption grey--text mt-1">
+              The setup checklist counts runs on the new setup (staging).
+            </div>
+          </template>
           <v-text-field
             v-model="runForm.note"
             label="Note (optional)"
@@ -307,6 +320,7 @@ import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import CaseDialog from "@/components/quality/CaseDialog.vue";
 import ItemEditorDrawer from "@/components/knowledge/ItemEditorDrawer.vue";
 import { apiError, formatDate, loadMyPermissions } from "@/utils/knowledge";
+import { isSetupRunning, loadSetup } from "@/utils/setup";
 import {
   EVAL_API,
   PROFILE_MODES,
@@ -336,7 +350,8 @@ export default {
       baselineBusy: null,
 
       runOpen: false,
-      runForm: { profileMode: "published", note: "" },
+      runForm: { profileMode: "published", knowledgeMode: "live", note: "" },
+      setupRunning: false,
       starting: false,
       runError: "",
 
@@ -413,6 +428,13 @@ export default {
     loadMyPermissions()
       .then((p) => (this.perms = p))
       .catch(() => {});
+    // The Setup page links here with ?run=staging to open "Run tests"
+    const openRunNow = this.$route.query.run === "staging";
+    if (openRunNow) this.$router.replace({ query: {} }).catch(() => {});
+    loadSetup().then((state) => {
+      this.setupRunning = isSetupRunning(state);
+      if (openRunNow) this.openRun();
+    });
   },
 
   beforeDestroy() {
@@ -471,7 +493,11 @@ export default {
     },
 
     openRun() {
-      this.runForm = { profileMode: "published", note: "" };
+      this.runForm = {
+        profileMode: "published",
+        knowledgeMode: this.setupRunning ? "staging" : "live",
+        note: "",
+      };
       this.runError = "";
       this.runOpen = true;
     },
@@ -482,6 +508,7 @@ export default {
       try {
         await apiClient.post(`${EVAL_API}/runs`, {
           profileMode: this.runForm.profileMode,
+          knowledgeMode: this.setupRunning ? this.runForm.knowledgeMode : undefined,
           note: this.runForm.note.trim() || undefined,
         });
         this.runOpen = false;

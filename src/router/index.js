@@ -35,6 +35,11 @@ const routes = [
         meta: { permission: "knowledge:read" },
       },
       {
+        path: "setup",
+        component: () => import("../screens/dashboard/setup/SetupPage.vue"),
+        meta: { permission: "settings:manage" },
+      },
+      {
         path: "quality",
         component: () => import("../screens/dashboard/quality/QualityPage.vue"),
         meta: { permission: "settings:manage" },

@@ -130,9 +130,17 @@
                 </template>
               </div>
             </div>
-            <v-chip v-if="source.status === 'paused'" x-small outlined color="warning">
-              Paused
-            </v-chip>
+            <div class="d-flex flex-column align-end">
+              <v-chip v-if="source.stage === 'staging'" x-small color="deep-orange" text-color="white" class="mb-1">
+                Staging
+              </v-chip>
+              <v-chip v-if="source.retiring" x-small outlined color="grey darken-1" class="mb-1">
+                Being replaced
+              </v-chip>
+              <v-chip v-if="source.status === 'paused'" x-small outlined color="warning">
+                Paused
+              </v-chip>
+            </div>
           </div>
 
           <div class="d-flex stats text-body-2 mb-3">

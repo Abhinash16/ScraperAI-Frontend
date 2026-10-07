@@ -1,5 +1,25 @@
 <template>
   <div>
+    <v-alert
+      v-if="setupState && setupState.setup"
+      type="info"
+      outlined
+      rounded="xl"
+      class="text-body-2 mb-8"
+    >
+      <div class="d-flex align-center flex-wrap">
+        <div class="mr-4">
+          <strong>Setup in progress:</strong>
+          {{ setupProgress.done }} of {{ setupProgress.total }} steps done. Customers
+          keep getting your current answers until you switch over.
+        </div>
+        <v-spacer />
+        <v-btn small depressed rounded color="primary" class="text-none" to="/dashboard/setup">
+          Continue setup
+        </v-btn>
+      </div>
+    </v-alert>
+
     <div v-for="(section, title) in dashboardData" :key="title" class="mb-12">
       <div class="d-flex align-center mb-6">
         <h2 class="text-h5 font-weight-bold grey--text text--darken-3">
@@ -77,6 +97,7 @@
 
 <script>
 import { can, loadIssueSummary, loadMyPermissions } from "@/utils/knowledge";
+import { checklistProgress, loadSetup } from "@/utils/setup";
 
 export default {
   name: "DashboardHome",
@@ -87,6 +108,7 @@ export default {
       badges: {},
       // Null until loaded; tiles with a `permission` stay hidden until then
       perms: null,
+      setupState: null,
       dashboardData: {
         Products: {
           color: "indigo",
@@ -133,6 +155,13 @@ export default {
               description: "Tone, facts and rules",
             },
             {
+              name: "Setup",
+              link: "/dashboard/setup",
+              icon: "$rocket",
+              description: "Build, test and go live",
+              permission: "settings:manage",
+            },
+            {
               name: "Quality",
               link: "/dashboard/quality",
               icon: "$circle-check",
@@ -168,7 +197,14 @@ export default {
     };
   },
 
+  computed: {
+    setupProgress() {
+      return checklistProgress(this.setupState?.checklist);
+    },
+  },
+
   async created() {
+    loadSetup().then((s) => (this.setupState = s));
     loadMyPermissions()
       .then((p) => (this.perms = p))
       .catch(() => (this.perms = []));
