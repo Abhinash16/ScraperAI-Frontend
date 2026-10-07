@@ -323,7 +323,7 @@
                     :disabled="!currentLoggedInUser.apiKey"
                     @click="copyApiKey"
                   >
-                    <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
+                    <v-icon x-small class="mr-1">$copy</v-icon> Copy
                   </v-btn>
                 </div>
                 <code class="code-text">
@@ -333,7 +333,7 @@
 
               <div class="d-flex align-start">
                 <v-icon small color="primary" class="mr-2 mt-1">
-                  mdi-shield-check-outline
+                  $shield-check
                 </v-icon>
                 <div class="grey--text text--darken-3 text-body-2">
                   <strong>This key is public by design.</strong> It's in the
@@ -373,7 +373,7 @@
           </div>
           <v-spacer></v-spacer>
           <v-btn icon @click="connectChatGptDialog = false">
-            <v-icon>mdi-close</v-icon>
+            <v-icon>$x</v-icon>
           </v-btn>
         </v-card-title>
 
@@ -482,8 +482,8 @@ const WEBHOOK_TYPES = [
 
 // Sub-tabs under API Config. Add future API integrations here.
 const API_CONFIG_TABS = [
-  { id: "customer-api", name: "Customer API", icon: "mdi-account-search-outline" },
-  { id: "product-api", name: "Product API", icon: "mdi-tag-search-outline" },
+  { id: "customer-api", name: "Customer API", icon: "$user-search" },
+  { id: "product-api", name: "Product API", icon: "$tag" },
 ];
 
 export default {
@@ -549,14 +549,14 @@ export default {
             {
               id: "widget",
               name: "Website Widget",
-              icon: "mdi-code-tags",
+              icon: "$code",
               description:
                 "Add the chat widget to your website and choose which domains can use it.",
             },
             this.canManageSettings && {
               id: "tellephant",
               name: "Tellephant",
-              icon: "mdi-whatsapp",
+              icon: "$whatsapp",
               title: "WhatsApp · Tellephant",
               description:
                 "Connect your WhatsApp Business number and let the bot reply automatically.",
@@ -572,7 +572,7 @@ export default {
             {
               id: "ai-provider",
               name: "AI Provider",
-              icon: "mdi-robot-outline",
+              icon: "$bot",
               image: chatgptIcon,
               title: "ChatGPT",
               description: "The OpenAI account and model that power your chats.",
@@ -586,14 +586,14 @@ export default {
             this.canManageSettings && {
               id: "api-config",
               name: "API Config",
-              icon: "mdi-api",
+              icon: "$plug",
               description:
                 "Connect your own systems so the assistant can answer with live data.",
             },
             {
               id: "webhooks",
               name: "Webhooks",
-              icon: "mdi-webhook",
+              icon: "$webhook",
               description:
                 "Notify your systems when something happens in a conversation.",
               badge: activeHooks
@@ -608,7 +608,7 @@ export default {
             {
               id: "api-keys",
               name: "API Keys",
-              icon: "mdi-key-variant",
+              icon: "$key",
               title: "API Key",
               description:
                 "Your account key. The website widget uses it to find your chatbot.",
@@ -617,7 +617,7 @@ export default {
             {
               id: "database",
               name: "Database",
-              icon: "mdi-database-outline",
+              icon: "$database",
               disabled: true,
               badge: { text: "Retired", color: "grey" },
             },
@@ -642,7 +642,7 @@ export default {
     activeItem() {
       if (this.section === "api-config") {
         return {
-          icon: "mdi-api",
+          icon: "$plug",
           name: "API Config",
           description:
             "Connect your own systems so the assistant can answer with live data.",

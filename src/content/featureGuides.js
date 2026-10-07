@@ -6,7 +6,7 @@ export const FEATURE_GUIDES = [
   {
     id: "bot-profile",
     name: "Bot profile",
-    icon: "mdi-account-cog-outline",
+    icon: "$user-cog",
     route: "/dashboard/bot-profile",
     summary:
       "Your bot's name, tone, business facts, and rules, all set by you.",
@@ -26,7 +26,7 @@ export const FEATURE_GUIDES = [
   {
     id: "website-content",
     name: "Website content",
-    icon: "mdi-web",
+    icon: "$globe",
     route: "/dashboard/page-list",
     summary:
       "The pages the chatbot learns from. Add a sitemap or single URLs, or upload JSON or CSV files, then scrape them.",
@@ -45,7 +45,7 @@ export const FEATURE_GUIDES = [
   {
     id: "content-chunks",
     name: "Content chunks",
-    icon: "mdi-text-box-multiple-outline",
+    icon: "$files",
     route: "/dashboard/content-chunks",
     summary:
       "The short pieces of text the chatbot searches when it answers. Every scraped page is split into chunks.",
@@ -63,7 +63,7 @@ export const FEATURE_GUIDES = [
   {
     id: "knowledge-gap",
     name: "Knowledge gap",
-    icon: "mdi-lightbulb-on-outline",
+    icon: "$lightbulb",
     route: "/dashboard/knowledge-gap",
     summary:
       "Questions customers asked that the chatbot couldn't answer. Answer them once and the chatbot learns the answer.",
@@ -81,7 +81,7 @@ export const FEATURE_GUIDES = [
   {
     id: "chats",
     name: "Chats",
-    icon: "mdi-message-text-outline",
+    icon: "$message-square-text",
     route: "/dashboard/chat",
     summary:
       "Every conversation from your website and WhatsApp, live. Read along, take over, and close tickets.",
@@ -100,7 +100,7 @@ export const FEATURE_GUIDES = [
   {
     id: "sandbox",
     name: "Sandbox",
-    icon: "mdi-flask-outline",
+    icon: "$flask-conical",
     route: "/dashboard/sandbox",
     summary:
       "Test the chatbot as a customer would, with real answers, without anything reaching customers.",
@@ -118,7 +118,7 @@ export const FEATURE_GUIDES = [
   {
     id: "widget",
     name: "Website widget",
-    icon: "mdi-code-tags",
+    icon: "$code",
     route: "/dashboard/integration?section=widget",
     summary:
       "The chat bubble on your website. Paste one script tag and choose which domains can use it.",
@@ -139,7 +139,7 @@ export const FEATURE_GUIDES = [
   {
     id: "whatsapp",
     name: "WhatsApp",
-    icon: "mdi-whatsapp",
+    icon: "$whatsapp",
     route: "/dashboard/integration?section=tellephant",
     summary:
       "Let the bot reply on your WhatsApp Business number through Tellephant.",
@@ -156,7 +156,7 @@ export const FEATURE_GUIDES = [
   {
     id: "ai-provider",
     name: "AI provider",
-    icon: "mdi-robot-outline",
+    icon: "$bot",
     route: "/dashboard/integration?section=ai-provider",
     summary: "The OpenAI account that powers your chatbot's answers.",
     steps: [
@@ -171,7 +171,7 @@ export const FEATURE_GUIDES = [
   {
     id: "webhooks",
     name: "Webhooks & API config",
-    icon: "mdi-webhook",
+    icon: "$webhook",
     route: "/dashboard/integration?section=webhooks",
     summary:
       "Tell your systems when a chat needs a person, shows buying interest, or needs a follow-up. Connect product and customer APIs for live answers.",
@@ -187,7 +187,7 @@ export const FEATURE_GUIDES = [
   {
     id: "analytics",
     name: "Analytics & insights",
-    icon: "mdi-chart-line",
+    icon: "$chart-line",
     route: "/dashboard/chat-analytics",
     summary:
       "Conversation volume, engagement, and growth opportunities across your chats.",
@@ -202,7 +202,7 @@ export const FEATURE_GUIDES = [
   {
     id: "call-analysis",
     name: "Call analysis",
-    icon: "mdi-phone-outline",
+    icon: "$phone",
     route: "/dashboard/call-batches",
     summary:
       "Upload call recordings in batches and get an AI report on each call, with issues marked by timestamp.",
@@ -219,7 +219,7 @@ export const FEATURE_GUIDES = [
   {
     id: "team",
     name: "Team & roles",
-    icon: "mdi-account-multiple-outline",
+    icon: "$users",
     route: "/dashboard/team",
     summary:
       "Invite people and decide what each person can do with roles and permissions.",
@@ -323,47 +323,47 @@ export const GO_LIVE_CHECKLIST = [
 // repo. No dates: we only list what is coming, in rough order.
 export const COMING_NEXT = [
   {
-    icon: "mdi-file-tree-outline",
+    icon: "$folder-tree",
     title: "Knowledge sources with review",
     text: "Manage your website, FAQs, and documents (PDF, DOCX) as sources. Review what the bot learns before it goes live, and remove a source in one click.",
   },
   {
-    icon: "mdi-alert-decagram-outline",
+    icon: "$badge-alert",
     title: "Knowledge health checks",
     text: "Automatic warnings about contradictions, outdated content, and duplicates, plus a weekly digest.",
   },
   {
-    icon: "mdi-rocket-launch-outline",
+    icon: "$rocket",
     title: "Onboarding wizard",
     text: "A guided setup with a readiness score, so you can go live in under 30 minutes.",
   },
   {
-    icon: "mdi-database-sync-outline",
+    icon: "$database-zap",
     title: "Live product and customer data",
     text: "Connect your product and customer systems with mapping and preview, so answers use live stock, prices, and order status.",
   },
   {
-    icon: "mdi-forum-outline",
+    icon: "$messages-square",
     title: "Conversations and summaries",
     text: "Chats grouped into conversations with automatic summaries, plus WhatsApp 24-hour window handling.",
   },
   {
-    icon: "mdi-shield-account-outline",
+    icon: "$shield-user",
     title: "Verified customers",
     text: "Phone verification and signed sign-in from your app, so the bot can safely discuss a customer's own account.",
   },
   {
-    icon: "mdi-lightning-bolt-outline",
+    icon: "$zap",
     title: "Actions",
     text: "The bot can do things for customers, like extending a booking or sending a payment link, with confirmation first.",
   },
   {
-    icon: "mdi-fire",
+    icon: "$flame",
     title: "Lead scoring and follow-ups",
     text: "Hot leads are flagged automatically, and follow-up messages go out on rules you set.",
   },
   {
-    icon: "mdi-cellphone-link",
+    icon: "$smartphone",
     title: "SDKs for apps",
     text: "Add the chat to React and React Native apps, with native iOS and Android to follow.",
   },

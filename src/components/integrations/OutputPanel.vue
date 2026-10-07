@@ -16,7 +16,7 @@
         class="ml-2"
         @click="copy"
       >
-        <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
+        <v-icon x-small class="mr-1">$copy</v-icon> Copy
       </v-btn>
     </div>
     <div class="output-box">

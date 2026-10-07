@@ -40,7 +40,7 @@ export default {
     text: { type: String, default: "" },
     confirmLabel: { type: String, default: "Confirm" },
     color: { type: String, default: "error" },
-    icon: { type: String, default: "mdi-alert-outline" },
+    icon: { type: String, default: "$triangle-alert" },
     loading: { type: Boolean, default: false },
   },
 };

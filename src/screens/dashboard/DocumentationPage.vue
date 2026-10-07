@@ -10,7 +10,7 @@
         </p>
       </div>
       <v-btn color="primary" rounded depressed outlined @click="downloadDocs">
-        <v-icon left>mdi-download</v-icon>
+        <v-icon left>$download</v-icon>
         Download
       </v-btn>
     </div>
@@ -164,7 +164,7 @@
         <div class="code-box d-flex justify-space-between align-start mb-6">
           <pre class="ma-0">{{ scriptCode }}</pre>
           <v-btn icon small dark @click="copyScript">
-            <v-icon small>mdi-content-copy</v-icon>
+            <v-icon small>$copy</v-icon>
           </v-btn>
         </div>
 
@@ -203,10 +203,10 @@ import {
 } from "@/content/featureGuides";
 
 const TABS = [
-  { id: "checklist", name: "Go-live checklist", icon: "mdi-rocket-launch-outline" },
-  { id: "features", name: "Feature guides", icon: "mdi-book-open-variant" },
-  { id: "coming", name: "Coming next", icon: "mdi-map-marker-path" },
-  { id: "install", name: "Install", icon: "mdi-code-tags" },
+  { id: "checklist", name: "Go-live checklist", icon: "$rocket" },
+  { id: "features", name: "Feature guides", icon: "$book-open" },
+  { id: "coming", name: "Coming next", icon: "$route" },
+  { id: "install", name: "Install", icon: "$code" },
 ];
 
 export default {
@@ -299,9 +299,9 @@ export default {
 
     statusIcon(item) {
       const s = this.statusOf(item);
-      if (s === true) return "mdi-check-circle";
-      if (s === false) return "mdi-circle-outline";
-      return "mdi-help-circle-outline";
+      if (s === true) return "$circle-check";
+      if (s === false) return "$circle";
+      return "$circle-help";
     },
 
     statusColor(item) {

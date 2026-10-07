@@ -196,8 +196,8 @@
               indeterminate
             >
               <v-avatar color="primary darken-4" size="80">
-                <v-icon size="40" color="white" class="mdi-spin">
-                  mdi-auto-fix
+                <v-icon size="40" color="white" class="icon-spin">
+                  $wand-sparkles
                 </v-icon>
               </v-avatar>
             </v-progress-circular>
@@ -230,7 +230,7 @@
       <v-card rounded="xl" :loading="loading" class="overflow-hidden">
         <div class="pa-6 pb-0 d-flex align-center">
           <v-avatar color="#eff2fb" rounded="xl" size="48" class="mr-4">
-            <v-icon color="black">mdi-web-sync</v-icon>
+            <v-icon color="black">$refresh-cw</v-icon>
           </v-avatar>
           <div>
             <div class="text-h6 font-weight-bold black--text">
@@ -242,7 +242,7 @@
           </div>
           <v-spacer></v-spacer>
           <v-btn icon @click="uploadUrlDialog = false" :disabled="loading">
-            <v-icon>mdi-close</v-icon>
+            <v-icon>$x</v-icon>
           </v-btn>
         </div>
 
@@ -253,16 +253,16 @@
           active-class="font-weight-bold"
         >
           <v-tab class="text-none">
-            <v-icon small class="mr-2">mdi-sitemap-outline</v-icon> Sitemap
+            <v-icon small class="mr-2">$network</v-icon> Sitemap
           </v-tab>
           <v-tab class="text-none">
-            <v-icon small class="mr-2">mdi-link-variant</v-icon> Individual URL
+            <v-icon small class="mr-2">$link</v-icon> Individual URL
           </v-tab>
           <v-tab class="text-none">
-            <v-icon small class="mr-2">mdi-code-json</v-icon> JSON
+            <v-icon small class="mr-2">$file-json</v-icon> JSON
           </v-tab>
           <v-tab class="text-none">
-            <v-icon small class="mr-2">mdi-code-json</v-icon> CSV
+            <v-icon small class="mr-2">$file-json</v-icon> CSV
           </v-tab>
         </v-tabs>
 
@@ -375,7 +375,7 @@
 
         <div class="px-6 pb-6 text-center">
           <span class="text-caption grey--text">
-            <v-icon x-small color="grey">mdi-lock-outline</v-icon>
+            <v-icon x-small color="grey">$lock</v-icon>
             Only public URLs can be crawled. Ensure your robots.txt allows
             access.
           </span>
@@ -387,7 +387,7 @@
         <!-- Header -->
         <v-card-title class="d-flex align-center">
           <v-avatar color="primary" size="36" class="mr-3">
-            <v-icon dark>mdi-web-sync</v-icon>
+            <v-icon dark>$refresh-cw</v-icon>
           </v-avatar>
           <span class="text-h6 font-weight-medium">Scrape all pages</span>
         </v-card-title>

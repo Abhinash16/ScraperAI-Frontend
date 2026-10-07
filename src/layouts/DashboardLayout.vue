@@ -43,7 +43,7 @@
               color="primary"
               class="ml-4 grey lighten-3"
             >
-              <v-icon color="black">mdi-account</v-icon>
+              <v-icon color="black">$user</v-icon>
             </v-avatar>
           </template>
 
@@ -53,7 +53,7 @@
               <!-- Profile -->
               <v-list-item @click="goToProfile()">
                 <v-list-item-icon>
-                  <v-icon>mdi-account-outline</v-icon>
+                  <v-icon>$user</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title class="font-weight-bold">
                   Profile
@@ -63,7 +63,7 @@
               <!-- Integration -->
               <v-list-item @click="goToIntegration()">
                 <v-list-item-icon>
-                  <v-icon>mdi-puzzle-outline</v-icon>
+                  <v-icon>$puzzle</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title class="font-weight-bold">
                   Integration
@@ -76,7 +76,7 @@
                 @click="goToUserList()"
               >
                 <v-list-item-icon>
-                  <v-icon>mdi-account-multiple-outline</v-icon>
+                  <v-icon>$users</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title class="font-weight-bold">
                   Team
@@ -115,7 +115,7 @@
       <v-card rounded="xl" class="text-center">
         <v-card-text class="pt-6">
           <v-avatar color="error lighten-5" size="64" class="mb-4">
-            <v-icon color="error" size="36"> mdi-alert-octagon-outline </v-icon>
+            <v-icon color="error" size="36"> $octagon-alert </v-icon>
           </v-avatar>
 
           <div class="text-h6 font-weight-bold mb-2">Confirm Logout</div>
@@ -165,12 +165,12 @@ export default {
           {
             name: "Dashboard",
             link: "/dashboard/",
-            icon: "mdi-view-dashboard-outline",
+            icon: "$layout-dashboard",
           },
           {
             name: "Your Profile",
             link: "/dashboard/profile",
-            icon: "mdi-account-outline",
+            icon: "$user",
           },
         ],
       },
@@ -180,22 +180,22 @@ export default {
           {
             name: "Call Analysis",
             link: "/dashboard/call-batches",
-            icon: "mdi-phone-outline",
+            icon: "$phone",
           },
           {
             name: "Knowledge Gap",
             link: "/dashboard/knowledge-gap/",
-            icon: "mdi-lightbulb-on-outline",
+            icon: "$lightbulb",
           },
           {
             name: "Opportunity Analysis",
             link: "/dashboard/opportunity-analysis",
-            icon: "mdi-chart-line",
+            icon: "$chart-line",
           },
           {
             name: "Chat Analytics",
             link: "/dashboard/chat-analytics",
-            icon: "mdi-chart-line",
+            icon: "$chart-line",
           },
         ],
       },
@@ -205,7 +205,7 @@ export default {
           {
             name: "Chats",
             link: "/dashboard/chat",
-            icon: "mdi-message-text-outline",
+            icon: "$message-square-text",
           },
 
         ],
@@ -216,7 +216,7 @@ export default {
           {
             name: "Chatbot Knowledge Score",
             link: "/dashboard/chatbot-knowledge-score",
-            icon: "mdi-robot-outline",
+            icon: "$bot",
           },
         ],
       },
@@ -226,17 +226,17 @@ export default {
           {
             name: "Page List",
             link: "/dashboard/page-list",
-            icon: "mdi-format-list-bulleted",
+            icon: "$list",
           },
           {
             name: "Scraped Pages",
             link: "/dashboard/scraped-pages",
-            icon: "mdi-file-document-outline",
+            icon: "$file-text",
           },
           {
             name: "Content Chunks",
             link: "/dashboard/content-chunks",
-            icon: "mdi-text-box-multiple-outline",
+            icon: "$files",
           },
         ],
       },
@@ -246,12 +246,12 @@ export default {
           {
             name: "Bot Profile",
             link: "/dashboard/bot-profile",
-            icon: "mdi-account-cog-outline",
+            icon: "$user-cog",
           },
           {
             name: "Integration",
             link: "/dashboard/integration",
-            icon: "mdi-puzzle-outline",
+            icon: "$puzzle",
           },
         ],
       },

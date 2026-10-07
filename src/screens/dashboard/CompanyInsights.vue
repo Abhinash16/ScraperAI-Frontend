@@ -183,7 +183,7 @@
           <v-list dense>
             <v-list-item v-for="(q, i) in insight.customerQuestions" :key="i">
               <v-list-item-icon>
-                <v-icon color="primary">mdi-help-circle-outline</v-icon>
+                <v-icon color="primary">$circle-help</v-icon>
               </v-list-item-icon>
 
               <v-list-item-content>
@@ -201,7 +201,7 @@
           <v-list dense>
             <v-list-item v-for="(s, i) in insight.aiSuggestions" :key="i">
               <v-list-item-icon>
-                <v-icon color="success">mdi-lightbulb-on-outline</v-icon>
+                <v-icon color="success">$lightbulb</v-icon>
               </v-list-item-icon>
 
               <v-list-item-content>
@@ -229,7 +229,7 @@
               md="4"
             >
               <v-card elevation="0" class="pa-4 seo-card">
-                <v-icon color="orange" class="mb-2"> mdi-trending-up </v-icon>
+                <v-icon color="orange" class="mb-2"> $trending-up </v-icon>
 
                 <div class="grey--text text--darken-2">
                   {{ seo }}

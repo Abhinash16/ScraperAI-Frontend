@@ -21,7 +21,7 @@
           class="text-capitalize font-weight-bold"
           @click="openManualDialog"
         >
-          <v-icon left small>mdi-plus</v-icon>
+          <v-icon left small>$plus</v-icon>
           Add Content Manual
         </v-btn>
       </div>
@@ -34,7 +34,7 @@
           <v-col cols="12" md="6">
             <v-text-field
               v-model="search"
-              append-icon="mdi-magnify"
+              append-icon="$search"
               label="Search content..."
               outlined
               dense
@@ -101,11 +101,11 @@
 
             <td>
               <v-btn icon small @click="viewChunk(item)">
-                <v-icon small color="primary">mdi-eye</v-icon>
+                <v-icon small color="primary">$eye</v-icon>
               </v-btn>
 
               <v-btn icon small @click="deleteChunk(item._id)">
-                <v-icon small color="red">mdi-delete</v-icon>
+                <v-icon small color="red">$trash-2</v-icon>
               </v-btn>
             </td>
           </tr>
@@ -129,7 +129,7 @@
           Chunk Content
           <v-spacer />
           <v-btn icon @click="viewDialog = false">
-            <v-icon>mdi-close</v-icon>
+            <v-icon>$x</v-icon>
           </v-btn>
         </v-card-title>
 
@@ -154,7 +154,7 @@
           Add Manual Content
           <v-spacer />
           <v-btn icon @click="manualDialog = false">
-            <v-icon>mdi-close</v-icon>
+            <v-icon>$x</v-icon>
           </v-btn>
         </v-card-title>
 

@@ -15,6 +15,15 @@ export default {};
 * {
   font-family: "PT Sans", sans-serif;
 }
+/* Spinning icon (replaces mdi-spin) */
+.icon-spin {
+  animation: icon-spin 1.5s linear infinite;
+}
+@keyframes icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .v-btn,
 .v-tab {
   text-decoration: none !important;

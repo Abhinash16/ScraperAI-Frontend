@@ -31,7 +31,7 @@
           outlined
           dense
           clearable
-          prepend-inner-icon="mdi-magnify"
+          prepend-inner-icon="$search"
           hide-details
         />
       </div>
@@ -81,7 +81,7 @@
         <!-- Actions -->
         <template v-slot:[`item.actions`]="{ item }">
           <v-btn icon small @click="openPage(item.url)">
-            <v-icon small color="primary">mdi-open-in-new</v-icon>
+            <v-icon small color="primary">$external-link</v-icon>
           </v-btn>
         </template>
 
@@ -89,7 +89,7 @@
         <template v-slot:no-data>
           <div class="pa-10 text-center grey--text">
             <v-icon large color="grey lighten-1">
-              mdi-file-search-outline
+              $file-search
             </v-icon>
 
             <div class="mt-3">No pages have been scraped yet</div>

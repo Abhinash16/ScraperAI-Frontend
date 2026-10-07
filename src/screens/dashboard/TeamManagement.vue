@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex align-center mb-6">
       <v-avatar size="48" rounded="xl" color="#cde6ff" class="mr-4">
-        <v-icon color="black">mdi-account-group-outline</v-icon>
+        <v-icon color="black">$users</v-icon>
       </v-avatar>
       <div>
         <div class="text-h5 font-weight-bold">Team</div>
@@ -31,10 +31,10 @@
         @change="setTab"
       >
         <v-tab v-if="canManageUsers" tab-value="members" class="text-none">
-          <v-icon small class="mr-2">mdi-account-multiple-outline</v-icon> Members
+          <v-icon small class="mr-2">$users</v-icon> Members
         </v-tab>
         <v-tab v-if="canManageRoles" tab-value="roles" class="text-none">
-          <v-icon small class="mr-2">mdi-shield-account-outline</v-icon> Roles
+          <v-icon small class="mr-2">$shield-user</v-icon> Roles
         </v-tab>
       </v-tabs>
 

@@ -5,7 +5,7 @@
       text
       dense
       rounded="lg"
-      icon="mdi-flask-outline"
+      icon="$flask-conical"
       class="text-body-2 mb-4"
     >
       Sandbox: real answers, but nothing is sent to customers and no alerts
@@ -23,7 +23,7 @@
     <v-card v-else-if="!session" outlined rounded="xl" class="pa-6 pa-sm-8">
       <div class="d-flex align-center mb-6">
         <v-avatar size="48" rounded="xl" color="#cde6ff" class="mr-4">
-          <v-icon color="black">mdi-flask-outline</v-icon>
+          <v-icon color="black">$flask-conical</v-icon>
         </v-avatar>
         <div>
           <div class="text-h6 font-weight-bold">Sandbox</div>
@@ -67,7 +67,7 @@
         <v-text-field
           v-model.trim="phone"
           placeholder="919876543210"
-          prepend-inner-icon="mdi-phone-outline"
+          prepend-inner-icon="$phone"
           hint="With a phone number, the bot looks up that customer's real bookings and dues through your customer API."
           persistent-hint
           outlined
@@ -97,7 +97,7 @@
             type="submit"
             :loading="starting"
           >
-            <v-icon left>mdi-play</v-icon>
+            <v-icon left>$play</v-icon>
             Start
           </v-btn>
         </div>
@@ -115,7 +115,7 @@
       <div class="chat-header d-flex align-center px-4 py-3">
         <v-avatar size="40" class="mr-3 header-avatar">
           <v-icon :color="isWhatsapp ? 'white' : 'primary'">
-            {{ isWhatsapp ? "mdi-whatsapp" : "mdi-robot-outline" }}
+            {{ isWhatsapp ? "$whatsapp" : "$bot" }}
           </v-icon>
         </v-avatar>
         <div class="flex-grow-1" style="min-width: 0">
@@ -150,7 +150,7 @@
           :loading="resetting"
           @click="reset"
         >
-          <v-icon>mdi-restart</v-icon>
+          <v-icon>$rotate-ccw</v-icon>
         </v-btn>
       </div>
 
@@ -217,7 +217,7 @@
 
             <div v-if="m.failed" class="msg-meta error--text">
               <v-icon x-small color="error" class="mr-1">
-                mdi-alert-circle-outline
+                $circle-alert
               </v-icon>
               Not answered
             </div>
@@ -283,7 +283,7 @@
           :color="isWhatsapp ? '#00a884' : 'primary'"
           :disabled="sending || expired || !newMessage.trim()"
         >
-          <v-icon small color="white">mdi-send</v-icon>
+          <v-icon small color="white">$send</v-icon>
         </v-btn>
       </v-form>
     </v-card>
@@ -322,14 +322,14 @@ export default {
         {
           id: "whatsapp",
           name: "WhatsApp",
-          icon: "mdi-whatsapp",
+          icon: "$whatsapp",
           color: "#25d366",
           description: "Test the WhatsApp bot",
         },
         {
           id: "web",
           name: "Website",
-          icon: "mdi-web",
+          icon: "$globe",
           color: "primary",
           description: "Test the website widget",
         },

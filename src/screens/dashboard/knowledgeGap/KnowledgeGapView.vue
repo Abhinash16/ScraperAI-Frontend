@@ -4,7 +4,7 @@
     <v-row class="mb-6">
       <v-col cols="auto">
         <v-btn icon text color="primary" @click="$router.back()">
-          <v-icon>mdi-arrow-left</v-icon>
+          <v-icon>$arrow-left</v-icon>
         </v-btn>
       </v-col>
 
@@ -69,7 +69,7 @@
         <!-- Conversation -->
         <div class="mb-6">
           <div class="text-subtitle-1 font-weight-bold mb-4">
-            <v-icon small class="mr-2">mdi-message-text-outline</v-icon>
+            <v-icon small class="mr-2">$message-square-text</v-icon>
             Conversation Context
           </div>
 
@@ -86,7 +86,7 @@
                 <!-- Sender Label with Icon -->
                 <div class="d-flex align-center mb-1">
                   <v-icon x-small color="grey" class="mr-1">
-                    {{ msg.role === "user" ? "mdi-account" : "mdi-robot" }}
+                    {{ msg.role === "user" ? "$user" : "$bot" }}
                   </v-icon>
 
                   <span class="text-caption grey--text">
@@ -126,7 +126,7 @@
         <v-card outlined rounded="xl" class="pa-5">
           <div class="d-flex align-center justify-space-between mb-4">
             <div class="text-subtitle-1 font-weight-bold">
-              <v-icon small class="mr-2">mdi-lightbulb-outline</v-icon>
+              <v-icon small class="mr-2">$lightbulb</v-icon>
               Provide Correct Answer
             </div>
 
@@ -137,7 +137,7 @@
               text-color="white"
               class="rounded-xl"
             >
-              <v-icon small left>mdi-check-circle</v-icon>
+              <v-icon small left>$circle-check</v-icon>
               Answered
             </v-chip>
           </div>

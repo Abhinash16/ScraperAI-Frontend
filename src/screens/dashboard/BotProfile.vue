@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex align-center flex-wrap mb-6">
       <v-avatar size="48" rounded="xl" color="#cde6ff" class="mr-4">
-        <v-icon color="black">mdi-account-cog-outline</v-icon>
+        <v-icon color="black">$user-cog</v-icon>
       </v-avatar>
       <div class="mr-4">
         <div class="text-h5 font-weight-bold">Bot Profile</div>
@@ -76,7 +76,7 @@
             class="text-none ml-2 my-1"
             to="/dashboard/sandbox"
           >
-            <v-icon small class="mr-1">mdi-flask-outline</v-icon>
+            <v-icon small class="mr-1">$flask-conical</v-icon>
             Test in sandbox
           </v-btn>
           <v-btn
@@ -320,7 +320,7 @@
               :disabled="form.facts[list.key].length >= LIST_MAX"
               @click="addRow(list)"
             >
-              <v-icon small class="mr-1">mdi-plus</v-icon> Add
+              <v-icon small class="mr-1">$plus</v-icon> Add
             </v-btn>
           </div>
           <div class="text-body-2 grey--text text--darken-1 mb-4">{{ list.help }}</div>
@@ -365,7 +365,7 @@
               :aria-label="`Remove ${list.title.toLowerCase()} row`"
               @click="form.facts[list.key].splice(i, 1)"
             >
-              <v-icon small>mdi-close</v-icon>
+              <v-icon small>$x</v-icon>
             </v-btn>
           </div>
           <div v-if="!form.facts[list.key].length" class="text-body-2 grey--text">
@@ -469,7 +469,7 @@
           class="text-none mt-4 px-2"
           to="/dashboard/integration?section=webhooks"
         >
-          <v-icon small class="mr-1">mdi-webhook</v-icon>
+          <v-icon small class="mr-1">$webhook</v-icon>
           Set where escalations are sent
         </v-btn>
       </v-card>
@@ -608,12 +608,12 @@ const DEFAULT_THRESHOLD = 0.6;
 const DEFAULT_TIMEZONE = "Asia/Kolkata";
 
 const TABS = [
-  { id: "identity", label: "Identity", icon: "mdi-account-outline" },
-  { id: "facts", label: "Business facts", icon: "mdi-store-outline" },
-  { id: "rules", label: "Rules", icon: "mdi-format-list-checks" },
-  { id: "escalation", label: "Escalation", icon: "mdi-account-arrow-right-outline" },
-  { id: "advanced", label: "Advanced", icon: "mdi-code-braces" },
-  { id: "history", label: "History", icon: "mdi-history" },
+  { id: "identity", label: "Identity", icon: "$user" },
+  { id: "facts", label: "Business facts", icon: "$store" },
+  { id: "rules", label: "Rules", icon: "$list-checks" },
+  { id: "escalation", label: "Escalation", icon: "$headset" },
+  { id: "advanced", label: "Advanced", icon: "$braces" },
+  { id: "history", label: "History", icon: "$history" },
 ];
 
 const ROLES = [
@@ -849,12 +849,12 @@ export default {
 
     statusChip() {
       if (this.dirty || this.hasUnpublishedChanges) {
-        return { text: "Draft: unpublished changes", color: "warning", icon: "mdi-pencil-outline" };
+        return { text: "Draft: unpublished changes", color: "warning", icon: "$pencil" };
       }
       if (this.publishedVersion) {
-        return { text: `Live: version ${this.publishedVersion}`, color: "success", icon: "mdi-check-circle-outline" };
+        return { text: `Live: version ${this.publishedVersion}`, color: "success", icon: "$circle-check" };
       }
-      return { text: "Not published", color: "grey", icon: "mdi-circle-outline" };
+      return { text: "Not published", color: "grey", icon: "$circle" };
     },
   },
 

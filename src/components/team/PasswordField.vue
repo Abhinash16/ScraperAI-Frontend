@@ -14,10 +14,10 @@
     >
       <template v-slot:append>
         <v-btn icon small :title="show ? 'Hide' : 'Show'" @click="show = !show">
-          <v-icon small>{{ show ? "mdi-eye-off-outline" : "mdi-eye-outline" }}</v-icon>
+          <v-icon small>{{ show ? "$eye-off" : "$eye" }}</v-icon>
         </v-btn>
         <v-btn small text color="primary" class="ml-1 px-2" @click="generate">
-          <v-icon small class="mr-1">mdi-auto-fix</v-icon> Generate
+          <v-icon small class="mr-1">$wand-sparkles</v-icon> Generate
         </v-btn>
       </template>
     </v-text-field>

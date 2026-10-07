@@ -13,7 +13,7 @@
         <div class="d-flex justify-space-between align-center mb-2">
           <span class="code-label">HTML</span>
           <v-btn x-small color="primary" depressed rounded @click="copyScript">
-            <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
+            <v-icon x-small class="mr-1">$copy</v-icon> Copy
           </v-btn>
         </div>
         <code class="code-text">{{ scriptTag }}</code>
@@ -26,7 +26,7 @@
         class="mt-4 px-2"
         to="/dashboard/documentation"
       >
-        <v-icon small class="mr-1">mdi-book-open-outline</v-icon>
+        <v-icon small class="mr-1">$book-open</v-icon>
         View installation guide
       </v-btn>
     </v-card>
@@ -169,7 +169,7 @@
             hide-details="auto"
             :error-messages="whatsappError"
             background-color="#f8fafc"
-            prepend-inner-icon="mdi-whatsapp"
+            prepend-inner-icon="$whatsapp"
             @input="whatsappError = ''"
           />
         </v-form>
@@ -231,27 +231,27 @@ const PHONE_RE = /^\d{10,15}$/;
 
 const THINGS_TO_KNOW = [
   {
-    icon: "mdi-web-check",
+    icon: "$globe-lock",
     title: "Listed domains only.",
     text: "Once you add any domain, the chat only works on the websites in this list. Leave it empty and it works everywhere.",
   },
   {
-    icon: "mdi-account-lock-outline",
+    icon: "$user-lock",
     title: "Private visitor sessions.",
     text: "Each visitor gets their own session issued by our server, so no one can read another visitor's chat.",
   },
   {
-    icon: "mdi-key-outline",
+    icon: "$key-round",
     title: "The key in the script is public.",
     text: "Anyone can see it in your page source, and that's expected. The domain list is what stops other sites from using it.",
   },
   {
-    icon: "mdi-history",
+    icon: "$history",
     title: "Existing chats are kept.",
     text: "Visitors who chatted before this update still see their previous conversation.",
   },
   {
-    icon: "mdi-whatsapp",
+    icon: "$whatsapp",
     title: "Set your support WhatsApp number.",
     text: "Escalated website chats link to it so customers can reach your team. Without it, customers see no WhatsApp link.",
   },

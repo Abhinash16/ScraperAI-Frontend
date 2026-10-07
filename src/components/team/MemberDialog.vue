@@ -9,7 +9,7 @@
           </div>
         </div>
         <v-spacer />
-        <v-btn icon :disabled="saving" @click="close"><v-icon>mdi-close</v-icon></v-btn>
+        <v-btn icon :disabled="saving" @click="close"><v-icon>$x</v-icon></v-btn>
       </v-card-title>
 
       <v-card-text class="pt-4">
@@ -50,7 +50,7 @@
               You can't change your own role.
             </div>
             <div v-if="!roles.length" class="empty-roles text-center">
-              <v-icon color="grey lighten-1" class="mb-1">mdi-shield-off-outline</v-icon>
+              <v-icon color="grey lighten-1" class="mb-1">$shield-off</v-icon>
               <div class="text-body-2 font-weight-medium">No roles available</div>
               <div class="text-caption grey--text text--darken-1">
                 A member needs a role.
@@ -86,7 +86,7 @@
                         @click="!(roleLocked || role.assignable === false) && !active && toggle()"
                       >
                         <v-icon small :color="active ? 'primary' : 'grey lighten-1'" class="mr-3">
-                          {{ active ? "mdi-radiobox-marked" : "mdi-radiobox-blank" }}
+                          {{ active ? "$circle-dot" : "$circle" }}
                         </v-icon>
                         <RoleChip :role="role" x-small class="mr-2" />
                         <span class="text-caption grey--text text--darken-1">

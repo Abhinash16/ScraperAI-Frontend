@@ -84,7 +84,7 @@
                 :key="index"
               >
                 <v-list-item-icon>
-                  <v-icon color="deep-purple"> mdi-lightbulb-on </v-icon>
+                  <v-icon color="deep-purple"> $lightbulb </v-icon>
                 </v-list-item-icon>
 
                 <v-list-item-content>

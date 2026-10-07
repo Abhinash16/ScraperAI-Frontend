@@ -77,7 +77,7 @@
         <!-- Header -->
         <div class="pa-6 pb-0 d-flex align-center">
           <v-avatar color="#eff2fb" rounded="xl" size="48" class="mr-4">
-            <v-icon color="black">mdi-phone-plus</v-icon>
+            <v-icon color="black">$phone-call</v-icon>
           </v-avatar>
 
           <div>
@@ -93,7 +93,7 @@
           <v-spacer></v-spacer>
 
           <v-btn icon @click="uploadDialog = false" :disabled="loading">
-            <v-icon>mdi-close</v-icon>
+            <v-icon>$x</v-icon>
           </v-btn>
         </div>
 
@@ -129,7 +129,7 @@
                 />
               </v-card>
               <div class="text-caption grey--text mt-2">
-                <v-icon x-small color="grey">mdi-information-outline</v-icon>
+                <v-icon x-small color="grey">$info</v-icon>
                 Upload multiple call records at once using valid JSON format.
               </div>
               <div class="text-caption grey--text">
@@ -147,7 +147,7 @@
                   dense
                   accept=".csv"
                   label="Upload CSV File"
-                  prepend-icon="mdi-file-delimited"
+                  prepend-icon="$file-spreadsheet"
                   show-size
                 />
               </v-card>
@@ -218,7 +218,7 @@
                       <td>{{ call.email }}</td>
                       <td>
                         <v-btn icon small @click="removeManualCall(i)">
-                          <v-icon small>mdi-delete</v-icon>
+                          <v-icon small>$trash-2</v-icon>
                         </v-btn>
                       </td>
                     </tr>

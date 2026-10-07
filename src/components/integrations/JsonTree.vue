@@ -3,7 +3,7 @@
     <template v-if="isContainer">
       <span class="json-toggle" @click="open = !open">
         <v-icon x-small class="json-chevron">
-          {{ open ? "mdi-chevron-down" : "mdi-chevron-right" }}
+          {{ open ? "$chevron-down" : "$chevron-right" }}
         </v-icon>
         <span v-if="name !== null" class="json-key">{{ name }}: </span>
         <span class="json-bracket">{{ openBracket }}</span>

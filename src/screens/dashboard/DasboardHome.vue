@@ -37,7 +37,7 @@
                 class="rounded-lg mr-4"
               >
                 <v-icon :color="section.color" size="28">
-                  {{ item.icon || "mdi-view-grid-plus-outline" }}
+                  {{ item.icon || "$layout-grid" }}
                 </v-icon>
               </v-avatar>
 
@@ -54,7 +54,7 @@
                 </div>
               </div>
 
-              <v-icon color="grey lighten-1">mdi-chevron-right</v-icon>
+              <v-icon color="grey lighten-1">$chevron-right</v-icon>
             </div>
           </v-card>
         </v-col>
@@ -78,25 +78,25 @@ export default {
             {
               name: "Chat",
               link: "/dashboard/chat",
-              icon: "mdi-message-text-outline",
+              icon: "$message-square-text",
               description: "Real-time AI assistance",
             },
             {
               name: "Sandbox",
               link: "/dashboard/sandbox",
-              icon: "mdi-flask-outline",
+              icon: "$flask-conical",
               description: "Test your bot as a customer",
             },
             // {
             //   name: "WhatsApp Bot",
             //   link: "/dashboard/whatsapp-bot",
-            //   icon: "mdi-whatsapp",
+            //   icon: "$whatsapp",
             //   description: "Automated messaging",
             // },
             {
               name: "Call Analysis",
               link: "/dashboard/call-batches",
-              icon: "mdi-phone-outline",
+              icon: "$phone",
               description: "Speech-to-text insights",
             },
           ],
@@ -107,25 +107,25 @@ export default {
             {
               name: "Page URL List",
               link: "/dashboard/page-list",
-              icon: "mdi-format-list-bulleted",
+              icon: "$list",
               description: "Sitemap management",
             },
             {
               name: "Scraped Pages",
               link: "/dashboard/scraped-pages",
-              icon: "mdi-file-document-outline",
+              icon: "$file-text",
               description: "Indexed data",
             },
             {
               name: "Knowledge Gap",
               link: "/dashboard/knowledge-gap/",
-              icon: "mdi-lightbulb-on-outline",
+              icon: "$lightbulb",
               description: "Missing information",
             },
             {
               name: "Content Chunks",
               link: "/dashboard/content-chunks",
-              icon: "mdi-text-box-multiple-outline",
+              icon: "$files",
               description: "Vector data segments",
             },
           ],
@@ -136,13 +136,13 @@ export default {
         //     {
         //       name: "Integration",
         //       link: "/dashboard/integration",
-        //       icon: "mdi-puzzle-outline",
+        //       icon: "$puzzle",
         //       description: "API and Webhooks",
         //     },
         //     {
         //       name: "Security",
         //       link: "/dashboard/security",
-        //       icon: "mdi-shield-lock-outline",
+        //       icon: "$shield-check",
         //       description: "Access and Auth",
         //     },
         //   ],

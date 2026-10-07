@@ -1,7 +1,7 @@
 <template>
   <v-card v-if="guide" outlined rounded="xl" class="things-to-know mb-4">
     <div class="d-flex align-center px-4 py-2" @click="toggle">
-      <v-icon small color="primary" class="mr-2">mdi-information-outline</v-icon>
+      <v-icon small color="primary" class="mr-2">$info</v-icon>
       <span class="text-subtitle-2 font-weight-bold">Things to know</span>
       <span
         v-if="!open"
@@ -10,7 +10,7 @@
         {{ guide.summary }}
       </span>
       <v-spacer />
-      <v-icon small>{{ open ? "mdi-chevron-up" : "mdi-chevron-down" }}</v-icon>
+      <v-icon small>{{ open ? "$chevron-up" : "$chevron-down" }}</v-icon>
     </div>
 
     <v-expand-transition>
@@ -30,7 +30,7 @@
           :to="{ path: '/dashboard/documentation', query: { guide: guide.id } }"
         >
           Full guide
-          <v-icon small right>mdi-arrow-right</v-icon>
+          <v-icon small right>$arrow-right</v-icon>
         </v-btn>
       </div>
     </v-expand-transition>

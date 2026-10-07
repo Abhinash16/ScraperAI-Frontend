@@ -197,7 +197,7 @@
                   class="px-0"
                 >
                   <v-list-item-icon class="mr-3">
-                    <v-icon color="primary lighten-2">mdi-check-circle</v-icon>
+                    <v-icon color="primary lighten-2">$circle-check</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
                     <v-list-item-title class="font-weight-bold">{{
@@ -344,7 +344,7 @@
                 >
                   <v-list-item-icon class="mr-3">
                     <v-icon color="primary lighten-2"
-                      >mdi-chart-timeline-variant</v-icon
+                      >$chart-spline</v-icon
                     >
                   </v-list-item-icon>
                   <v-list-item-content>
@@ -440,7 +440,7 @@
                     class="d-flex align-center mb-3"
                   >
                     <v-icon :color="topic.color" small class="mr-3"
-                      >mdi-circle-medium</v-icon
+                      >$dot</v-icon
                     >
                     <span class="text-body-2">{{ topic.name }}</span>
                     <v-spacer></v-spacer>
@@ -497,7 +497,7 @@
                     class="pa-6 h-100 rounded-xl transition-swing d-flex flex-column"
                   >
                     <v-avatar color="#EEF4FC" size="72" class="rounded-lg">
-                      <v-icon color="primary" size="36">mdi-chat</v-icon>
+                      <v-icon color="primary" size="36">$message-circle</v-icon>
                     </v-avatar>
 
                     <h3 class="text-h5 my-4 font-weight-black secondary--text">
@@ -521,7 +521,7 @@
                     class="pa-6 h-100 rounded-xl transition-swing d-flex flex-column"
                   >
                     <v-avatar color="#F1F7F0" size="72" class="rounded-lg">
-                      <v-icon color="green" size="36">mdi-chart-line</v-icon>
+                      <v-icon color="green" size="36">$chart-line</v-icon>
                     </v-avatar>
 
                     <h3 class="text-h5 my-4 font-weight-black secondary--text">
@@ -586,7 +586,7 @@
                     class="px-0"
                   >
                     <v-icon color="success" class="mr-3" small
-                      >mdi-check</v-icon
+                      >$check</v-icon
                     >
                     <span class="text-body-2">{{ feat }}</span>
                   </v-list-item>
@@ -644,7 +644,7 @@
                     :key="feat"
                     class="px-0"
                   >
-                    <v-icon color="white" class="mr-3" small>mdi-check</v-icon>
+                    <v-icon color="white" class="mr-3" small>$check</v-icon>
                     <span class="text-body-2 white--text">{{ feat }}</span>
                   </v-list-item>
                 </v-list>
@@ -689,7 +689,7 @@
                     class="px-0"
                   >
                     <v-icon color="success" class="mr-3" small
-                      >mdi-check</v-icon
+                      >$check</v-icon
                     >
                     <span class="text-body-2">{{ feat }}</span>
                   </v-list-item>
@@ -799,7 +799,7 @@
               solo
               flat
               background-color="secondary lighten-4"
-              append-icon="mdi-send"
+              append-icon="$send"
               rounded
             ></v-text-field>
           </v-col>
@@ -821,48 +821,48 @@ export default {
     rotatingWord: "Chatbot",
     words: ["Chatbot", "Call Analysis", "Analytics", "Copilot"],
     wordIndex: 0,
-    icons: ["mdi-facebook", "mdi-twitter", "mdi-linkedin", "mdi-instagram"],
+    icons: ["$facebook", "$twitter", "$linkedin", "$instagram"],
     mainFeatures: [
       {
-        icon: "mdi-code-tags",
+        icon: "$code",
         title: "Script Deployment",
         text: "Deploy a powerful AI chatbot by simply adding a single line of script to your site's header.",
       },
       {
-        icon: "mdi-robot",
+        icon: "$bot",
         title: "Powered by ChatGPT",
         text: "Built on the latest LLMs ensuring your users get human-like, intelligent, and accurate responses.",
       },
       {
-        icon: "mdi-web",
+        icon: "$globe",
         title: "Sitemap Intelligent",
         text: "Automatically crawls your sitemap to learn about your products, services, and documentation.",
       },
     ],
     features: [
       {
-        icon: "mdi-chat-outline",
+        icon: "$message-circle",
         title: "AI Chatbot",
         desc: "Intelligent chatbot that handles common queries, escalates complex issues, and learns from every interaction",
         color: "#1976D2",
         tags: ["Context Aware", "Multi-language", "24/7 Support"],
       },
       {
-        icon: "mdi-api",
+        icon: "$plug",
         title: "REST API",
         desc: "Simple, well-documented API to embed chat functionality into any web or mobile application",
         color: "#43A047",
         tags: ["Easy Integration", "Webhooks", "Real-time"],
       },
       {
-        icon: "mdi-database-outline",
+        icon: "$database",
         title: "Knowledge Base Integration",
         desc: "Automatically ingest your documentation and FAQs to power smarter, more accurate responses",
         color: "#FB8C00",
         tags: ["Auto-Learning", "RAG", "Semantic Search"],
       },
       {
-        icon: "mdi-shield-check-outline",
+        icon: "$shield-check",
         title: "Enterprise Security",
         desc: "Bank-grade encryption, compliance with GDPR and SOC 2, and granular access controls",
         color: "#8E24AA",
@@ -872,26 +872,26 @@ export default {
 
     services: [
       {
-        icon: "mdi-chart-box",
+        icon: "$chart-column",
         color: "#43A047",
         title: "Data Visualization",
         desc: "Beautiful, interactive dashboards that tell a story with your data.",
       },
       {
-        icon: "mdi-robot",
+        icon: "$bot",
 
         color: "#1976D2",
         title: "Chat Assistant",
         desc: "Ask questions in plain English and get instant visual answers.",
       },
       {
-        icon: "mdi-phone",
+        icon: "$phone",
         color: "#FB8C00",
         title: "Call Analysis",
         desc: "Extract business intelligence from customer conversations.",
       },
       {
-        icon: "mdi-puzzle-outline",
+        icon: "$puzzle",
         color: "#8E24AA",
         title: "Embedded Analytics",
         desc: "White‑label dashboards you can embed directly into your product.",

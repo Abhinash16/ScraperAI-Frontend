@@ -5,7 +5,7 @@
       text
       dense
       rounded="lg"
-      icon="mdi-information-outline"
+      icon="$info"
       class="text-body-2 mb-6"
     >
       Until a product API is enabled, the assistant will not quote prices and
@@ -222,7 +222,7 @@
       <!-- TEST PANEL -->
       <v-card outlined rounded="xl" class="pa-6">
         <div class="d-flex align-center mb-1">
-          <v-icon small class="mr-2">mdi-flask-outline</v-icon>
+          <v-icon small class="mr-2">$flask-conical</v-icon>
           <div class="text-subtitle-1 font-weight-bold">
             Test with a customer message
           </div>
@@ -318,7 +318,7 @@
             </div>
             <div v-if="testResult.apiError" class="text-body-2 error--text mt-1">
               <v-icon x-small color="error" class="mr-1">
-                mdi-alert-circle-outline
+                $circle-alert
               </v-icon>
               {{ testResult.apiError }}
             </div>
@@ -376,8 +376,8 @@
                       <v-icon x-small>
                         {{
                           expandedProduct === i
-                            ? "mdi-chevron-down"
-                            : "mdi-chevron-right"
+                            ? "$chevron-down"
+                            : "$chevron-right"
                         }}
                       </v-icon>
                     </td>
@@ -406,7 +406,7 @@
         </template>
 
         <div class="panel-note mt-4">
-          <v-icon x-small class="mr-1">mdi-information-outline</v-icon>
+          <v-icon x-small class="mr-1">$info</v-icon>
           The AI quotes prices only from this live data. Without a product API
           it never quotes prices and sends customers to the product page.
         </div>

@@ -2,7 +2,7 @@
   <div class="answer-trace">
     <button type="button" class="trace-toggle" @click="open = !open">
       <v-icon x-small class="mr-1">
-        {{ open ? "mdi-chevron-up" : "mdi-chevron-down" }}
+        {{ open ? "$chevron-up" : "$chevron-down" }}
       </v-icon>
       Why this answer
     </button>
@@ -102,7 +102,7 @@
               @click="toggleTool(i)"
             >
               <v-icon x-small class="mr-1">
-                {{ openTools.includes(i) ? "mdi-chevron-down" : "mdi-chevron-right" }}
+                {{ openTools.includes(i) ? "$chevron-down" : "$chevron-right" }}
               </v-icon>
               🔧 AI searched: '{{ call.query }}' →
               <span :class="['ml-1', toolModeClass(call.mode)]">
