@@ -183,6 +183,7 @@ const LucideIcon = {
 };
 
 const APP_ICONS = {
+  "star": Star,
   "check-check": CheckCheck,
   "git-compare": GitCompare,
   "scale": Scale,

@@ -45,6 +45,26 @@ export const FEATURE_GUIDES = [
     ],
   },
   {
+    id: "quality",
+    name: "Quality tests",
+    icon: "$circle-check",
+    route: "/dashboard/quality",
+    summary:
+      "Test questions with expected answers. A run asks your bot every question and an AI judge grades each reply.",
+    steps: [
+      "Click Generate from FAQs to turn your FAQs into test questions, or add your own.",
+      "Click Run tests. The first finished run becomes your baseline.",
+      "Open a run to see what failed and why, then fix the knowledge or the test question.",
+    ],
+    thingsToKnow: [
+      "Tests use your FAQs as questions, including other ways customers ask them.",
+      "Runs happen in the sandbox, so customers never see them.",
+      "Every run is compared with your baseline. A drop of more than 5 points is flagged as a regression.",
+      "Test your draft Bot Profile with \"Test my draft profile\" before you publish it.",
+      "A failing test means the knowledge is wrong or missing, or the test question's expected answer is out of date.",
+    ],
+  },
+  {
     id: "knowledge-checks",
     name: "Knowledge checks",
     icon: "$shield-alert",

@@ -35,6 +35,16 @@ const routes = [
         meta: { permission: "knowledge:read" },
       },
       {
+        path: "quality",
+        component: () => import("../screens/dashboard/quality/QualityPage.vue"),
+        meta: { permission: "settings:manage" },
+      },
+      {
+        path: "quality/runs/:runId",
+        component: () => import("../screens/dashboard/quality/QualityRun.vue"),
+        meta: { permission: "settings:manage" },
+      },
+      {
         path: "knowledge/issues",
         component: () =>
           import("../screens/dashboard/knowledge/KnowledgeIssues.vue"),

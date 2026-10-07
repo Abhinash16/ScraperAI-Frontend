@@ -19,7 +19,7 @@
 
       <v-row>
         <v-col
-          v-for="item in section.items"
+          v-for="item in visibleItems(section)"
           :key="item.name"
           cols="12"
           sm="6"
@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { loadIssueSummary } from "@/utils/knowledge";
+import { can, loadIssueSummary, loadMyPermissions } from "@/utils/knowledge";
 
 export default {
   name: "DashboardHome",
@@ -85,6 +85,8 @@ export default {
     return {
       // Counts shown on tiles, by link
       badges: {},
+      // Null until loaded; tiles with a `permission` stay hidden until then
+      perms: null,
       dashboardData: {
         Products: {
           color: "indigo",
@@ -131,6 +133,13 @@ export default {
               description: "Tone, facts and rules",
             },
             {
+              name: "Quality",
+              link: "/dashboard/quality",
+              icon: "$circle-check",
+              description: "Test your bot's answers",
+              permission: "settings:manage",
+            },
+            {
               name: "Knowledge Gap",
               link: "/dashboard/knowledge-gap/",
               icon: "$lightbulb",
@@ -160,6 +169,9 @@ export default {
   },
 
   async created() {
+    loadMyPermissions()
+      .then((p) => (this.perms = p))
+      .catch(() => (this.perms = []));
     // Open blockers: knowledge that isn't live until someone looks at it
     const summary = await loadIssueSummary();
     if (summary && summary.blocker) {
@@ -168,6 +180,10 @@ export default {
   },
 
   methods: {
+    visibleItems(section) {
+      return section.items.filter((i) => !i.permission || can(this.perms, i.permission));
+    },
+
     navigate(link) {
       this.$router.push(link).catch(() => {});
     },
