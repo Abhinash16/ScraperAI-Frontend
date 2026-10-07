@@ -29,7 +29,7 @@ export const FEATURE_GUIDES = [
     icon: "$folder-open",
     route: "/dashboard/knowledge",
     summary:
-      "Everything the chatbot knows, grouped into sources: your website pages, notes you write, and answers learned from chats.",
+      "Everything the chatbot knows, grouped into sources: your website pages, FAQs, notes you write, and answers learned from chats.",
     steps: [
       "Create a Website source and import pages by URL, sitemap, or a CSV/JSON file.",
       "Add a Notes source for facts that aren't on your website, like policies, timings, or contact details.",
@@ -42,6 +42,25 @@ export const FEATURE_GUIDES = [
       "Pages behind a login, or sites that block bots, may come out empty or incomplete. Open the page to check its text.",
       "The chatbot treats everything published as true, so archive old offers and anything you don't want quoted.",
       "If the chatbot gives a wrong answer, find the item it came from, then fix it or unpublish it. \"What the bot searches\" on an item shows the exact text the bot uses.",
+    ],
+  },
+  {
+    id: "faqs",
+    name: "FAQs",
+    icon: "$message-circle-question-mark",
+    route: "/dashboard/knowledge",
+    summary:
+      "Questions with exact answers. When a customer's question matches, the bot gives your answer.",
+    steps: [
+      "In Knowledge, create an FAQs source.",
+      "Add FAQs one by one, import a CSV (download the template first), or click Suggest from website.",
+      "Review suggested FAQs: approve the good ones and reject the rest.",
+    ],
+    thingsToKnow: [
+      "FAQ answers take priority over text from your website, so use them for anything the bot must get exactly right.",
+      "Add other ways customers ask the same question. More phrasings help the bot match.",
+      "Suggested FAQs are drafts. Nothing reaches customers until you approve it.",
+      "Editing a published FAQ updates the live answer once it has been re-indexed.",
     ],
   },
   {
@@ -59,7 +78,7 @@ export const FEATURE_GUIDES = [
     thingsToKnow: [
       "Check this list every day in your first weeks live. It's the fastest way to improve answers.",
       "Write answers as you'd want them repeated to any customer. Don't include one person's details.",
-      "Your answer is published as a note in the \"Learned from chats\" source in Knowledge. Edit or unpublish it there.",
+      "Your answer is published as an FAQ in the \"Learned from chats\" source in Knowledge. Edit it, add other ways to ask, or unpublish it there.",
     ],
   },
   {
@@ -308,8 +327,8 @@ export const GO_LIVE_CHECKLIST = [
 export const COMING_NEXT = [
   {
     icon: "$folder-tree",
-    title: "Documents and FAQs as sources",
-    text: "Upload PDFs and Word documents, or write FAQs, as knowledge sources next to your website and notes.",
+    title: "Documents as sources",
+    text: "Upload PDFs and Word documents as knowledge sources, next to your website, FAQs, and notes.",
   },
   {
     icon: "$badge-alert",

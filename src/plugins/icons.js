@@ -141,6 +141,8 @@ import {
   Archive,
   Layers,
   FileUp,
+  MessageCircleQuestionMark,
+  ThumbsUp,
 } from "lucide";
 import * as brands from "@/icons/brands";
 
@@ -178,6 +180,8 @@ const LucideIcon = {
 };
 
 const APP_ICONS = {
+  "thumbs-up": ThumbsUp,
+  "message-circle-question-mark": MessageCircleQuestionMark,
   "file-up": FileUp,
   "loader-circle": LoaderCircle,
   "layers": Layers,

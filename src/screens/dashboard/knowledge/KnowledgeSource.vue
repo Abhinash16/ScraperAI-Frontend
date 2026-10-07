@@ -75,10 +75,21 @@
         been deleted. Resume it to make it live again.
       </v-alert>
 
+      <ThingsToKnow v-if="faqSource" feature="faqs" />
+
       <ImportPanel
         v-if="source.type === 'website' && can(perms, 'knowledge:write')"
         :source-id="source._id"
         @imported="onImported"
+      />
+
+      <FaqExtractPanel
+        v-if="source.type === 'faq'"
+        v-model="extractOpen"
+        :source="source"
+        @update="(s) => (source = { ...source, ...s })"
+        @progress="loadItems({ quiet: true })"
+        @finished="refresh()"
       />
 
       <!-- Items -->
@@ -98,25 +109,57 @@
           </v-btn-toggle>
           <v-text-field
             v-model="search"
-            placeholder="Search titles"
+            :placeholder="faqSource ? 'Search questions and answers' : 'Search titles'"
             prepend-inner-icon="$search"
             outlined
             dense
             hide-details
             clearable
-            class="search-field my-1"
+            class="search-field mr-2 my-1"
+          />
+          <v-select
+            v-if="faqSource && knownCategories.length"
+            v-model="categoryFilter"
+            :items="knownCategories"
+            placeholder="All categories"
+            prepend-inner-icon="$tag"
+            outlined
+            dense
+            hide-details
+            clearable
+            class="category-field my-1"
           />
           <v-spacer />
-          <v-btn
-            v-if="source.type !== 'website' && can(perms, 'knowledge:write')"
-            color="primary"
-            depressed
-            rounded
-            class="text-none my-1"
-            @click="openNote()"
-          >
-            <v-icon small class="mr-1">$plus</v-icon> Add note
-          </v-btn>
+          <template v-if="can(perms, 'knowledge:write')">
+            <template v-if="source.type === 'faq'">
+              <v-btn text rounded class="text-none my-1" @click="extractOpen = true">
+                <v-icon small class="mr-1">$wand-sparkles</v-icon> Suggest from website
+              </v-btn>
+              <v-btn text rounded class="text-none my-1" @click="faqImportOpen = true">
+                <v-icon small class="mr-1">$file-spreadsheet</v-icon> Import CSV
+              </v-btn>
+            </template>
+            <v-btn
+              v-if="faqSource"
+              color="primary"
+              depressed
+              rounded
+              class="text-none ml-2 my-1"
+              @click="faqOpen = true"
+            >
+              <v-icon small class="mr-1">$plus</v-icon> Add FAQ
+            </v-btn>
+            <v-btn
+              v-else-if="source.type !== 'website'"
+              color="primary"
+              depressed
+              rounded
+              class="text-none my-1"
+              @click="openNote()"
+            >
+              <v-icon small class="mr-1">$plus</v-icon> Add note
+            </v-btn>
+          </template>
         </div>
 
         <!-- Bulk actions -->
@@ -124,12 +167,28 @@
           <span class="text-body-2 font-weight-bold mr-4">{{ selected.length }} selected</span>
           <template v-if="can(perms, 'knowledge:publish')">
             <v-btn small text rounded class="text-none" :loading="bulkBusy === 'publish'" @click="bulk('publish')">
-              Publish
+              {{ allSuggested ? "Approve" : "Publish" }}
             </v-btn>
-            <v-btn small text rounded class="text-none" :loading="bulkBusy === 'unpublish'" @click="bulk('unpublish')">
+            <v-btn
+              v-if="!allSuggested"
+              small
+              text
+              rounded
+              class="text-none"
+              :loading="bulkBusy === 'unpublish'"
+              @click="bulk('unpublish')"
+            >
               Unpublish
             </v-btn>
-            <v-btn small text rounded class="text-none" :loading="bulkBusy === 'archive'" @click="bulk('archive')">
+            <v-btn
+              v-if="!allSuggested"
+              small
+              text
+              rounded
+              class="text-none"
+              :loading="bulkBusy === 'archive'"
+              @click="bulk('archive')"
+            >
               Archive
             </v-btn>
           </template>
@@ -142,7 +201,7 @@
             class="text-none"
             @click="confirmBulkDelete = true"
           >
-            Delete
+            {{ allSuggested ? "Reject" : "Delete" }}
           </v-btn>
           <v-spacer />
           <v-btn small text rounded class="text-none" @click="selected = []">Clear</v-btn>
@@ -170,10 +229,24 @@
               <div v-if="item.data && item.data.url" class="text-caption grey--text text-truncate url">
                 {{ item.data.url }}
               </div>
+              <div
+                v-else-if="item.type === 'faq' && item.data && item.data.alternates && item.data.alternates.length"
+                class="text-caption grey--text"
+              >
+                +{{ item.data.alternates.length }} other way{{ item.data.alternates.length === 1 ? "" : "s" }} to ask
+              </div>
             </div>
           </template>
+          <template #[`item.category`]="{ item }">
+            <v-chip v-if="item.data && item.data.category" x-small outlined>
+              {{ item.data.category }}
+            </v-chip>
+          </template>
           <template #[`item.status`]="{ item }">
-            <v-chip x-small :color="statusOf(item).color" text-color="white">
+            <v-chip v-if="isSuggested(item)" x-small outlined color="deep-purple">
+              <v-icon x-small left>$sparkles</v-icon> Suggested
+            </v-chip>
+            <v-chip v-else x-small :color="statusOf(item).color" text-color="white">
               {{ statusOf(item).label }}
             </v-chip>
             <v-tooltip v-if="workOf(item)" bottom :disabled="!workOf(item).error">
@@ -194,16 +267,46 @@
             </v-tooltip>
           </template>
           <template #[`item.chunkCount`]="{ item }">{{ item.chunkCount || 0 }}</template>
+          <template #[`item.review`]="{ item }">
+            <div v-if="isSuggested(item)" class="text-no-wrap" @click.stop>
+              <v-btn
+                v-if="can(perms, 'knowledge:publish')"
+                x-small
+                depressed
+                rounded
+                color="primary"
+                class="text-none mr-1"
+                :loading="rowBusy === item._id + 'publish'"
+                @click="review(item, 'publish')"
+              >
+                Approve
+              </v-btn>
+              <v-btn
+                v-if="can(perms, 'knowledge:delete')"
+                x-small
+                text
+                rounded
+                color="error"
+                class="text-none"
+                :loading="rowBusy === item._id + 'delete'"
+                @click="review(item, 'delete')"
+              >
+                Reject
+              </v-btn>
+            </div>
+          </template>
           <template #[`item.updatedAt`]="{ item }">
             <span class="text-no-wrap">{{ formatDate(item.updatedAt) }}</span>
           </template>
           <template #no-data>
             <div class="py-6 text-body-2 grey--text">
               {{
-                search || statusFilter
+                search || statusFilter || categoryFilter
                   ? "No items match."
                   : source.type === "website"
                   ? "No pages yet. Import some above."
+                  : faqSource
+                  ? "No FAQs yet."
                   : "No notes yet."
               }}
             </div>
@@ -215,10 +318,27 @@
     <ItemEditorDrawer
       :item-id="openItemId"
       :permissions="perms"
+      :categories="knownCategories"
       @close="openItemId = null"
       @changed="refresh"
       @add-note="addAsNote"
     />
+
+    <template v-if="source && faqSource">
+      <FaqDialog
+        v-model="faqOpen"
+        :source-id="source._id"
+        :categories="knownCategories"
+        :can-publish="can(perms, 'knowledge:publish')"
+        @saved="refresh"
+      />
+      <FaqImportDialog
+        v-model="faqImportOpen"
+        :source-id="source._id"
+        :can-publish="can(perms, 'knowledge:publish')"
+        @imported="refresh"
+      />
+    </template>
 
     <!-- Add note -->
     <v-dialog v-model="noteOpen" max-width="600">
@@ -229,7 +349,7 @@
           <v-textarea
             v-model="note.body"
             label="Text"
-            hint="Write it the way you'd want the bot to answer. At least 20 characters."
+            hint="Write it the way you'd want the bot to answer. At least 10 characters."
             persistent-hint
             outlined
             rows="8"
@@ -259,7 +379,7 @@
             depressed
             rounded
             class="text-none"
-            :disabled="note.body.trim().length < 20"
+            :disabled="note.body.trim().length < 10"
             :loading="noteSaving"
             @click="saveNote"
           >
@@ -339,9 +459,15 @@
     <!-- Bulk delete -->
     <v-dialog v-model="confirmBulkDelete" max-width="440">
       <v-card rounded="xl">
-        <v-card-title class="text-h6">Delete {{ selected.length }} items?</v-card-title>
+        <v-card-title class="text-h6">
+          {{ allSuggested ? `Reject ${selected.length} suggestions?` : `Delete ${selected.length} items?` }}
+        </v-card-title>
         <v-card-text class="text-body-2">
-          The bot stops using them right away. This can't be undone.
+          {{
+            allSuggested
+              ? "The suggested FAQs are deleted. The bot never used them."
+              : "The bot stops using them right away. This can't be undone."
+          }}
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -359,7 +485,11 @@
 
 <script>
 import apiClient from "@/service/axios";
+import FaqDialog from "@/components/knowledge/FaqDialog.vue";
+import FaqExtractPanel from "@/components/knowledge/FaqExtractPanel.vue";
+import FaqImportDialog from "@/components/knowledge/FaqImportDialog.vue";
 import ImportPanel from "@/components/knowledge/ImportPanel.vue";
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import ItemEditorDrawer from "@/components/knowledge/ItemEditorDrawer.vue";
 import {
   ITEM_STATUS,
@@ -368,6 +498,8 @@ import {
   can,
   formatDate,
   isBusy,
+  isFaqSource,
+  isSuggested,
   loadMyPermissions,
   sourceType,
   workState,
@@ -400,7 +532,14 @@ const emptyNote = () => ({
 export default {
   name: "KnowledgeSource",
 
-  components: { ImportPanel, ItemEditorDrawer },
+  components: {
+    FaqDialog,
+    FaqExtractPanel,
+    FaqImportDialog,
+    ImportPanel,
+    ItemEditorDrawer,
+    ThingsToKnow,
+  },
 
   data() {
     return {
@@ -416,6 +555,8 @@ export default {
       itemsLoading: false,
       options: { page: 1, itemsPerPage: 20 },
       statusFilter: "",
+      categoryFilter: null,
+      knownCategories: [],
       search: "",
       searchTimer: null,
       pollTimer: null,
@@ -425,6 +566,11 @@ export default {
       confirmBulkDelete: false,
 
       openItemId: null,
+      rowBusy: null,
+
+      faqOpen: false,
+      faqImportOpen: false,
+      extractOpen: false,
 
       noteOpen: false,
       note: emptyNote(),
@@ -449,10 +595,25 @@ export default {
     paused() {
       return this.source?.status === "paused";
     },
+    faqSource() {
+      return isFaqSource(this.source);
+    },
+    allSuggested() {
+      return this.selected.length > 0 && this.selected.every(isSuggested);
+    },
     canBulk() {
       return can(this.perms, "knowledge:publish") || can(this.perms, "knowledge:delete");
     },
     headers() {
+      if (this.faqSource) {
+        return [
+          { text: "Question", value: "title", sortable: false },
+          { text: "Category", value: "category", sortable: false },
+          { text: "Status", value: "status", sortable: false },
+          { text: "", value: "review", sortable: false, align: "end" },
+          { text: "Updated", value: "updatedAt", sortable: false },
+        ];
+      }
       return [
         { text: "Title", value: "title", sortable: false },
         { text: "Status", value: "status", sortable: false },
@@ -472,6 +633,9 @@ export default {
     statusFilter() {
       this.resetPage();
     },
+    categoryFilter() {
+      this.resetPage();
+    },
     search() {
       clearTimeout(this.searchTimer);
       this.searchTimer = setTimeout(this.resetPage, 350);
@@ -484,6 +648,8 @@ export default {
       this.total = 0;
       this.openItemId = null;
       this.statusFilter = "";
+      this.categoryFilter = null;
+      this.knownCategories = [];
       this.search = "";
       this.loadSource();
       this.resetPage();
@@ -505,6 +671,7 @@ export default {
   methods: {
     can,
     formatDate,
+    isSuggested,
     statusOf: (item) => ITEM_STATUS[item.status] || ITEM_STATUS.draft,
     workOf: (item) => workState(item),
 
@@ -543,12 +710,17 @@ export default {
           params: {
             status: this.statusFilter || undefined,
             search: this.search || undefined,
+            category: this.categoryFilter || undefined,
             limit: itemsPerPage,
             offset: (page - 1) * itemsPerPage,
           },
         });
         this.items = data.data.items || [];
         this.total = data.data.total || 0;
+        // Categories seen so far feed the filter and the FAQ editors
+        const seen = new Set(this.knownCategories);
+        this.items.forEach((i) => i.data?.category && seen.add(i.data.category));
+        this.knownCategories = [...seen].sort((a, b) => a.localeCompare(b));
         // Keep selections that are still on the page, with fresh data
         const ids = new Set(this.selected.map((s) => s._id));
         this.selected = this.items.filter((i) => ids.has(i._id));
@@ -691,6 +863,21 @@ export default {
       }
     },
 
+    // Approve (publish) or reject (delete) one suggested FAQ from the table
+    async review(item, action) {
+      this.rowBusy = item._id + action;
+      try {
+        if (action === "delete") await apiClient.delete(`${KNOWLEDGE_API}/items/${item._id}`);
+        else await apiClient.post(`${KNOWLEDGE_API}/items/${item._id}/publish`);
+        this.$toast.success(action === "delete" ? "Suggestion rejected" : "Approved");
+        this.refresh({ quiet: true });
+      } catch (err) {
+        this.$toast.error(apiError(err, action === "delete" ? "Failed to reject" : "Failed to approve"));
+      } finally {
+        this.rowBusy = null;
+      }
+    },
+
     async bulk(action) {
       this.bulkBusy = action;
       try {
@@ -722,6 +909,9 @@ export default {
 <style scoped>
 .search-field {
   max-width: 280px;
+}
+.category-field {
+  max-width: 220px;
 }
 .bulk-bar {
   background: #eef0ff;

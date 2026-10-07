@@ -35,6 +35,9 @@
             <v-icon v-if="work.busy" x-small left class="icon-spin">$loader-circle</v-icon>
             {{ work.label }}
           </v-chip>
+          <v-chip v-if="suggested" small outlined color="deep-purple" class="mr-2 mb-1">
+            <v-icon x-small left>$sparkles</v-icon> Suggested
+          </v-chip>
           <v-chip v-if="item.locked" small outlined class="mr-2 mb-1">
             <v-icon x-small left>$lock</v-icon> Edited by hand
           </v-chip>
@@ -110,23 +113,46 @@
 
         <!-- CONTENT -->
         <div v-show="tab === 'content'">
-          <v-text-field
-            v-model="form.title"
-            label="Title"
+          <v-alert
+            v-if="suggested"
+            border="left"
+            colored-border
+            color="deep-purple"
+            elevation="0"
             outlined
-            dense
-            counter="300"
+            rounded="lg"
+            class="text-body-2"
+          >
+            The AI suggested this FAQ from your website. Check the answer, edit
+            it if needed, then approve it. Reject it if it's wrong.
+          </v-alert>
+
+          <FaqFields
+            v-if="isFaq"
+            v-model="faq"
+            :categories="categories"
             :readonly="!canWrite"
+            class="mb-4"
           />
-          <v-textarea
-            v-model="form.body"
-            label="Text"
-            outlined
-            rows="14"
-            auto-grow
-            :readonly="!canWrite"
-            class="body-field"
-          />
+          <template v-else>
+            <v-text-field
+              v-model="form.title"
+              label="Title"
+              outlined
+              dense
+              counter="300"
+              :readonly="!canWrite"
+            />
+            <v-textarea
+              v-model="form.body"
+              label="Text"
+              outlined
+              rows="14"
+              auto-grow
+              :readonly="!canWrite"
+              class="body-field"
+            />
+          </template>
 
           <div v-if="canWrite" class="text-caption grey--text mb-3">
             <template v-if="item.status === 'published'">
@@ -162,7 +188,22 @@
               :loading="busy === 'publish'"
               @click="act('publish')"
             >
-              <v-icon small class="mr-1">$send</v-icon> Publish
+              <template v-if="suggested">
+                <v-icon small class="mr-1">$check</v-icon> Approve
+              </template>
+              <template v-else>
+                <v-icon small class="mr-1">$send</v-icon> Publish
+              </template>
+            </v-btn>
+            <v-btn
+              v-if="suggested && canDelete"
+              text
+              rounded
+              color="error"
+              class="text-none mr-2 mb-2"
+              @click="confirming = 'reject'"
+            >
+              Reject
             </v-btn>
             <v-spacer />
             <v-menu offset-y left>
@@ -260,6 +301,7 @@
 
 <script>
 import apiClient from "@/service/axios";
+import FaqFields from "@/components/knowledge/FaqFields.vue";
 import {
   ITEM_STATUS,
   KNOWLEDGE_API,
@@ -268,8 +310,22 @@ import {
   fixFor,
   formatDate,
   isBusy,
+  isSuggested,
   workState,
 } from "@/utils/knowledge";
+
+const faqOf = (item) => ({
+  question: item.data?.question || item.title || "",
+  answer: item.data?.answer || "",
+  alternates: [...(item.data?.alternates || [])],
+  category: item.data?.category || "",
+});
+
+const sameFaq = (a, b) =>
+  a.question === b.question &&
+  a.answer === b.answer &&
+  a.category === b.category &&
+  a.alternates.join("\n") === b.alternates.join("\n");
 
 const POLL_MS = 3000;
 
@@ -284,6 +340,11 @@ const CONFIRM = {
     text: "This page was edited by hand. Re-importing replaces your edits with the current text from the website.",
     button: "Re-import",
   },
+  reject: {
+    title: "Reject this suggestion?",
+    text: "The suggested FAQ is deleted. The bot never used it.",
+    button: "Reject",
+  },
   discard: {
     title: "Discard unsaved changes?",
     text: "Your edits to this item haven't been saved.",
@@ -297,15 +358,20 @@ const CONFIRM = {
 export default {
   name: "ItemEditorDrawer",
 
+  components: { FaqFields },
+
   props: {
     itemId: { type: String, default: null },
     permissions: { type: Array, default: () => [] },
+    // Known FAQ categories, offered when editing a FAQ
+    categories: { type: Array, default: () => [] },
   },
 
   data() {
     return {
       item: null,
       form: { title: "", body: "" },
+      faq: { question: "", answer: "", alternates: [], category: "" },
       loading: false,
       loadError: "",
       tab: "content",
@@ -338,11 +404,16 @@ export default {
     fix() {
       return fixFor(this.work);
     },
+    isFaq() {
+      return this.item?.type === "faq";
+    },
+    suggested() {
+      return !!this.item && isSuggested(this.item);
+    },
     dirty() {
-      return (
-        !!this.item &&
-        (this.form.title !== (this.item.title || "") || this.form.body !== (this.item.body || ""))
-      );
+      if (!this.item) return false;
+      if (this.isFaq) return !sameFaq(this.faq, faqOf(this.item));
+      return this.form.title !== (this.item.title || "") || this.form.body !== (this.item.body || "");
     },
     confirmCopy() {
       return CONFIRM[this.confirming] || {};
@@ -376,7 +447,10 @@ export default {
 
     apply(item, { keepForm = false } = {}) {
       this.item = item;
-      if (!keepForm) this.form = { title: item.title || "", body: item.body || "" };
+      if (!keepForm) {
+        this.form = { title: item.title || "", body: item.body || "" };
+        this.faq = faqOf(item);
+      }
       this.stopPolling();
       if (isBusy(item)) this.pollTimer = setTimeout(this.poll, POLL_MS);
     },
@@ -433,10 +507,16 @@ export default {
       this.busy = "save";
       this.actionError = "";
       try {
-        const { data } = await apiClient.patch(`${KNOWLEDGE_API}/items/${this.itemId}`, {
-          title: this.form.title.trim(),
-          body: this.form.body,
-        });
+        // FAQs are edited field by field; their body is built by the server
+        const changes = this.isFaq
+          ? {
+              question: this.faq.question.trim(),
+              answer: this.faq.answer.trim(),
+              alternates: this.faq.alternates,
+              category: this.faq.category,
+            }
+          : { title: this.form.title.trim(), body: this.form.body };
+        const { data } = await apiClient.patch(`${KNOWLEDGE_API}/items/${this.itemId}`, changes);
         this.apply(data.data);
         this.chunksFor = null;
         this.$emit("changed");
@@ -449,6 +529,7 @@ export default {
     },
 
     async act(action) {
+      const wasSuggested = this.suggested;
       this.busy = action;
       this.actionError = "";
       try {
@@ -458,7 +539,9 @@ export default {
         this.$emit("changed");
         this.$toast.success(
           {
-            publish: "Publishing. The bot can use it once indexing finishes.",
+            publish: wasSuggested
+              ? "Approved. The bot can use it once indexing finishes."
+              : "Publishing. The bot can use it once indexing finishes.",
             unpublish: "Unpublished. The bot no longer uses it.",
             archive: "Archived. The bot no longer uses it.",
             reimport: "Re-import queued",
@@ -481,6 +564,7 @@ export default {
       if (what === "discard") {
         this.confirming = null;
         this.form = { title: this.item.title || "", body: this.item.body || "" };
+        this.faq = faqOf(this.item);
         this.$emit("close");
         return;
       }
@@ -495,7 +579,7 @@ export default {
         this.confirming = null;
         this.$emit("changed");
         this.$emit("close");
-        this.$toast.success("Deleted");
+        this.$toast.success(what === "reject" ? "Suggestion rejected" : "Deleted");
       } catch (err) {
         this.confirming = null;
         this.actionError = apiError(err, "Failed to delete");

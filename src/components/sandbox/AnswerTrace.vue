@@ -144,6 +144,18 @@
           }}</pre>
         </template>
 
+        <!-- Matched FAQs (curated answers, used ahead of website text) -->
+        <template v-if="curated">
+          <div class="trace-heading">
+            Matched FAQs
+            <span v-if="curatedScores.length" class="grey--text">
+              (match {{ curatedScores.map((s) => s.toFixed(2)).join(", ") }})
+            </span>
+          </div>
+          <pre v-if="curated.text" class="trace-pre">{{ curated.text }}</pre>
+          <div v-else class="text-caption grey--text">No FAQ matched.</div>
+        </template>
+
         <!-- Website knowledge -->
         <template v-if="knowledge">
           <div class="trace-heading">
@@ -181,6 +193,14 @@ export default {
     },
     knowledge() {
       return this.trace.websiteKnowledge;
+    },
+    // null when no FAQ matched; missing on older traces
+    curated() {
+      return this.trace.curatedAnswers;
+    },
+    curatedScores() {
+      const scores = this.curated?.scores;
+      return Array.isArray(scores) ? scores.filter((s) => typeof s === "number") : [];
     },
     modeInfo() {
       return productModeInfo(this.product?.mode);

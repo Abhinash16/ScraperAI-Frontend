@@ -6,12 +6,23 @@ export const KNOWLEDGE_API = "/knowledge";
 
 export const SOURCE_TYPES = {
   website: { label: "Website", icon: "$globe", color: "indigo" },
+  faq: { label: "FAQs", icon: "$message-circle-question-mark", color: "deep-purple" },
   manual: { label: "Notes", icon: "$notebook-pen", color: "teal" },
   knowledge_gap: { label: "Learned from chats", icon: "$messages-square", color: "orange" },
 };
 
 export const sourceType = (type) =>
   SOURCE_TYPES[type] || { label: type, icon: "$folder", color: "grey" };
+
+// Sources whose items are FAQs (question + answer) rather than free text
+export const isFaqSource = (source) => ["faq", "knowledge_gap"].includes(source?.type);
+
+// Draft FAQs the AI pulled from website pages, waiting for approval
+export const isSuggested = (item) => item.origin === "ai_suggested" && item.status === "draft";
+
+// Backend limits for FAQs
+export const FAQ_ANSWER_MAX = 2000;
+export const FAQ_ALTERNATES_MAX = 10;
 
 export const ITEM_STATUS = {
   draft: { label: "Draft", color: "grey" },

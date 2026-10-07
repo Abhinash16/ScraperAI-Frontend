@@ -215,7 +215,7 @@ export default {
         });
 
         this.$toast.success(
-          'Answer saved and published in "Learned from chats". The bot can use it once indexing finishes.'
+          'Answer saved as an FAQ in "Learned from chats". The bot can use it once indexing finishes.'
         );
 
         this.loadQuestion();

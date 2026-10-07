@@ -166,21 +166,20 @@
             <v-btn value="website" class="text-none">
               <v-icon small class="mr-2">$globe</v-icon> Website
             </v-btn>
+            <v-btn value="faq" class="text-none">
+              <v-icon small class="mr-2">$message-circle-question-mark</v-icon> FAQs
+            </v-btn>
             <v-btn value="manual" class="text-none">
               <v-icon small class="mr-2">$notebook-pen</v-icon> Notes
             </v-btn>
           </v-btn-toggle>
           <div class="text-body-2 grey--text text--darken-1 mb-4">
-            {{
-              draft.type === "website"
-                ? "Import pages from your site by URL, sitemap, or file. Each page is read once when you import it."
-                : "Write facts that aren't on your website, like policies, timings, or contact details."
-            }}
+            {{ TYPE_HELP[draft.type] }}
           </div>
           <v-text-field
             v-model="draft.name"
             label="Name"
-            :placeholder="draft.type === 'website' ? 'Main website' : 'Policies'"
+            :placeholder="{ website: 'Main website', faq: 'Customer FAQs', manual: 'Policies' }[draft.type]"
             outlined
             dense
             counter="100"
@@ -275,6 +274,14 @@ import {
   sourceType,
 } from "@/utils/knowledge";
 
+const TYPE_HELP = {
+  website:
+    "Import pages from your site by URL, sitemap, or file. Each page is read once when you import it.",
+  faq:
+    "Questions and exact answers. The bot gives these answers ahead of website text. Add them by hand, import a CSV, or let the AI suggest them from your website.",
+  manual: "Write facts that aren't on your website, like policies, timings, or contact details.",
+};
+
 const emptyDraft = () => ({ type: "website", name: "", rootUrl: "", autoPublish: true });
 
 export default {
@@ -284,6 +291,7 @@ export default {
 
   data() {
     return {
+      TYPE_HELP,
       perms: [],
       sources: [],
       loading: false,
