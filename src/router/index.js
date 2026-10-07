@@ -1,7 +1,5 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import ScrapedPages from "../components/ScrapedPages.vue";
-import SitemapForm from "@/components/SitemapForm.vue";
 import LandingPage from "@/pages/landing/LandingPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
@@ -30,13 +28,23 @@ const routes = [
         component: () => import("../screens/dashboard/MyProfile.vue"),
         meta: { tab: 0 },
       },
-      { path: "sitemap", component: SitemapForm, meta: { tab: 0 } },
       {
-        path: "page-list",
-        component: () => import("../screens/dashboard/PageList.vue"),
-        meta: { tab: 1 },
+        path: "knowledge",
+        component: () =>
+          import("../screens/dashboard/knowledge/KnowledgeSources.vue"),
+        meta: { permission: "knowledge:read" },
       },
-      { path: "scraped-pages", component: ScrapedPages, meta: { tab: 2 } },
+      {
+        path: "knowledge/:sourceId",
+        component: () =>
+          import("../screens/dashboard/knowledge/KnowledgeSource.vue"),
+        meta: { permission: "knowledge:read" },
+      },
+      // Replaced by Knowledge (Track K)
+      { path: "sitemap", redirect: "/dashboard/knowledge" },
+      { path: "page-list", redirect: "/dashboard/knowledge" },
+      { path: "scraped-pages", redirect: "/dashboard/knowledge" },
+      { path: "content-chunks", redirect: "/dashboard/knowledge" },
       {
         path: "integration",
         component: () => import("../screens/dashboard/IntegrationPage.vue"),
@@ -81,11 +89,6 @@ const routes = [
         name: "KnowledgeGap",
         component: () =>
           import("../screens/dashboard/knowledgeGap/KnowledgeGapView.vue"),
-      },
-      {
-        path: "content-chunks",
-        name: "ContentChunksList",
-        component: () => import("../screens/dashboard/ContentChunksList.vue"),
       },
 
       {

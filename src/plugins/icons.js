@@ -133,6 +133,14 @@ import {
   Webhook,
   X,
   Zap,
+  Folder,
+  FolderOpen,
+  NotebookPen,
+  Upload,
+  Pause,
+  Archive,
+  Layers,
+  FileUp,
 } from "lucide";
 import * as brands from "@/icons/brands";
 
@@ -170,6 +178,15 @@ const LucideIcon = {
 };
 
 const APP_ICONS = {
+  "file-up": FileUp,
+  "loader-circle": LoaderCircle,
+  "layers": Layers,
+  "archive": Archive,
+  "pause": Pause,
+  "upload": Upload,
+  "notebook-pen": NotebookPen,
+  "folder-open": FolderOpen,
+  "folder": Folder,
   "arrow-left": ArrowLeft,
   "arrow-right": ArrowRight,
   "badge-alert": BadgeAlert,

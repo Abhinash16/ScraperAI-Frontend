@@ -24,40 +24,24 @@ export const FEATURE_GUIDES = [
     ],
   },
   {
-    id: "website-content",
-    name: "Website content",
-    icon: "$globe",
-    route: "/dashboard/page-list",
+    id: "knowledge",
+    name: "Knowledge",
+    icon: "$folder-open",
+    route: "/dashboard/knowledge",
     summary:
-      "The pages the chatbot learns from. Add a sitemap or single URLs, or upload JSON or CSV files, then scrape them.",
+      "Everything the chatbot knows, grouped into sources: your website pages, notes you write, and answers learned from chats.",
     steps: [
-      "Open Page List and add your sitemap URL, a single page, or a JSON/CSV file.",
-      "Click Scrape All Pages, or scrape pages one at a time.",
-      "Check Scraped Pages to confirm each page was read correctly.",
+      "Create a Website source and import pages by URL, sitemap, or a CSV/JSON file.",
+      "Add a Notes source for facts that aren't on your website, like policies, timings, or contact details.",
+      "Open an item to check its text, edit it, and publish it. Only published items are used by the bot.",
     ],
     thingsToKnow: [
-      "The chatbot only knows what has been scraped. A page that is listed but not scraped teaches it nothing.",
-      "TTL (sec) is how long until a page is re-scraped automatically. The default is about 3 months. Use a shorter TTL for pages that change often, like 86400 for daily. Pages are checked once an hour, so a TTL under 3600 won't refresh any faster.",
-      "Pages behind a login, or sites that block bots, may come out empty or incomplete. Check them in Scraped Pages.",
-      "Don't add pages you don't want quoted, like old offers or internal pages. The chatbot treats everything it has learned as true.",
-    ],
-  },
-  {
-    id: "content-chunks",
-    name: "Content chunks",
-    icon: "$files",
-    route: "/dashboard/content-chunks",
-    summary:
-      "The short pieces of text the chatbot searches when it answers. Every scraped page is split into chunks.",
-    steps: [
-      "Search for a topic to see exactly what the chatbot will find.",
-      "Delete chunks that are wrong or out of date.",
-      "Use Add Content Manual to add facts that aren't on your website.",
-    ],
-    thingsToKnow: [
-      "If the chatbot gives a wrong answer, search here first. The wrong text usually comes from a chunk.",
-      "Deleting a chunk takes effect right away, but it comes back the next time its page is re-scraped. To remove it for good, fix the text on the page itself.",
-      "Manual content is the quickest way to add policies, timings, or contact details that aren't published on your site.",
+      "Website pages are read once, when you import them. Nothing refreshes on its own: when your site changes, re-import the page or edit its text here.",
+      "Re-importing a page you edited by hand replaces your edits with the website's current text.",
+      "Unpublishing, archiving, or deleting takes effect right away. Pausing a source hides all of it from the bot without deleting anything.",
+      "Pages behind a login, or sites that block bots, may come out empty or incomplete. Open the page to check its text.",
+      "The chatbot treats everything published as true, so archive old offers and anything you don't want quoted.",
+      "If the chatbot gives a wrong answer, find the item it came from, then fix it or unpublish it. \"What the bot searches\" on an item shows the exact text the bot uses.",
     ],
   },
   {
@@ -75,7 +59,7 @@ export const FEATURE_GUIDES = [
     thingsToKnow: [
       "Check this list every day in your first weeks live. It's the fastest way to improve answers.",
       "Write answers as you'd want them repeated to any customer. Don't include one person's details.",
-      "Your answer is saved as manual content. To change or remove it later, find it in Content Chunks.",
+      "Your answer is published as a note in the \"Learned from chats\" source in Knowledge. Edit or unpublish it there.",
     ],
   },
   {
@@ -107,7 +91,7 @@ export const FEATURE_GUIDES = [
     steps: [
       "Ask the questions your customers ask most.",
       "Switch between the website assistant and the WhatsApp bot to compare them.",
-      "Fix any wrong answer in Content Chunks or Knowledge Gap, then ask again.",
+      "Fix any wrong answer in Knowledge or Knowledge Gap, then ask again.",
     ],
     thingsToKnow: [
       "Nothing in the sandbox is sent to customers, and it doesn't trigger alerts.",
@@ -243,9 +227,9 @@ export function featureGuide(id) {
 export const GO_LIVE_CHECKLIST = [
   {
     id: "content",
-    title: "Add and scrape your website",
+    title: "Import and publish your website",
     text: "At least your main pages: services, pricing, FAQs, and contact.",
-    route: "/dashboard/page-list",
+    route: "/dashboard/knowledge",
     required: true,
     check: "hasPages",
   },
@@ -324,8 +308,8 @@ export const GO_LIVE_CHECKLIST = [
 export const COMING_NEXT = [
   {
     icon: "$folder-tree",
-    title: "Knowledge sources with review",
-    text: "Manage your website, FAQs, and documents (PDF, DOCX) as sources. Review what the bot learns before it goes live, and remove a source in one click.",
+    title: "Documents and FAQs as sources",
+    text: "Upload PDFs and Word documents, or write FAQs, as knowledge sources next to your website and notes.",
   },
   {
     icon: "$badge-alert",

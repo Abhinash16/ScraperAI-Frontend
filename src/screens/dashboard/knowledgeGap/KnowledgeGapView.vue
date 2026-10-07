@@ -191,7 +191,7 @@ export default {
       const id = this.$route.params.id;
       this.loading = true;
       try {
-        const res = await apiClient.get(`/content/knowledge-gap/${id}`);
+        const res = await apiClient.get(`/knowledge/gaps/${id}`);
         this.gap = res.data.data;
         this.answer = this.gap.answer || "";
       } catch (err) {
@@ -203,23 +203,24 @@ export default {
 
     async submitAnswer() {
       if (!this.answer.trim()) {
-        return alert("Answer cannot be empty");
+        this.$toast.error("Answer cannot be empty");
+        return;
       }
 
       this.saving = true;
 
       try {
-        await apiClient.post(`/content/knowledge-gap/${this.gap._id}/answer`, {
+        await apiClient.post(`/knowledge/gaps/${this.gap._id}/answer`, {
           answer: this.answer,
         });
 
-        this.$toast?.success?.("Answer saved successfully") ||
-          alert("Knowledge gap answered successfully");
+        this.$toast.success(
+          'Answer saved and published in "Learned from chats". The bot can use it once indexing finishes.'
+        );
 
         this.loadQuestion();
       } catch (err) {
-        console.error(err);
-        alert("Failed to save answer");
+        this.$toast.error(err.response?.data?.message || "Failed to save answer");
       } finally {
         this.saving = false;
       }

@@ -224,19 +224,9 @@ export default {
         section: "Data",
         items: [
           {
-            name: "Page List",
-            link: "/dashboard/page-list",
-            icon: "$list",
-          },
-          {
-            name: "Scraped Pages",
-            link: "/dashboard/scraped-pages",
-            icon: "$file-text",
-          },
-          {
-            name: "Content Chunks",
-            link: "/dashboard/content-chunks",
-            icon: "$files",
+            name: "Knowledge",
+            link: "/dashboard/knowledge",
+            icon: "$folder-open",
           },
         ],
       },

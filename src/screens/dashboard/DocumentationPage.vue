@@ -327,8 +327,10 @@ export default {
 
     async loadPages() {
       try {
-        const { data } = await apiClient.get("content/pages");
-        this.checks.hasPages = (data.data || []).length > 0;
+        const { data } = await apiClient.get("/knowledge/sources");
+        this.checks.hasPages = (data.data || []).some(
+          (s) => s.status !== "paused" && s.stats?.publishedCount > 0,
+        );
       } catch {
         // leave as unknown
       }
@@ -346,10 +348,10 @@ export default {
 
     async loadGaps() {
       try {
-        const { data } = await apiClient.get("/content/knowledge-gap", {
+        const { data } = await apiClient.get("/knowledge/gaps", {
           params: { status: "pending", limit: 1, offset: 0 },
         });
-        this.checks.noPendingGaps = data.pagination?.total === 0;
+        this.checks.noPendingGaps = data.data?.total === 0;
       } catch {
         // leave as unknown
       }
