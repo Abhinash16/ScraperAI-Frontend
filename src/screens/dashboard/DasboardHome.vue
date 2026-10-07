@@ -54,6 +54,16 @@
                 </div>
               </div>
 
+              <v-chip
+                v-if="badges[item.link]"
+                small
+                color="error"
+                text-color="white"
+                class="mr-2"
+                :title="`${badges[item.link]} knowledge problems need attention`"
+              >
+                {{ badges[item.link] }}
+              </v-chip>
               <v-icon color="grey lighten-1">$chevron-right</v-icon>
             </div>
           </v-card>
@@ -66,11 +76,15 @@
 </template>
 
 <script>
+import { loadIssueSummary } from "@/utils/knowledge";
+
 export default {
   name: "DashboardHome",
 
   data() {
     return {
+      // Counts shown on tiles, by link
+      badges: {},
       dashboardData: {
         Products: {
           color: "indigo",
@@ -143,6 +157,14 @@ export default {
         // },
       },
     };
+  },
+
+  async created() {
+    // Open blockers: knowledge that isn't live until someone looks at it
+    const summary = await loadIssueSummary();
+    if (summary && summary.blocker) {
+      this.badges = { ...this.badges, "/dashboard/knowledge": summary.blocker };
+    }
   },
 
   methods: {

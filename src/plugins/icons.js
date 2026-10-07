@@ -143,6 +143,9 @@ import {
   FileUp,
   MessageCircleQuestionMark,
   ThumbsUp,
+  Scale,
+  GitCompare,
+  CheckCheck,
 } from "lucide";
 import * as brands from "@/icons/brands";
 
@@ -180,6 +183,9 @@ const LucideIcon = {
 };
 
 const APP_ICONS = {
+  "check-check": CheckCheck,
+  "git-compare": GitCompare,
+  "scale": Scale,
   "thumbs-up": ThumbsUp,
   "message-circle-question-mark": MessageCircleQuestionMark,
   "file-up": FileUp,

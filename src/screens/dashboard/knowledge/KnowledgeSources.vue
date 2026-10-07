@@ -12,6 +12,18 @@
         </div>
       </div>
       <v-spacer />
+      <v-btn text rounded class="text-none my-1" to="/dashboard/knowledge/issues">
+        <v-icon small class="mr-1">$shield-alert</v-icon> Issues
+        <v-chip
+          v-if="summary && summary.blocker"
+          x-small
+          color="error"
+          text-color="white"
+          class="ml-2"
+        >
+          {{ summary.blocker }}
+        </v-chip>
+      </v-btn>
       <v-btn
         text
         rounded
@@ -32,6 +44,28 @@
         <v-icon small class="mr-1">$plus</v-icon> New source
       </v-btn>
     </div>
+
+    <v-alert
+      v-if="problemCount"
+      :type="summary.blocker ? 'error' : 'warning'"
+      outlined
+      rounded="xl"
+      class="text-body-2"
+    >
+      <div class="d-flex align-center flex-wrap">
+        <div class="mr-4">
+          <strong>{{ problemCount }} problem{{ problemCount === 1 ? "" : "s" }} need{{ problemCount === 1 ? "s" : "" }} attention.</strong>
+          <template v-if="summary.blocker">
+            {{ summary.blocker }} item{{ summary.blocker === 1 ? " isn't" : "s aren't" }} live until
+            {{ summary.blocker === 1 ? "it's" : "they're" }} reviewed.
+          </template>
+        </div>
+        <v-spacer />
+        <v-btn small depressed rounded color="primary" class="text-none" to="/dashboard/knowledge/issues">
+          Review
+        </v-btn>
+      </div>
+    </v-alert>
 
     <ThingsToKnow feature="knowledge" />
 
@@ -270,6 +304,7 @@ import {
   apiError,
   can,
   formatDate,
+  loadIssueSummary,
   loadMyPermissions,
   sourceType,
 } from "@/utils/knowledge";
@@ -293,6 +328,7 @@ export default {
     return {
       TYPE_HELP,
       perms: [],
+      summary: null,
       sources: [],
       loading: false,
       loadError: "",
@@ -307,8 +343,15 @@ export default {
     };
   },
 
+  computed: {
+    problemCount() {
+      return this.summary ? (this.summary.blocker || 0) + (this.summary.warning || 0) : 0;
+    },
+  },
+
   created() {
     this.load();
+    loadIssueSummary().then((s) => (this.summary = s));
     loadMyPermissions()
       .then((p) => (this.perms = p))
       .catch(() => {});

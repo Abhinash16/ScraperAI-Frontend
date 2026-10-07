@@ -35,6 +35,12 @@ const routes = [
         meta: { permission: "knowledge:read" },
       },
       {
+        path: "knowledge/issues",
+        component: () =>
+          import("../screens/dashboard/knowledge/KnowledgeIssues.vue"),
+        meta: { permission: "knowledge:read" },
+      },
+      {
         path: "knowledge/:sourceId",
         component: () =>
           import("../screens/dashboard/knowledge/KnowledgeSource.vue"),

@@ -249,6 +249,17 @@
             <v-chip v-else x-small :color="statusOf(item).color" text-color="white">
               {{ statusOf(item).label }}
             </v-chip>
+            <v-chip
+              v-if="healthOf(item)"
+              x-small
+              outlined
+              :color="healthOf(item).color"
+              class="ml-1"
+              :title="item.openIssueCount ? `${item.openIssueCount} open issue(s)` : ''"
+            >
+              <v-icon x-small left>{{ healthOf(item).icon }}</v-icon>
+              {{ healthOf(item).label }}
+            </v-chip>
             <v-tooltip v-if="workOf(item)" bottom :disabled="!workOf(item).error">
               <template #activator="{ on, attrs }">
                 <v-chip
@@ -322,6 +333,7 @@
       @close="openItemId = null"
       @changed="refresh"
       @add-note="addAsNote"
+      @open-issue="(id) => $router.push({ path: '/dashboard/knowledge/issues', query: { issue: id } })"
     />
 
     <template v-if="source && faqSource">
@@ -497,6 +509,7 @@ import {
   apiError,
   can,
   formatDate,
+  healthOf,
   isBusy,
   isFaqSource,
   isSuggested,
@@ -511,6 +524,7 @@ const FILTERS = [
   { value: "", label: "All" },
   { value: "draft", label: "Draft" },
   { value: "published", label: "Published" },
+  { value: "needs_review", label: "Needs review" },
   { value: "archived", label: "Archived" },
 ];
 
@@ -672,6 +686,7 @@ export default {
     can,
     formatDate,
     isSuggested,
+    healthOf,
     statusOf: (item) => ITEM_STATUS[item.status] || ITEM_STATUS.draft,
     workOf: (item) => workState(item),
 

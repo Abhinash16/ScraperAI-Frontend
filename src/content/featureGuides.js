@@ -45,6 +45,25 @@ export const FEATURE_GUIDES = [
     ],
   },
   {
+    id: "knowledge-checks",
+    name: "Knowledge checks",
+    icon: "$shield-alert",
+    route: "/dashboard/knowledge/issues",
+    summary:
+      "We check new knowledge before the bot uses it: contradictions, duplicates, secrets and ID numbers, other people's contact details, and text that tries to give the bot instructions.",
+    steps: [
+      "Open Knowledge > Issues to see what the checks found.",
+      "Open an issue to compare the two items side by side, with the conflicting words highlighted.",
+      "Edit or archive the wrong item, then resolve the issue. Dismiss it, with a reason, if it isn't a problem.",
+    ],
+    thingsToKnow: [
+      "Every item is checked when it's published. If a blocker is found, the item stays out of the bot's reach and shows \"Needs review\".",
+      "When two items disagree, the more trusted one wins: FAQs over notes, and notes over website pages. The other is held (hidden from the bot) until the issue is resolved.",
+      "\"Publish anyway\" needs a reason, which is saved with the item.",
+      "A dismissed issue only comes back if the item's text changes. Editing, unpublishing, archiving, or deleting an item closes its issues.",
+    ],
+  },
+  {
     id: "faqs",
     name: "FAQs",
     icon: "$message-circle-question-mark",

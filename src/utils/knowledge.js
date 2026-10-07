@@ -27,8 +27,51 @@ export const FAQ_ALTERNATES_MAX = 10;
 export const ITEM_STATUS = {
   draft: { label: "Draft", color: "grey" },
   published: { label: "Published", color: "success" },
+  // A check found a blocker: not live, no chunks
+  needs_review: { label: "Needs review", color: "error" },
   archived: { label: "Archived", color: "blue-grey" },
 };
+
+// Health from the publish-time checks. "held" = published but hidden from the
+// bot because a more trusted item contradicts it.
+export const HEALTH = {
+  held: { label: "Held", color: "orange darken-2", icon: "$eye-off" },
+  warning: { label: "Warning", color: "amber darken-3", icon: "$triangle-alert" },
+};
+
+export const healthOf = (item) => HEALTH[item?.healthStatus] || null;
+
+export const ISSUE_TYPES = {
+  contradiction: "Contradiction",
+  duplicate: "Duplicate",
+  pii: "Personal details",
+  secret: "Secret or ID number",
+  injection: "Instructions to the bot",
+};
+
+export const SEVERITY = {
+  blocker: { label: "Blocker", color: "error" },
+  warning: { label: "Warning", color: "amber darken-3" },
+};
+
+export const ISSUE_STATUS = {
+  open: { label: "Open", color: "primary" },
+  resolved: { label: "Resolved", color: "success" },
+  dismissed: { label: "Dismissed", color: "grey" },
+};
+
+export const OVERRIDE_REASON_MIN = 5;
+export const DISMISS_REASON_MIN = 3;
+
+// Open issue counts: { blocker, warning }. Null when unavailable.
+export async function loadIssueSummary() {
+  try {
+    const { data } = await apiClient.get(`${KNOWLEDGE_API}/issues/summary`);
+    return data.data || { blocker: 0, warning: 0 };
+  } catch {
+    return null;
+  }
+}
 
 // Background work on an item: importing (pages) comes before indexing.
 const IMPORT_STATE = {

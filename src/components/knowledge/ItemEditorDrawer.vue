@@ -35,6 +35,9 @@
             <v-icon v-if="work.busy" x-small left class="icon-spin">$loader-circle</v-icon>
             {{ work.label }}
           </v-chip>
+          <v-chip v-if="health" small outlined :color="health.color" class="mr-2 mb-1">
+            <v-icon x-small left>{{ health.icon }}</v-icon> {{ health.label }}
+          </v-chip>
           <v-chip v-if="suggested" small outlined color="deep-purple" class="mr-2 mb-1">
             <v-icon x-small left>$sparkles</v-icon> Suggested
           </v-chip>
@@ -98,6 +101,60 @@
             </v-btn>
           </div>
         </v-alert>
+
+        <!-- Checks -->
+        <v-alert
+          v-if="item.status === 'needs_review'"
+          type="error"
+          dense
+          outlined
+          rounded="lg"
+          class="text-body-2"
+        >
+          This item isn't live: a check found a problem, listed below. Fix the
+          text and publish again to re-check it<template v-if="canPublish">, or
+          publish it anyway with a reason</template>.
+        </v-alert>
+        <v-alert
+          v-else-if="item.healthStatus === 'held'"
+          type="warning"
+          dense
+          outlined
+          rounded="lg"
+          class="text-body-2"
+        >
+          Published, but hidden from the bot: a more trusted item says
+          something different. Resolve the issue below to show it again.
+        </v-alert>
+
+        <div v-if="issues.length" class="mb-4">
+          <div class="text-subtitle-2 font-weight-bold mb-2">
+            Open issues ({{ issues.length }})
+          </div>
+          <v-card
+            v-for="issue in issues"
+            :key="issue._id"
+            outlined
+            rounded="lg"
+            class="pa-3 mb-2 d-flex align-start"
+          >
+            <v-chip x-small :color="severityOf(issue).color" text-color="white" class="mr-2 mt-1 flex-shrink-0">
+              {{ severityOf(issue).label }}
+            </v-chip>
+            <div class="text-body-2 flex-grow-1">
+              <div class="font-weight-medium">{{ issueType(issue) }}</div>
+              {{ issue.explanation }}
+            </div>
+            <v-btn small text rounded color="primary" class="text-none ml-2" @click="$emit('open-issue', issue._id)">
+              View
+            </v-btn>
+          </v-card>
+        </div>
+
+        <div v-if="item.reviewOverride" class="text-caption grey--text text--darken-1 mb-4">
+          Published anyway {{ formatDate(item.reviewOverride.at) }}:
+          "{{ item.reviewOverride.reason }}"
+        </div>
 
         <div v-if="item.data && item.data.url" class="text-body-2 mb-4">
           <a :href="item.data.url" target="_blank" rel="noopener noreferrer">
@@ -191,9 +248,22 @@
               <template v-if="suggested">
                 <v-icon small class="mr-1">$check</v-icon> Approve
               </template>
+              <template v-else-if="item.status === 'needs_review'">
+                <v-icon small class="mr-1">$refresh-cw</v-icon> Check again
+              </template>
               <template v-else>
                 <v-icon small class="mr-1">$send</v-icon> Publish
               </template>
+            </v-btn>
+            <v-btn
+              v-if="item.status === 'needs_review' && canPublish"
+              text
+              rounded
+              class="text-none mr-2 mb-2"
+              :disabled="dirty"
+              @click="openOverride"
+            >
+              Publish anyway
             </v-btn>
             <v-btn
               v-if="suggested && canDelete"
@@ -275,6 +345,49 @@
       </template>
     </div>
 
+    <!-- Publish anyway -->
+    <v-dialog v-model="overrideOpen" max-width="480">
+      <v-card rounded="xl">
+        <v-card-title class="text-h6">Publish anyway?</v-card-title>
+        <v-card-text>
+          <div class="text-body-2 mb-4">
+            The bot will use this item even though a check flagged it. Say why
+            it's fine; your reason is saved with the item.
+          </div>
+          <v-textarea
+            v-model="overrideReason"
+            label="Reason"
+            outlined
+            rows="2"
+            auto-grow
+            autofocus
+            :hint="`At least ${OVERRIDE_REASON_MIN} characters.`"
+            persistent-hint
+          />
+          <v-alert v-if="overrideError" type="error" dense outlined rounded="lg" class="mt-3 mb-0 text-body-2">
+            {{ overrideError }}
+          </v-alert>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn text rounded class="text-none" :disabled="busy === 'override'" @click="overrideOpen = false">
+            Cancel
+          </v-btn>
+          <v-btn
+            color="error"
+            depressed
+            rounded
+            class="text-none"
+            :disabled="overrideReason.trim().length < OVERRIDE_REASON_MIN"
+            :loading="busy === 'override'"
+            @click="publishAnyway"
+          >
+            Publish anyway
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- Confirmations -->
     <v-dialog :value="!!confirming" max-width="440" @input="confirming = null">
       <v-card v-if="confirming" rounded="xl">
@@ -309,6 +422,10 @@ import {
   can,
   fixFor,
   formatDate,
+  ISSUE_TYPES,
+  OVERRIDE_REASON_MIN,
+  SEVERITY,
+  healthOf,
   isBusy,
   isSuggested,
   workState,
@@ -353,8 +470,8 @@ const CONFIRM = {
 };
 
 // Opens when `itemId` is set. Emits "close", "changed" (the list should
-// reload) and "add-note" with { title, failedItemId } when a page that
-// can't be imported should become a note.
+// reload), "add-note" with { title, failedItemId } when a page that can't be
+// imported should become a note, and "open-issue" with an issue id.
 export default {
   name: "ItemEditorDrawer",
 
@@ -372,6 +489,11 @@ export default {
       item: null,
       form: { title: "", body: "" },
       faq: { question: "", answer: "", alternates: [], category: "" },
+      issues: [],
+      OVERRIDE_REASON_MIN,
+      overrideOpen: false,
+      overrideReason: "",
+      overrideError: "",
       loading: false,
       loadError: "",
       tab: "content",
@@ -410,6 +532,9 @@ export default {
     suggested() {
       return !!this.item && isSuggested(this.item);
     },
+    health() {
+      return healthOf(this.item);
+    },
     dirty() {
       if (!this.item) return false;
       if (this.isFaq) return !sameFaq(this.faq, faqOf(this.item));
@@ -430,6 +555,7 @@ export default {
         this.chunks = [];
         this.chunksFor = null;
         this.actionError = "";
+        this.issues = [];
         if (id) this.load();
       },
     },
@@ -444,6 +570,46 @@ export default {
 
   methods: {
     formatDate,
+    severityOf: (issue) => SEVERITY[issue.severity] || SEVERITY.warning,
+    issueType: (issue) => ISSUE_TYPES[issue.type] || issue.type,
+
+    // Open issues mentioning this item (checks run on publish)
+    async loadIssues() {
+      try {
+        const { data } = await apiClient.get(`${KNOWLEDGE_API}/issues`, {
+          params: { itemId: this.itemId, status: "open", limit: 20 },
+        });
+        this.issues = data.data.issues || [];
+      } catch {
+        this.issues = [];
+      }
+    },
+
+    openOverride() {
+      this.overrideReason = "";
+      this.overrideError = "";
+      this.overrideOpen = true;
+    },
+
+    async publishAnyway() {
+      this.busy = "override";
+      this.overrideError = "";
+      try {
+        await apiClient.post(`${KNOWLEDGE_API}/items/${this.itemId}/publish`, {
+          override: true,
+          reason: this.overrideReason.trim(),
+        });
+        this.overrideOpen = false;
+        await this.load();
+        this.chunksFor = null;
+        this.$emit("changed");
+        this.$toast.success("Published anyway. The bot can use it once indexing finishes.");
+      } catch (err) {
+        this.overrideError = apiError(err, "Failed to publish");
+      } finally {
+        this.busy = null;
+      }
+    },
 
     apply(item, { keepForm = false } = {}) {
       this.item = item;
@@ -461,6 +627,7 @@ export default {
       try {
         const { data } = await apiClient.get(`${KNOWLEDGE_API}/items/${this.itemId}`);
         this.apply(data.data);
+        this.loadIssues();
       } catch (err) {
         this.loadError = apiError(err, "Failed to load the item");
       } finally {
@@ -477,6 +644,8 @@ export default {
         if (wasBusy && !isBusy(data.data)) {
           this.$emit("changed");
           this.chunksFor = null;
+          // The checks finished along with indexing
+          this.loadIssues();
           if (this.tab === "chunks") this.loadChunks();
         }
       } catch {
