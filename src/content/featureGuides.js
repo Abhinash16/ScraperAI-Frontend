@@ -217,23 +217,6 @@ export const FEATURE_GUIDES = [
     ],
   },
   {
-    id: "forms",
-    name: "Forms",
-    icon: "mdi-list-box-outline",
-    route: "/dashboard/forms",
-    summary:
-      "Build lead forms with fields and stages, share them by link or API, and track submissions.",
-    steps: [
-      "Create a form and add its fields.",
-      "Define stages, like New, Contacted, and Won, to track each lead.",
-      "Share the link, or submit through the API or a webhook.",
-    ],
-    thingsToKnow: [
-      "Removing a stage moves its leads to the stage you choose.",
-      "Submissions sent through the API show up next to submissions from the form link.",
-    ],
-  },
-  {
     id: "team",
     name: "Team & roles",
     icon: "mdi-account-multiple-outline",

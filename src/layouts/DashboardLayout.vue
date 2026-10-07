@@ -255,17 +255,6 @@ export default {
           },
         ],
       },
-
-      {
-        section: "Other",
-        items: [
-          {
-            name: "Forms",
-            link: "/dashboard/forms",
-            icon: "mdi-list-box-outline",
-          },
-        ],
-      },
     ],
   }),
 

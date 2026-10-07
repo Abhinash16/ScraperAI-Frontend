@@ -148,40 +148,8 @@ const routes = [
     ],
   },
 
-  // forms dashboard
-  {
-    path: "/dashboard/forms",
-    component: () => import("../layouts/FormsDashboardLayout.vue"),
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: "",
-        name: "FormsList",
-        component: () => import("../screens/dashboard/forms/FormList.vue"),
-      },
-      {
-        path: "create",
-        name: "CreateForm",
-        component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
-      },
-      {
-        path: ":id/edit",
-        name: "EditForm",
-        component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
-      },
-      {
-        path: ":id/submissions",
-        name: "FormSubmissions",
-        component: () =>
-          import("../screens/dashboard/forms/FormSubmissions.vue"),
-      },
-      {
-        path: ":id/analytics",
-        name: "FormAnalytics",
-        component: () => import("../screens/dashboard/forms/FormAnalytics.vue"),
-      },
-    ],
-  },
+  // The forms module was removed; send old links to the dashboard
+  { path: "/dashboard/forms*", redirect: "/dashboard" },
 
   // call analysis dashboard
   {
@@ -206,24 +174,6 @@ const routes = [
       },
     ],
   },
-
-  // {
-  //   path: "/dashboard/forms/create",
-  //   name: "/dashboardCreateForm",
-  //   component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
-  // },
-
-  // {
-  //   path: "/dashboard/forms/:id/edit",
-  //   name: "EditForm",
-  //   component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
-  // },
-
-  // {
-  //   path: "/dashboard/forms/:id/submissions",
-  //   name: "FormSubmissions",
-  //   component: () => import("../screens/dashboard/forms/FormSubmissions.vue"),
-  // },
 ];
 
 const router = new VueRouter({

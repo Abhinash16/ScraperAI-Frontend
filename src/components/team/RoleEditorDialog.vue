@@ -166,7 +166,8 @@ export default {
         const perms = source?.permissions || [];
         this.name = this.role ? this.role.name : this.copyFrom ? `${this.copyFrom.name} copy` : "";
         this.fullAccess = perms.includes(FULL_ACCESS);
-        this.selected = perms.filter((p) => p !== FULL_ACCESS);
+        // Ignore keys the catalog no longer lists (retired permissions)
+        this.selected = perms.filter((p) => this.allKeys.includes(p));
         this.nameError = "";
         this.generalError = "";
       },

@@ -150,7 +150,7 @@
 import apiClient from "@/service/axios";
 import RoleEditorDialog from "@/components/team/RoleEditorDialog.vue";
 import ConfirmDialog from "@/components/team/ConfirmDialog.vue";
-import { apiError, isOwnerRole, permissionSummary, roleColor } from "@/utils/team";
+import { FULL_ACCESS, apiError, isOwnerRole, permissionSummary, roleColor } from "@/utils/team";
 
 export default {
   name: "RolesTab",
@@ -211,8 +211,12 @@ export default {
       return roleColor(role).split(" ")[0];
     },
 
+    // Count only permissions the catalog still lists
     summary(role) {
-      return permissionSummary(role);
+      const permissions = (role.permissions || []).filter(
+        (p) => p === FULL_ACCESS || this.groupOf[p],
+      );
+      return permissionSummary({ ...role, permissions });
     },
 
     groupsFor(role) {

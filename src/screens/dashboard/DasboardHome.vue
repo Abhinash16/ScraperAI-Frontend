@@ -87,12 +87,6 @@ export default {
               icon: "mdi-flask-outline",
               description: "Test your bot as a customer",
             },
-            {
-              name: "Forms",
-              link: "/dashboard/forms",
-              icon: "mdi-list-box-outline",
-              description: "Builder and responses",
-            },
             // {
             //   name: "WhatsApp Bot",
             //   link: "/dashboard/whatsapp-bot",
