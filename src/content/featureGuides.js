@@ -4,6 +4,26 @@
 
 export const FEATURE_GUIDES = [
   {
+    id: "bot-profile",
+    name: "Bot profile",
+    icon: "mdi-account-cog-outline",
+    route: "/dashboard/bot-profile",
+    summary:
+      "Your bot's name, tone, business facts, and rules, all set by you.",
+    steps: [
+      "Fill in Identity, Business facts, Rules, and Escalation, then save the draft.",
+      "Click Test in sandbox and ask the questions your customers ask.",
+      "When the answers look right, click Publish.",
+    ],
+    thingsToKnow: [
+      "Changes do nothing for customers until you publish them. Saving only updates your draft.",
+      "The sandbox tests your saved draft, so you can try changes before they go live.",
+      "Business facts win over your website. If they disagree, the bot uses the facts on this page.",
+      "Messages with an escalation keyword always go to a person.",
+      "You can restore any of your last 20 published versions from History.",
+    ],
+  },
+  {
     id: "website-content",
     name: "Website content",
     icon: "mdi-web",
@@ -91,6 +111,7 @@ export const FEATURE_GUIDES = [
     ],
     thingsToKnow: [
       "Nothing in the sandbox is sent to customers, and it doesn't trigger alerts.",
+      "The sandbox uses your saved Bot Profile draft, so you can test changes before you publish them.",
       "Before going live, test pricing, refunds, timings, and \"talk to a human\" questions.",
     ],
   },
@@ -254,6 +275,13 @@ export const GO_LIVE_CHECKLIST = [
     check: "aiConfigured",
   },
   {
+    id: "bot-profile",
+    title: "Set up and publish your bot profile",
+    text: "Name, tone, opening hours, contact details, and policies.",
+    route: "/dashboard/bot-profile",
+    required: false,
+  },
+  {
     id: "sandbox",
     title: "Test in the sandbox",
     text: "Ask your top 10 customer questions and fix any wrong answers.",
@@ -311,11 +339,6 @@ export const GO_LIVE_CHECKLIST = [
 // Client-facing summary of documentation/platform-roadmap/v1 in the backend
 // repo. No dates: we only list what is coming, in rough order.
 export const COMING_NEXT = [
-  {
-    icon: "mdi-account-cog-outline",
-    title: "Bot profile",
-    text: "Set your bot's tone, business facts, and rules yourself, with no help needed from us.",
-  },
   {
     icon: "mdi-file-tree-outline",
     title: "Knowledge sources with review",

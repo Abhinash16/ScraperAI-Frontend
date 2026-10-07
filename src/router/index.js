@@ -53,6 +53,11 @@ const routes = [
         meta: { permission: "settings:manage" },
       },
       { path: "try-chat", redirect: "/dashboard/sandbox" },
+      {
+        path: "bot-profile",
+        component: () => import("../screens/dashboard/BotProfile.vue"),
+        meta: { permission: "settings:manage" },
+      },
 
       {
         path: "opportunity-analysis",

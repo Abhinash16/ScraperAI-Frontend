@@ -244,9 +244,9 @@ export default {
         section: "Settings",
         items: [
           {
-            name: "Integration",
-            link: "/dashboard/integration",
-            icon: "mdi-puzzle-outline",
+            name: "Bot Profile",
+            link: "/dashboard/bot-profile",
+            icon: "mdi-account-cog-outline",
           },
           {
             name: "Integration",
