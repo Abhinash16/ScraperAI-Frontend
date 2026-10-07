@@ -64,7 +64,8 @@ const FIX_BY_CODE = {
   UNREACHABLE: "retry",
   AI_BUSY: "retry",
   UNKNOWN: "retry",
-  AI_CONFIG: "ai-settings",
+  // AI_CONFIG (our platform key) and EMPTY_TEXT: message only, nothing the
+  // client can do.
 };
 
 export const fixFor = (state) =>

@@ -72,7 +72,12 @@
               rounded
               color="primary"
               class="text-none"
-              @click="$emit('add-note', item.title || (item.data && item.data.url) || '')"
+              @click="
+                $emit('add-note', {
+                  title: item.title || (item.data && item.data.url) || '',
+                  failedItemId: item._id,
+                })
+              "
             >
               Add as note instead
             </v-btn>
@@ -87,17 +92,6 @@
               @click="item.type === 'page' ? confirmReimport() : act('publish')"
             >
               Retry
-            </v-btn>
-            <v-btn
-              v-else-if="fix === 'ai-settings'"
-              small
-              depressed
-              rounded
-              color="primary"
-              class="text-none"
-              to="/dashboard/integration?section=ai-provider"
-            >
-              Open AI settings
             </v-btn>
           </div>
         </v-alert>
@@ -298,7 +292,8 @@ const CONFIRM = {
 };
 
 // Opens when `itemId` is set. Emits "close", "changed" (the list should
-// reload) and "add-note" with a title, when a page should become a note.
+// reload) and "add-note" with { title, failedItemId } when a page that
+// can't be imported should become a note.
 export default {
   name: "ItemEditorDrawer",
 

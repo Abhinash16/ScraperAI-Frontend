@@ -241,6 +241,12 @@
             hide-details
             label="Publish now, so the bot can use it"
           />
+          <v-checkbox
+            v-if="note.failedItemId && can(perms, 'knowledge:delete')"
+            v-model="note.deleteFailed"
+            hide-details
+            label="Also delete the page that failed"
+          />
           <v-alert v-if="noteError" type="error" dense outlined rounded="lg" class="mt-4 mb-0 text-body-2">
             {{ noteError }}
           </v-alert>
@@ -383,7 +389,13 @@ const BULK_DONE = {
   delete: "deleted",
 };
 
-const emptyNote = () => ({ title: "", body: "", publish: true });
+const emptyNote = () => ({
+  title: "",
+  body: "",
+  publish: true,
+  failedItemId: null,
+  deleteFailed: false,
+});
 
 export default {
   name: "KnowledgeSource",
@@ -506,10 +518,10 @@ export default {
         const { data } = await apiClient.get(`${KNOWLEDGE_API}/sources/${this.sourceId}`);
         this.source = data.data;
         // Arrived from "Add as note instead" on a failed page
-        const { note } = this.$route.query;
+        const { note, failed } = this.$route.query;
         if (note !== undefined) {
           this.$router.replace({ query: {} }).catch(() => {});
-          if (this.source.type !== "website") this.openNote(String(note));
+          if (this.source.type !== "website") this.openNote(String(note), failed || null);
         }
       } catch (err) {
         this.loadError = apiError(err, "Failed to load this source");
@@ -616,8 +628,9 @@ export default {
       }
     },
 
-    openNote(title = "") {
-      this.note = { ...emptyNote(), title };
+    // failedItemId: the page this note replaces ("Add as note instead")
+    openNote(title = "", failedItemId = null) {
+      this.note = { ...emptyNote(), title, failedItemId, deleteFailed: !!failedItemId };
       this.note.publish = can(this.perms, "knowledge:publish");
       this.noteError = "";
       this.noteOpen = true;
@@ -625,10 +638,10 @@ export default {
 
     // A page that can't be imported (blocked, too little text...) becomes a
     // note in a manual source, created if the client has none yet.
-    async addAsNote(title) {
+    async addAsNote({ title, failedItemId }) {
       this.openItemId = null;
       if (this.source.type === "manual") {
-        this.openNote(title);
+        this.openNote(title, failedItemId);
         return;
       }
       try {
@@ -641,7 +654,10 @@ export default {
           });
           target = created.data.data;
         }
-        this.$router.push({ path: `/dashboard/knowledge/${target._id}`, query: { note: title } });
+        this.$router.push({
+          path: `/dashboard/knowledge/${target._id}`,
+          query: { note: title, failed: failedItemId },
+        });
       } catch (err) {
         this.$toast.error(apiError(err, "Couldn't open a notes source"));
       }
@@ -658,6 +674,15 @@ export default {
         });
         this.noteOpen = false;
         this.$toast.success(this.note.publish ? "Note added and publishing" : "Note added as a draft");
+        // Only once the note is saved; if this fails the page simply stays
+        if (this.note.failedItemId && this.note.deleteFailed && can(this.perms, "knowledge:delete")) {
+          try {
+            await apiClient.delete(`${KNOWLEDGE_API}/items/${this.note.failedItemId}`);
+            this.$toast.success("Deleted the page that failed");
+          } catch (err) {
+            this.$toast.error(apiError(err, "The note was added, but the failed page couldn't be deleted"));
+          }
+        }
         this.refresh();
       } catch (err) {
         this.noteError = apiError(err, "Failed to add the note");
