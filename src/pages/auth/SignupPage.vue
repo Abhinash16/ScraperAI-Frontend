@@ -53,7 +53,7 @@
                 <v-list-item class="px-0">
                   <v-list-item-icon class="mr-3"
                     ><v-icon color="success"
-                      >mdi-check-circle</v-icon
+                      >$circle-check</v-icon
                     ></v-list-item-icon
                   >
                   <v-list-item-content class="body-2 font-weight-medium"
@@ -63,7 +63,7 @@
                 <v-list-item class="px-0">
                   <v-list-item-icon class="mr-3"
                     ><v-icon color="success"
-                      >mdi-check-circle</v-icon
+                      >$circle-check</v-icon
                     ></v-list-item-icon
                   >
                   <v-list-item-content class="body-2 font-weight-medium"
@@ -172,7 +172,7 @@
                   @click="submit"
                 >
                   Create Free Account
-                  <v-icon right size="18">mdi-sparkles</v-icon>
+                  <v-icon right size="18">$sparkles</v-icon>
                 </v-btn>
 
                 <p

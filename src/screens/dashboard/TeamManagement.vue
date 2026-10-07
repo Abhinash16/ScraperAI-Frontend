@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="d-flex align-center mb-6">
       <v-avatar size="48" rounded="xl" color="#cde6ff" class="mr-4">
-        <v-icon color="black">mdi-account-group-outline</v-icon>
+        <v-icon color="black">$users</v-icon>
       </v-avatar>
       <div>
         <div class="text-h5 font-weight-bold">Team</div>
@@ -12,6 +12,8 @@
         </div>
       </div>
     </div>
+
+    <ThingsToKnow feature="team" />
 
     <v-card v-if="!me" outlined rounded="xl" class="pa-6">
       <v-progress-linear v-if="!meError" indeterminate color="primary" />
@@ -29,10 +31,10 @@
         @change="setTab"
       >
         <v-tab v-if="canManageUsers" tab-value="members" class="text-none">
-          <v-icon small class="mr-2">mdi-account-multiple-outline</v-icon> Members
+          <v-icon small class="mr-2">$users</v-icon> Members
         </v-tab>
         <v-tab v-if="canManageRoles" tab-value="roles" class="text-none">
-          <v-icon small class="mr-2">mdi-shield-account-outline</v-icon> Roles
+          <v-icon small class="mr-2">$shield-user</v-icon> Roles
         </v-tab>
       </v-tabs>
 
@@ -52,6 +54,7 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 import MembersTab from "@/components/team/MembersTab.vue";
 import RolesTab from "@/components/team/RolesTab.vue";
@@ -60,7 +63,7 @@ import { apiError, FULL_ACCESS } from "@/utils/team";
 export default {
   name: "TeamManagement",
 
-  components: { MembersTab, RolesTab },
+  components: { ThingsToKnow, MembersTab, RolesTab },
 
   data() {
     return { me: null, meError: "" };

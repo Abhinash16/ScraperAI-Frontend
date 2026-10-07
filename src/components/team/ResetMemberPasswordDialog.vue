@@ -27,7 +27,7 @@
           <div class="secret-box">
             <code class="secret">{{ password }}</code>
             <v-btn x-small depressed rounded color="primary" @click="copy">
-              <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
+              <v-icon x-small class="mr-1">$copy</v-icon> Copy
             </v-btn>
           </div>
         </template>

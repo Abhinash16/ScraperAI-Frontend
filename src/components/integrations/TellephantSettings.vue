@@ -19,7 +19,7 @@
         <div class="step-header">
           <span :class="['step-badge', { done: info.tellephantConfigured }]">
             <v-icon v-if="info.tellephantConfigured" small color="white">
-              mdi-check
+              $check
             </v-icon>
             <template v-else>1</template>
           </span>
@@ -48,7 +48,7 @@
             autocomplete="new-password"
             class="mr-2"
             :type="showKey ? 'text' : 'password'"
-            :append-icon="showKey ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+            :append-icon="showKey ? '$eye-off' : '$eye'"
             :error-messages="keyError"
             @click:append="showKey = !showKey"
             @input="keyError = ''"
@@ -93,7 +93,7 @@
       <v-card outlined rounded="xl" class="step pa-6 mb-4">
         <div class="step-header">
           <span :class="['step-badge', { done: receivedViaKey }]">
-            <v-icon v-if="receivedViaKey" small color="white">mdi-check</v-icon>
+            <v-icon v-if="receivedViaKey" small color="white">$check</v-icon>
             <template v-else>2</template>
           </span>
           <div class="flex-grow-1">
@@ -112,12 +112,12 @@
           <div class="d-flex flex-shrink-0 ml-2">
             <v-btn x-small text dark @click="showUrl = !showUrl">
               <v-icon x-small class="mr-1">
-                {{ showUrl ? "mdi-eye-off-outline" : "mdi-eye-outline" }}
+                {{ showUrl ? "$eye-off" : "$eye" }}
               </v-icon>
               {{ showUrl ? "Hide" : "Show" }}
             </v-btn>
             <v-btn x-small depressed rounded color="primary" @click="copyUrl">
-              <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
+              <v-icon x-small class="mr-1">$copy</v-icon> Copy
             </v-btn>
           </div>
         </div>
@@ -131,7 +131,7 @@
           text
           dense
           rounded="lg"
-          icon="mdi-lock-alert-outline"
+          icon="$shield-alert"
           class="text-body-2 mt-4 mb-0"
         >
           Keep it secret: anyone with this URL can send messages as your
@@ -143,7 +143,7 @@
       <v-card outlined rounded="xl" class="step pa-6 mb-4">
         <div class="step-header">
           <span :class="['step-badge', { done: receivedViaKey }]">
-            <v-icon v-if="receivedViaKey" small color="white">mdi-check</v-icon>
+            <v-icon v-if="receivedViaKey" small color="white">$check</v-icon>
             <template v-else>3</template>
           </span>
           <div class="flex-grow-1">
@@ -163,7 +163,7 @@
               !info.lastInbound ? 'grey' : receivedViaKey ? 'success' : 'warning'
             "
           >
-            {{ info.lastInbound ? "mdi-message-check-outline" : "mdi-message-outline" }}
+            {{ info.lastInbound ? "$message-square-check" : "$message-square" }}
           </v-icon>
           <div class="flex-grow-1 text-body-2">
             <template v-if="info.lastInbound">
@@ -178,7 +178,7 @@
             </span>
           </div>
           <v-btn small rounded outlined color="primary" :loading="loading" @click="load">
-            <v-icon small class="mr-1">mdi-refresh</v-icon> Refresh
+            <v-icon small class="mr-1">$refresh-cw</v-icon> Refresh
           </v-btn>
         </div>
       </v-card>
@@ -232,7 +232,7 @@
       <!-- ============ HELP ============ -->
       <v-card outlined rounded="xl" class="pa-6 mb-4">
         <div class="d-flex align-center mb-3">
-          <v-icon small class="mr-2">mdi-help-circle-outline</v-icon>
+          <v-icon small class="mr-2">$circle-help</v-icon>
           <div class="text-subtitle-1 font-weight-bold">
             Why didn't the bot reply?
           </div>

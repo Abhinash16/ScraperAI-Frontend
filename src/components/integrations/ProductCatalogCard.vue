@@ -29,7 +29,7 @@
         :disabled="syncing || loading || polling"
         @click="sync"
       >
-        <v-icon small class="mr-1">mdi-sync</v-icon> Sync now
+        <v-icon small class="mr-1">$refresh-cw</v-icon> Sync now
       </v-btn>
     </div>
 
@@ -66,7 +66,7 @@
       </div>
 
       <div v-if="index.lastError" class="text-body-2 amber--text text--darken-3 mt-2 d-flex align-start">
-        <v-icon x-small color="amber darken-3" class="mr-1 mt-1">mdi-alert-outline</v-icon>
+        <v-icon x-small color="amber darken-3" class="mr-1 mt-1">$triangle-alert</v-icon>
         <span>{{ index.lastError }}</span>
       </div>
 

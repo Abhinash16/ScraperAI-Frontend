@@ -6,7 +6,7 @@
           <!-- HEADER -->
           <v-toolbar flat>
             <v-avatar color="#cde6ff" size="44" rounded="xl">
-              <v-icon color="black">mdi-account-circle</v-icon>
+              <v-icon color="black">$circle-user</v-icon>
             </v-avatar>
 
             <div class="ml-3">
@@ -29,7 +29,7 @@
                 <v-divider vertical class="mx-2"></v-divider>
 
                 <v-icon size="16" class="mr-1" color="primary"
-                  >mdi-robot</v-icon
+                  >$bot</v-icon
                 >
 
                 <span class="mr-2">
@@ -57,7 +57,7 @@
             <v-menu offset-y :disabled="statusUpdating">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-dots-vertical</v-icon>
+                  <v-icon>$ellipsis-vertical</v-icon>
                 </v-btn>
               </template>
 
@@ -109,7 +109,7 @@
               v-else-if="messages.length === 0"
               class="text-center grey--text mt-10"
             >
-              <v-icon large color="grey lighten-1"> mdi-chat-outline </v-icon>
+              <v-icon large color="grey lighten-1"> $message-circle </v-icon>
               <div class="mt-2">No messages yet. Start the conversation!</div>
             </div>
 
@@ -192,7 +192,7 @@
                             class="d-flex align-center justify-center grey lighten-2"
                             style="height: 100%"
                           >
-                            <v-icon>mdi-map-marker</v-icon>
+                            <v-icon>$map-pin</v-icon>
                           </div>
                         </template>
                       </v-img>
@@ -219,7 +219,7 @@
                       class="d-flex align-center"
                     >
                       <v-icon small class="mr-2 primary--text">
-                        mdi-microphone
+                        $mic
                       </v-icon>
 
                       <audio controls>
@@ -258,7 +258,7 @@
                 >
                   <div class="typing muted-text">
                     <v-icon color="white" size="10" v-if="typingSender === 'ai'"
-                      >mdi-robot</v-icon
+                      >$bot</v-icon
                     >
                     {{ typingMessage }}
                   </div>
@@ -293,7 +293,7 @@
               @click="sendMessage"
               :disabled="!newMessage.trim() || ticketStatus === 'resolved'"
             >
-              <v-icon left>mdi-send</v-icon>
+              <v-icon left>$send</v-icon>
               Send
             </v-btn>
           </v-card-actions>
@@ -316,7 +316,7 @@
           <v-spacer />
 
           <v-btn icon @click="previewDialog = false">
-            <v-icon>mdi-close</v-icon>
+            <v-icon>$x</v-icon>
           </v-btn>
         </div>
 
@@ -349,7 +349,7 @@
             depressed
             @click="downloadMedia(previewUrl)"
           >
-            <v-icon left small>mdi-download</v-icon>
+            <v-icon left small>$download</v-icon>
             Download
           </v-btn>
         </div>
@@ -388,7 +388,6 @@ export default {
       messages: [],
       newMessage: "",
       socket: null,
-      apiKey: "",
 
       ticketStatus: "",
 
@@ -524,29 +523,26 @@ export default {
       this.playSound(this.notificationSound);
     },
 
-    async connectSocket() {
+    connectSocket() {
       try {
-        const response = await apiClient.get("/clients/currentUser");
-        this.apiKey = response.data?.data?.apiKey;
-
-        if (!this.apiKey) {
-          throw new Error("API key missing");
-        }
-
         if (this.socket) {
           this.socket.disconnect();
         }
 
+        // The server derives the client from the JWT, checks the chat belongs
+        // to it (chat:read) and records our messages as sender "client".
         this.socket = io("https://ai-api.on-track.in", {
           transports: ["websocket"],
+          auth: { token: localStorage.getItem("user-token") },
         });
 
         this.socket.on("connect", () => {
-          this.socket.emit("joinRoom", {
-            apiKey: this.apiKey,
-            chatId: this.chatId,
-            sender: "client",
-          });
+          this.socket.emit("joinRoom", { chatId: this.chatId });
+        });
+
+        // Auth/permission failures, e.g. "You don't have permission to reply."
+        this.socket.on("error_message", ({ message } = {}) => {
+          this.showError(message || "Chat error. Please try again.");
         });
 
         this.socket.on("previousMessages", (messages) => {
@@ -673,14 +669,7 @@ export default {
       this.socket.emit("stopTyping");
       this.isTyping = false;
 
-      const message = {
-        apiKey: this.apiKey,
-        chatId: this.chatId,
-        sender: "client",
-        message: this.newMessage,
-      };
-
-      this.socket.emit("sendMessage", message);
+      this.socket.emit("sendMessage", { text: this.newMessage });
       this.newMessage = "";
     },
 

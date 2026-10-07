@@ -20,7 +20,7 @@
         </template>
       </div>
       <v-chip v-if="roleName" small outlined color="primary" class="mt-2">
-        <v-icon x-small left>mdi-shield-account-outline</v-icon>
+        <v-icon x-small left>$shield-user</v-icon>
         {{ roleName }}
       </v-chip>
     </div>
@@ -298,9 +298,9 @@ import ResetPasswordDialog from "@/components/ResetPasswordDialog.vue";
 import IpAllowlist from "@/components/profile/IpAllowlist.vue";
 
 const SECTIONS = [
-  { id: "account", name: "Your account", icon: "mdi-account-outline" },
-  { id: "company", name: "Company", icon: "mdi-domain" },
-  { id: "security", name: "Security", icon: "mdi-shield-lock-outline" },
+  { id: "account", name: "Your account", icon: "$user" },
+  { id: "company", name: "Company", icon: "$building-2" },
+  { id: "security", name: "Security", icon: "$shield-check" },
 ];
 
 // Old links used ?tab=0..3
@@ -326,25 +326,25 @@ export default {
           key: "company_website",
           label: "Website",
           placeholder: "https://example.com",
-          icon: "mdi-web",
+          icon: "$globe",
         },
         {
           key: "company_aboutus_url",
           label: "About us page",
           placeholder: "https://example.com/about",
-          icon: "mdi-information-outline",
+          icon: "$info",
         },
         {
           key: "company_termsandconditions_url",
           label: "Terms and conditions",
           placeholder: "https://example.com/terms",
-          icon: "mdi-file-document-outline",
+          icon: "$file-text",
         },
         {
           key: "company_privacypolicy_url",
           label: "Privacy policy",
           placeholder: "https://example.com/privacy",
-          icon: "mdi-shield-outline",
+          icon: "$shield",
         },
       ],
 

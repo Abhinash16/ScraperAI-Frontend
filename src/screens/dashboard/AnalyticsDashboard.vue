@@ -8,6 +8,8 @@
       </div>
     </v-overlay>
 
+    <ThingsToKnow feature="analytics" />
+
     <!-- HEADER -->
     <v-row>
       <v-col cols="12">
@@ -77,7 +79,7 @@
               @click="applyFilters"
               class="font-weight-bold"
             >
-              <v-icon left>mdi-filter</v-icon>
+              <v-icon left>$funnel</v-icon>
               Apply
             </v-btn>
           </v-col>
@@ -121,7 +123,7 @@
                   {{ stats.activeChats || 0 }}
                 </h2>
               </div>
-              <v-icon size="48" class="stat-icon-active">mdi-chat</v-icon>
+              <v-icon size="48" class="stat-icon-active">$message-circle</v-icon>
             </div>
           </v-card-text>
         </v-card>
@@ -138,7 +140,7 @@
                 </h2>
               </div>
               <v-icon size="48" class="stat-icon-completed"
-                >mdi-check-circle</v-icon
+                >$circle-check</v-icon
               >
             </div>
           </v-card-text>
@@ -156,7 +158,7 @@
                 </h2>
               </div>
               <v-icon size="48" class="stat-icon-disconnected"
-                >mdi-link-off</v-icon
+                >$unlink</v-icon
               >
             </div>
           </v-card-text>
@@ -170,7 +172,7 @@
       <v-col cols="12" lg="8">
         <v-card outlined rounded="xl" elevation="0">
           <v-card-title>
-            <v-icon left>mdi-chart-line</v-icon>
+            <v-icon left>$chart-line</v-icon>
             Active Chats Trend
           </v-card-title>
           <v-card-text>
@@ -190,7 +192,7 @@
       <v-col cols="12" lg="4">
         <v-card outlined rounded="xl" elevation="0">
           <v-card-title>
-            <v-icon left>mdi-pie-chart</v-icon>
+            <v-icon left>$chart-pie</v-icon>
             Platform Distribution
           </v-card-title>
           <v-card-text>
@@ -212,7 +214,7 @@
       <v-col cols="12">
         <v-card outlined rounded="xl" elevation="0">
           <v-card-title>
-            <v-icon left>mdi-message-multiple</v-icon>
+            <v-icon left>$messages-square</v-icon>
             Messages Per Day
           </v-card-title>
           <v-card-text>
@@ -232,11 +234,12 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 import VueApexCharts from "vue-apexcharts";
 
 export default {
-  components: { apexchart: VueApexCharts },
+  components: { ThingsToKnow, apexchart: VueApexCharts },
 
   data() {
     return {

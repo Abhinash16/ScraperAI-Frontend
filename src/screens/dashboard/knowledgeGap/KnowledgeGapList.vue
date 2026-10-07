@@ -5,6 +5,8 @@
       <v-progress-circular indeterminate size="70" width="6" color="primary" />
     </v-overlay>
 
+    <ThingsToKnow feature="knowledge-gap" />
+
     <v-card outlined rounded="xl">
       <!-- HEADER -->
       <div class="d-flex justify-space-between align-center pa-4 flex-wrap">
@@ -163,7 +165,7 @@
         <template v-slot:no-data>
           <!-- EMPTY STATE -->
           <div v-if="!loading && rows.length === 0" class="pa-10 text-center">
-            <v-icon large color="grey lighten-1"> mdi-brain </v-icon>
+            <v-icon large color="grey lighten-1"> $brain </v-icon>
 
             <div class="grey--text mt-3">No knowledge gaps found.</div>
           </div>
@@ -180,7 +182,7 @@
     <v-dialog v-model="deferDialog" max-width="420" persistent>
       <v-card rounded="xl">
         <v-card-title class="d-flex align-center">
-          <v-icon color="warning" class="mr-2">mdi-alert-outline</v-icon>
+          <v-icon color="warning" class="mr-2">$triangle-alert</v-icon>
           Confirm Action
         </v-card-title>
 
@@ -225,9 +227,12 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 
 export default {
+  components: { ThingsToKnow },
+
   name: "KnowledgeGapList",
 
   data() {
@@ -302,7 +307,7 @@ export default {
       this.loading = true;
 
       try {
-        const res = await apiClient.get(`/content/knowledge-gap`, {
+        const res = await apiClient.get(`/knowledge/gaps`, {
           params: {
             limit: this.limit,
             offset: this.offset,
@@ -311,9 +316,10 @@ export default {
           },
         });
 
-        this.rows = res.data.data;
-        this.total = res.data.pagination.total;
-        this.hasMore = res.data.pagination.hasMore;
+        const { rows, total, hasMore } = res.data.data;
+        this.rows = rows;
+        this.total = total;
+        this.hasMore = hasMore;
       } catch (err) {
         console.error(err);
       }
@@ -332,9 +338,7 @@ export default {
       this.deferLoading = true;
 
       try {
-        await apiClient.put(
-          `/content/knowledge-gap/${this.selectedGap._id}/defer`,
-        );
+        await apiClient.post(`/knowledge/gaps/${this.selectedGap._id}/defer`);
 
         // ✅ Update UI instantly
         this.selectedGap.status = "deferred";

@@ -67,7 +67,7 @@
     </v-alert>
 
     <div v-else-if="!allowlist.length" class="empty-state text-center">
-      <v-icon color="grey lighten-1" class="mb-1">mdi-ip-network-outline</v-icon>
+      <v-icon color="grey lighten-1" class="mb-1">$network</v-icon>
       <div class="text-body-2 grey--text text--darken-1">
         No IP addresses yet. API keys work from any IP.
       </div>
@@ -76,7 +76,7 @@
     <div v-else class="ip-list">
       <div v-for="ip in allowlist" :key="ip._id" class="ip-row d-flex align-center">
         <v-icon small class="mr-3" color="grey darken-1">
-          {{ ip.ipAddress.includes("/") ? "mdi-lan" : "mdi-desktop-classic" }}
+          {{ ip.ipAddress.includes("/") ? "$network" : "$monitor" }}
         </v-icon>
         <div class="flex-grow-1" style="min-width: 0">
           <code class="ip-code">{{ ip.ipAddress }}</code>
@@ -92,7 +92,7 @@
           :loading="removingId === ip._id"
           @click="removeIp(ip)"
         >
-          <v-icon small color="error">mdi-delete-outline</v-icon>
+          <v-icon small color="error">$trash-2</v-icon>
         </v-btn>
       </div>
     </div>

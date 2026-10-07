@@ -5,7 +5,7 @@
       <v-text-field
         v-model="search"
         placeholder="Search name or email"
-        prepend-inner-icon="mdi-magnify"
+        prepend-inner-icon="$search"
         outlined
         dense
         hide-details
@@ -30,7 +30,7 @@
       />
       <v-spacer />
       <v-btn color="primary" rounded depressed class="mb-2" @click="openDialog('create')">
-        <v-icon left>mdi-account-plus-outline</v-icon> Add member
+        <v-icon left>$user-plus</v-icon> Add member
       </v-btn>
     </div>
 
@@ -43,7 +43,7 @@
       <v-skeleton-loader v-if="loading && !users.length" type="table-row@4" class="pa-4" />
 
       <div v-else-if="!filteredUsers.length" class="empty-state text-center pa-10">
-        <v-icon large color="grey lighten-1" class="mb-2">mdi-account-search-outline</v-icon>
+        <v-icon large color="grey lighten-1" class="mb-2">$user-search</v-icon>
         <div class="text-body-1 font-weight-medium">
           {{ users.length ? "No members match your filters" : "No members yet" }}
         </div>
@@ -118,7 +118,7 @@
                 :title="actionsFor(item).length ? 'Actions' : 'You can\'t manage this member'"
                 v-on="on"
               >
-                <v-icon>mdi-dots-horizontal</v-icon>
+                <v-icon>$ellipsis</v-icon>
               </v-btn>
             </template>
             <v-list dense class="py-1">
@@ -275,19 +275,19 @@ export default {
     actionsFor(u) {
       const manage = this.canManage(u);
       const actions = [];
-      if (manage || this.isSelf(u)) actions.push({ id: "edit", label: "Edit", icon: "mdi-pencil-outline" });
-      if (manage) actions.push({ id: "role", label: "Change role", icon: "mdi-shield-account-outline" });
+      if (manage || this.isSelf(u)) actions.push({ id: "edit", label: "Edit", icon: "$pencil" });
+      if (manage) actions.push({ id: "role", label: "Change role", icon: "$shield-user" });
       if (manage) {
         actions.push(
           u.status === 1
-            ? { id: "deactivate", label: "Deactivate", icon: "mdi-account-cancel-outline" }
-            : { id: "activate", label: "Activate", icon: "mdi-account-check-outline" },
+            ? { id: "deactivate", label: "Deactivate", icon: "$user-x" }
+            : { id: "activate", label: "Activate", icon: "$user-check" },
         );
       }
       if (this.hasPermission("user:reset-password") && !this.isSelf(u) && withinLevel(u.roleId?.permissions, this.myPermissions)) {
-        actions.push({ id: "reset", label: "Reset password", icon: "mdi-lock-reset" });
+        actions.push({ id: "reset", label: "Reset password", icon: "$rotate-ccw-key" });
       }
-      if (manage) actions.push({ id: "remove", label: "Remove", icon: "mdi-delete-outline", color: "error" });
+      if (manage) actions.push({ id: "remove", label: "Remove", icon: "$trash-2", color: "error" });
       return actions;
     },
 
@@ -345,7 +345,7 @@ export default {
           text: `${u.name || u.email} won't be able to sign in until you activate them again.`,
           label: "Deactivate",
           color: "warning",
-          icon: "mdi-account-cancel-outline",
+          icon: "$user-x",
           run: () => this.setStatus(u, 0),
         });
       } else if (id === "remove") {
@@ -354,7 +354,7 @@ export default {
           text: `${u.name || u.email} will lose access immediately. This can't be undone.`,
           label: "Remove",
           color: "error",
-          icon: "mdi-delete-outline",
+          icon: "$trash-2",
           run: () => this.remove(u),
         });
       }

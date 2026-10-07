@@ -4,7 +4,7 @@
     <v-row class="mb-6">
       <v-col cols="auto">
         <v-btn icon text color="primary" @click="$router.back()">
-          <v-icon>mdi-arrow-left</v-icon>
+          <v-icon>$arrow-left</v-icon>
         </v-btn>
       </v-col>
       <v-col>
@@ -74,7 +74,7 @@
 
               <div class="mb-2">
                 <h4 class="text-subtitle-1 font-weight-bold mb-4">
-                  <v-icon small class="mr-2">mdi-lightbulb-outline</v-icon>
+                  <v-icon small class="mr-2">$lightbulb</v-icon>
                   Key Insights & Recommendations
                 </h4>
               </div>
@@ -90,7 +90,7 @@
                     <v-card-text class="pa-4">
                       <div class="d-flex align-center mb-3">
                         <v-icon small color="primary" class="mr-2">
-                          mdi-alert-circle-outline
+                          $circle-alert
                         </v-icon>
                         <span class="font-weight-bold text-body-2">
                           {{ insight.issue }}
@@ -104,7 +104,7 @@
                         color="grey"
                         class="mb-4 rounded-xl"
                       >
-                        <v-icon small left>mdi-repeat</v-icon>
+                        <v-icon small left>$repeat</v-icon>
                         {{ insight.frequency }} occurrences
                       </v-chip>
 
@@ -163,7 +163,7 @@
               target="_blank"
               @click.stop
             >
-              <v-icon left small>mdi-headphones</v-icon>
+              <v-icon left small>$headphones</v-icon>
               Open
             </v-btn>
           </template>
@@ -215,7 +215,7 @@
                 :loading="retryingId === item._id"
                 @click="retryCall(item._id)"
               >
-                <v-icon small left>mdi-refresh</v-icon>
+                <v-icon small left>$refresh-cw</v-icon>
                 Retry
               </v-btn>
 
@@ -227,20 +227,20 @@
                 rounded
                 @click="viewReport(item)"
               >
-                <v-icon small left>mdi-file-document-outline</v-icon>
+                <v-icon small left>$file-text</v-icon>
                 Report
               </v-btn>
 
               <v-menu offset-y v-if="item.status === 'processing'">
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn small icon v-bind="attrs" v-on="on">
-                    <v-icon>mdi-dots-vertical</v-icon>
+                    <v-icon>$ellipsis-vertical</v-icon>
                   </v-btn>
                 </template>
                 <v-list>
                   <v-list-item @click="viewReport(item)">
                     <v-list-item-icon>
-                      <v-icon>mdi-file-document-outline</v-icon>
+                      <v-icon>$file-text</v-icon>
                     </v-list-item-icon>
                     <v-list-item-title>View Details</v-list-item-title>
                   </v-list-item>
@@ -328,11 +328,11 @@ export default {
 
     statusIcon(status) {
       const iconMap = {
-        completed: "mdi-check-circle",
-        failed: "mdi-alert-circle",
-        processing: "mdi-clock-outline",
+        completed: "$circle-check",
+        failed: "$circle-alert",
+        processing: "$clock",
       };
-      return iconMap[status] || "mdi-help-circle";
+      return iconMap[status] || "$circle-help";
     },
 
     async fetchBatch() {

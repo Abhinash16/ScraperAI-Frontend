@@ -4,7 +4,7 @@
     <v-row class="mb-6">
       <v-col cols="auto">
         <v-btn icon text color="primary" @click="$router.back()">
-          <v-icon>mdi-arrow-left</v-icon>
+          <v-icon>$arrow-left</v-icon>
         </v-btn>
       </v-col>
 
@@ -69,7 +69,7 @@
         <!-- Conversation -->
         <div class="mb-6">
           <div class="text-subtitle-1 font-weight-bold mb-4">
-            <v-icon small class="mr-2">mdi-message-text-outline</v-icon>
+            <v-icon small class="mr-2">$message-square-text</v-icon>
             Conversation Context
           </div>
 
@@ -86,7 +86,7 @@
                 <!-- Sender Label with Icon -->
                 <div class="d-flex align-center mb-1">
                   <v-icon x-small color="grey" class="mr-1">
-                    {{ msg.role === "user" ? "mdi-account" : "mdi-robot" }}
+                    {{ msg.role === "user" ? "$user" : "$bot" }}
                   </v-icon>
 
                   <span class="text-caption grey--text">
@@ -126,7 +126,7 @@
         <v-card outlined rounded="xl" class="pa-5">
           <div class="d-flex align-center justify-space-between mb-4">
             <div class="text-subtitle-1 font-weight-bold">
-              <v-icon small class="mr-2">mdi-lightbulb-outline</v-icon>
+              <v-icon small class="mr-2">$lightbulb</v-icon>
               Provide Correct Answer
             </div>
 
@@ -137,7 +137,7 @@
               text-color="white"
               class="rounded-xl"
             >
-              <v-icon small left>mdi-check-circle</v-icon>
+              <v-icon small left>$circle-check</v-icon>
               Answered
             </v-chip>
           </div>
@@ -148,13 +148,6 @@
             outlined
             rows="4"
             placeholder="Write the correct answer that the AI should learn..."
-          />
-
-          <v-checkbox
-            v-model="notify_user"
-            label="Notify customer with this answer"
-            class="mt-2"
-            :disabled="gap.status === 'answered'"
           />
 
           <div class="d-flex justify-end">
@@ -186,7 +179,6 @@ export default {
       loading: false,
       saving: false,
       answer: "",
-      notify_user: false,
     };
   },
 
@@ -199,7 +191,7 @@ export default {
       const id = this.$route.params.id;
       this.loading = true;
       try {
-        const res = await apiClient.get(`/content/knowledge-gap/${id}`);
+        const res = await apiClient.get(`/knowledge/gaps/${id}`);
         this.gap = res.data.data;
         this.answer = this.gap.answer || "";
       } catch (err) {
@@ -211,24 +203,24 @@ export default {
 
     async submitAnswer() {
       if (!this.answer.trim()) {
-        return alert("Answer cannot be empty");
+        this.$toast.error("Answer cannot be empty");
+        return;
       }
 
       this.saving = true;
 
       try {
-        await apiClient.post(`/content/knowledge-gap/${this.gap._id}/answer`, {
+        await apiClient.post(`/knowledge/gaps/${this.gap._id}/answer`, {
           answer: this.answer,
-          notify_user: this.notify_user,
         });
 
-        this.$toast?.success?.("Answer saved successfully") ||
-          alert("Knowledge gap answered successfully");
+        this.$toast.success(
+          'Answer saved as an FAQ in "Learned from chats". The bot can use it once indexing finishes.'
+        );
 
         this.loadQuestion();
       } catch (err) {
-        console.error(err);
-        alert("Failed to save answer");
+        this.$toast.error(err.response?.data?.message || "Failed to save answer");
       } finally {
         this.saving = false;
       }

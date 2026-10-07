@@ -4,7 +4,7 @@
     <v-row align="center" class="mb-6">
       <v-col cols="auto">
         <v-btn icon text color="primary" @click="$router.back()">
-          <v-icon>mdi-arrow-left</v-icon>
+          <v-icon>$arrow-left</v-icon>
         </v-btn>
       </v-col>
 
@@ -88,7 +88,7 @@
       <v-card outlined rounded="xl" class="mb-6">
         <v-card-text>
           <div class="d-flex align-center mb-3">
-            <v-icon class="mr-2">mdi-headphones</v-icon>
+            <v-icon class="mr-2">$headphones</v-icon>
             <span class="font-weight-bold">Call Recording</span>
           </div>
 

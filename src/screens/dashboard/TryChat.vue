@@ -5,12 +5,14 @@
       text
       dense
       rounded="lg"
-      icon="mdi-flask-outline"
+      icon="$flask-conical"
       class="text-body-2 mb-4"
     >
       Sandbox: real answers, but nothing is sent to customers and no alerts
       are triggered.
     </v-alert>
+
+    <ThingsToKnow feature="sandbox" />
 
     <!-- ================= RESTORING ================= -->
     <v-card v-if="restoring" outlined rounded="xl" class="pa-8 text-center">
@@ -21,7 +23,7 @@
     <v-card v-else-if="!session" outlined rounded="xl" class="pa-6 pa-sm-8">
       <div class="d-flex align-center mb-6">
         <v-avatar size="48" rounded="xl" color="#cde6ff" class="mr-4">
-          <v-icon color="black">mdi-flask-outline</v-icon>
+          <v-icon color="black">$flask-conical</v-icon>
         </v-avatar>
         <div>
           <div class="text-h6 font-weight-bold">Sandbox</div>
@@ -61,11 +63,26 @@
           </v-item>
         </v-item-group>
 
+        <template v-if="setupRunning">
+          <div class="field-title">Knowledge</div>
+          <v-btn-toggle v-model="knowledgeMode" mandatory rounded color="primary" class="mb-2">
+            <v-btn value="live" class="text-none">Live knowledge</v-btn>
+            <v-btn value="staging" class="text-none">New setup (staging)</v-btn>
+          </v-btn-toggle>
+          <div class="text-caption grey--text text--darken-1 mb-6">
+            {{
+              knowledgeMode === "staging"
+                ? "Answers use the knowledge your setup is building, which customers can't see yet."
+                : "Answers use the knowledge customers get today."
+            }}
+          </div>
+        </template>
+
         <div class="field-title">Customer phone (optional)</div>
         <v-text-field
           v-model.trim="phone"
           placeholder="919876543210"
-          prepend-inner-icon="mdi-phone-outline"
+          prepend-inner-icon="$phone"
           hint="With a phone number, the bot looks up that customer's real bookings and dues through your customer API."
           persistent-hint
           outlined
@@ -95,7 +112,7 @@
             type="submit"
             :loading="starting"
           >
-            <v-icon left>mdi-play</v-icon>
+            <v-icon left>$play</v-icon>
             Start
           </v-btn>
         </div>
@@ -113,7 +130,7 @@
       <div class="chat-header d-flex align-center px-4 py-3">
         <v-avatar size="40" class="mr-3 header-avatar">
           <v-icon :color="isWhatsapp ? 'white' : 'primary'">
-            {{ isWhatsapp ? "mdi-whatsapp" : "mdi-robot-outline" }}
+            {{ isWhatsapp ? "$whatsapp" : "$bot" }}
           </v-icon>
         </v-avatar>
         <div class="flex-grow-1" style="min-width: 0">
@@ -124,6 +141,7 @@
             <template v-if="sending">typing…</template>
             <template v-else>
               {{ session.phone ? `+${session.phone}` : "Anonymous visitor" }}
+              <template v-if="session.knowledgeMode === 'staging'"> · new setup (staging)</template>
             </template>
           </div>
         </div>
@@ -148,7 +166,7 @@
           :loading="resetting"
           @click="reset"
         >
-          <v-icon>mdi-restart</v-icon>
+          <v-icon>$rotate-ccw</v-icon>
         </v-btn>
       </div>
 
@@ -215,7 +233,7 @@
 
             <div v-if="m.failed" class="msg-meta error--text">
               <v-icon x-small color="error" class="mr-1">
-                mdi-alert-circle-outline
+                $circle-alert
               </v-icon>
               Not answered
             </div>
@@ -281,7 +299,7 @@
           :color="isWhatsapp ? '#00a884' : 'primary'"
           :disabled="sending || expired || !newMessage.trim()"
         >
-          <v-icon small color="white">mdi-send</v-icon>
+          <v-icon small color="white">$send</v-icon>
         </v-btn>
       </v-form>
     </v-card>
@@ -289,6 +307,8 @@
 </template>
 
 <script>
+import { isSetupRunning, loadSetup } from "@/utils/setup";
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import AnswerTrace from "@/components/sandbox/AnswerTrace.vue";
 import {
   createSandboxSession,
@@ -311,7 +331,7 @@ const SOURCES = {
 export default {
   name: "TryChat",
 
-  components: { AnswerTrace },
+  components: { ThingsToKnow, AnswerTrace },
 
   data() {
     return {
@@ -319,20 +339,23 @@ export default {
         {
           id: "whatsapp",
           name: "WhatsApp",
-          icon: "mdi-whatsapp",
+          icon: "$whatsapp",
           color: "#25d366",
           description: "Test the WhatsApp bot",
         },
         {
           id: "web",
           name: "Website",
-          icon: "mdi-web",
+          icon: "$globe",
           color: "primary",
           description: "Test the website widget",
         },
       ],
       platform: "whatsapp",
       phone: "",
+      setupRunning: false,
+      // The Setup page links here with ?knowledge=staging
+      knowledgeMode: this.$route.query.knowledge === "staging" ? "staging" : "live",
       starting: false,
       startError: "",
       restoring: false,
@@ -363,6 +386,7 @@ export default {
 
   mounted() {
     this.restore();
+    loadSetup().then((state) => (this.setupRunning = isSetupRunning(state)));
   },
 
   methods: {
@@ -422,6 +446,7 @@ export default {
         const session = await createSandboxSession({
           platform: this.platform,
           phone: this.normalizePhone(this.phone),
+          knowledgeMode: this.setupRunning ? this.knowledgeMode : undefined,
         });
         storeSessionId(session.sessionId);
         this.session = session;

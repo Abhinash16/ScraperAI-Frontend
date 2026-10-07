@@ -33,7 +33,7 @@
             </v-list-item-content>
 
             <v-avatar size="60" color="white" rounded="lg">
-              <v-icon color="primary" size="32"> mdi-chat-processing </v-icon>
+              <v-icon color="primary" size="32"> $message-circle-more </v-icon>
             </v-avatar>
           </v-list-item>
         </v-card>
@@ -57,7 +57,7 @@
             </v-list-item-content>
 
             <v-avatar size="60" color="white" rounded="lg">
-              <v-icon color="success" size="32"> mdi-check-circle </v-icon>
+              <v-icon color="success" size="32"> $circle-check </v-icon>
             </v-avatar>
           </v-list-item>
         </v-card>
@@ -81,7 +81,7 @@
             </v-list-item-content>
 
             <v-avatar size="60" color="white" rounded="lg">
-              <v-icon color="error" size="32"> mdi-chat-alert </v-icon>
+              <v-icon color="error" size="32"> $message-circle-warning </v-icon>
             </v-avatar>
           </v-list-item>
         </v-card>
@@ -97,7 +97,7 @@
           style="border-style: dashed !important"
         >
           <v-card-text class="text-center py-12">
-            <v-icon large color="grey lighten-1"> mdi-chart-areaspline </v-icon>
+            <v-icon large color="grey lighten-1"> $chart-area </v-icon>
             <div class="grey--text text--darken-1 mt-2">
               Historical trends will appear here
             </div>

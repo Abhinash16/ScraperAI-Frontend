@@ -4,7 +4,7 @@
       <v-card-title class="d-flex align-center pb-2">
         <div class="text-h6 font-weight-bold">{{ title }}</div>
         <v-spacer />
-        <v-btn icon :disabled="saving" @click="close"><v-icon>mdi-close</v-icon></v-btn>
+        <v-btn icon :disabled="saving" @click="close"><v-icon>$x</v-icon></v-btn>
       </v-card-title>
 
       <v-card-text class="pt-4">
@@ -22,7 +22,7 @@
         <div v-if="iAmOwner" class="full-access d-flex align-center mb-4">
           <div class="flex-grow-1 mr-4">
             <div class="font-weight-medium d-flex align-center">
-              <v-icon small color="amber darken-2" class="mr-1">mdi-crown</v-icon>
+              <v-icon small color="amber darken-2" class="mr-1">$crown</v-icon>
               {{ catalog.fullAccess ? catalog.fullAccess.label : "Full access" }}
             </div>
             <div class="text-caption grey--text text--darken-1">
@@ -166,7 +166,8 @@ export default {
         const perms = source?.permissions || [];
         this.name = this.role ? this.role.name : this.copyFrom ? `${this.copyFrom.name} copy` : "";
         this.fullAccess = perms.includes(FULL_ACCESS);
-        this.selected = perms.filter((p) => p !== FULL_ACCESS);
+        // Ignore keys the catalog no longer lists (retired permissions)
+        this.selected = perms.filter((p) => this.allKeys.includes(p));
         this.nameError = "";
         this.generalError = "";
       },

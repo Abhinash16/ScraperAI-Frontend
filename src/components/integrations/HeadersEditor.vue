@@ -9,7 +9,7 @@
       </div>
       <v-spacer />
       <v-btn small text rounded color="primary" @click="addRow">
-        <v-icon small class="mr-1">mdi-plus</v-icon> Add header
+        <v-icon small class="mr-1">$plus</v-icon> Add header
       </v-btn>
     </div>
 
@@ -39,7 +39,7 @@
           dense
           hide-details
           readonly
-          prepend-inner-icon="mdi-lock-outline"
+          prepend-inner-icon="$lock"
         />
         <v-text-field
           v-else
@@ -60,10 +60,10 @@
           title="Replace value"
           @click="update(row, { stored: false, value: '' })"
         >
-          <v-icon small>mdi-pencil-outline</v-icon>
+          <v-icon small>$pencil</v-icon>
         </v-btn>
         <v-btn icon small title="Remove header" @click="removeRow(row)">
-          <v-icon small color="error">mdi-delete-outline</v-icon>
+          <v-icon small color="error">$trash-2</v-icon>
         </v-btn>
       </v-col>
     </v-row>

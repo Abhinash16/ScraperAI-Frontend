@@ -88,7 +88,7 @@
             color="primary"
             class="ml-4 grey lighten-3"
           >
-            <v-icon color="black">mdi-account</v-icon>
+            <v-icon color="black">$user</v-icon>
           </v-avatar>
         </template>
 
@@ -98,7 +98,7 @@
             <!-- Profile -->
             <v-list-item @click="goToProfile()">
               <v-list-item-icon>
-                <v-icon>mdi-account-outline</v-icon>
+                <v-icon>$user</v-icon>
               </v-list-item-icon>
               <v-list-item-title class="font-weight-bold">
                 Profile
@@ -108,7 +108,7 @@
             <!-- Integration -->
             <v-list-item @click="goToIntegration()">
               <v-list-item-icon>
-                <v-icon>mdi-puzzle-outline</v-icon>
+                <v-icon>$puzzle</v-icon>
               </v-list-item-icon>
               <v-list-item-title class="font-weight-bold">
                 Integration
@@ -121,7 +121,7 @@
               @click="goToUserList()"
             >
               <v-list-item-icon>
-                <v-icon>mdi-account-multiple-outline</v-icon>
+                <v-icon>$users</v-icon>
               </v-list-item-icon>
               <v-list-item-title class="font-weight-bold">
                 Team
@@ -159,7 +159,7 @@
       <v-card rounded="xl" class="text-center">
         <v-card-text class="pt-6">
           <v-avatar color="error lighten-5" size="64" class="mb-4">
-            <v-icon color="error" size="36"> mdi-alert-octagon-outline </v-icon>
+            <v-icon color="error" size="36"> $octagon-alert </v-icon>
           </v-avatar>
 
           <div class="text-h6 font-weight-bold mb-2">Confirm Logout</div>
@@ -202,17 +202,17 @@ export default {
           {
             name: "Home",
             link: "/dashboard/chat",
-            icon: "mdi-view-dashboard-outline",
+            icon: "$layout-dashboard",
           },
           {
             name: "Chat Insights",
             link: "/dashboard/chat/insights",
-            icon: "mdi-chart-line",
+            icon: "$chart-line",
           },
           {
             name: "Chatbot Knowledge Score",
             link: "/dashboard/chat/chatbot-knowledge-score",
-            icon: "mdi-robot-outline",
+            icon: "$bot",
           },
 
         ],

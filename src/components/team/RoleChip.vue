@@ -7,7 +7,7 @@
     :color="color"
     class="font-weight-medium"
   >
-    <v-icon v-if="owner" x-small left>mdi-crown</v-icon>
+    <v-icon v-if="owner" x-small left>$crown</v-icon>
     {{ role.name }}
   </v-chip>
   <v-chip v-else :small="!xSmall" :x-small="xSmall" outlined color="grey">

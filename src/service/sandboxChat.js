@@ -7,9 +7,11 @@ const STORAGE_KEY = "sandbox-session-id";
 
 // platform: "whatsapp" | "web"; phone: digits with country code, optional.
 // Resolves to { sessionId, platform, phone, createdAt }.
-export async function createSandboxSession({ platform, phone }) {
+// knowledgeMode: "live" (default) or "staging" (a setup's new knowledge)
+export async function createSandboxSession({ platform, phone, knowledgeMode }) {
   const body = { platform };
   if (phone) body.phone = phone;
+  if (knowledgeMode) body.knowledgeMode = knowledgeMode;
   const { data } = await apiClient.post(BASE, body);
   return data.data;
 }

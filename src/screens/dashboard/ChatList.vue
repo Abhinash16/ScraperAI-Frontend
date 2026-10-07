@@ -1,5 +1,7 @@
 <template>
   <div>
+    <ThingsToKnow feature="chats" />
+
     <v-chip color="primary" outlined small class="mb-4">
       {{ chats.length }}/{{ total }} Chats Loaded
     </v-chip>
@@ -47,12 +49,12 @@
             <v-chip small outlined value="">All</v-chip>
 
             <v-chip small outlined color="green" value="whatsapp">
-              <v-icon x-small left>mdi-whatsapp</v-icon>
+              <v-icon x-small left>$whatsapp</v-icon>
               WhatsApp
             </v-chip>
 
             <v-chip small outlined color="blue" value="webchat">
-              <v-icon x-small left>mdi-web</v-icon>
+              <v-icon x-small left>$globe</v-icon>
               Other
             </v-chip>
           </v-chip-group>
@@ -95,7 +97,7 @@
                             : 'grey lighten-3'
                         "
                       >
-                        <v-icon color="black">mdi-account-circle</v-icon>
+                        <v-icon color="black">$circle-user</v-icon>
                       </v-avatar>
 
                       <!-- Platform Badge -->
@@ -112,8 +114,8 @@
                         <v-icon size="10" color="white">
                           {{
                             chat.platform === "whatsapp"
-                              ? "mdi-whatsapp"
-                              : "mdi-web"
+                              ? "$whatsapp"
+                              : "$globe"
                           }}
                         </v-icon>
                       </v-avatar>
@@ -134,14 +136,14 @@
                   </v-col>
 
                   <v-col cols="auto">
-                    <v-icon small color="grey"> mdi-chevron-right </v-icon>
+                    <v-icon small color="grey"> $chevron-right </v-icon>
                   </v-col>
                 </v-row>
               </v-card>
             </div>
 
             <div v-if="chats.length === 0" class="text-center py-10">
-              <v-icon large color="grey lighten-1"> mdi-chat-remove </v-icon>
+              <v-icon large color="grey lighten-1"> $message-circle-x </v-icon>
               <div class="grey--text mt-2">No conversations found</div>
             </div>
           </div>
@@ -167,7 +169,7 @@
           @statusUpdated="fetchChats"
         />
         <div v-else class="text-center grey--text mt-10">
-          <v-icon large color="grey lighten-1"> mdi-chat-outline </v-icon>
+          <v-icon large color="grey lighten-1"> $message-circle </v-icon>
           <div class="mt-2">Select a chat to view the conversation</div>
         </div>
       </v-col>
@@ -200,11 +202,13 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 import ChatView from "../../screens/dashboard/ChatView.vue";
 
 export default {
   components: {
+    ThingsToKnow,
     ChatView,
   },
   data: () => ({

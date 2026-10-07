@@ -145,7 +145,7 @@
       <!-- TEST PANEL -->
       <v-card outlined rounded="xl" class="pa-6">
         <div class="d-flex align-center mb-1">
-          <v-icon small class="mr-2">mdi-flask-outline</v-icon>
+          <v-icon small class="mr-2">$flask-conical</v-icon>
           <div class="text-subtitle-1 font-weight-bold">
             Test with phone number
           </div>
@@ -198,8 +198,8 @@
               <v-icon x-small left>
                 {{
                   testResult.found
-                    ? "mdi-account-check-outline"
-                    : "mdi-account-off-outline"
+                    ? "$user-check"
+                    : "$user-minus"
                 }}
               </v-icon>
               {{
@@ -251,7 +251,7 @@
         </template>
 
         <div class="panel-note mt-4">
-          <v-icon x-small class="mr-1">mdi-information-outline</v-icon>
+          <v-icon x-small class="mr-1">$info</v-icon>
           Real chats look up customers on WhatsApp only (by the sender's
           number). Results are cached for 5 minutes.
         </div>

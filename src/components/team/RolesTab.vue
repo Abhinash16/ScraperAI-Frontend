@@ -13,7 +13,7 @@
         :disabled="!catalog"
         @click="openEditor()"
       >
-        <v-icon left>mdi-plus</v-icon> New role
+        <v-icon left>$plus</v-icon> New role
       </v-btn>
     </div>
 
@@ -35,14 +35,14 @@
             <div class="d-flex align-start">
               <v-avatar size="40" :color="`${color(role)} lighten-5`" class="mr-3">
                 <v-icon :color="color(role)">
-                  {{ owner(role) ? "mdi-crown" : "mdi-shield-account-outline" }}
+                  {{ owner(role) ? "$crown" : "$shield-user" }}
                 </v-icon>
               </v-avatar>
               <div class="flex-grow-1" style="min-width: 0">
                 <div class="d-flex align-center flex-wrap">
                   <span class="font-weight-bold text-truncate mr-2">{{ role.name }}</span>
                   <v-chip v-if="role.isDefault" x-small outlined color="grey darken-1">
-                    <v-icon x-small left>mdi-lock-outline</v-icon> Default
+                    <v-icon x-small left>$lock</v-icon> Default
                   </v-chip>
                 </div>
                 <div class="text-caption grey--text text--darken-1">
@@ -76,7 +76,7 @@
                 :title="role.editable ? '' : lockedReason(role)"
                 @click="openEditor(role)"
               >
-                <v-icon small class="mr-1">mdi-pencil-outline</v-icon> Edit
+                <v-icon small class="mr-1">$pencil</v-icon> Edit
               </v-btn>
               <v-btn
                 small
@@ -86,7 +86,7 @@
                 :title="role.assignable === false ? 'You can only copy roles with permissions you have' : ''"
                 @click="openEditor(null, role)"
               >
-                <v-icon small class="mr-1">mdi-content-copy</v-icon> Duplicate
+                <v-icon small class="mr-1">$copy</v-icon> Duplicate
               </v-btn>
               <v-spacer />
               <v-tooltip top :disabled="!deleteBlocked(role)">
@@ -99,7 +99,7 @@
                       title="Delete role"
                       @click="confirmDelete(role)"
                     >
-                      <v-icon small color="error">mdi-delete-outline</v-icon>
+                      <v-icon small color="error">$trash-2</v-icon>
                     </v-btn>
                   </span>
                 </template>
@@ -112,7 +112,7 @@
         <!-- Empty state for custom roles -->
         <v-col v-if="!customRoles.length" cols="12" sm="6" lg="4">
           <div class="empty-card text-center pa-6" @click="catalog && openEditor()">
-            <v-icon large color="grey lighten-1" class="mb-2">mdi-shield-plus-outline</v-icon>
+            <v-icon large color="grey lighten-1" class="mb-2">$shield-plus</v-icon>
             <div class="font-weight-medium">No custom roles yet</div>
             <div class="text-caption grey--text text--darken-1">
               Create one to fine-tune what each member can do.
@@ -136,7 +136,7 @@
       v-model="deleteDialog.open"
       title="Delete role?"
       confirm-label="Delete role"
-      icon="mdi-delete-outline"
+      icon="$trash-2"
       :loading="deleteDialog.loading"
       @confirm="remove"
     >
@@ -150,7 +150,7 @@
 import apiClient from "@/service/axios";
 import RoleEditorDialog from "@/components/team/RoleEditorDialog.vue";
 import ConfirmDialog from "@/components/team/ConfirmDialog.vue";
-import { apiError, isOwnerRole, permissionSummary, roleColor } from "@/utils/team";
+import { FULL_ACCESS, apiError, isOwnerRole, permissionSummary, roleColor } from "@/utils/team";
 
 export default {
   name: "RolesTab",
@@ -211,8 +211,12 @@ export default {
       return roleColor(role).split(" ")[0];
     },
 
+    // Count only permissions the catalog still lists
     summary(role) {
-      return permissionSummary(role);
+      const permissions = (role.permissions || []).filter(
+        (p) => p === FULL_ACCESS || this.groupOf[p],
+      );
+      return permissionSummary({ ...role, permissions });
     },
 
     groupsFor(role) {

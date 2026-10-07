@@ -1,5 +1,25 @@
 <template>
   <div>
+    <v-alert
+      v-if="setupState && setupState.setup"
+      type="info"
+      outlined
+      rounded="xl"
+      class="text-body-2 mb-8"
+    >
+      <div class="d-flex align-center flex-wrap">
+        <div class="mr-4">
+          <strong>Setup in progress:</strong>
+          {{ setupProgress.done }} of {{ setupProgress.total }} steps done. Customers
+          keep getting your current answers until you switch over.
+        </div>
+        <v-spacer />
+        <v-btn small depressed rounded color="primary" class="text-none" to="/dashboard/setup">
+          Continue setup
+        </v-btn>
+      </div>
+    </v-alert>
+
     <div v-for="(section, title) in dashboardData" :key="title" class="mb-12">
       <div class="d-flex align-center mb-6">
         <h2 class="text-h5 font-weight-bold grey--text text--darken-3">
@@ -19,7 +39,7 @@
 
       <v-row>
         <v-col
-          v-for="item in section.items"
+          v-for="item in visibleItems(section)"
           :key="item.name"
           cols="12"
           sm="6"
@@ -37,7 +57,7 @@
                 class="rounded-lg mr-4"
               >
                 <v-icon :color="section.color" size="28">
-                  {{ item.icon || "mdi-view-grid-plus-outline" }}
+                  {{ item.icon || "$layout-grid" }}
                 </v-icon>
               </v-avatar>
 
@@ -54,7 +74,17 @@
                 </div>
               </div>
 
-              <v-icon color="grey lighten-1">mdi-chevron-right</v-icon>
+              <v-chip
+                v-if="badges[item.link]"
+                small
+                color="error"
+                text-color="white"
+                class="mr-2"
+                :title="`${badges[item.link]} knowledge problems need attention`"
+              >
+                {{ badges[item.link] }}
+              </v-chip>
+              <v-icon color="grey lighten-1">$chevron-right</v-icon>
             </div>
           </v-card>
         </v-col>
@@ -66,11 +96,19 @@
 </template>
 
 <script>
+import { can, loadIssueSummary, loadMyPermissions } from "@/utils/knowledge";
+import { checklistProgress, loadSetup } from "@/utils/setup";
+
 export default {
   name: "DashboardHome",
 
   data() {
     return {
+      // Counts shown on tiles, by link
+      badges: {},
+      // Null until loaded; tiles with a `permission` stay hidden until then
+      perms: null,
+      setupState: null,
       dashboardData: {
         Products: {
           color: "indigo",
@@ -78,31 +116,25 @@ export default {
             {
               name: "Chat",
               link: "/dashboard/chat",
-              icon: "mdi-message-text-outline",
+              icon: "$message-square-text",
               description: "Real-time AI assistance",
             },
             {
               name: "Sandbox",
               link: "/dashboard/sandbox",
-              icon: "mdi-flask-outline",
+              icon: "$flask-conical",
               description: "Test your bot as a customer",
-            },
-            {
-              name: "Forms",
-              link: "/dashboard/forms",
-              icon: "mdi-list-box-outline",
-              description: "Builder and responses",
             },
             // {
             //   name: "WhatsApp Bot",
             //   link: "/dashboard/whatsapp-bot",
-            //   icon: "mdi-whatsapp",
+            //   icon: "$whatsapp",
             //   description: "Automated messaging",
             // },
             {
               name: "Call Analysis",
               link: "/dashboard/call-batches",
-              icon: "mdi-phone-outline",
+              icon: "$phone",
               description: "Speech-to-text insights",
             },
           ],
@@ -111,28 +143,36 @@ export default {
           color: "orange",
           items: [
             {
-              name: "Page URL List",
-              link: "/dashboard/page-list",
-              icon: "mdi-format-list-bulleted",
-              description: "Sitemap management",
+              name: "Knowledge",
+              link: "/dashboard/knowledge",
+              icon: "$folder-open",
+              description: "Website pages and notes",
             },
             {
-              name: "Scraped Pages",
-              link: "/dashboard/scraped-pages",
-              icon: "mdi-file-document-outline",
-              description: "Indexed data",
+              name: "Bot Profile",
+              link: "/dashboard/bot-profile",
+              icon: "$user-cog",
+              description: "Tone, facts and rules",
+            },
+            {
+              name: "Setup",
+              link: "/dashboard/setup",
+              icon: "$rocket",
+              description: "Build, test and go live",
+              permission: "settings:manage",
+            },
+            {
+              name: "Quality",
+              link: "/dashboard/quality",
+              icon: "$circle-check",
+              description: "Test your bot's answers",
+              permission: "settings:manage",
             },
             {
               name: "Knowledge Gap",
               link: "/dashboard/knowledge-gap/",
-              icon: "mdi-lightbulb-on-outline",
+              icon: "$lightbulb",
               description: "Missing information",
-            },
-            {
-              name: "Content Chunks",
-              link: "/dashboard/content-chunks",
-              icon: "mdi-text-box-multiple-outline",
-              description: "Vector data segments",
             },
           ],
         },
@@ -142,13 +182,13 @@ export default {
         //     {
         //       name: "Integration",
         //       link: "/dashboard/integration",
-        //       icon: "mdi-puzzle-outline",
+        //       icon: "$puzzle",
         //       description: "API and Webhooks",
         //     },
         //     {
         //       name: "Security",
         //       link: "/dashboard/security",
-        //       icon: "mdi-shield-lock-outline",
+        //       icon: "$shield-check",
         //       description: "Access and Auth",
         //     },
         //   ],
@@ -157,7 +197,29 @@ export default {
     };
   },
 
+  computed: {
+    setupProgress() {
+      return checklistProgress(this.setupState?.checklist);
+    },
+  },
+
+  async created() {
+    loadSetup().then((s) => (this.setupState = s));
+    loadMyPermissions()
+      .then((p) => (this.perms = p))
+      .catch(() => (this.perms = []));
+    // Open blockers: knowledge that isn't live until someone looks at it
+    const summary = await loadIssueSummary();
+    if (summary && summary.blocker) {
+      this.badges = { ...this.badges, "/dashboard/knowledge": summary.blocker };
+    }
+  },
+
   methods: {
+    visibleItems(section) {
+      return section.items.filter((i) => !i.permission || can(this.perms, i.permission));
+    },
+
     navigate(link) {
       this.$router.push(link).catch(() => {});
     },

@@ -1,7 +1,5 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import ScrapedPages from "../components/ScrapedPages.vue";
-import SitemapForm from "@/components/SitemapForm.vue";
 import LandingPage from "@/pages/landing/LandingPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
@@ -30,13 +28,44 @@ const routes = [
         component: () => import("../screens/dashboard/MyProfile.vue"),
         meta: { tab: 0 },
       },
-      { path: "sitemap", component: SitemapForm, meta: { tab: 0 } },
       {
-        path: "page-list",
-        component: () => import("../screens/dashboard/PageList.vue"),
-        meta: { tab: 1 },
+        path: "knowledge",
+        component: () =>
+          import("../screens/dashboard/knowledge/KnowledgeSources.vue"),
+        meta: { permission: "knowledge:read" },
       },
-      { path: "scraped-pages", component: ScrapedPages, meta: { tab: 2 } },
+      {
+        path: "setup",
+        component: () => import("../screens/dashboard/setup/SetupPage.vue"),
+        meta: { permission: "settings:manage" },
+      },
+      {
+        path: "quality",
+        component: () => import("../screens/dashboard/quality/QualityPage.vue"),
+        meta: { permission: "settings:manage" },
+      },
+      {
+        path: "quality/runs/:runId",
+        component: () => import("../screens/dashboard/quality/QualityRun.vue"),
+        meta: { permission: "settings:manage" },
+      },
+      {
+        path: "knowledge/issues",
+        component: () =>
+          import("../screens/dashboard/knowledge/KnowledgeIssues.vue"),
+        meta: { permission: "knowledge:read" },
+      },
+      {
+        path: "knowledge/:sourceId",
+        component: () =>
+          import("../screens/dashboard/knowledge/KnowledgeSource.vue"),
+        meta: { permission: "knowledge:read" },
+      },
+      // Replaced by Knowledge (Track K)
+      { path: "sitemap", redirect: "/dashboard/knowledge" },
+      { path: "page-list", redirect: "/dashboard/knowledge" },
+      { path: "scraped-pages", redirect: "/dashboard/knowledge" },
+      { path: "content-chunks", redirect: "/dashboard/knowledge" },
       {
         path: "integration",
         component: () => import("../screens/dashboard/IntegrationPage.vue"),
@@ -53,6 +82,11 @@ const routes = [
         meta: { permission: "settings:manage" },
       },
       { path: "try-chat", redirect: "/dashboard/sandbox" },
+      {
+        path: "bot-profile",
+        component: () => import("../screens/dashboard/BotProfile.vue"),
+        meta: { permission: "settings:manage" },
+      },
 
       {
         path: "opportunity-analysis",
@@ -77,15 +111,14 @@ const routes = [
         component: () =>
           import("../screens/dashboard/knowledgeGap/KnowledgeGapView.vue"),
       },
-      {
-        path: "content-chunks",
-        name: "ContentChunksList",
-        component: () => import("../screens/dashboard/ContentChunksList.vue"),
-      },
 
       {
         path: "whatsapp-bot",
         redirect: "/dashboard/integration?section=tellephant",
+      },
+      {
+        path: "widget",
+        redirect: "/dashboard/integration?section=widget",
       },
       {
         path: "documentation",
@@ -139,40 +172,8 @@ const routes = [
     ],
   },
 
-  // forms dashboard
-  {
-    path: "/dashboard/forms",
-    component: () => import("../layouts/FormsDashboardLayout.vue"),
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: "",
-        name: "FormsList",
-        component: () => import("../screens/dashboard/forms/FormList.vue"),
-      },
-      {
-        path: "create",
-        name: "CreateForm",
-        component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
-      },
-      {
-        path: ":id/edit",
-        name: "EditForm",
-        component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
-      },
-      {
-        path: ":id/submissions",
-        name: "FormSubmissions",
-        component: () =>
-          import("../screens/dashboard/forms/FormSubmissions.vue"),
-      },
-      {
-        path: ":id/analytics",
-        name: "FormAnalytics",
-        component: () => import("../screens/dashboard/forms/FormAnalytics.vue"),
-      },
-    ],
-  },
+  // The forms module was removed; send old links to the dashboard
+  { path: "/dashboard/forms*", redirect: "/dashboard" },
 
   // call analysis dashboard
   {
@@ -197,24 +198,6 @@ const routes = [
       },
     ],
   },
-
-  // {
-  //   path: "/dashboard/forms/create",
-  //   name: "/dashboardCreateForm",
-  //   component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
-  // },
-
-  // {
-  //   path: "/dashboard/forms/:id/edit",
-  //   name: "EditForm",
-  //   component: () => import("../screens/dashboard/forms/FormBuilder.vue"),
-  // },
-
-  // {
-  //   path: "/dashboard/forms/:id/submissions",
-  //   name: "FormSubmissions",
-  //   component: () => import("../screens/dashboard/forms/FormSubmissions.vue"),
-  // },
 ];
 
 const router = new VueRouter({

@@ -7,7 +7,7 @@
           <div class="message" :class="'message-' + chat.sentBy">
             {{ chat.message }}
             <div v-if="chat.sentBy == 'ChatGpt'">
-              <v-icon small>mdi-robot</v-icon>
+              <v-icon small>$bot</v-icon>
             </div>
           </div>
         </div>
