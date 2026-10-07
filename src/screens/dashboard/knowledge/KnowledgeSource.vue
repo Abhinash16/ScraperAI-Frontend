@@ -113,7 +113,7 @@
             depressed
             rounded
             class="text-none my-1"
-            @click="openNote"
+            @click="openNote()"
           >
             <v-icon small class="mr-1">$plus</v-icon> Add note
           </v-btn>
@@ -217,6 +217,7 @@
       :permissions="perms"
       @close="openItemId = null"
       @changed="refresh"
+      @add-note="addAsNote"
     />
 
     <!-- Add note -->
@@ -463,6 +464,18 @@ export default {
       clearTimeout(this.searchTimer);
       this.searchTimer = setTimeout(this.resetPage, 350);
     },
+    // The same component is reused when moving to another source
+    sourceId(id, old) {
+      if (!id || id === old) return;
+      this.source = null;
+      this.items = [];
+      this.total = 0;
+      this.openItemId = null;
+      this.statusFilter = "";
+      this.search = "";
+      this.loadSource();
+      this.resetPage();
+    },
   },
 
   created() {
@@ -492,6 +505,12 @@ export default {
       try {
         const { data } = await apiClient.get(`${KNOWLEDGE_API}/sources/${this.sourceId}`);
         this.source = data.data;
+        // Arrived from "Add as note instead" on a failed page
+        const { note } = this.$route.query;
+        if (note !== undefined) {
+          this.$router.replace({ query: {} }).catch(() => {});
+          if (this.source.type !== "website") this.openNote(String(note));
+        }
       } catch (err) {
         this.loadError = apiError(err, "Failed to load this source");
       }
@@ -597,11 +616,35 @@ export default {
       }
     },
 
-    openNote() {
-      this.note = emptyNote();
+    openNote(title = "") {
+      this.note = { ...emptyNote(), title };
       this.note.publish = can(this.perms, "knowledge:publish");
       this.noteError = "";
       this.noteOpen = true;
+    },
+
+    // A page that can't be imported (blocked, too little text...) becomes a
+    // note in a manual source, created if the client has none yet.
+    async addAsNote(title) {
+      this.openItemId = null;
+      if (this.source.type === "manual") {
+        this.openNote(title);
+        return;
+      }
+      try {
+        const { data } = await apiClient.get(`${KNOWLEDGE_API}/sources`);
+        let target = (data.data || []).find((s) => s.type === "manual");
+        if (!target) {
+          const created = await apiClient.post(`${KNOWLEDGE_API}/sources`, {
+            type: "manual",
+            name: "Notes",
+          });
+          target = created.data.data;
+        }
+        this.$router.push({ path: `/dashboard/knowledge/${target._id}`, query: { note: title } });
+      } catch (err) {
+        this.$toast.error(apiError(err, "Couldn't open a notes source"));
+      }
     },
 
     async saveNote() {

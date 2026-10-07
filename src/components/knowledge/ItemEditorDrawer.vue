@@ -46,13 +46,60 @@
 
         <v-alert
           v-if="work && work.error"
-          type="error"
+          :type="work.retrying ? 'info' : 'error'"
           dense
           outlined
           rounded="lg"
           class="text-body-2"
         >
           {{ work.error }}
+          <div v-if="fix" class="mt-2">
+            <v-btn
+              v-if="fix === 'delete' && canDelete"
+              small
+              depressed
+              rounded
+              color="error"
+              class="text-none"
+              @click="confirming = 'delete'"
+            >
+              Delete {{ item.type === "page" ? "page" : "item" }}
+            </v-btn>
+            <v-btn
+              v-else-if="fix === 'note' && canWrite"
+              small
+              depressed
+              rounded
+              color="primary"
+              class="text-none"
+              @click="$emit('add-note', item.title || (item.data && item.data.url) || '')"
+            >
+              Add as note instead
+            </v-btn>
+            <v-btn
+              v-else-if="fix === 'retry' && (item.type === 'page' ? canWrite : canPublish)"
+              small
+              depressed
+              rounded
+              color="primary"
+              class="text-none"
+              :loading="busy === 'reimport' || busy === 'publish'"
+              @click="item.type === 'page' ? confirmReimport() : act('publish')"
+            >
+              Retry
+            </v-btn>
+            <v-btn
+              v-else-if="fix === 'ai-settings'"
+              small
+              depressed
+              rounded
+              color="primary"
+              class="text-none"
+              to="/dashboard/integration?section=ai-provider"
+            >
+              Open AI settings
+            </v-btn>
+          </div>
         </v-alert>
 
         <div v-if="item.data && item.data.url" class="text-body-2 mb-4">
@@ -224,6 +271,7 @@ import {
   KNOWLEDGE_API,
   apiError,
   can,
+  fixFor,
   formatDate,
   isBusy,
   workState,
@@ -249,7 +297,8 @@ const CONFIRM = {
   },
 };
 
-// Opens when `itemId` is set. Emits "close" and "changed" (the list should reload).
+// Opens when `itemId` is set. Emits "close", "changed" (the list should
+// reload) and "add-note" with a title, when a page should become a note.
 export default {
   name: "ItemEditorDrawer",
 
@@ -290,6 +339,9 @@ export default {
     },
     work() {
       return this.item ? workState(this.item) : null;
+    },
+    fix() {
+      return fixFor(this.work);
     },
     dirty() {
       return (

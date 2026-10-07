@@ -54,6 +54,21 @@
     />
 
     <v-alert
+      v-if="invalid.length"
+      type="info"
+      dense
+      outlined
+      rounded="lg"
+      dismissible
+      class="mt-4 mb-0 text-body-2"
+      @input="invalid = []"
+    >
+      {{ invalid.length }} entr{{ invalid.length === 1 ? "y was" : "ies were" }}
+      skipped because {{ invalid.length === 1 ? "it isn't a web address" : "they aren't web addresses" }}:
+      <span class="invalid-list">{{ invalid.join(", ") }}</span>
+    </v-alert>
+
+    <v-alert
       v-if="error"
       type="error"
       dense
@@ -109,6 +124,8 @@ export default {
       file: null,
       importing: false,
       error: "",
+      // Entries the server rejected as not being web addresses (up to 20)
+      invalid: [],
     };
   },
 
@@ -134,6 +151,7 @@ export default {
     async run() {
       this.importing = true;
       this.error = "";
+      this.invalid = [];
       const base = `${KNOWLEDGE_API}/sources/${this.sourceId}/import`;
       try {
         let res;
@@ -149,10 +167,11 @@ export default {
           res = await apiClient.post(`${base}/file`, form);
           this.file = null;
         }
-        const { queued = 0, skipped = 0 } = res.data.data || {};
+        const { queued = 0, skipped = 0, invalid = [] } = res.data.data || {};
+        this.invalid = invalid;
         this.$toast.success(
           `${queued} page${queued === 1 ? "" : "s"} queued for import` +
-            (skipped ? `, ${skipped} skipped` : "")
+            (skipped ? `, ${skipped} already in this source` : "")
         );
         this.$emit("imported", { queued, skipped });
       } catch (err) {
@@ -168,5 +187,8 @@ export default {
 <style scoped>
 .import-tabs {
   border-bottom: 1px solid #e0e0e0;
+}
+.invalid-list {
+  word-break: break-all;
 }
 </style>
