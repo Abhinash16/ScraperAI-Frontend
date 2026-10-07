@@ -5,6 +5,8 @@
       <v-progress-circular indeterminate size="70" width="6" color="primary" />
     </v-overlay>
 
+    <ThingsToKnow feature="website-content" />
+
     <!-- Empty State -->
     <v-card outlined rounded="xl">
       <!-- Pages Table -->
@@ -427,9 +429,12 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 
 export default {
+  components: { ThingsToKnow },
+
   data() {
     return {
       loading: false,

@@ -12,6 +12,8 @@
       are triggered.
     </v-alert>
 
+    <ThingsToKnow feature="sandbox" />
+
     <!-- ================= RESTORING ================= -->
     <v-card v-if="restoring" outlined rounded="xl" class="pa-8 text-center">
       <v-progress-circular indeterminate color="primary" />
@@ -289,6 +291,7 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import AnswerTrace from "@/components/sandbox/AnswerTrace.vue";
 import {
   createSandboxSession,
@@ -311,7 +314,7 @@ const SOURCES = {
 export default {
   name: "TryChat",
 
-  components: { AnswerTrace },
+  components: { ThingsToKnow, AnswerTrace },
 
   data() {
     return {

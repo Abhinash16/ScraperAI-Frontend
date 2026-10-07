@@ -4,6 +4,8 @@
       <v-progress-circular indeterminate size="70" />
     </v-overlay>
 
+    <ThingsToKnow feature="call-analysis" />
+
     <v-card outlined rounded="xl">
       <div class="d-flex justify-space-between align-center pa-4">
         <div>
@@ -259,9 +261,12 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 
 export default {
+  components: { ThingsToKnow },
+
   data() {
     return {
       loading: false,

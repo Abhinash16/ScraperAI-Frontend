@@ -5,6 +5,8 @@
       <v-progress-circular indeterminate size="60" color="primary" />
     </v-overlay>
 
+    <ThingsToKnow feature="content-chunks" />
+
     <v-card outlined rounded="xl">
       <!-- HEADER -->
       <div class="d-flex justify-space-between align-center pa-4 flex-wrap">
@@ -194,10 +196,13 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 import debounce from "lodash/debounce";
 
 export default {
+  components: { ThingsToKnow },
+
   data() {
     return {
       loading: false,

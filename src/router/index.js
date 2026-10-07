@@ -88,6 +88,10 @@ const routes = [
         redirect: "/dashboard/integration?section=tellephant",
       },
       {
+        path: "widget",
+        redirect: "/dashboard/integration?section=widget",
+      },
+      {
         path: "documentation",
         name: "documentation",
         component: () => import("../screens/dashboard/DocumentationPage.vue"),

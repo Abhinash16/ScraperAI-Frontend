@@ -8,6 +8,8 @@
       </div>
     </v-overlay>
 
+    <ThingsToKnow feature="analytics" />
+
     <!-- HEADER -->
     <v-row>
       <v-col cols="12">
@@ -232,11 +234,12 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 import VueApexCharts from "vue-apexcharts";
 
 export default {
-  components: { apexchart: VueApexCharts },
+  components: { ThingsToKnow, apexchart: VueApexCharts },
 
   data() {
     return {

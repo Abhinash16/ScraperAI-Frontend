@@ -13,6 +13,8 @@
       </div>
     </div>
 
+    <ThingsToKnow feature="team" />
+
     <v-card v-if="!me" outlined rounded="xl" class="pa-6">
       <v-progress-linear v-if="!meError" indeterminate color="primary" />
       <v-alert v-else type="error" outlined rounded="lg" class="mb-0">
@@ -52,6 +54,7 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 import MembersTab from "@/components/team/MembersTab.vue";
 import RolesTab from "@/components/team/RolesTab.vue";
@@ -60,7 +63,7 @@ import { apiError, FULL_ACCESS } from "@/utils/team";
 export default {
   name: "TeamManagement",
 
-  components: { MembersTab, RolesTab },
+  components: { ThingsToKnow, MembersTab, RolesTab },
 
   data() {
     return { me: null, meError: "" };

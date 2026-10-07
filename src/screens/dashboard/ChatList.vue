@@ -1,5 +1,7 @@
 <template>
   <div>
+    <ThingsToKnow feature="chats" />
+
     <v-chip color="primary" outlined small class="mb-4">
       {{ chats.length }}/{{ total }} Chats Loaded
     </v-chip>
@@ -200,11 +202,13 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 import ChatView from "../../screens/dashboard/ChatView.vue";
 
 export default {
   components: {
+    ThingsToKnow,
     ChatView,
   },
   data: () => ({

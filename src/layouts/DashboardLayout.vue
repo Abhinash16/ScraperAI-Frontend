@@ -151,7 +151,7 @@ export default {
 
     links: [
       { name: "Dashboard", path: "/dashboard" },
-      // { name: "Documentation", path: "/dashboard/documentation" },
+      { name: "Guide", path: "/dashboard/documentation" },
       // { name: "API Reference", path: "/api" },
     ],
 

@@ -1,281 +1,401 @@
 <template>
-  <div>
+  <div class="docs-page">
     <!-- HEADER -->
-    <v-row class="mb-6">
-      <v-col>
-        <div>
-          <h1 class="text-h5 font-weight-bold mb-1">Documentation</h1>
-          <p class="text-subtitle-2 grey--text mb-0">
-            Complete guide to integrate chatbot and enable AI features
-          </p>
-        </div>
-      </v-col>
-
-      <!-- DOWNLOAD BUTTON -->
-      <v-col cols="auto">
-        <v-btn color="primary" rounded depressed @click="downloadDocs">
-          <v-icon left>mdi-download</v-icon>
-          Download Docs
-        </v-btn>
-      </v-col>
-    </v-row>
-
-    <!-- ================= USER INFO ================= -->
-    <v-card outlined rounded="xl" class="mb-6">
-      <div class="pa-4">
-        <div class="text-h6 font-weight-bold">Getting Started</div>
-        <div class="text-caption grey--text">
-          Understand how ScraperAI works before integrating
-        </div>
+    <div class="d-flex align-start flex-wrap mb-4">
+      <div class="flex-grow-1 mr-4 mb-2">
+        <h1 class="text-h5 font-weight-bold mb-1">Guide</h1>
+        <p class="text-subtitle-2 grey--text mb-0">
+          What each feature does, what to know before going live, and what's
+          coming next.
+        </p>
       </div>
+      <v-btn color="primary" rounded depressed outlined @click="downloadDocs">
+        <v-icon left>mdi-download</v-icon>
+        Download
+      </v-btn>
+    </div>
 
-      <v-divider />
+    <v-tabs
+      :value="tabIndex"
+      show-arrows
+      class="mb-6 docs-tabs"
+      @change="setTab(TABS[$event].id)"
+    >
+      <v-tab v-for="t in TABS" :key="t.id" class="text-none">
+        <v-icon small left>{{ t.icon }}</v-icon>
+        {{ t.name }}
+      </v-tab>
+    </v-tabs>
 
-      <v-card-text>
-        <div class="mb-3">
-          ScraperAI allows you to add an AI-powered chatbot to your website that
-          can:
+    <!-- ================= GO-LIVE CHECKLIST ================= -->
+    <div v-if="tab === 'checklist'">
+      <v-card outlined rounded="xl" class="pa-6 mb-4">
+        <div class="d-flex align-center flex-wrap">
+          <v-progress-circular
+            :value="readiness"
+            size="64"
+            width="6"
+            color="primary"
+            class="mr-4"
+          >
+            <strong>{{ readiness }}%</strong>
+          </v-progress-circular>
+          <div>
+            <div class="text-subtitle-1 font-weight-bold">
+              {{ requiredDone }} of {{ autoRequired.length }} required checks
+              passed
+            </div>
+            <div class="text-body-2 grey--text text--darken-1">
+              Ticks are checked automatically where we can. Steps marked
+              "Check yourself" are ones we can't verify, so make sure they're
+              done.
+            </div>
+          </div>
         </div>
+      </v-card>
 
-        <v-list dense>
-          <v-list-item>
-            <v-list-item-content>
-              Answer customer queries automatically
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-content>
-              Fetch data from your database (via DB AI)
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-content>
-              Integrate with external APIs (like customer APIs)
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-
-        <div class="mt-3 text-caption grey--text">
-          To get started, you need:
-          <br />
-          1. Your API Key (already generated for you)
-          <br />
-          2. Add chatbot script to your website
-          <br />
-          3. (Optional) Configure database AI for advanced queries
-        </div>
-      </v-card-text>
-    </v-card>
-
-    <!-- ================= CHAT INTEGRATION ================= -->
-    <v-card outlined rounded="xl" class="mb-6">
-      <div class="pa-4">
-        <div class="text-h6 font-weight-bold">Chat Integration</div>
-        <div class="text-caption grey--text">
-          Add AI chatbot to your website
-        </div>
-      </div>
-
-      <v-divider />
-
-      <v-card-text>
-        <!-- EXPLANATION -->
-        <div class="mb-4 text-caption grey--text">
-          This script connects your website to ScraperAI servers using your
-          unique API key. The chatbot will automatically load and start
-          responding to users.
-        </div>
-
-        <!-- STEP 1 -->
-        <div class="mb-4">
-          <div class="font-weight-medium mb-2">Step 1: Copy Script</div>
-
-          <div class="code-box d-flex justify-space-between">
-            <pre class="ma-0">{{ scriptCode }}</pre>
-
-            <v-btn icon small @click="copyScript">
-              <v-icon small>mdi-content-copy</v-icon>
+      <v-card outlined rounded="xl">
+        <template v-for="(item, i) in GO_LIVE_CHECKLIST">
+          <v-divider v-if="i" :key="item.id + '-d'" />
+          <div :key="item.id" class="d-flex align-start pa-4">
+            <v-icon :color="statusColor(item)" class="mr-3 mt-1">
+              {{ statusIcon(item) }}
+            </v-icon>
+            <div class="flex-grow-1 mr-2">
+              <div class="font-weight-bold">
+                {{ item.title }}
+                <v-chip
+                  x-small
+                  outlined
+                  :color="item.required ? 'primary' : 'grey'"
+                  class="ml-1"
+                >
+                  {{ item.required ? "Required" : "Recommended" }}
+                </v-chip>
+              </div>
+              <div class="text-body-2 grey--text text--darken-1">
+                {{ item.text }}
+              </div>
+              <div
+                v-if="statusOf(item) === null"
+                class="text-caption grey--text mt-1"
+              >
+                {{ item.check ? "Couldn't check this" : "Check yourself" }}
+              </div>
+            </div>
+            <v-btn small text rounded color="primary" :to="item.route">
+              Open
             </v-btn>
           </div>
-        </div>
+        </template>
+      </v-card>
+    </div>
 
-        <!-- STEP 2 -->
-        <div class="mb-4">
-          <div class="font-weight-medium mb-1">Step 2: Add to Website</div>
+    <!-- ================= FEATURE GUIDES ================= -->
+    <div v-if="tab === 'features'">
+      <v-expansion-panels v-model="openGuide" flat class="guides">
+        <v-expansion-panel
+          v-for="g in FEATURE_GUIDES"
+          :id="'guide-' + g.id"
+          :key="g.id"
+          class="guide-panel mb-3"
+        >
+          <v-expansion-panel-header>
+            <div class="d-flex align-center">
+              <v-avatar size="36" rounded="lg" color="#eff2fb" class="mr-3">
+                <v-icon small color="primary">{{ g.icon }}</v-icon>
+              </v-avatar>
+              <div>
+                <div class="font-weight-bold">{{ g.name }}</div>
+                <div class="text-body-2 grey--text text--darken-1">
+                  {{ g.summary }}
+                </div>
+              </div>
+            </div>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <v-row>
+              <v-col cols="12" md="6">
+                <div class="field-title">How to use it</div>
+                <ol class="text-body-2 list">
+                  <li v-for="s in g.steps" :key="s">{{ s }}</li>
+                </ol>
+              </v-col>
+              <v-col cols="12" md="6">
+                <div class="field-title">Things to know</div>
+                <ul class="text-body-2 list">
+                  <li v-for="p in g.thingsToKnow" :key="p">{{ p }}</li>
+                </ul>
+              </v-col>
+            </v-row>
+            <v-btn small depressed rounded color="primary" :to="g.route">
+              Go to {{ g.name }}
+            </v-btn>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </div>
 
-          <div class="text-caption grey--text">
-            Paste the script inside your <b>&lt;body&gt;</b> or before the
-            closing <b>&lt;/body&gt;</b> tag in your HTML file.
-          </div>
-        </div>
-
-        <!-- STEP 3 -->
-        <div>
-          <div class="font-weight-medium mb-1">Step 3: Verify</div>
-
-          <div class="text-caption grey--text">
-            Open your website → chatbot should appear at bottom-right corner.
-          </div>
-        </div>
-
-        <!-- IMPORTANT NOTE -->
-        <v-alert dense rounded="xl" outlined type="info" class="mt-4">
-          Make sure your API key is active. If chatbot doesn't appear, check
-          browser console.
-        </v-alert>
-      </v-card-text>
-    </v-card>
-
-    <!-- ================= DB QUERY ================= -->
-    <v-card outlined rounded="xl" class="mb-6">
-      <div class="pa-4">
-        <div class="text-h6 font-weight-bold">Database AI Setup</div>
-        <div class="text-caption grey--text">
-          Configure schema for AI query generation
-        </div>
+    <!-- ================= COMING NEXT ================= -->
+    <div v-if="tab === 'coming'">
+      <div class="text-body-2 grey--text text--darken-1 mb-4">
+        Features we're building next, roughly in order. We'll let you know as
+        each one becomes available.
       </div>
+      <v-row>
+        <v-col v-for="c in COMING_NEXT" :key="c.title" cols="12" sm="6">
+          <v-card outlined rounded="xl" class="pa-5 fill-height">
+            <div class="d-flex align-center mb-2">
+              <v-icon color="primary" class="mr-2">{{ c.icon }}</v-icon>
+              <span class="font-weight-bold">{{ c.title }}</span>
+            </div>
+            <div class="text-body-2 grey--text text--darken-2">
+              {{ c.text }}
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+    </div>
 
-      <v-divider />
-
-      <v-card-text>
-        <div class="mb-4 text-caption grey--text">
-          Database AI allows the chatbot to understand your database and
-          generate queries automatically. This is useful for dynamic data like
-          users, orders, bookings, etc.
+    <!-- ================= INSTALL ================= -->
+    <div v-if="tab === 'install'">
+      <v-card outlined rounded="xl" class="pa-6">
+        <div class="font-weight-bold mb-2">1. Copy the script</div>
+        <div class="code-box d-flex justify-space-between align-start mb-6">
+          <pre class="ma-0">{{ scriptCode }}</pre>
+          <v-btn icon small dark @click="copyScript">
+            <v-icon small>mdi-content-copy</v-icon>
+          </v-btn>
         </div>
 
-        <v-timeline dense>
-          <v-timeline-item small>
-            <b>Step 1:</b> Go to "DB Query Generator" and create a new project
-          </v-timeline-item>
+        <div class="font-weight-bold mb-1">2. Add it to your website</div>
+        <div class="text-body-2 grey--text text--darken-1 mb-6">
+          Paste the script just before the closing
+          <code>&lt;/body&gt;</code> tag on every page where you want the chat.
+        </div>
 
-          <v-timeline-item small>
-            <b>Step 2:</b> Select your database type (MySQL / PostgreSQL)
-          </v-timeline-item>
+        <div class="font-weight-bold mb-1">3. Lock it to your domains</div>
+        <div class="text-body-2 grey--text text--darken-1 mb-6">
+          In
+          <router-link to="/dashboard/integration?section=widget">
+            Integrations → Website Widget</router-link
+          >, add the domains where you installed it. After that, other
+          websites can't use your chatbot.
+        </div>
 
-          <v-timeline-item small>
-            <b>Step 3:</b> Click <b>Configure</b> to open schema builder
-          </v-timeline-item>
-
-          <v-timeline-item small>
-            <b>Step 4:</b> Upload your SQL schema (DDL)
-            <div class="text-caption grey--text">
-              Example: CREATE TABLE users (...)
-            </div>
-          </v-timeline-item>
-
-          <v-timeline-item small>
-            <b>Step 5:</b> Add relationships between tables
-            <div class="text-caption grey--text">
-              This helps AI understand joins between tables
-            </div>
-          </v-timeline-item>
-
-          <v-timeline-item small>
-            <b>Step 6:</b> Start asking questions in natural language
-          </v-timeline-item>
-        </v-timeline>
-
-        <v-alert dense rounded="xl" outlined type="success" class="mt-4">
-          Once configured, your chatbot can answer questions like:
-          <br />
-          "Show all users created last week"
-        </v-alert>
-      </v-card-text>
-    </v-card>
+        <div class="font-weight-bold mb-1">4. Check it works</div>
+        <div class="text-body-2 grey--text text--darken-1">
+          Open your website. The chat bubble appears in the bottom-right
+          corner. If it doesn't, make sure the domain you're on is in your
+          allowed list, then check the browser console for errors.
+        </div>
+      </v-card>
+    </div>
   </div>
 </template>
 
 <script>
 import apiClient from "@/service/axios";
+import {
+  FEATURE_GUIDES,
+  GO_LIVE_CHECKLIST,
+  COMING_NEXT,
+} from "@/content/featureGuides";
+
+const TABS = [
+  { id: "checklist", name: "Go-live checklist", icon: "mdi-rocket-launch-outline" },
+  { id: "features", name: "Feature guides", icon: "mdi-book-open-variant" },
+  { id: "coming", name: "Coming next", icon: "mdi-map-marker-path" },
+  { id: "install", name: "Install", icon: "mdi-code-tags" },
+];
 
 export default {
   data() {
     return {
+      TABS,
+      FEATURE_GUIDES,
+      GO_LIVE_CHECKLIST,
+      COMING_NEXT,
+
       user: {},
-      customerApiUrl: "",
+      openGuide: null,
+      // true / false once known; null means unknown (manual or failed).
+      checks: {
+        hasPages: null,
+        aiConfigured: null,
+        domainsSet: null,
+        escalateSet: null,
+        noPendingGaps: null,
+        whatsappOn: null,
+      },
     };
   },
 
   computed: {
+    tab() {
+      if (this.$route.query.guide) return "features";
+      const t = this.$route.query.tab;
+      return TABS.some((x) => x.id === t) ? t : "checklist";
+    },
+
+    tabIndex() {
+      return TABS.findIndex((t) => t.id === this.tab);
+    },
+
+    // Only required steps we can verify count toward the score.
+    autoRequired() {
+      return GO_LIVE_CHECKLIST.filter((i) => i.required && i.check);
+    },
+
+    requiredDone() {
+      return this.autoRequired.filter((i) => this.statusOf(i) === true).length;
+    },
+
+    readiness() {
+      if (!this.autoRequired.length) return 0;
+      return Math.round((this.requiredDone / this.autoRequired.length) * 100);
+    },
+
     scriptCode() {
       const open = "<" + "script";
       const close = "</" + "script>";
-
       return `${open} src="https://scraper.ai/chatpanel.js" id="chatPanelScript" data-api-key="${
         this.user.apiKey || "YOUR_API_KEY"
       }">${close}`;
     },
   },
 
+  watch: {
+    "$route.query.guide": {
+      immediate: true,
+      handler(id) {
+        const i = FEATURE_GUIDES.findIndex((g) => g.id === id);
+        if (i === -1) return;
+        this.openGuide = i;
+        this.$nextTick(() => {
+          const el = document.getElementById("guide-" + id);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      },
+    },
+  },
+
   mounted() {
-    this.currentLoggedInUserInfo();
-    this.loadCustomerApiUrl();
+    this.loadUser();
+    this.loadPages();
+    this.loadDomains();
+    this.loadGaps();
   },
 
   methods: {
-    async currentLoggedInUserInfo() {
+    setTab(id) {
+      if (id === this.tab) return;
+      this.$router.replace({ query: { tab: id } }).catch(() => {});
+    },
+
+    statusOf(item) {
+      return item.check ? this.checks[item.check] : null;
+    },
+
+    statusIcon(item) {
+      const s = this.statusOf(item);
+      if (s === true) return "mdi-check-circle";
+      if (s === false) return "mdi-circle-outline";
+      return "mdi-help-circle-outline";
+    },
+
+    statusColor(item) {
+      const s = this.statusOf(item);
+      if (s === true) return "success";
+      if (s === false && item.required) return "warning";
+      return "grey";
+    },
+
+    async loadUser() {
       try {
         const { data } = await apiClient.get("/clients/currentUser");
-        this.user = data.data;
+        const user = data.data || {};
+        this.user = user;
+        this.checks.aiConfigured =
+          user.chatgptConfigured ?? !!user.chatgptApiKey;
+        this.checks.escalateSet = !!user.webhooks?.escalate?.url;
+        this.checks.whatsappOn = !!user.autoWhatsappEnabled;
       } catch {
-        console.log("error loading user");
+        // leave as unknown
       }
     },
 
-    async loadCustomerApiUrl() {
+    async loadPages() {
       try {
-        const { data } = await apiClient.get("/clients/customer-api-settings");
-        this.customerApiUrl = data.data?.url || "";
+        const { data } = await apiClient.get("content/pages");
+        this.checks.hasPages = (data.data || []).length > 0;
       } catch {
-        // needs settings:manage; leave blank for other users
-        this.customerApiUrl = "";
+        // leave as unknown
+      }
+    },
+
+    // Needs settings:manage; others see this step as "Couldn't check this".
+    async loadDomains() {
+      try {
+        const { data } = await apiClient.get("/clients/widget-settings");
+        this.checks.domainsSet = (data.data?.allowedOrigins || []).length > 0;
+      } catch {
+        // leave as unknown
+      }
+    },
+
+    async loadGaps() {
+      try {
+        const { data } = await apiClient.get("/content/knowledge-gap", {
+          params: { status: "pending", limit: 1, offset: 0 },
+        });
+        this.checks.noPendingGaps = data.pagination?.total === 0;
+      } catch {
+        // leave as unknown
       }
     },
 
     copyScript() {
-      const open = "<" + "script";
-      const close = "</" + "script>";
-
-      const raw = `${open} src="https://scraper.ai/chatpanel.js" id="chatPanelScript" data-api-key="${this.user.apiKey}">${close}`;
-
-      navigator.clipboard.writeText(raw);
+      navigator.clipboard.writeText(this.scriptCode);
+      this.$toast.success("Script copied");
     },
 
     downloadDocs() {
-      const open = "<" + "script";
-      const close = "</" + "script>";
+      const lines = [
+        "scraperAI guide",
+        "",
+        `Website: ${this.user.company_website || "-"}`,
+        "",
+        "INSTALL",
+        this.scriptCode,
+        "Paste before </body>, then add your domains in Integrations > Website Widget.",
+        "",
+        "GO-LIVE CHECKLIST",
+        ...GO_LIVE_CHECKLIST.map(
+          (i) =>
+            `[${this.statusOf(i) === true ? "x" : " "}] ${i.title}${
+              i.required ? " (required)" : ""
+            } - ${i.text}`,
+        ),
+        "",
+        "FEATURES",
+        ...FEATURE_GUIDES.flatMap((g) => [
+          "",
+          g.name.toUpperCase(),
+          g.summary,
+          ...g.steps.map((s, n) => `  ${n + 1}. ${s}`),
+          "  Things to know:",
+          ...g.thingsToKnow.map((p) => `  - ${p}`),
+        ]),
+        "",
+        "COMING NEXT",
+        ...COMING_NEXT.map((c) => `- ${c.title}: ${c.text}`),
+      ];
 
-      const scriptTag = `${open} src="https://scraper.ai/chatpanel.js" id="chatPanelScript" data-api-key="${this.user.apiKey}">${close}`;
-
-      const content = `
-ScraperAI Documentation
-
-Website: ${this.user.company_website}
-API Key: ${this.user.apiKey}
-
-CHAT INTEGRATION:
-Add this script:
-
-${scriptTag}
-
-DB QUERY SETUP:
-1. Create Project
-2. Select DB Version
-3. Upload Schema
-4. Add Relationships
-
-Customer API:
-${this.customerApiUrl || "Not configured"}
-  `;
-
-      const blob = new Blob([content], { type: "text/plain" });
+      const blob = new Blob([lines.join("\n")], { type: "text/plain" });
       const link = document.createElement("a");
-
       link.href = URL.createObjectURL(blob);
-      link.download = "scraperai-docs.txt";
+      link.download = "scraperai-guide.txt";
       link.click();
     },
   },
@@ -283,6 +403,40 @@ ${this.customerApiUrl || "Not configured"}
 </script>
 
 <style scoped>
+.docs-page {
+  max-width: 1000px;
+}
+
+.docs-tabs {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.guide-panel {
+  border: 1px solid #e0e0e0;
+  border-radius: 16px !important;
+}
+
+.guide-panel::before {
+  box-shadow: none !important;
+}
+
+.field-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #757575;
+  margin-bottom: 8px;
+}
+
+.list {
+  padding-left: 18px;
+}
+
+.list li {
+  margin-bottom: 6px;
+}
+
 .code-box {
   background: #0f172a;
   color: #fff;
@@ -290,5 +444,10 @@ ${this.customerApiUrl || "Not configured"}
   border-radius: 10px;
   font-size: 13px;
   overflow-x: auto;
+}
+
+.code-box pre {
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 </style>

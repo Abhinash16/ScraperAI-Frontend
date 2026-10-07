@@ -150,13 +150,6 @@
             placeholder="Write the correct answer that the AI should learn..."
           />
 
-          <v-checkbox
-            v-model="notify_user"
-            label="Notify customer with this answer"
-            class="mt-2"
-            :disabled="gap.status === 'answered'"
-          />
-
           <div class="d-flex justify-end">
             <v-btn
               color="primary"
@@ -186,7 +179,6 @@ export default {
       loading: false,
       saving: false,
       answer: "",
-      notify_user: false,
     };
   },
 
@@ -219,7 +211,6 @@ export default {
       try {
         await apiClient.post(`/content/knowledge-gap/${this.gap._id}/answer`, {
           answer: this.answer,
-          notify_user: this.notify_user,
         });
 
         this.$toast?.success?.("Answer saved successfully") ||

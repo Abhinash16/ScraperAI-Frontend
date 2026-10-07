@@ -21,6 +21,8 @@
       </v-col>
     </v-row>
 
+    <ThingsToKnow feature="forms" />
+
     <!-- LOADING -->
     <v-row v-if="loading" justify="center" class="py-10">
       <v-progress-circular indeterminate size="40" />
@@ -202,9 +204,12 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 
 export default {
+  components: { ThingsToKnow },
+
   data() {
     return {
       forms: [],

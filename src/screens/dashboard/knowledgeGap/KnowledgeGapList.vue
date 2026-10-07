@@ -5,6 +5,8 @@
       <v-progress-circular indeterminate size="70" width="6" color="primary" />
     </v-overlay>
 
+    <ThingsToKnow feature="knowledge-gap" />
+
     <v-card outlined rounded="xl">
       <!-- HEADER -->
       <div class="d-flex justify-space-between align-center pa-4 flex-wrap">
@@ -225,9 +227,12 @@
 </template>
 
 <script>
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 
 export default {
+  components: { ThingsToKnow },
+
   name: "KnowledgeGapList",
 
   data() {

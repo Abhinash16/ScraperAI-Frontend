@@ -75,45 +75,14 @@
             </div>
           </div>
 
+          <ThingsToKnow v-if="sectionGuide" :feature="sectionGuide" />
+
           <!-- ================= WEBSITE WIDGET ================= -->
           <div v-if="section === 'widget'">
-            <v-card outlined rounded="xl" class="pa-6">
-              <div class="text-subtitle-1 font-weight-bold mb-1">
-                Embed script
-              </div>
-              <div class="text-body-2 grey--text text--darken-1 mb-4">
-                Paste this before the closing <code>&lt;/body&gt;</code> tag of
-                your site's <code>index.html</code>. The chat widget appears on
-                every page that loads it.
-              </div>
-
-              <div class="code-box">
-                <div class="d-flex justify-space-between align-center mb-2">
-                  <span class="code-label">HTML</span>
-                  <v-btn
-                    x-small
-                    color="primary"
-                    depressed
-                    rounded
-                    @click="copyScriptCode"
-                  >
-                    <v-icon x-small class="mr-1">mdi-content-copy</v-icon> Copy
-                  </v-btn>
-                </div>
-                <code class="code-text">{{ scriptTag }}</code>
-              </div>
-
-              <v-btn
-                text
-                rounded
-                color="primary"
-                class="mt-4 px-2"
-                to="/dashboard/documentation"
-              >
-                <v-icon small class="mr-1">mdi-book-open-outline</v-icon>
-                View installation guide
-              </v-btn>
-            </v-card>
+            <WidgetSettings
+              :api-key="currentLoggedInUser.apiKey"
+              :can-manage-settings="canManageSettings"
+            />
           </div>
 
           <!-- ================= TELLEPHANT (WHATSAPP) ================= -->
@@ -338,14 +307,14 @@
               rounded="xl"
               class="text-body-2 mb-4"
             >
-              Your secret key is disabled until payment is made or the billing
+              Your API key is disabled until payment is made or the billing
               cycle lapses. Once we receive payment, the key is reactivated.
             </v-alert>
 
             <v-card outlined rounded="xl" class="pa-6">
               <div class="code-box mb-4">
                 <div class="d-flex justify-space-between align-center mb-2">
-                  <span class="code-label">SECRET KEY</span>
+                  <span class="code-label">API KEY</span>
                   <v-btn
                     x-small
                     color="primary"
@@ -363,13 +332,15 @@
               </div>
 
               <div class="d-flex align-start">
-                <v-icon small color="orange darken-2" class="mr-2 mt-1">
-                  mdi-shield-alert-outline
+                <v-icon small color="primary" class="mr-2 mt-1">
+                  mdi-shield-check-outline
                 </v-icon>
                 <div class="grey--text text--darken-3 text-body-2">
-                  <strong>Keep this key secret.</strong> Don't share it or
-                  expose it in browser or other client-side code. scraperAI may
-                  automatically disable any key that leaks publicly.
+                  <strong>This key is public by design.</strong> It's in the
+                  widget script on your website, so anyone can see it. What
+                  protects it is your
+                  <a @click="setSection('widget')">list of allowed domains</a>:
+                  once you add domains, the widget only works on those sites.
                 </div>
               </div>
             </v-card>
@@ -417,7 +388,7 @@
               {{
                 openaiConfigured
                   ? "A key is saved. Leave this empty to keep it, or enter a new key to replace it."
-                  : "Securely connect your OpenAI account. Keys are encrypted."
+                  : "Connect your OpenAI account. Your key is never shown again after you save it."
               }}
             </div>
             <v-text-field
@@ -482,6 +453,8 @@ import CustomerApiSettings from "@/components/integrations/CustomerApiSettings.v
 import ProductApiSettings from "@/components/integrations/ProductApiSettings.vue";
 import HeadersEditor from "@/components/integrations/HeadersEditor.vue";
 import TellephantSettings from "@/components/integrations/TellephantSettings.vue";
+import WidgetSettings from "@/components/integrations/WidgetSettings.vue";
+import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import { rowsFromHeaders, headersFromRows } from "@/utils/apiHeaders";
 import chatgptIcon from "@/assets/images/chatgpt-icon.png";
 
@@ -519,6 +492,8 @@ export default {
     ProductApiSettings,
     HeadersEditor,
     TellephantSettings,
+    WidgetSettings,
+    ThingsToKnow,
   },
 
   data() {
@@ -575,7 +550,8 @@ export default {
               id: "widget",
               name: "Website Widget",
               icon: "mdi-code-tags",
-              description: "Add the scraperAI chat widget to your website.",
+              description:
+                "Add the chat widget to your website and choose which domains can use it.",
             },
             this.canManageSettings && {
               id: "tellephant",
@@ -633,9 +609,9 @@ export default {
               id: "api-keys",
               name: "API Keys",
               icon: "mdi-key-variant",
-              title: "Secret API Key",
+              title: "API Key",
               description:
-                "Use this key to call scraperAI services from your own backend.",
+                "Your account key. The website widget uses it to find your chatbot.",
               badge: { text: "Legacy", color: "warning" },
             },
             {
@@ -675,6 +651,16 @@ export default {
       return this.navItems.find((i) => i.id === this.section) || {};
     },
 
+    // Widget has its own "Things to know" panel inside WidgetSettings.
+    sectionGuide() {
+      return {
+        tellephant: "whatsapp",
+        "ai-provider": "ai-provider",
+        webhooks: "webhooks",
+        "api-config": "webhooks",
+      }[this.section];
+    },
+
     apiConfigTab() {
       const tab = this.$route.query.tab;
       return API_CONFIG_TABS.some((t) => t.id === tab)
@@ -691,13 +677,6 @@ export default {
 
     activeWebhook() {
       return WEBHOOK_TYPES.find((w) => w.id === this.webhookTab);
-    },
-
-    scriptTag() {
-      const close = "</" + "script>";
-      return `<script src="https://scraper.ai/chatpanel.js" id="chatPanelScript" data-api-key="${
-        this.currentLoggedInUser.apiKey || "YOUR_API_KEY"
-      }">${close}`;
     },
   },
 
@@ -832,11 +811,6 @@ export default {
     copyApiKey() {
       navigator.clipboard.writeText(this.currentLoggedInUser.apiKey);
       this.$toast.success("API key copied");
-    },
-
-    copyScriptCode() {
-      navigator.clipboard.writeText(this.scriptTag);
-      this.$toast.success("Script copied");
     },
   },
 };

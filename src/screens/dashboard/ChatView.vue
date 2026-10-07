@@ -388,7 +388,6 @@ export default {
       messages: [],
       newMessage: "",
       socket: null,
-      apiKey: "",
 
       ticketStatus: "",
 
@@ -524,29 +523,26 @@ export default {
       this.playSound(this.notificationSound);
     },
 
-    async connectSocket() {
+    connectSocket() {
       try {
-        const response = await apiClient.get("/clients/currentUser");
-        this.apiKey = response.data?.data?.apiKey;
-
-        if (!this.apiKey) {
-          throw new Error("API key missing");
-        }
-
         if (this.socket) {
           this.socket.disconnect();
         }
 
+        // The server derives the client from the JWT, checks the chat belongs
+        // to it (chat:read) and records our messages as sender "client".
         this.socket = io("https://ai-api.on-track.in", {
           transports: ["websocket"],
+          auth: { token: localStorage.getItem("user-token") },
         });
 
         this.socket.on("connect", () => {
-          this.socket.emit("joinRoom", {
-            apiKey: this.apiKey,
-            chatId: this.chatId,
-            sender: "client",
-          });
+          this.socket.emit("joinRoom", { chatId: this.chatId });
+        });
+
+        // Auth/permission failures, e.g. "You don't have permission to reply."
+        this.socket.on("error_message", ({ message } = {}) => {
+          this.showError(message || "Chat error. Please try again.");
         });
 
         this.socket.on("previousMessages", (messages) => {
@@ -673,14 +669,7 @@ export default {
       this.socket.emit("stopTyping");
       this.isTyping = false;
 
-      const message = {
-        apiKey: this.apiKey,
-        chatId: this.chatId,
-        sender: "client",
-        message: this.newMessage,
-      };
-
-      this.socket.emit("sendMessage", message);
+      this.socket.emit("sendMessage", { text: this.newMessage });
       this.newMessage = "";
     },
 
