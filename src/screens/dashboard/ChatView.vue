@@ -53,6 +53,23 @@
 
             <v-spacer></v-spacer>
 
+            <v-tooltip v-if="replyWindow" bottom max-width="280">
+              <template #activator="{ on, attrs }">
+                <v-chip
+                  small
+                  outlined
+                  :color="replyWindow.color"
+                  class="mr-2"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon x-small left>$clock</v-icon>
+                  {{ replyWindow.label }}
+                </v-chip>
+              </template>
+              WhatsApp lets businesses send free-form replies for 24 hours after
+              the customer's last message.
+            </v-tooltip>
             <v-chip
               v-if="openConversation"
               small
@@ -156,6 +173,7 @@
             </div>
             <div v-else-if="footer" :key="key" class="conv-footer text-caption mb-4">
               {{ endedLabel(footer) }}
+              <div v-if="footer.summary" class="conv-summary mt-1">{{ footer.summary }}</div>
             </div>
             <v-row
               v-else
@@ -451,6 +469,10 @@ export default {
       conversations: [],
       conversationsLoading: false,
       showConversations: false,
+      summaryRetries: 0,
+      summaryTimer: null,
+      now: Date.now(),
+      clockTimer: null,
       newMessage: "",
       socket: null,
 
@@ -485,6 +507,8 @@ export default {
 
   created() {
     this.notificationSound = new Audio("/message.wav");
+    // Keeps the WhatsApp reply-window countdown current
+    this.clockTimer = setInterval(() => (this.now = Date.now()), 60000);
 
     const unlockAudio = () => {
       this.notificationSound
@@ -529,6 +553,25 @@ export default {
     },
     openConversation() {
       return this.conversations.find(isOpen) || null;
+    },
+    // WhatsApp's 24 h free-form reply window, for the newest conversation
+    replyWindow() {
+      if (this.platform !== "whatsapp") return null;
+      const expires = this.conversations[0]?.whatsappWindowExpiresAt;
+      if (!expires) return null;
+      const ms = new Date(expires) - this.now;
+      if (ms <= 0) {
+        return {
+          label: "Reply window closed: WhatsApp only allows approved template messages now",
+          color: "grey",
+        };
+      }
+      const min = Math.ceil(ms / 60000);
+      const left = min < 60 ? `${min} min` : `${Math.floor(min / 60)} h`;
+      return {
+        label: `Reply window closes in ${left}`,
+        color: min < 120 ? "amber darken-3" : "grey darken-1",
+      };
     },
     openStatus() {
       return OPEN_STATUS[this.openConversation?.status] || OPEN_STATUS.open;
@@ -757,12 +800,32 @@ export default {
       if (!quiet) this.conversationsLoading = true;
       try {
         const list = await fetchConversations(chatId);
-        if (chatId === this.chatId) this.conversations = list;
+        if (chatId === this.chatId) {
+          this.conversations = list;
+          this.waitForSummaries();
+        }
       } catch {
         // Older backends have no conversations: the chat shows ungrouped
       } finally {
         this.conversationsLoading = false;
       }
+    },
+
+    // Summaries are written a few seconds after a conversation ends: check
+    // back a few times for recently ended ones, then give up quietly.
+    waitForSummaries() {
+      clearTimeout(this.summaryTimer);
+      const recent = Date.now() - 5 * 60000;
+      const pending = this.conversations.some(
+        (c) => !isOpen(c) && !c.summary && c.closedAt && new Date(c.closedAt) > recent,
+      );
+      if (!pending) {
+        this.summaryRetries = 0;
+        return;
+      }
+      if (this.summaryRetries >= 4) return;
+      this.summaryRetries += 1;
+      this.summaryTimer = setTimeout(() => this.loadConversations({ quiet: true }), 8000);
     },
 
     formatStart,
@@ -794,6 +857,8 @@ export default {
 
       this.messages = [];
       this.conversations = [];
+      this.summaryRetries = 0;
+      clearTimeout(this.summaryTimer);
     },
 
     scrollToBottom() {
@@ -860,6 +925,8 @@ export default {
   },
 
   beforeDestroy() {
+    clearInterval(this.clockTimer);
+    clearTimeout(this.summaryTimer);
     if (this.socket) {
       this.socket.disconnect();
     }
@@ -887,5 +954,10 @@ export default {
 .conv-footer {
   text-align: center;
   color: #9ca3af;
+}
+.conv-summary {
+  color: #4b5563;
+  max-width: 520px;
+  margin: 0 auto;
 }
 </style>

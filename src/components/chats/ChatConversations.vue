@@ -20,6 +20,10 @@
             {{ stat(c, "userMessages") }} from the customer · {{ stat(c, "botMessages") }} bot
             <template v-if="stat(c, 'agentMessages')"> · {{ stat(c, "agentMessages") }} team</template>
           </v-list-item-subtitle>
+          <div v-if="c.summary" class="text-caption summary mt-1">{{ c.summary }}</div>
+          <div v-if="c.topics && c.topics.length" class="mt-1">
+            <v-chip v-for="t in c.topics" :key="t" x-small class="mr-1">{{ t }}</v-chip>
+          </div>
         </v-list-item-content>
         <v-list-item-action class="my-0">
           <v-chip v-if="statusOf(c)" x-small :color="statusOf(c).color" text-color="white">
@@ -64,10 +68,14 @@ export default {
 
 <style scoped>
 .chat-conversations {
-  max-height: 220px;
+  max-height: 280px;
   overflow-y: auto;
 }
 .conv-row {
   border-bottom: 1px solid #eef1f7;
+}
+.summary {
+  color: #374151;
+  white-space: normal;
 }
 </style>

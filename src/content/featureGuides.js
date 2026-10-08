@@ -323,7 +323,8 @@ export const FEATURE_GUIDES = [
       "Each chat is split into conversations. A conversation ends after a while without messages, and the next message starts a new one.",
     steps: [
       "Set how long a conversation lasts without messages under Bot Profile → Conversation (website in minutes, WhatsApp in hours).",
-      "In a chat, click Conversations to see each one with its outcome, and jump to it.",
+      "In a chat, click Conversations to see each one with its outcome and summary, and jump to it.",
+      "Open Bot Health → Conversations to see how many the bot resolved, and which ones need a look.",
     ],
     thingsToKnow: [
       "The next message after a conversation ends starts a new conversation, and the bot starts fresh (it doesn't carry over the earlier messages).",
@@ -331,6 +332,10 @@ export const FEATURE_GUIDES = [
       "No reply sent: the customer wrote but neither the bot nor your team answered. Open the chat to follow up.",
       "Marking a chat as resolved also ends its open conversation.",
       "Messages from before conversations existed are shown together as \"Earlier messages\".",
+      "A few seconds after a conversation ends, we write a short summary and its topics. You see them in the chat and on Bot Health → Conversations.",
+      "When a customer comes back within 30 days, the bot starts the new conversation with the summary of their last one, so it knows the context. It's context only: the bot never uses it for prices or policies. \"Why this answer\" shows exactly what it remembered.",
+      "WhatsApp lets businesses send free-form replies for 24 hours after the customer's last message. WhatsApp chats show when that window closes; after that, WhatsApp only allows approved template messages.",
+      "\"Resolved by the bot\" counts conversations that ended without a person from your team or a handoff.",
     ],
   },
   {
