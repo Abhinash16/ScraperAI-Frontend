@@ -129,7 +129,7 @@
               </v-col>
             </v-row>
             <ProductApiFormat v-if="g.format" class="mt-2 mb-4" />
-            <v-btn small depressed rounded color="primary" :to="g.route">
+            <v-btn v-if="g.route" small depressed rounded color="primary" :to="g.route">
               Go to {{ g.name }}
             </v-btn>
           </v-expansion-panel-content>

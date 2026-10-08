@@ -65,6 +65,7 @@
             Save key
           </v-btn>
         </v-form>
+        <SecretNotice class="mb-4" />
 
         <div class="d-flex align-center sub-row pa-4">
           <div class="flex-grow-1 mr-4">
@@ -314,6 +315,7 @@
 
 <script>
 import apiClient from "@/service/axios";
+import SecretNotice from "@/components/SecretNotice.vue";
 
 const ENDPOINT = "/clients/whatsapp-integration";
 
@@ -321,6 +323,8 @@ const ENDPOINT = "/clients/whatsapp-integration";
 // the Integrations page can refresh its sidebar badge.
 export default {
   name: "TellephantSettings",
+
+  components: { SecretNotice },
 
   data() {
     return {

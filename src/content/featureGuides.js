@@ -233,6 +233,23 @@ export const FEATURE_GUIDES = [
     ],
   },
   {
+    id: "security",
+    name: "Security: how we protect your keys",
+    icon: "$shield-check",
+    summary:
+      "What happens to the API keys, WhatsApp key and headers you give us.",
+    steps: [
+      "Create a dedicated OpenAI project key just for ScraperAI, with a monthly spending limit (OpenAI dashboard → Projects → API keys / Limits). You can revoke it at any time without affecting your other systems.",
+      "To change a key, enter a new one. To stop its use, remove it.",
+    ],
+    thingsToKnow: [
+      "Encrypted before it's stored. Your API keys, WhatsApp key and integration/webhook headers are encrypted with AES-256-GCM (the encryption standard banks use) before they reach our database. Database backups only ever contain the encrypted form.",
+      "Never shown again. Once saved, a key is never sent back to any screen or API, not to you, your team or our support staff. You'll only see that it's set and, for headers, masked values (********). To change it, enter a new one.",
+      "Used only for its purpose. Your OpenAI key is used only to write your bot's replies to your customers. It's decrypted in memory just for that request, sent only to OpenAI over an encrypted connection (HTTPS), and never written to logs.",
+      "You stay in control. Replace or remove a key at any time. Removing it stops its use immediately.",
+    ],
+  },
+  {
     id: "webhooks",
     name: "Webhooks & API config",
     icon: "$webhook",
@@ -366,6 +383,11 @@ export const PRODUCT_API_FORMAT = {
     "The bot only states prices and stock from this data, never from website text.",
   ],
 };
+
+// Short version shown next to every field that takes a secret
+// (components/SecretNotice.vue). Keep it no stronger than the security guide.
+export const SECRET_NOTICE =
+  "Encrypted with AES-256-GCM before it's stored, and never shown again once saved. Replace or remove it at any time.";
 
 export function featureGuide(id) {
   return FEATURE_GUIDES.find((g) => g.id === id);

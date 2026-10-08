@@ -419,6 +419,7 @@
               color="primary"
               background-color="#f8fafc"
             ></v-text-field>
+            <SecretNotice class="mt-2" />
           </div>
 
           <div class="mb-2">
@@ -473,6 +474,7 @@ import TellephantSettings from "@/components/integrations/TellephantSettings.vue
 import WidgetSettings from "@/components/integrations/WidgetSettings.vue";
 import EscalationAlertEmails from "@/components/integrations/EscalationAlertEmails.vue";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
+import SecretNotice from "@/components/SecretNotice.vue";
 import { rowsFromHeaders, headersFromRows } from "@/utils/apiHeaders";
 import chatgptIcon from "@/assets/images/chatgpt-icon.png";
 
@@ -513,6 +515,7 @@ export default {
     WidgetSettings,
     EscalationAlertEmails,
     ThingsToKnow,
+    SecretNotice,
   },
 
   data() {
