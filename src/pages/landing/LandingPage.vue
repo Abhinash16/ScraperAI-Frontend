@@ -1,952 +1,1476 @@
 <template>
-  <div>
-    <v-app-bar app flat color="white" light elevate-on-scroll>
-      <v-container class="py-0 fill-height">
-        <v-avatar size="40" color="primary" tile class="mr-2 mb-0 rounded-lg">
-          <v-img
-            src="../../assets/13.png"
-            max-height="40"
-            max-width="40"
-          ></v-img>
-        </v-avatar>
-        <div>
-          <h3 class="font-weight-black secondary--text">scraperAI</h3>
-          <div class="text-caption grey--text hidden-sm-and-down">
-            Modular Intelligence Grid System
-          </div>
+  <div class="landing">
+    <!-- ================= TOP BAR ================= -->
+    <v-app-bar
+      app
+      flat
+      elevate-on-scroll
+      color="rgba(255,255,255,0.86)"
+      :height="$vuetify.breakpoint.xsOnly ? 60 : 68"
+      class="landing-bar"
+    >
+      <!-- No extra container padding on phones: the bar already has its own -->
+      <v-container class="d-flex align-center py-0 px-0 px-sm-3">
+        <router-link
+          to="/"
+          class="d-flex align-center text-decoration-none"
+          aria-label="scraperAI home"
+        >
+          <v-avatar
+            :size="$vuetify.breakpoint.xsOnly ? 32 : 36"
+            color="primary"
+            tile
+            class="rounded-lg mr-2 mr-sm-3"
+          >
+            <v-img src="../../assets/13.png" alt="" />
+          </v-avatar>
+          <span class="text-h6 font-weight-black secondary--text"
+            >scraperAI</span
+          >
+        </router-link>
+
+        <v-spacer />
+
+        <div class="hidden-sm-and-down">
+          <v-btn
+            v-for="l in NAV"
+            :key="l.id"
+            text
+            color="grey darken-3"
+            class="font-weight-bold"
+            @click="scrollTo(l.id)"
+          >
+            {{ l.label }}
+          </v-btn>
         </div>
-        <v-spacer></v-spacer>
+
         <v-btn
+          v-if="!isLoggedIn"
           text
-          class="text-capitalize font-weight-bold"
-          @click="scrollToSection('features')"
-          >Features</v-btn
+          color="grey darken-3"
+          class="font-weight-bold ml-2 hidden-xs-only"
+          to="/login"
         >
-        <v-btn
-          text
-          class="text-capitalize font-weight-bold mr-2"
-          @click="scrollToSection('services')"
-          >Services</v-btn
-        >
-        <v-btn
-          text
-          class="text-capitalize font-weight-bold mr-2"
-          @click="scrollToSection('prices')"
-          >Pricing</v-btn
-        >
-        <v-btn
-          color="primary"
-          rounded
-          depressed
-          class="px-6 text-capitalize font-weight-bold"
-          @click="redirectToSignup"
-        >
-          {{ isLoggedIn ? "Dashboard" : "Sign In" }}
+          Sign in
         </v-btn>
+        <v-btn
+          depressed
+          color="primary"
+          class="font-weight-bold ml-2"
+          :small="$vuetify.breakpoint.xsOnly"
+          @click="primaryAction"
+        >
+          <v-icon v-if="isLoggedIn" left size="16">$layout-dashboard</v-icon>
+          {{
+            isLoggedIn
+              ? "Dashboard"
+              : $vuetify.breakpoint.xsOnly
+              ? "Try free"
+              : "Try for free"
+          }}
+        </v-btn>
+
+        <v-menu offset-y left nudge-bottom="8">
+          <template #activator="{ on, attrs }">
+            <v-btn
+              icon
+              class="ml-1 hidden-md-and-up"
+              aria-label="Menu"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon>$menu</v-icon>
+            </v-btn>
+          </template>
+          <v-card width="220" outlined rounded="lg">
+            <v-list dense nav class="py-2">
+              <v-list-item v-for="l in NAV" :key="l.id" @click="scrollTo(l.id)">
+                <v-list-item-title class="font-weight-bold">{{
+                  l.label
+                }}</v-list-item-title>
+              </v-list-item>
+              <v-list-item v-if="!isLoggedIn" to="/login">
+                <v-list-item-title class="font-weight-bold"
+                  >Sign in</v-list-item-title
+                >
+              </v-list-item>
+            </v-list>
+          </v-card>
+        </v-menu>
       </v-container>
     </v-app-bar>
 
-    <!-- Hero Section -->
-    <v-sheet
-      color="grey lighten-5"
-      min-height="90vh"
-      class="d-flex align-center pt-12 pb-12"
-      style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)"
-    >
-      <v-container>
-        <v-row align="center" justify="center">
-          <v-col cols="12" md="6" class="text-left">
-            <v-chip
-              color="primary "
-              label
-              class="mb-6 px-6 font-weight-bold rounded-xl"
-            >
-              Customer Support, Reimagined
-            </v-chip>
-            <h1 class="text-h2 font-weight-black mb-6 secondary--text">
-              AI-Powered <br />
-              <span class="primary--text rotating-text">{{
-                rotatingWord
-              }}</span>
-              <br />
-              for Every Business
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+      <div class="blob blob--one" aria-hidden="true" />
+      <div class="blob blob--two" aria-hidden="true" />
+      <v-container class="hero__inner">
+        <v-row align="center">
+          <v-col cols="12" md="7">
+            <div v-reveal>
+              <v-chip
+                label
+                color="white"
+                class="hero__badge font-weight-bold mb-6"
+              >
+                <v-icon left size="14" color="primary">$sparkles</v-icon>
+                AI customer support for WhatsApp and the web
+              </v-chip>
+            </div>
+            <h1 v-reveal="80" class="hero__title font-weight-black mb-5">
+              Answer every customer instantly, from
+              <span class="text-gradient">your own knowledge</span>.
             </h1>
             <p
-              class="text-h6 grey--text text--darken-1 font-weight-regular mb-10 mx-auto"
-              style="max-width: 600px; line-height: 1.6"
+              v-reveal="160"
+              class="text-body-1 text-sm-h6 font-weight-regular grey--text text--darken-1 mb-8"
             >
-              Integrate intelligent AI support into your application in minutes.
-              Handle customer inquiries 24/7 with ease, precision, and
-              context-aware responses.
+              scraperAI learns from your website, FAQs and documents, replies on
+              your website and WhatsApp around the clock, checks live prices and
+              bookings, and hands the chat to your team when it should.
             </p>
-            <div class="d-flex justify-between flex-wrap gap-4">
+            <!-- One line on every screen: halves on phones, natural width on larger -->
+            <div v-reveal="240" class="d-flex">
               <v-btn
-                x-large
-                rounded
+                :x-large="!compactCta"
+                :large="compactCta"
                 depressed
                 color="primary"
-                class="px-10 py-6 mr-4 text-capitalize font-weight-bold"
-                @click="redirectToSignup"
+                class="cta-btn font-weight-bold flex-grow-1 flex-sm-grow-0 mr-3"
+                @click="primaryAction"
               >
-                Get Started Free
+                {{ isLoggedIn ? "Go to dashboard" : "Try for free" }}
+                <v-icon v-if="!compactCta" right size="18">$arrow-right</v-icon>
               </v-btn>
               <v-btn
-                x-large
-                rounded
+                :x-large="!compactCta"
+                :large="compactCta"
                 outlined
                 color="primary"
-                class="px-12 py-6 font-weight-bold ml-2"
+                class="font-weight-bold flex-grow-1 flex-sm-grow-0"
+                @click="scrollTo('how')"
               >
-                See in Action
+                See how it works
               </v-btn>
             </div>
+            <div v-reveal="320" class="d-flex flex-wrap mt-3">
+              <span
+                v-for="p in HERO_POINTS"
+                :key="p"
+                class="d-inline-flex align-center text-body-2 grey--text text--darken-2 mr-5 my-1"
+              >
+                <v-icon size="16" color="success" class="mr-2"
+                  >$circle-check</v-icon
+                >
+                {{ p }}
+              </span>
+            </div>
           </v-col>
-          <v-col cols="12" md="6" class="hidden-sm-and-down">
-            <v-img
-              src="../../assets//images/landing.png"
-              max-width="600"
-              class="mx-auto"
-              style="filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1))"
-            ></v-img>
+
+          <!-- Animated example chat -->
+          <v-col cols="12" md="5">
+            <div v-reveal="200" class="chat-shell mx-auto">
+              <v-card
+                rounded="lg"
+                elevation="0"
+                outlined
+                class="overflow-hidden"
+              >
+                <v-sheet
+                  color="#075e54"
+                  dark
+                  class="d-flex align-center px-4 py-3"
+                >
+                  <v-avatar size="38" color="#128c7e" class="mr-3">
+                    <v-icon size="18" color="white">$whatsapp</v-icon>
+                  </v-avatar>
+                  <div class="flex-grow-1">
+                    <div class="text-body-2 font-weight-bold">
+                      Ontrack Rentals
+                    </div>
+                    <div class="text-caption green--text text--lighten-4">
+                      {{ botTyping ? "typing…" : "online" }}
+                    </div>
+                  </div>
+                  <v-chip
+                    x-small
+                    label
+                    color="rgba(255,255,255,0.16)"
+                    class="font-weight-bold"
+                  >
+                    <v-icon left size="10">$bot</v-icon>
+                    AI
+                  </v-chip>
+                </v-sheet>
+
+                <v-sheet color="#efeae2" class="chat-body pa-4">
+                  <transition-group name="msg" tag="div">
+                    <div
+                      v-for="m in shownMessages"
+                      :key="m.id"
+                      class="d-flex mb-3"
+                      :class="
+                        m.from === 'customer' ? 'justify-end' : 'justify-start'
+                      "
+                    >
+                      <div
+                        class="bubble"
+                        :class="
+                          m.from === 'customer' ? 'bubble--me' : 'bubble--bot'
+                        "
+                      >
+                        <div class="text-body-2 grey--text text--darken-4">
+                          {{ m.text }}
+                        </div>
+                        <div v-if="m.sources" class="d-flex flex-wrap mt-2">
+                          <span
+                            v-for="s in m.sources"
+                            :key="s"
+                            class="source-chip mr-1 mt-1"
+                          >
+                            <v-icon size="10" color="primary" class="mr-1"
+                              >$route</v-icon
+                            >{{ s }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </transition-group>
+                  <div v-if="botTyping" class="d-flex justify-start mb-3">
+                    <div class="bubble bubble--bot typing" aria-label="typing">
+                      <span /><span /><span />
+                    </div>
+                  </div>
+                </v-sheet>
+              </v-card>
+              <div class="text-center text-caption grey--text mt-3">
+                Example conversation
+              </div>
+            </div>
           </v-col>
         </v-row>
       </v-container>
-    </v-sheet>
+    </section>
 
-    <div>
-      <v-container class="py-16" id="features">
-        <div class="text-center mb-16">
-          <h2 class="text-h3 font-weight-black secondary--text mb-4">
-            Built for Scale
-          </h2>
-          <p class="text-h6 grey--text mx-auto" style="max-width: 700px">
-            Automate your customer experience with tools designed for
-            high-growth engineering teams.
-          </p>
+    <!-- ================= TOPIC MARQUEE ================= -->
+    <section class="py-8 marquee-wrap">
+      <div
+        class="text-center text-caption font-weight-bold text-uppercase grey--text mb-4"
+      >
+        Customers ask. Your bot answers.
+      </div>
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee__track">
+          <span v-for="(t, i) in MARQUEE_DOUBLE" :key="i" class="marquee__item">
+            <v-icon size="16" color="primary" class="mr-2">{{ t.icon }}</v-icon
+            >{{ t.label }}
+          </span>
         </div>
+      </div>
+    </section>
 
-        <v-row>
-          <v-col v-for="(feature, i) in features" :key="i" cols="12" md="6">
-            <v-card
-              hover
-              flat
-              outlined
-              class="pa-6 h-100 rounded-xl transition-swing d-flex flex-column"
-              style="border: 1.5px solid #f0f0f0 !important"
+    <!-- ================= HIGHLIGHTS ================= -->
+    <v-container id="features" class="py-12 py-md-16">
+      <div v-reveal class="text-center mb-12">
+        <div class="eyebrow mb-2">Why scraperAI</div>
+        <h2 class="section-title mb-3">
+          Accurate answers your customers can trust
+        </h2>
+        <div class="text-body-1 grey--text text--darken-1">
+          Control what the bot knows, see why it answers, and step in when it
+          matters.
+        </div>
+      </div>
+
+      <v-row>
+        <v-col v-for="(h, i) in HIGHLIGHTS" :key="h.title" cols="12" md="4">
+          <v-card
+            v-reveal="i * 100"
+            outlined
+            rounded="xl"
+            class="lift pa-6 fill-height"
+          >
+            <v-avatar
+              size="48"
+              tile
+              :color="`${h.tone} lighten-5`"
+              class="rounded-lg mb-5"
             >
-              <v-avatar
-                :color="feature.color + '15'"
-                size="72"
-                class="rounded-lg"
+              <v-icon size="24" :color="h.tone">{{ h.icon }}</v-icon>
+            </v-avatar>
+            <div
+              class="text-h6 font-weight-bold grey--text text--darken-4 mb-2"
+            >
+              {{ h.title }}
+            </div>
+            <div class="text-body-2 grey--text text--darken-1 mb-5">
+              {{ h.text }}
+            </div>
+            <v-sheet color="#F7F7FE" rounded="lg" class="pa-3">
+              <div
+                v-for="line in h.demo"
+                :key="line"
+                class="d-flex align-center text-caption grey--text text--darken-3 py-1"
               >
-                <v-icon :color="feature.color" size="36">
-                  {{ feature.icon }}
-                </v-icon>
-              </v-avatar>
+                <v-icon size="14" color="success" class="mr-2">$check</v-icon>
+                {{ line }}
+              </div>
+            </v-sheet>
+          </v-card>
+        </v-col>
+      </v-row>
 
-              <h3 class="text-h5 my-4 font-weight-black secondary--text">
-                {{ feature.title }}
-              </h3>
+      <v-row class="mt-6">
+        <v-col
+          v-for="(f, i) in FEATURES"
+          :key="f.title"
+          cols="12"
+          sm="6"
+          md="3"
+        >
+          <v-card
+            v-reveal="(i % 4) * 80"
+            outlined
+            rounded="lg"
+            class="lift pa-5 fill-height"
+          >
+            <v-icon size="22" :color="f.tone" class="mb-3">{{ f.icon }}</v-icon>
+            <div
+              class="text-subtitle-2 font-weight-bold grey--text text--darken-4 mb-1"
+            >
+              {{ f.title }}
+            </div>
+            <div class="text-body-2 grey--text text--darken-1">
+              {{ f.text }}
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
 
-              <p
-                class="text-body-1 grey--text text--darken-2"
-                style="line-height: 1.7"
+    <!-- ================= HOW IT WORKS ================= -->
+    <section id="how" class="soft-band py-12 py-md-16">
+      <v-container>
+        <div v-reveal class="text-center mb-12">
+          <div class="eyebrow mb-2">How it works</div>
+          <h2 class="section-title mb-3">Live in four steps, without code</h2>
+          <div class="text-body-1 grey--text text--darken-1">
+            Everything is staged and tested before a single customer sees it.
+          </div>
+        </div>
+        <v-row>
+          <v-col v-for="(s, i) in STEPS" :key="s.title" cols="12" sm="6" md="3">
+            <v-card
+              v-reveal="i * 120"
+              outlined
+              rounded="xl"
+              class="lift pa-6 fill-height"
+            >
+              <div class="step-number mb-4">0{{ i + 1 }}</div>
+              <v-icon size="22" color="primary" class="mb-3">{{
+                s.icon
+              }}</v-icon>
+              <div
+                class="text-subtitle-1 font-weight-bold grey--text text--darken-4 mb-2"
               >
-                {{ feature.desc }}
-              </p>
-
-              <v-spacer></v-spacer>
-
-              <div class="d-flex flex-wrap mt-auto">
-                <v-chip
-                  v-for="tag in feature.tags"
-                  :key="tag"
-                  small
-                  class="mr-2 font-weight-bold"
-                  :color="feature.color + '12'"
-                  :text-color="feature.color"
-                >
-                  {{ tag }}
-                </v-chip>
+                {{ s.title }}
+              </div>
+              <div class="text-body-2 grey--text text--darken-1">
+                {{ s.text }}
               </div>
             </v-card>
           </v-col>
         </v-row>
       </v-container>
+    </section>
 
-      <v-sheet color="secondary" class="py-16 mt-10 overflow-hidden" dark>
-        <v-container>
-          <v-row align="center">
-            <v-col cols="12" md="5">
-              <h2 class="text-h3 font-weight-black mb-6">
-                AI that actually learns.
-              </h2>
-              <p class="text-h6 mb-8 opacity-70 font-weight-regular">
-                Most bots require manual FAQs. We scrape your technical docs,
-                blog posts, and sitemaps to build a dynamic knowledge base that
-                updates as you do.
-              </p>
-              <v-list color="transparent" dense>
-                <v-list-item
-                  v-for="item in [
-                    'Automated RAG Pipeline',
-                    'Zero Manual Training',
-                    'Custom Tone of Voice',
-                  ]"
-                  :key="item"
-                  class="px-0"
-                >
-                  <v-list-item-icon class="mr-3">
-                    <v-icon color="primary lighten-2">$circle-check</v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>
-                    <v-list-item-title class="font-weight-bold">{{
-                      item
-                    }}</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-col>
-            <v-col cols="12" md="7">
-              <v-card
-                color="#1e293b"
-                class="rounded-xl pa-6 border-chat elevation-20"
-              >
-                <div class="d-flex align-center mb-6">
-                  <div class="chat-dot red mr-2"></div>
-                  <div class="chat-dot yellow mr-2"></div>
-                  <div class="chat-dot green"></div>
-                  <v-spacer></v-spacer>
-                  <span class="text-caption font-weight-bold opacity-50"
-                    >LIVE PREVIEW</span
-                  >
-                </div>
-                <v-timeline dense align-top>
-                  <!-- User -->
-                  <v-timeline-item color="primary" small>
-                    <v-card
-                      color="rgba(255,255,255,0.05)"
-                      class="pa-3 rounded-lg"
-                    >
-                      <span class="text-body-2 white--text">
-                        How do I setup the REST API?
-                      </span>
-                    </v-card>
-                  </v-timeline-item>
-
-                  <!-- AI -->
-                  <v-timeline-item color="success" small>
-                    <v-card color="primary" class="pa-3 rounded-lg">
-                      <span class="text-body-2 white--text">
-                        Just wrap your endpoint with our Bearer token. Check the
-                        <a href="#" class="white--text font-weight-black"
-                          >/v1/auth</a
-                        >
-                        docs.
-                      </span>
-                    </v-card>
-                  </v-timeline-item>
-
-                  <!-- User -->
-                  <v-timeline-item color="primary" small>
-                    <v-card
-                      color="rgba(255,255,255,0.05)"
-                      class="pa-3 rounded-lg"
-                    >
-                      <span class="text-body-2 white--text">
-                        Can I track API usage and analytics?
-                      </span>
-                    </v-card>
-                  </v-timeline-item>
-
-                  <!-- AI -->
-                  <v-timeline-item color="success" small>
-                    <v-card color="primary" class="pa-3 rounded-lg">
-                      <span class="text-body-2 white--text">
-                        Yes You get real-time insights like requests, latency,
-                        and errors in the dashboard.
-                      </span>
-                    </v-card>
-                  </v-timeline-item>
-                </v-timeline>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-sheet>
-
-      <v-container class="py-16" id="services">
-        <div class="text-center mb-16">
-          <h2 class="text-h3 font-weight-black secondary--text mb-4">
-            Integrated Intelligence Services
-          </h2>
-          <p class="text-h6 grey--text mx-auto" style="max-width: 700px">
-            Explore our specialized BI solutions designed for modern
-            enterprises.
-          </p>
-        </div>
-
-        <v-row>
-          <v-col v-for="(service, i) in services" :key="i" cols="12" md="3">
-            <v-card
-              hover
-              flat
-              outlined
-              class="pa-6 h-100 rounded-xl transition-swing d-flex flex-column"
-              style="border: 1.5px solid #f0f0f0 !important"
+    <!-- ================= TRANSPARENCY ================= -->
+    <v-container class="py-12 py-md-16">
+      <v-row align="center">
+        <v-col cols="12" md="5">
+          <div v-reveal>
+            <div class="eyebrow mb-2">Transparency</div>
+            <h2 class="section-title mb-4">
+              See exactly why the bot said what it said
+            </h2>
+            <div class="text-body-1 grey--text text--darken-1 mb-6">
+              Every reply has a "Why this answer" view: the FAQs and pages it
+              used, the products it looked up, how long it took and what it
+              cost. When something's wrong, fix the source in one click.
+            </div>
+            <div
+              v-for="p in WHY_POINTS"
+              :key="p"
+              class="d-flex align-center text-body-1 grey--text text--darken-3 mb-3"
             >
+              <v-icon size="18" color="success" class="mr-3"
+                >$circle-check</v-icon
+              >
+              {{ p }}
+            </div>
+          </div>
+        </v-col>
+        <v-col cols="12" md="7">
+          <v-card v-reveal="120" outlined rounded="xl" class="lift">
+            <div class="d-flex align-center px-5 py-4">
               <v-avatar
-                :color="service.color + '15'"
-                size="72"
-                class="rounded-lg"
+                size="34"
+                tile
+                color="primary lighten-5"
+                class="rounded-lg mr-3"
               >
-                <v-icon :color="service.color" size="36">
-                  {{ service.icon }}
-                </v-icon>
+                <v-icon size="16" color="primary">$route</v-icon>
               </v-avatar>
-
-              <h3 class="text-h5 my-4 font-weight-black secondary--text">
-                {{ service.title }}
-              </h3>
-
-              <p
-                class="text-body-1 grey--text text--darken-2"
-                style="line-height: 1.7"
+              <div class="flex-grow-1 overflow-hidden">
+                <div
+                  class="text-body-2 font-weight-bold grey--text text--darken-4"
+                >
+                  Why this answer
+                </div>
+                <div
+                  class="text-caption grey--text text--darken-1 text-truncate"
+                >
+                  "Is Activa EV available in Koramangala?"
+                </div>
+              </div>
+              <v-chip
+                x-small
+                label
+                color="green lighten-5"
+                text-color="green darken-2"
+                class="font-weight-bold"
               >
-                {{ service.desc }}
-              </p>
+                Answered
+              </v-chip>
+            </div>
+            <v-divider />
+            <v-row no-gutters class="px-3 py-3">
+              <v-col
+                v-for="t in TRACE_STATS"
+                :key="t.label"
+                cols="6"
+                sm="3"
+                class="px-2 py-1"
+              >
+                <div class="text-caption grey--text">{{ t.label }}</div>
+                <div
+                  class="text-body-2 font-weight-bold grey--text text--darken-4"
+                >
+                  {{ t.value }}
+                </div>
+              </v-col>
+            </v-row>
+            <v-divider />
+            <div class="pa-5">
+              <div
+                class="text-caption font-weight-bold text-uppercase grey--text mb-2"
+              >
+                Used in the answer
+              </div>
+              <v-sheet outlined rounded="lg">
+                <template v-for="(b, i) in TRACE_SOURCES">
+                  <v-divider v-if="i > 0" :key="`d-${i}`" />
+                  <div :key="i" class="d-flex align-center flex-wrap px-4 py-2">
+                    <v-chip
+                      x-small
+                      label
+                      color="primary lighten-5"
+                      text-color="primary"
+                      class="font-weight-bold mr-3"
+                    >
+                      {{ b.kind }}
+                    </v-chip>
+                    <span class="text-body-2 grey--text text--darken-3 mr-2">{{
+                      b.title
+                    }}</span>
+                    <v-spacer />
+                    <v-icon size="14" color="success">$check</v-icon>
+                  </div>
+                </template>
+              </v-sheet>
+              <div class="text-center text-caption grey--text mt-3">
+                Example
+              </div>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+
+    <!-- ================= PRICING ================= -->
+    <section id="pricing" class="soft-band py-12 py-md-16">
+      <v-container>
+        <div v-reveal class="text-center mb-12">
+          <div class="eyebrow mb-2">Pricing</div>
+          <h2 class="section-title mb-3">Simple, transparent pricing</h2>
+          <div class="text-body-1 grey--text text--darken-1">
+            Flexible plans designed for growing businesses.
+          </div>
+        </div>
+        <v-row justify="center" align="stretch">
+          <v-col
+            v-for="(plan, i) in PLANS"
+            :key="plan.name"
+            cols="12"
+            sm="8"
+            md="4"
+          >
+            <v-card
+              v-reveal="i * 120"
+              :outlined="!plan.featured"
+              :color="plan.featured ? 'primary' : undefined"
+              :dark="plan.featured"
+              rounded="xl"
+              :elevation="plan.featured ? 12 : 0"
+              class="lift d-flex flex-column pa-7 fill-height"
+            >
+              <div class="d-flex align-center mb-4">
+                <span
+                  class="text-overline font-weight-bold"
+                  :class="plan.featured ? 'white--text' : 'primary--text'"
+                >
+                  {{ plan.name }}
+                </span>
+                <v-spacer />
+                <v-chip
+                  v-if="plan.featured"
+                  x-small
+                  label
+                  color="white"
+                  class="primary--text font-weight-bold"
+                >
+                  Recommended
+                </v-chip>
+              </div>
+              <div
+                class="text-h3 font-weight-black mb-1"
+                :class="plan.featured ? '' : 'grey--text text--darken-4'"
+              >
+                {{ plan.price }}
+              </div>
+              <div
+                class="text-body-2 mb-6"
+                :class="
+                  plan.featured ? 'white--text' : 'grey--text text--darken-1'
+                "
+              >
+                {{ plan.period }}
+              </div>
+              <div
+                v-for="feat in plan.features"
+                :key="feat"
+                class="d-flex align-center text-body-2 mb-3"
+              >
+                <v-icon
+                  size="16"
+                  :color="plan.featured ? 'white' : 'success'"
+                  class="mr-3"
+                  >$circle-check</v-icon
+                >
+                <span
+                  :class="
+                    plan.featured ? 'white--text' : 'grey--text text--darken-3'
+                  "
+                  >{{ feat }}</span
+                >
+              </div>
+              <v-spacer />
+              <v-btn
+                block
+                x-large
+                depressed
+                :outlined="!plan.featured"
+                :color="plan.featured ? 'white' : 'primary'"
+                class="font-weight-bold mt-5"
+                :class="plan.featured ? 'primary--text' : ''"
+                to="/signup"
+              >
+                {{ plan.cta }}
+              </v-btn>
             </v-card>
           </v-col>
         </v-row>
       </v-container>
+    </section>
 
-      <v-sheet color="secondary" class="py-16 mt-10 overflow-hidden" dark>
-        <v-container>
-          <v-row align="center">
-            <v-col cols="12" md="5">
-              <h2 class="text-h3 font-weight-black mb-6">
-                Analytics that drive growth.
-              </h2>
-              <p class="text-h6 mb-8 opacity-70 font-weight-regular">
-                Don't just chat—understand. Our dashboard tracks user intent,
-                resolution rates, and knowledge gaps so you can optimize your
-                documentation in real-time.
-              </p>
-              <v-list color="transparent" dense>
-                <v-list-item
-                  v-for="item in [
-                    'Real-time Sentiment Analysis',
-                    'Automated Intent Tagging',
-                    'Resolution Rate Tracking',
-                  ]"
-                  :key="item"
-                  class="px-0"
-                >
-                  <v-list-item-icon class="mr-3">
-                    <v-icon color="primary lighten-2"
-                      >$chart-spline</v-icon
-                    >
-                  </v-list-item-icon>
-                  <v-list-item-content>
-                    <v-list-item-title class="font-weight-bold">{{
-                      item
-                    }}</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list>
-            </v-col>
-
-            <v-col cols="12" md="7">
-              <v-card
-                color="#1e293b"
-                class="rounded-xl pa-6 border-chat elevation-20"
+    <!-- ================= SECURITY ================= -->
+    <v-container class="py-12 py-md-16">
+      <div v-reveal class="text-center mb-12">
+        <div class="eyebrow mb-2">Safe by design</div>
+        <h2 class="section-title mb-3">
+          Built so nothing goes live by accident
+        </h2>
+        <div class="text-body-1 grey--text text--darken-1">
+          Guardrails at every step, from your knowledge to your API keys.
+        </div>
+      </div>
+      <v-row>
+        <v-col v-for="(t, i) in TRUST" :key="t.title" cols="12" sm="6" md="4">
+          <div v-reveal="(i % 3) * 100" class="d-flex align-start">
+            <v-avatar
+              size="42"
+              tile
+              color="green lighten-5"
+              class="rounded-lg mr-4 flex-shrink-0"
+            >
+              <v-icon size="20" color="green darken-1">{{ t.icon }}</v-icon>
+            </v-avatar>
+            <div>
+              <div
+                class="text-subtitle-1 font-weight-bold grey--text text--darken-4 mb-1"
               >
-                <div class="d-flex align-center mb-6">
-                  <div class="chat-dot red mr-2"></div>
-                  <div class="chat-dot yellow mr-2"></div>
-                  <div class="chat-dot green"></div>
-                  <v-spacer></v-spacer>
-                  <v-chip x-small color="success" class="font-weight-black"
-                    >AI ANALYTICS LIVE</v-chip
-                  >
-                </div>
-
-                <v-row>
-                  <v-col cols="12" sm="6">
-                    <div
-                      class="pa-4 rounded-lg mb-4"
-                      style="background: rgba(255, 255, 255, 0.05)"
-                    >
-                      <div class="text-caption grey--text text--lighten-1 mb-1">
-                        USER SATISFACTION
-                      </div>
-                      <div class="text-h4 font-weight-black">98.2%</div>
-                      <v-progress-linear
-                        color="success"
-                        value="98"
-                        class="mt-2"
-                        rounded
-                        height="6"
-                      ></v-progress-linear>
-                    </div>
-                  </v-col>
-                  <v-col cols="12" sm="6">
-                    <div
-                      class="pa-4 rounded-lg mb-4"
-                      style="background: rgba(255, 255, 255, 0.05)"
-                    >
-                      <div class="text-caption grey--text text--lighten-1 mb-1">
-                        AVG. RESPONSE TIME
-                      </div>
-                      <div class="text-h4 font-weight-black">1.2s</div>
-                      <v-progress-linear
-                        color="primary"
-                        value="30"
-                        class="mt-2"
-                        rounded
-                        height="6"
-                      ></v-progress-linear>
-                    </div>
-                  </v-col>
-                </v-row>
-
-                <v-card
-                  color="rgba(255,255,255,0.03)"
-                  class="pa-4 rounded-lg border-1"
-                >
-                  <div class="text-subtitle-2 mb-4 font-weight-bold">
-                    Top Trending Topics
-                  </div>
-
-                  <div
-                    v-for="(topic, i) in [
-                      {
-                        name: 'API Authentication',
-                        count: '450 hits',
-                        color: 'blue',
-                      },
-                      {
-                        name: 'Pricing Plans',
-                        count: '312 hits',
-                        color: 'purple',
-                      },
-                      {
-                        name: 'React Integration',
-                        count: '289 hits',
-                        color: 'cyan',
-                      },
-                    ]"
-                    :key="i"
-                    class="d-flex align-center mb-3"
-                  >
-                    <v-icon :color="topic.color" small class="mr-3"
-                      >$dot</v-icon
-                    >
-                    <span class="text-body-2">{{ topic.name }}</span>
-                    <v-spacer></v-spacer>
-                    <span class="text-caption opacity-60">{{
-                      topic.count
-                    }}</span>
-                  </div>
-                </v-card>
-
-                <div
-                  class="mt-6 d-flex align-end justify-space-between"
-                  style="height: 60px"
-                >
-                  <div
-                    v-for="n in 12"
-                    :key="n"
-                    :style="{
-                      height: Math.floor(Math.random() * 100) + '%',
-                      width: '6%',
-                      background: 'rgba(255,255,255,0.1)',
-                      borderRadius: '4px 4px 0 0',
-                    }"
-                  ></div>
-                </div>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-sheet>
-
-      <!-- Roadmap Section -->
-      <v-sheet color="grey lighten-5" class="py-16 mt-10 overflow-hidden">
-        <v-container>
-          <v-row justify="center" class="mb-12">
-            <v-col cols="12" class="text-center">
-              <h2 class="text-h3 font-weight-black mb-4">
-                Coming Soon: AI Copilot & Analytics
-              </h2>
-              <p class="text-h6 grey--text">
-                We're expanding ScraperAI with powerful new capabilities to
-                supercharge your support
-              </p>
-            </v-col>
-          </v-row>
-
-          <v-row justify="center">
-            <v-col cols="12" md="8">
-              <v-row class="mb-8">
-                <v-col cols="12" sm="6">
-                  <v-card
-                    hover
-                    flat
-                    outlined
-                    class="pa-6 h-100 rounded-xl transition-swing d-flex flex-column"
-                  >
-                    <v-avatar color="#EEF4FC" size="72" class="rounded-lg">
-                      <v-icon color="primary" size="36">$message-circle</v-icon>
-                    </v-avatar>
-
-                    <h3 class="text-h5 my-4 font-weight-black secondary--text">
-                      AI Copilot
-                    </h3>
-
-                    <p
-                      class="text-body-1 grey--text text--darken-2"
-                      style="line-height: 1.7"
-                    >
-                      Smart assistant for your support team. Real-time
-                      suggestions and automated responses with human oversight.
-                    </p>
-                  </v-card>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-card
-                    hover
-                    flat
-                    outlined
-                    class="pa-6 h-100 rounded-xl transition-swing d-flex flex-column"
-                  >
-                    <v-avatar color="#F1F7F0" size="72" class="rounded-lg">
-                      <v-icon color="green" size="36">$chart-line</v-icon>
-                    </v-avatar>
-
-                    <h3 class="text-h5 my-4 font-weight-black secondary--text">
-                      Data Analytics
-                    </h3>
-
-                    <p
-                      class="text-body-1 grey--text text--darken-2"
-                      style="line-height: 1.7"
-                    >
-                      Deep insights into customer behavior, satisfaction trends,
-                      and support performance metrics.
-                    </p>
-                  </v-card>
-                </v-col>
-              </v-row>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-sheet>
-
-      <v-sheet
-        color="secondary"
-        dark
-        class="py-16 mt-10 overflow-hidden"
-        id="prices"
-      >
-        <v-container>
-          <div class="text-center mb-16">
-            <h2 class="text-h3 font-weight-black mb-4">
-              Simple, transparent pricing
-            </h2>
-            <p class="text-h6 opacity-70 font-weight-regular">
-              Flexible plans designed for the Indian tech ecosystem.
-            </p>
+                {{ t.title }}
+              </div>
+              <div class="text-body-2 grey--text text--darken-1">
+                {{ t.text }}
+              </div>
+            </div>
           </div>
+        </v-col>
+      </v-row>
+    </v-container>
 
-          <v-row align="center" justify="center">
-            <v-col cols="12" md="4">
-              <v-card
-                color="#1e293b"
-                class="rounded-xl pa-8 border-pricing elevation-10 text-center"
-              >
-                <div class="text-overline font-weight-bold mb-2 primary--text">
-                  STARTER
-                </div>
-                <div class="text-h3 font-weight-black mb-1">₹0</div>
-                <div class="text-caption opacity-60 mb-6">
-                  Free forever for developers
-                </div>
-
-                <v-divider class="mb-6 opacity-20"></v-divider>
-
-                <v-list color="transparent" dense class="text-left mb-8">
-                  <v-list-item
-                    v-for="feat in [
-                      '1,000 messages/mo',
-                      '1 Data Source',
-                      'Community Support',
-                    ]"
-                    :key="feat"
-                    class="px-0"
-                  >
-                    <v-icon color="success" class="mr-3" small
-                      >$check</v-icon
-                    >
-                    <span class="text-body-2">{{ feat }}</span>
-                  </v-list-item>
-                </v-list>
-
-                <v-btn
-                  block
-                  x-large
-                  rounded
-                  depressed
-                  outlined
-                  color="primary"
-                  class="font-weight-bold"
-                >
-                  Get Started
-                </v-btn>
-              </v-card>
-            </v-col>
-
-            <v-col cols="12" md="4">
-              <v-card
-                color="primary"
-                class="rounded-xl pa-10 elevation-24 text-center transform-scale-105"
-                style="z-index: 2"
-              >
-                <v-chip
-                  small
-                  color="white"
-                  class="primary--text font-weight-black mb-4"
-                  >BEST VALUE</v-chip
-                >
-                <div class="text-overline font-weight-bold mb-2 white--text">
-                  PRO
-                </div>
-                <div class="text-h3 font-weight-black mb-1 white--text">
-                  ₹6,999
-                </div>
-                <div class="text-caption white--text opacity-80 mb-6">
-                  Per month, billed yearly
-                </div>
-
-                <v-divider
-                  class="mb-6"
-                  style="background: rgba(255, 255, 255, 0.2)"
-                ></v-divider>
-
-                <v-list color="transparent" dense class="text-left mb-8">
-                  <v-list-item
-                    v-for="feat in [
-                      'Unlimited messages',
-                      'Priority RAG Pipeline',
-                      'GST Invoicing',
-                      'Custom Branding',
-                    ]"
-                    :key="feat"
-                    class="px-0"
-                  >
-                    <v-icon color="white" class="mr-3" small>$check</v-icon>
-                    <span class="text-body-2 white--text">{{ feat }}</span>
-                  </v-list-item>
-                </v-list>
-
-                <v-btn
-                  block
-                  x-large
-                  rounded
-                  depressed
-                  color="white"
-                  class="primary--text font-weight-black"
-                >
-                  Start 14-Day Trial
-                </v-btn>
-              </v-card>
-            </v-col>
-
-            <v-col cols="12" md="4">
-              <v-card
-                color="#1e293b"
-                class="rounded-xl pa-8 border-pricing elevation-10 text-center"
-              >
-                <div class="text-overline font-weight-bold mb-2 primary--text">
-                  ENTERPRISE
-                </div>
-                <div class="text-h3 font-weight-black mb-1">Custom</div>
-                <div class="text-caption opacity-60 mb-6">
-                  For high-scale organizations
-                </div>
-
-                <v-divider class="mb-6 opacity-20"></v-divider>
-
-                <v-list color="transparent" dense class="text-left mb-8">
-                  <v-list-item
-                    v-for="feat in [
-                      'On-premise Deployment',
-                      'Dedicated Account Manager',
-                      'SLA Guarantee',
-                      '24/7 Phone Support',
-                    ]"
-                    :key="feat"
-                    class="px-0"
-                  >
-                    <v-icon color="success" class="mr-3" small
-                      >$check</v-icon
-                    >
-                    <span class="text-body-2">{{ feat }}</span>
-                  </v-list-item>
-                </v-list>
-
-                <v-btn
-                  block
-                  x-large
-                  outlined
-                  rounded
-                  depressed
-                  color="primary"
-                  class="font-weight-bold"
-                >
-                  Contact Sales
-                </v-btn>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-sheet>
-
-      <v-container class="py-16 text-center">
-        <v-card color="primary" dark class="pa-12 rounded-xl elevation-0">
-          <h2 class="text-h3 font-weight-bold mb-6">
-            Ready to automate your support?
-          </h2>
-          <p class="text-h6 mb-8 opacity-80">
-            Join 1,000+ businesses using scraperAI to save time.
-          </p>
-          <v-btn
-            x-large
-            light
-            depressed
-            rounded
-            class="px-12 font-weight-bold"
-            @click="redirectToSignup"
-          >
-            Get Started Now
-          </v-btn>
-        </v-card>
-      </v-container>
-    </div>
-
-    <v-footer padless color="dark" class="pt-12">
+    <!-- ================= FAQ ================= -->
+    <section id="faq" class="soft-band py-12 py-md-16">
       <v-container>
-        <v-row>
-          <v-col cols="12" md="4" class="mb-6">
-            <v-img
-              src="../../assets/13.png"
-              max-width="42"
-              class="mb-4 rounded-lg"
-            ></v-img>
-            <p class="grey--text pr-md-12">
-              Transforming how businesses interact with their customers through
-              autonomous AI scraping and chat technology.
-            </p>
-            <div class="mt-4">
-              <v-btn
-                v-for="icon in icons"
-                :key="icon"
-                icon
-                color="grey darken-1"
-                class="mr-2"
-              >
-                <v-icon size="20px">{{ icon }}</v-icon>
-              </v-btn>
+        <v-row justify="center">
+          <v-col cols="12" md="9" lg="8">
+            <div v-reveal class="text-center mb-10">
+              <div class="eyebrow mb-2">FAQ</div>
+              <h2 class="section-title">Questions, answered</h2>
             </div>
-          </v-col>
-          <v-col cols="6" md="2" class="mb-6">
-            <div class="font-weight-bold mb-4">Product</div>
-            <div
-              v-for="link in [
-                'Features',
-                'Integrations',
-                'Pricing',
-                'Changelog',
-              ]"
-              :key="link"
-              class="mb-2"
-            >
-              <a
-                href="#"
-                class="text-decoration-none grey--text text--darken-1"
-                >{{ link }}</a
+            <v-expansion-panels v-reveal="100" flat>
+              <v-expansion-panel
+                v-for="q in FAQS"
+                :key="q.q"
+                class="faq-panel mb-3"
               >
-            </div>
-          </v-col>
-          <v-col cols="6" md="2" class="mb-6">
-            <div class="font-weight-bold mb-4">Company</div>
-            <div
-              v-for="link in ['About Us', 'Contact', 'Privacy Policy', 'Terms']"
-              :key="link"
-              class="mb-2"
-            >
-              <a
-                href="#"
-                class="text-decoration-none grey--text text--darken-1"
-                >{{ link }}</a
-              >
-            </div>
-          </v-col>
-          <v-col cols="12" md="4">
-            <div class="font-weight-bold mb-4">Stay Updated</div>
-            <v-text-field
-              label="Email Address"
-              solo
-              flat
-              background-color="secondary lighten-4"
-              append-icon="$send"
-              rounded
-            ></v-text-field>
+                <v-expansion-panel-header
+                  class="text-body-1 font-weight-bold grey--text text--darken-4 py-5"
+                >
+                  {{ q.q }}
+                </v-expansion-panel-header>
+                <v-expansion-panel-content
+                  class="text-body-2 grey--text text--darken-2"
+                >
+                  {{ q.a }}
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
           </v-col>
         </v-row>
-        <v-divider class="my-8"></v-divider>
-        <div class="text-center grey--text body-2 pb-8">
-          &copy; {{ new Date().getFullYear() }} scraperAI. All rights reserved.
-        </div>
       </v-container>
-    </v-footer>
+    </section>
+
+    <!-- ================= FINAL CTA ================= -->
+    <v-container class="py-12 py-md-16">
+      <div v-reveal class="final-cta pa-8 pa-md-14 text-center white--text">
+        <h2 class="text-h5 text-sm-h3 font-weight-black mb-4">
+          Create your AI assistant today
+        </h2>
+        <div class="text-body-1 text-sm-h6 font-weight-regular mb-8 cta-sub">
+          Import your website, test the answers in the sandbox, and go live when
+          you're happy.
+        </div>
+        <div class="d-flex justify-center">
+          <v-btn
+            :x-large="!compactCta"
+            :large="compactCta"
+            depressed
+            color="white"
+            class="primary--text font-weight-bold flex-grow-1 flex-sm-grow-0 mr-3"
+            @click="primaryAction"
+          >
+            {{ isLoggedIn ? "Go to dashboard" : "Try for free" }}
+            <v-icon v-if="!compactCta" right size="18">$arrow-right</v-icon>
+          </v-btn>
+          <v-btn
+            :x-large="!compactCta"
+            :large="compactCta"
+            outlined
+            color="white"
+            class="font-weight-bold flex-grow-1 flex-sm-grow-0"
+            to="/signup"
+          >
+            Talk to us
+          </v-btn>
+        </div>
+      </div>
+    </v-container>
+
+    <!-- ================= FOOTER ================= -->
+    <v-divider />
+    <v-container class="py-8">
+      <v-row align="center">
+        <v-col cols="12" md="5" class="d-flex align-center">
+          <v-avatar size="32" color="primary" tile class="rounded-lg mr-3">
+            <v-img src="../../assets/13.png" alt="" />
+          </v-avatar>
+          <div>
+            <div class="text-body-2 font-weight-black secondary--text">
+              scraperAI
+            </div>
+            <div class="text-caption grey--text">
+              AI customer support for WhatsApp and the web.
+            </div>
+          </div>
+        </v-col>
+        <v-col cols="12" md="7" class="d-flex flex-wrap justify-md-end">
+          <v-btn
+            v-for="l in NAV"
+            :key="l.id"
+            text
+            small
+            color="grey darken-2"
+            @click="scrollTo(l.id)"
+          >
+            {{ l.label }}
+          </v-btn>
+          <v-btn text small color="grey darken-2" to="/login">Sign in</v-btn>
+          <v-btn text small color="grey darken-2" to="/signup"
+            >Create account</v-btn
+          >
+        </v-col>
+      </v-row>
+      <div class="text-caption grey--text text-center text-md-left mt-4">
+        &copy; {{ year }} scraperAI. All rights reserved.
+      </div>
+    </v-container>
   </div>
 </template>
 
 <script>
+const NAV = [
+  { id: "features", label: "Features" },
+  { id: "how", label: "How it works" },
+  { id: "pricing", label: "Pricing" },
+  { id: "faq", label: "FAQ" },
+];
+
+const HERO_POINTS = [
+  "No code to install",
+  "Replies in your customer's language",
+  "Hands off to your team",
+];
+
+// Illustrative conversation built from real product behaviour; plays in a loop
+const DEMO_CHAT = [
+  {
+    id: 1,
+    from: "customer",
+    text: "Hi, is Activa EV available in Koramangala this week?",
+  },
+  {
+    id: 2,
+    from: "bot",
+    text: "Yes! Honda Activa EV is available at our Koramangala hub. Monthly rent is ₹5,599 for the first month, then ₹5,699. Shall I share the booking link?",
+    sources: ["Product API", "FAQ: Our hubs"],
+  },
+  { id: 3, from: "customer", text: "Mera refund kab aayega?" },
+  {
+    id: 4,
+    from: "bot",
+    text: "Main aapko hamari team se connect kar raha hoon, woh jaldi aapse baat karenge.",
+    sources: ["Handed to your team"],
+  },
+];
+
+const MARQUEE = [
+  { icon: "$tag", label: "Prices" },
+  { icon: "$layers", label: "Availability" },
+  { icon: "$calendar", label: "Bookings" },
+  { icon: "$rotate-ccw", label: "Refunds" },
+  { icon: "$clock", label: "Opening hours" },
+  { icon: "$sparkles", label: "Offers" },
+  { icon: "$file-text", label: "Policies" },
+  { icon: "$map-pin", label: "Locations" },
+  { icon: "$user-search", label: "My dues" },
+  { icon: "$message-circle-question-mark", label: "How it works" },
+];
+
+const HIGHLIGHTS = [
+  {
+    icon: "$folder-open",
+    tone: "indigo",
+    title: "Learns your business, no coding",
+    text: "Import website pages, FAQ sheets, notes and PDF or Word documents. You decide what's published.",
+    demo: ["Website import", "FAQ CSV upload", "PDF and Word documents"],
+  },
+  {
+    icon: "$shield-check",
+    tone: "green",
+    title: "Checked before it goes live",
+    text: "Contradictions, duplicates and private details are caught on publish, and old offers expire on their date.",
+    demo: ["Contradiction checks", "Private data blocked", "Valid-until dates"],
+  },
+  {
+    icon: "$tag",
+    tone: "teal",
+    title: "Live prices, never made up",
+    text: "Connect your product and customer APIs and the bot quotes real prices, stock and bookings.",
+    demo: [
+      "Live product lookup",
+      "Customer bookings and dues",
+      "Field mapping, no dev work",
+    ],
+  },
+];
+
+const FEATURES = [
+  {
+    icon: "$headset",
+    tone: "deep-orange",
+    title: "Hands off to your team",
+    text: "Keywords, a confidence threshold and reply limits send chats to a person.",
+  },
+  {
+    icon: "$route",
+    tone: "purple",
+    title: "Why this answer",
+    text: "Every reply shows the knowledge, lookups, time and cost behind it.",
+  },
+  {
+    icon: "$activity",
+    tone: "red",
+    title: "Bot health and alerts",
+    text: "Errors, speed and AI cost per day, with emails when something breaks.",
+  },
+  {
+    icon: "$flask-conical",
+    tone: "blue",
+    title: "Test before customers see",
+    text: "A sandbox and answer-quality test runs, compared against a baseline.",
+  },
+  {
+    icon: "$message-circle-question-mark",
+    tone: "amber",
+    title: "Learns from gaps",
+    text: "Questions it couldn't answer become FAQs once you answer them.",
+  },
+  {
+    icon: "$calendar",
+    tone: "teal",
+    title: "Notices",
+    text: "Closures, special hours and offers the bot mentions until they end.",
+  },
+  {
+    icon: "$users",
+    tone: "blue-grey",
+    title: "Team and roles",
+    text: "Invite your team and decide exactly what each person can do.",
+  },
+  {
+    icon: "$globe",
+    tone: "indigo",
+    title: "Many languages",
+    text: "Replies in the customer's language, including Hindi and Hinglish.",
+  },
+];
+
+const STEPS = [
+  {
+    icon: "$globe",
+    title: "Connect your content",
+    text: "Import your website and add FAQs, notes or documents.",
+  },
+  {
+    icon: "$user-cog",
+    title: "Shape the bot",
+    text: "Set its name, tone, business facts, rules and when to escalate.",
+  },
+  {
+    icon: "$flask-conical",
+    title: "Test it safely",
+    text: "Chat in the sandbox and run answer-quality tests. Customers see nothing yet.",
+  },
+  {
+    icon: "$rocket",
+    title: "Go live",
+    text: "Add the widget to your site or connect WhatsApp, then switch over in one step.",
+  },
+];
+
+const WHY_POINTS = [
+  "FAQs, notes and pages used for each reply",
+  "Product and customer lookups it made",
+  "Answer time, tokens and AI cost",
+];
+
+const TRACE_STATS = [
+  { label: "Intent", value: "Availability" },
+  { label: "Answer time", value: "2.1 s" },
+  { label: "Product lookup", value: "In-stock list" },
+  { label: "Channel", value: "WhatsApp" },
+];
+
+const TRACE_SOURCES = [
+  { kind: "FAQ", title: "Which hubs do you have?" },
+  { kind: "Product", title: "Honda Activa EV · in stock · ₹5,599/month" },
+  { kind: "Page", title: "Rent Honda Activa EV in Bangalore" },
+];
+
+const PLANS = [
+  {
+    name: "Starter",
+    price: "₹0",
+    period: "Free forever for developers",
+    features: ["1,000 messages/mo", "1 Data Source", "Community Support"],
+    cta: "Get Started",
+  },
+  {
+    name: "Pro",
+    price: "₹6,999",
+    period: "Per month, billed yearly",
+    features: [
+      "Unlimited messages",
+      "Priority RAG Pipeline",
+      "GST Invoicing",
+      "Custom Branding",
+    ],
+    cta: "Start 14-Day Trial",
+    featured: true,
+  },
+  {
+    name: "Enterprise",
+    price: "Custom",
+    period: "For high-scale organizations",
+    features: [
+      "On-premise Deployment",
+      "Dedicated Account Manager",
+      "SLA Guarantee",
+      "24/7 Phone Support",
+    ],
+    cta: "Contact Sales",
+  },
+];
+
+const TRUST = [
+  {
+    icon: "$flask-conical",
+    title: "Staged go-live",
+    text: "New knowledge is tested in a sandbox and switched over in one step.",
+  },
+  {
+    icon: "$shield-check",
+    title: "Checks on publish",
+    text: "Contradictions, duplicates and private details are flagged before customers see them.",
+  },
+  {
+    icon: "$lock",
+    title: "Encrypted keys",
+    text: "API keys and tokens are stored encrypted and never shown again.",
+  },
+  {
+    icon: "$network",
+    title: "IP allowlist",
+    text: "Restrict API access to the IP addresses you trust.",
+  },
+  {
+    icon: "$shield-user",
+    title: "Roles and permissions",
+    text: "Give each team member only the access they need.",
+  },
+  {
+    icon: "$globe-lock",
+    title: "Locked widget",
+    text: "The chat widget only works on the domains you allow.",
+  },
+];
+
+const FAQS = [
+  {
+    q: "Do I need a developer to set it up?",
+    a: "No. Import your website from the dashboard, then add one script tag to your site for the chat widget, or connect your WhatsApp Business number. Connecting a product or customer API is optional.",
+  },
+  {
+    q: "Where does the bot get its answers?",
+    a: "Only from the knowledge you publish (website pages, FAQs, notes and documents), your Bot Profile's business facts, and your product and customer APIs if you connect them. If it can't answer, the question is saved so you can answer it once and the bot learns it.",
+  },
+  {
+    q: "Will it make up prices?",
+    a: "You choose where prices come from. With a product API connected, the bot can quote only live product data, so it never invents a price.",
+  },
+  {
+    q: "Can customers talk to a person?",
+    a: "Yes. Chats are handed to your team on escalation keywords, when the bot isn't confident enough, or after a set number of AI replies. Your team gets alert emails and can take over from the inbox.",
+  },
+  {
+    q: "Which languages does it support?",
+    a: "The bot can reply in the customer's language, including Hindi and Hinglish, and you can list the languages you want it to use.",
+  },
+  {
+    q: "How is my data protected?",
+    a: "API keys and tokens are encrypted and never shown again after you save them. You can restrict API access to your own IP addresses and limit what each team member can do with roles.",
+  },
+];
+
+const reducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// v-reveal: fade content up when it scrolls into view. Optional delay in ms.
+const reveal = {
+  inserted(el, binding) {
+    el.classList.add("reveal");
+    if (binding.value) el.style.transitionDelay = `${binding.value}ms`;
+    if (reducedMotion() || !("IntersectionObserver" in window)) {
+      el.classList.add("reveal--in");
+      return;
+    }
+    el._revealObserver = new IntersectionObserver(
+      (entries, observer) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          el.classList.add("reveal--in");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.12 },
+    );
+    el._revealObserver.observe(el);
+  },
+  unbind(el) {
+    if (el._revealObserver) el._revealObserver.disconnect();
+  },
+};
+
 export default {
   name: "LandingPage",
+
+  directives: { reveal },
+
   data: () => ({
     isLoggedIn: false,
-    rotatingWord: "Chatbot",
-    words: ["Chatbot", "Call Analysis", "Analytics", "Copilot"],
-    wordIndex: 0,
-    icons: ["$facebook", "$twitter", "$linkedin", "$instagram"],
-    mainFeatures: [
-      {
-        icon: "$code",
-        title: "Script Deployment",
-        text: "Deploy a powerful AI chatbot by simply adding a single line of script to your site's header.",
-      },
-      {
-        icon: "$bot",
-        title: "Powered by ChatGPT",
-        text: "Built on the latest LLMs ensuring your users get human-like, intelligent, and accurate responses.",
-      },
-      {
-        icon: "$globe",
-        title: "Sitemap Intelligent",
-        text: "Automatically crawls your sitemap to learn about your products, services, and documentation.",
-      },
-    ],
-    features: [
-      {
-        icon: "$message-circle",
-        title: "AI Chatbot",
-        desc: "Intelligent chatbot that handles common queries, escalates complex issues, and learns from every interaction",
-        color: "#1976D2",
-        tags: ["Context Aware", "Multi-language", "24/7 Support"],
-      },
-      {
-        icon: "$plug",
-        title: "REST API",
-        desc: "Simple, well-documented API to embed chat functionality into any web or mobile application",
-        color: "#43A047",
-        tags: ["Easy Integration", "Webhooks", "Real-time"],
-      },
-      {
-        icon: "$database",
-        title: "Knowledge Base Integration",
-        desc: "Automatically ingest your documentation and FAQs to power smarter, more accurate responses",
-        color: "#FB8C00",
-        tags: ["Auto-Learning", "RAG", "Semantic Search"],
-      },
-      {
-        icon: "$shield-check",
-        title: "Enterprise Security",
-        desc: "Bank-grade encryption, compliance with GDPR and SOC 2, and granular access controls",
-        color: "#8E24AA",
-        tags: ["GDPR Ready", "SOC 2", "Data Privacy"],
-      },
-    ],
-
-    services: [
-      {
-        icon: "$chart-column",
-        color: "#43A047",
-        title: "Data Visualization",
-        desc: "Beautiful, interactive dashboards that tell a story with your data.",
-      },
-      {
-        icon: "$bot",
-
-        color: "#1976D2",
-        title: "Chat Assistant",
-        desc: "Ask questions in plain English and get instant visual answers.",
-      },
-      {
-        icon: "$phone",
-        color: "#FB8C00",
-        title: "Call Analysis",
-        desc: "Extract business intelligence from customer conversations.",
-      },
-      {
-        icon: "$puzzle",
-        color: "#8E24AA",
-        title: "Embedded Analytics",
-        desc: "White‑label dashboards you can embed directly into your product.",
-      },
-    ],
+    year: new Date().getFullYear(),
+    shownCount: 0,
+    botTyping: false,
+    chatTimer: null,
+    NAV,
+    HERO_POINTS,
+    MARQUEE_DOUBLE: [...MARQUEE, ...MARQUEE],
+    HIGHLIGHTS,
+    FEATURES,
+    STEPS,
+    WHY_POINTS,
+    TRACE_STATS,
+    TRACE_SOURCES,
+    PLANS,
+    TRUST,
+    FAQS,
   }),
-  mounted() {
-    this.isLoggedIn = !!localStorage.getItem("user-token");
-    setInterval(() => {
-      this.wordIndex = (this.wordIndex + 1) % this.words.length;
-      this.rotatingWord = this.words[this.wordIndex];
-    }, 2000); // change every 2 seconds
-  },
-  methods: {
-    redirectToSignup() {
-      this.$router.push(this.isLoggedIn ? "/dashboard" : "/login");
+
+  computed: {
+    // Phones: smaller buttons so a pair fits on one line
+    compactCta() {
+      return this.$vuetify.breakpoint.xsOnly;
     },
 
-    scrollToSection(sectionId) {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
+    shownMessages() {
+      return DEMO_CHAT.slice(0, this.shownCount);
+    },
+  },
+
+  mounted() {
+    this.isLoggedIn = !!localStorage.getItem("user-token");
+    if (reducedMotion()) {
+      this.shownCount = DEMO_CHAT.length;
+    } else {
+      this.playChat();
+    }
+  },
+
+  beforeDestroy() {
+    clearTimeout(this.chatTimer);
+  },
+
+  methods: {
+    primaryAction() {
+      this.$router.push(this.isLoggedIn ? "/dashboard" : "/signup");
+    },
+
+    // Plays the example chat one message at a time, with a typing pause
+    // before each bot reply, then starts over.
+    playChat() {
+      const next = DEMO_CHAT[this.shownCount];
+      if (!next) {
+        this.chatTimer = setTimeout(() => {
+          this.shownCount = 0;
+          this.playChat();
+        }, 4500);
+        return;
       }
+      if (next.from === "bot") {
+        this.botTyping = true;
+        this.chatTimer = setTimeout(() => {
+          this.botTyping = false;
+          this.shownCount += 1;
+          this.chatTimer = setTimeout(this.playChat, 1400);
+        }, 1300);
+      } else {
+        this.chatTimer = setTimeout(
+          () => {
+            this.shownCount += 1;
+            this.playChat();
+          },
+          this.shownCount === 0 ? 500 : 900,
+        );
+      }
+    },
+
+    // Smooth scroll, leaving room for the fixed top bar
+    scrollTo(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - 76;
+      window.scrollTo({ top, behavior: "smooth" });
     },
   },
 };
 </script>
-<style>
-.chat-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-.red {
-  background: #ff5f56;
-}
-.yellow {
-  background: #ffbd2e;
-}
-.green {
-  background: #27c93f;
-}
-.rotating-text {
-  display: inline-block;
-  animation: fadeSlide 0.6s ease;
+
+<style scoped>
+/* ---------- Top bar ---------- */
+.landing-bar {
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06) !important;
 }
 
-@keyframes fadeSlide {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
+/* ---------- Hero ---------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 24px 0 48px;
+  background: radial-gradient(
+      1200px 500px at 15% -10%,
+      #eef0fe 0%,
+      rgba(238, 240, 254, 0) 60%
+    ),
+    radial-gradient(
+      900px 500px at 100% 20%,
+      #f3e8ff 0%,
+      rgba(243, 232, 255, 0) 55%
+    ),
+    #ffffff;
+}
+
+@media (min-width: 960px) {
+  .hero {
+    padding: 64px 0 88px;
   }
-  to {
-    opacity: 1;
+}
+
+.hero__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.hero__badge {
+  border: 1px solid rgba(108, 110, 246, 0.2) !important;
+  color: #3f3fbf !important;
+  border-radius: 6px !important;
+}
+
+.hero__title {
+  font-size: clamp(2rem, 4.6vw, 3.4rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: #1f2330;
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, #6c6ef6 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.45;
+  animation: float 14s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.blob--one {
+  width: 380px;
+  height: 380px;
+  background: #c7c8fb;
+  top: -120px;
+  right: 8%;
+}
+
+.blob--two {
+  width: 300px;
+  height: 300px;
+  background: #e9d5ff;
+  bottom: -120px;
+  left: 4%;
+  animation-delay: -6s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(24px, -18px) scale(1.06);
+  }
+}
+
+.cta-btn {
+  box-shadow: 0 10px 24px rgba(108, 110, 246, 0.35) !important;
+}
+
+/* ---------- Example chat ---------- */
+.chat-shell {
+  max-width: 460px;
+  animation: bob 6s ease-in-out infinite;
+}
+
+@keyframes bob {
+  0%,
+  100% {
     transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.chat-body {
+  min-height: 330px;
+}
+
+.bubble {
+  max-width: 84%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+}
+
+.bubble--me {
+  background: #d9fdd3;
+  border-top-right-radius: 2px;
+}
+
+.bubble--bot {
+  background: #fff;
+  border-top-left-radius: 2px;
+}
+
+.source-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #3f3fbf;
+  background: #eef0fe;
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+
+.typing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 14px;
+}
+
+.typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9e9e9e;
+  animation: blink 1.2s infinite ease-in-out;
+}
+
+.typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+.msg-enter-active {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.msg-enter {
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+}
+
+/* ---------- Marquee ---------- */
+.marquee-wrap {
+  border-top: 1px solid rgba(17, 24, 39, 0.06);
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.marquee {
+  overflow: hidden;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+}
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+  animation: marquee 32s linear infinite;
+}
+
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+
+.marquee__item {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 10px;
+  padding: 10px 18px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #3d4152;
+  background: #fff;
+  white-space: nowrap;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- Sections ---------- */
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6c6ef6;
+}
+
+.section-title {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #1f2330;
+}
+
+.soft-band {
+  background: #f7f7fe;
+}
+
+.step-number {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(90deg, #6c6ef6, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(17, 24, 39, 0.08) !important;
+}
+
+.faq-panel {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 12px !important;
+}
+
+.faq-panel::before {
+  box-shadow: none !important;
+}
+
+/* ---------- Final CTA ---------- */
+.final-cta {
+  border-radius: 24px;
+  background: linear-gradient(120deg, #4f46e5 0%, #6c6ef6 45%, #a855f7 100%);
+  background-size: 200% 200%;
+  animation: shimmer 10s ease infinite;
+  box-shadow: 0 24px 48px rgba(108, 110, 246, 0.3);
+}
+
+.cta-sub {
+  opacity: 0.9;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ---------- Reveal on scroll ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal--in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob,
+  .chat-shell,
+  .marquee__track,
+  .final-cta,
+  .typing span {
+    animation: none !important;
+  }
+
+  .reveal,
+  .lift {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .reveal {
+    opacity: 1 !important;
   }
 }
 </style>
