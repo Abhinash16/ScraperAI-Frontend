@@ -98,14 +98,7 @@
         class="d-flex align-center text-decoration-none mr-4"
         aria-label="scraperAI home"
       >
-        <v-avatar
-          size="34"
-          color="primary"
-          tile
-          class="rounded-lg mr-3 flex-shrink-0"
-        >
-          <v-img src="@/assets/13.png" alt="" />
-        </v-avatar>
+        <AppLogo size="34" class="mr-3" />
         <div class="hidden-xs-only min-w-0">
           <div
             class="text-subtitle-1 font-weight-black secondary--text lh-tight"
@@ -327,6 +320,7 @@
 </template>
 
 <script>
+import AppLogo from "@/components/AppLogo.vue";
 import GlobalSearch from "@/components/layout/GlobalSearch.vue";
 import HelpPanel from "@/components/layout/HelpPanel.vue";
 import { currentHelp, markSeen, readSeen } from "@/utils/pageHelp";
@@ -356,7 +350,7 @@ function readCollapsed() {
 export default {
   name: "AppShell",
 
-  components: { GlobalSearch, HelpPanel, NavLink },
+  components: { AppLogo, GlobalSearch, HelpPanel, NavLink },
 
   data: () => ({
     drawer: false,

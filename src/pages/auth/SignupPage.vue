@@ -5,9 +5,7 @@
 
         <v-card outlined rounded="lg" class="pa-6 pa-sm-8">
           <div class="d-flex align-center mb-6">
-            <v-avatar size="48" color="primary" tile class="rounded-lg mr-4 flex-shrink-0">
-              <v-img src="../../assets/13.png" alt="scraperAI" />
-            </v-avatar>
+            <AppLogo size="48" class="mr-4" />
             <div>
               <h1 class="text-h5 font-weight-bold grey--text text--darken-4">Create your account</h1>
               <div class="text-body-2 grey--text text--darken-1">Set up your AI assistant in a few minutes.</div>
@@ -136,9 +134,12 @@
 </template>
 
 <script>
+import AppLogo from "@/components/AppLogo.vue";
 import apiClient from "@/service/axios";
 
 export default {
+
+  components: { AppLogo },
   data() {
     return {
       valid: false,

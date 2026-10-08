@@ -16,14 +16,7 @@
           class="d-flex align-center text-decoration-none"
           aria-label="scraperAI home"
         >
-          <v-avatar
-            :size="$vuetify.breakpoint.xsOnly ? 32 : 36"
-            color="primary"
-            tile
-            class="rounded-lg mr-2 mr-sm-3"
-          >
-            <v-img src="../../assets/13.png" alt="" />
-          </v-avatar>
+          <AppLogo :size="$vuetify.breakpoint.xsOnly ? 32 : 36" class="mr-2 mr-sm-3" />
           <span class="text-h6 font-weight-black secondary--text"
             >scraperAI</span
           >
@@ -703,9 +696,7 @@
     <v-container class="py-8">
       <v-row align="center">
         <v-col cols="12" md="5" class="d-flex align-center">
-          <v-avatar size="32" color="primary" tile class="rounded-lg mr-3">
-            <v-img src="../../assets/13.png" alt="" />
-          </v-avatar>
+          <AppLogo size="32" class="mr-3" />
           <div>
             <div class="text-body-2 font-weight-black secondary--text">
               scraperAI
@@ -740,6 +731,7 @@
 </template>
 
 <script>
+import AppLogo from "@/components/AppLogo.vue";
 const NAV = [
   { id: "features", label: "Features" },
   { id: "how", label: "How it works" },
@@ -1057,6 +1049,8 @@ const reveal = {
 
 export default {
   name: "LandingPage",
+
+  components: { AppLogo },
 
   directives: { reveal },
 
