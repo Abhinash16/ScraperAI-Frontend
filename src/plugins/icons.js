@@ -222,6 +222,7 @@ const APP_ICONS = {
   "chart-spline": ChartSpline,
   "check": Check,
   "chevron-down": ChevronDown,
+  "chevron-left": ChevronLeft,
   "chevron-right": ChevronRight,
   "chevron-up": ChevronUp,
   "circle": Circle,

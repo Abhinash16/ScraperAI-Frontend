@@ -1,8 +1,25 @@
 <template>
   <v-dialog :value="value" max-width="600" scrollable @input="$emit('input', $event)">
     <v-card rounded="lg">
-      <v-card-title class="text-h6">{{ notice ? "Edit notice" : "Add notice" }}</v-card-title>
-      <v-card-text>
+      <div class="d-flex align-center pa-5">
+        <v-avatar size="44" tile color="primary lighten-5" class="rounded-lg mr-4 flex-shrink-0">
+          <v-icon size="22" color="primary">{{ notice ? "$pencil" : "$calendar" }}</v-icon>
+        </v-avatar>
+        <div class="flex-grow-1">
+          <div class="text-h6 font-weight-bold grey--text text--darken-4">
+            {{ notice ? "Edit notice" : "Add notice" }}
+          </div>
+          <div class="text-caption grey--text text--darken-1">
+            Something temporary the bot should tell customers.
+          </div>
+        </div>
+        <v-btn icon aria-label="Close" :disabled="saving" @click="$emit('input', false)">
+          <v-icon>$x</v-icon>
+        </v-btn>
+      </div>
+      <v-divider />
+
+      <v-card-text class="pa-5">
         <v-alert
           v-if="notice && notice.origin === 'api'"
           type="warning"
@@ -11,17 +28,13 @@
           rounded="lg"
           class="text-body-2"
         >
-          This notice comes from your system. You can edit it here, but your
-          system may overwrite your changes the next time it sends it.
+          This notice comes from your system. You can edit it here, but your system may overwrite your
+          changes the next time it sends it.
         </v-alert>
 
-        <v-select
-          v-model="form.type"
-          :items="TYPE_ITEMS"
-          label="Type"
-          outlined
-          dense
-        />
+        <!-- What -->
+        <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">What</div>
+        <v-select v-model="form.type" :items="TYPE_ITEMS" label="Type" outlined dense />
         <v-text-field
           v-model="form.title"
           label="Title"
@@ -43,13 +56,21 @@
           class="mb-2"
         />
 
-        <v-switch
-          v-model="form.wholeDays"
-          inset
-          hide-details
-          class="mt-0 mb-3"
-          label="Whole days"
-        />
+        <v-divider class="my-4" />
+
+        <!-- When -->
+        <div class="d-flex align-center mb-2">
+          <span class="text-caption font-weight-bold text-uppercase grey--text">When</span>
+          <v-spacer />
+          <v-switch
+            v-model="form.wholeDays"
+            inset
+            hide-details
+            color="success"
+            class="mt-0 pt-0"
+            label="Whole days"
+          />
+        </div>
         <v-row dense>
           <v-col cols="12" sm="6">
             <v-text-field
@@ -80,7 +101,7 @@
             <v-text-field v-model="form.endTime" type="time" label="At" outlined dense hide-details class="mb-2" />
           </v-col>
         </v-row>
-        <div class="text-caption grey--text mb-4">India time (IST). Notices end by themselves.</div>
+        <div class="text-caption grey--text mb-3">India time (IST). Notices end by themselves.</div>
 
         <v-row v-if="form.type === 'special_hours'" dense>
           <v-col cols="6">
@@ -91,6 +112,10 @@
           </v-col>
         </v-row>
 
+        <v-divider class="my-4" />
+
+        <!-- Where -->
+        <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">Where</div>
         <v-combobox
           v-model="form.locations"
           :items="locationSuggestions"
@@ -107,21 +132,32 @@
           class="mb-2"
         />
 
-        <v-checkbox
+        <v-sheet
           v-if="BANNER_TYPES.includes(form.type)"
-          v-model="form.showInWidget"
-          hide-details
-          label="Show a banner on the website chat"
-        />
+          outlined
+          rounded="lg"
+          class="d-flex align-center px-4 py-2 mt-3"
+        >
+          <v-icon size="18" color="grey darken-1" class="mr-3">$monitor</v-icon>
+          <v-checkbox
+            v-model="form.showInWidget"
+            hide-details
+            color="success"
+            class="mt-0 pt-0"
+            label="Show a banner on the website chat"
+          />
+        </v-sheet>
 
-        <v-alert v-if="error" type="error" dense outlined rounded="lg" class="mt-4 mb-0 text-body-2">
+        <v-alert v-if="error" type="error" dense text rounded="lg" class="mt-4 mb-0 text-body-2">
           {{ error }}
         </v-alert>
       </v-card-text>
-      <v-card-actions>
+
+      <v-divider />
+      <v-card-actions class="px-5 py-3">
         <v-spacer />
-        <v-btn text rounded class="text-none" :disabled="saving" @click="$emit('input', false)">Cancel</v-btn>
-        <v-btn color="primary" depressed rounded class="text-none" :loading="saving" @click="save">
+        <v-btn text :disabled="saving" @click="$emit('input', false)">Cancel</v-btn>
+        <v-btn color="primary" depressed :loading="saving" @click="save">
           {{ notice ? "Save" : "Add notice" }}
         </v-btn>
       </v-card-actions>

@@ -1,23 +1,16 @@
 <template>
-  <div class="notices-page">
+  <div>
     <!-- HEADER -->
     <div class="d-flex flex-wrap align-center mb-4">
       <div class="mr-4 mb-2">
         <h1 class="text-h6 font-weight-bold grey--text text--darken-4">Notices</h1>
         <div class="text-body-2 grey--text text--darken-1">
-          Temporary things the bot should tell customers: closures, special
-          hours, maintenance, announcements and offers.
+          Temporary things the bot should tell customers: closures, special hours, maintenance,
+          announcements and offers.
         </div>
       </div>
       <v-spacer />
-      <v-btn
-        v-if="canWrite"
-        color="primary"
-        depressed
-        rounded
-        class="font-weight-bold my-1"
-        @click="openDialog(null)"
-      >
+      <v-btn v-if="canWrite" color="primary" depressed class="font-weight-bold mb-2" @click="openDialog(null)">
         <v-icon left size="16">$plus</v-icon>
         Add notice
       </v-btn>
@@ -25,57 +18,135 @@
 
     <ThingsToKnow feature="notices" />
 
-    <v-card outlined rounded="lg" class="pa-6">
-      <v-btn-toggle v-model="when" mandatory dense rounded color="primary" class="mb-4">
-        <v-btn value="current" small class="text-none">Active &amp; upcoming</v-btn>
-        <v-btn value="past" small class="text-none">Past</v-btn>
+    <!-- FILTER -->
+    <v-card outlined rounded="lg" class="d-flex align-center flex-wrap px-3 py-2 mb-4">
+      <v-btn-toggle v-model="when" mandatory dense color="success" class="my-1">
+        <v-btn value="current" small>Active &amp; upcoming</v-btn>
+        <v-btn value="past" small>Past</v-btn>
       </v-btn-toggle>
+      <v-spacer />
+      <span v-if="!loading && !error" class="text-caption grey--text text--darken-1 my-1">
+        {{ notices.length }} notice{{ notices.length === 1 ? "" : "s" }}
+      </span>
+    </v-card>
 
-      <v-progress-linear v-if="loading" indeterminate color="primary" />
-      <v-alert v-else-if="error" type="error" outlined rounded="lg" class="mb-0">
-        {{ error }}
-        <v-btn small text color="error" class="ml-2" @click="load">Retry</v-btn>
-      </v-alert>
-      <div v-else-if="!notices.length" class="text-body-2 grey--text py-4">
-        {{
-          when === "current"
-            ? "No active or upcoming notices. Add one when something changes for a few days, like a holiday closure or an offer."
-            : "No past notices."
-        }}
+    <!-- LOADING / ERROR / EMPTY -->
+    <template v-if="loading">
+      <v-card v-for="i in 3" :key="i" outlined rounded="lg" class="pa-2 mb-3">
+        <v-skeleton-loader type="list-item-avatar-three-line" />
+      </v-card>
+    </template>
+
+    <v-alert v-else-if="error" type="error" text rounded="lg" class="text-body-2">
+      <div class="d-flex align-center flex-wrap">
+        <span class="mr-4">{{ error }}</span>
+        <v-spacer />
+        <v-btn small outlined color="error" @click="load">
+          <v-icon left size="14">$refresh-cw</v-icon>
+          Retry
+        </v-btn>
       </div>
+    </v-alert>
 
-      <div v-for="n in notices" v-else :key="n._id" class="notice-row py-3 d-flex align-start">
-        <div class="flex-grow-1 min-w-0 mr-2">
+    <v-card
+      v-else-if="!notices.length"
+      outlined
+      rounded="lg"
+      class="d-flex flex-column align-center text-center px-6 py-12"
+    >
+      <v-avatar color="grey lighten-4" size="64" class="mb-4">
+        <v-icon size="28" color="grey">$calendar</v-icon>
+      </v-avatar>
+      <div class="text-subtitle-1 font-weight-bold grey--text text--darken-3 mb-1">
+        {{ when === "current" ? "No active or upcoming notices" : "No past notices" }}
+      </div>
+      <div v-if="when === 'current'" class="text-body-2 grey--text text--darken-1 mb-4">
+        Add one when something changes for a few days, like a holiday closure or an offer.
+      </div>
+      <v-btn v-if="canWrite && when === 'current'" small depressed color="primary" @click="openDialog(null)">
+        <v-icon left size="14">$plus</v-icon>
+        Add notice
+      </v-btn>
+    </v-card>
+
+    <!-- NOTICES -->
+    <template v-else>
+      <v-card v-for="n in notices" :key="n._id" outlined rounded="lg" class="d-flex align-start pa-4 mb-3">
+        <v-avatar
+          size="40"
+          tile
+          :color="`${typeOf(n).color.split(' ')[0]} lighten-5`"
+          class="rounded-lg mr-4 flex-shrink-0"
+        >
+          <v-icon size="20" :color="typeOf(n).color">
+            {{
+              n.type === "closed"
+                ? "$circle-x"
+                : n.type === "special_hours"
+                ? "$clock"
+                : n.type === "maintenance"
+                ? "$triangle-alert"
+                : n.type === "promotion"
+                ? "$tag"
+                : "$info"
+            }}
+          </v-icon>
+        </v-avatar>
+
+        <div class="flex-grow-1 overflow-hidden mr-2">
           <div class="d-flex align-center flex-wrap">
-            <v-chip x-small :color="typeOf(n).color" text-color="white" class="mr-2">{{ typeOf(n).label }}</v-chip>
-            <span class="font-weight-medium mr-2">{{ n.title }}</span>
+            <span class="text-body-2 font-weight-bold grey--text text--darken-4 text-break mr-2">
+              {{ n.title }}
+            </span>
+            <v-chip x-small label :color="typeOf(n).color" text-color="white" class="font-weight-bold mr-1 my-1">
+              {{ typeOf(n).label }}
+            </v-chip>
             <v-chip
               x-small
-              outlined
-              :color="timing(n).active ? 'success' : 'grey darken-1'"
-              class="mr-2"
+              label
+              :color="timing(n).active ? 'green lighten-5' : 'grey lighten-4'"
+              :text-color="timing(n).active ? 'green darken-2' : 'grey darken-1'"
+              class="font-weight-bold mr-1 my-1"
             >
               {{ timing(n).label }}
             </v-chip>
-            <v-chip v-if="n.origin === 'api'" x-small outlined color="indigo" class="mr-2">From your system</v-chip>
+            <v-chip v-if="n.origin === 'api'" x-small label outlined color="indigo" class="font-weight-bold my-1">
+              From your system
+            </v-chip>
           </div>
-          <div class="text-caption grey--text text--darken-1 mt-1">
-            {{ formatNoticeDates(n) }} · {{ whereLabel(n) }}
-            <template v-if="n.hours"> · {{ n.hours.open }}–{{ n.hours.close }}</template>
-            <template v-if="n.showInWidget"> · Banner on the website chat</template>
+
+          <div class="d-flex flex-wrap align-center text-caption grey--text text--darken-1 mt-1">
+            <span class="d-inline-flex align-center mr-3">
+              <v-icon size="12" class="mr-1">$calendar</v-icon>
+              {{ formatNoticeDates(n) }}
+            </span>
+            <span class="d-inline-flex align-center mr-3">
+              <v-icon size="12" class="mr-1">$map-pin</v-icon>
+              {{ whereLabel(n) }}
+            </span>
+            <span v-if="n.hours" class="d-inline-flex align-center mr-3">
+              <v-icon size="12" class="mr-1">$clock</v-icon>
+              {{ n.hours.open }}–{{ n.hours.close }}
+            </span>
+            <span v-if="n.showInWidget" class="d-inline-flex align-center">
+              <v-icon size="12" class="mr-1">$monitor</v-icon>
+              Banner on the website chat
+            </span>
           </div>
-          <div v-if="n.text" class="text-body-2 mt-1">{{ n.text }}</div>
+
+          <div v-if="n.text" class="text-body-2 grey--text text--darken-3 text-break mt-2">{{ n.text }}</div>
         </div>
-        <template v-if="canWrite">
+
+        <div v-if="canWrite" class="d-flex flex-shrink-0">
           <v-btn icon small aria-label="Edit notice" @click="openDialog(n)">
-            <v-icon small>$pencil</v-icon>
+            <v-icon size="16">$pencil</v-icon>
           </v-btn>
-          <v-btn icon small aria-label="Delete notice" @click="deleting = n">
-            <v-icon small color="error">$trash-2</v-icon>
+          <v-btn icon small color="error" aria-label="Delete notice" @click="deleting = n">
+            <v-icon size="16">$trash-2</v-icon>
           </v-btn>
-        </template>
-      </div>
-    </v-card>
+        </div>
+      </v-card>
+    </template>
 
     <NoticeDialog
       v-model="dialogOpen"
@@ -84,21 +155,26 @@
       @saved="load"
     />
 
-    <v-dialog :value="!!deleting" max-width="440" @input="deleting = null">
+    <!-- DELETE -->
+    <v-dialog :value="!!deleting" max-width="420" @input="deleting = null">
       <v-card v-if="deleting" rounded="lg">
-        <v-card-title class="text-h6">Delete "{{ deleting.title }}"?</v-card-title>
-        <v-card-text class="text-body-2">
-          The bot stops mentioning it right away.
-          <template v-if="deleting.origin === 'api'">
-            It came from your system, which may send it again.
-          </template>
+        <v-card-text class="pt-6 text-center">
+          <v-avatar color="error lighten-5" size="56" class="mb-4">
+            <v-icon color="error" size="26">$trash-2</v-icon>
+          </v-avatar>
+          <div class="text-h6 font-weight-bold grey--text text--darken-4 mb-2">
+            Delete "{{ deleting.title }}"?
+          </div>
+          <div class="text-body-2 grey--text text--darken-1">
+            The bot stops mentioning it right away.
+            <template v-if="deleting.origin === 'api'">
+              It came from your system, which may send it again.
+            </template>
+          </div>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text rounded class="text-none" :disabled="removing" @click="deleting = null">Cancel</v-btn>
-          <v-btn color="error" depressed rounded class="text-none" :loading="removing" @click="remove">
-            Delete
-          </v-btn>
+        <v-card-actions class="justify-center pb-5">
+          <v-btn text :disabled="removing" @click="deleting = null">Cancel</v-btn>
+          <v-btn color="error" depressed :loading="removing" @click="remove">Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -204,15 +280,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.notice-row {
-  border-bottom: 1px solid #eef1f7;
-}
-.notice-row:last-of-type {
-  border-bottom: none;
-}
-.min-w-0 {
-  min-width: 0;
-}
-</style>

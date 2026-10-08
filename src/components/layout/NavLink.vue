@@ -1,22 +1,46 @@
 <template>
-  <a
-    :href="href"
-    class="nav-link"
-    :class="{ 'nav-link--active': active }"
-    :aria-current="active ? 'page' : null"
-    @click="onClick"
-  >
-    <v-icon size="18" class="nav-link__icon">{{ item.icon }}</v-icon>
-    <span class="nav-link__label">{{ item.name }}</span>
-    <span v-if="count" class="nav-link__badge" :title="`${count} ${item.badgeHint || 'to review'}`">
-      {{ count > 99 ? "99+" : count }}
+  <v-tooltip right :disabled="!mini" open-delay="150">
+    <template #activator="{ on, attrs }">
+      <a
+        :href="href"
+        class="nav-link"
+        :class="{ 'nav-link--active': active, 'nav-link--mini': mini }"
+        :aria-current="active ? 'page' : null"
+        :aria-label="mini ? item.name : null"
+        v-bind="attrs"
+        v-on="on"
+        @click="onClick"
+      >
+        <v-badge
+          v-if="mini && count"
+          :content="badgeText"
+          color="error"
+          overlap
+          offset-x="8"
+          offset-y="8"
+        >
+          <v-icon size="20" class="nav-link__icon">{{ item.icon }}</v-icon>
+        </v-badge>
+        <v-icon v-else :size="mini ? 20 : 18" class="nav-link__icon">{{ item.icon }}</v-icon>
+
+        <template v-if="!mini">
+          <span class="nav-link__label">{{ item.name }}</span>
+          <span v-if="count" class="nav-link__badge" :title="`${count} ${item.badgeHint || 'to review'}`">
+            {{ badgeText }}
+          </span>
+        </template>
+      </a>
+    </template>
+    <span>
+      {{ item.name }}<template v-if="count"> · {{ count }} {{ item.badgeHint || "to review" }}</template>
     </span>
-  </a>
+  </v-tooltip>
 </template>
 
 <script>
 // One sidebar row. A real link (opens in a new tab with ctrl/cmd-click);
 // a plain click is handed to the parent so it can also close the drawer.
+// In the collapsed sidebar (`mini`) only the icon shows, with the name in a tooltip.
 export default {
   name: "NavLink",
 
@@ -24,11 +48,16 @@ export default {
     item: { type: Object, required: true },
     active: Boolean,
     count: { type: Number, default: 0 },
+    mini: Boolean,
   },
 
   computed: {
     href() {
       return this.$router.resolve(this.item.to).href;
+    },
+
+    badgeText() {
+      return this.count > 99 ? "99+" : String(this.count);
     },
   },
 
@@ -71,6 +100,16 @@ export default {
 .nav-link--active:hover {
   background-color: #eef0fe;
   color: var(--v-primary-base);
+}
+
+/* Collapsed sidebar: a centred square per item */
+.nav-link--mini {
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  margin: 0 auto 6px;
 }
 
 .nav-link__icon {

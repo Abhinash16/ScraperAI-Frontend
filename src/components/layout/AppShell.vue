@@ -6,46 +6,39 @@
       app
       :permanent="isDesktop"
       :temporary="!isDesktop"
+      :mini-variant="mini"
+      :clipped="isDesktop"
+      mini-variant-width="76"
       width="256"
       color="white"
       class="app-nav"
     >
-      <router-link to="/dashboard" class="app-nav__brand">
-        <v-avatar size="36" color="primary" tile class="rounded-lg mr-3">
-          <v-img src="@/assets/13.png" alt="" />
-        </v-avatar>
-        <div class="min-w-0">
-          <div
-            class="text-subtitle-1 font-weight-black secondary--text lh-tight"
-          >
-            scraperAI
-          </div>
-          <div
-            v-if="companyName"
-            class="text-caption grey--text text--darken-1 text-truncate lh-tight"
-          >
-            {{ companyName }}
-          </div>
-        </div>
-      </router-link>
 
-      <nav aria-label="Main">
-        <div v-for="group in groups" :key="group.id" class="app-nav__group">
-          <div v-if="group.title" class="app-nav__heading">
-            {{ group.title }}
-          </div>
+
+      <nav aria-label="Main" class="pt-3">
+        <div v-for="(group, gi) in groups" :key="group.id" class="app-nav__group">
+          <template v-if="group.title">
+            <v-divider v-if="mini && gi > 0" class="mx-3 my-2" />
+            <div v-else-if="!mini" class="app-nav__heading">{{ group.title }}</div>
+          </template>
           <nav-link
             v-for="item in group.items"
             :key="item.id"
             :item="item"
             :active="activeId === item.id"
             :count="badgeFor(item)"
+            :mini="mini"
             @navigate="go"
           />
         </div>
 
         <div v-if="perms === null" class="px-4 pt-2" aria-hidden="true">
-          <v-skeleton-loader v-for="n in 5" :key="n" type="text" class="mb-4" />
+          <v-skeleton-loader
+            v-for="n in 5"
+            :key="n"
+            :type="mini ? 'avatar' : 'text'"
+            class="mb-4"
+          />
         </div>
       </nav>
 
@@ -56,35 +49,56 @@
             :key="item.id"
             :item="item"
             :active="activeId === item.id"
+            :mini="mini"
             @navigate="go"
           />
         </div>
       </template>
     </v-navigation-drawer>
 
+    <!-- Collapse / expand (desktop) -->
+    <v-tooltip v-if="isDesktop" right open-delay="300">
+      <template #activator="{ on, attrs }">
+        <v-btn
+          fab
+          x-small
+          depressed
+          color="white"
+          :class="['app-nav__toggle', mini ? 'app-nav__toggle--mini' : '']"
+          :aria-label="mini ? 'Expand sidebar' : 'Collapse sidebar'"
+          :aria-expanded="String(!mini)"
+          v-bind="attrs"
+          v-on="on"
+          @click="toggleMini"
+        >
+          <v-icon size="16" color="primary">{{ mini ? "$chevron-right" : "$chevron-left" }}</v-icon>
+        </v-btn>
+      </template>
+      <span>{{ mini ? "Expand sidebar" : "Collapse sidebar" }}</span>
+    </v-tooltip>
+
     <!-- TOP BAR -->
-    <v-app-bar app flat color="white" height="64" class="app-bar">
-      <v-app-bar-nav-icon
-        v-if="!isDesktop"
-        aria-label="Open menu"
-        @click="drawer = !drawer"
-      />
+    <v-app-bar app clipped-left flat color="white" height="64" class="app-bar">
+      <v-app-bar-nav-icon v-if="!isDesktop" aria-label="Open menu" class="mr-1" @click="drawer = !drawer" />
 
-      <div class="min-w-0 ml-1">
-        <div
-          class="text-subtitle-1 font-weight-bold grey--text text--darken-4 text-truncate"
-        >
-          {{ section ? section.name : "Dashboard" }}
+      <router-link to="/dashboard" class="d-flex align-center text-decoration-none mr-4" aria-label="scraperAI home">
+        <v-avatar size="34" color="primary" tile class="rounded-lg mr-3 flex-shrink-0">
+          <v-img src="@/assets/13.png" alt="" />
+        </v-avatar>
+        <div class="hidden-xs-only min-w-0">
+          <div class="text-subtitle-1 font-weight-black secondary--text lh-tight">scraperAI</div>
+          <div v-if="companyName" class="text-caption grey--text text--darken-1 text-truncate lh-tight">
+            {{ companyName }}
+          </div>
         </div>
-        <div
-          v-if="section && section.description && $vuetify.breakpoint.smAndUp"
-          class="text-caption grey--text text--darken-1 text-truncate lh-tight"
-        >
-          {{ section.description }}
-        </div>
+      </router-link>
+
+      <div v-if="$vuetify.breakpoint.mdAndUp" class="flex-grow-1 ml-4 app-bar__search">
+        <GlobalSearch :items="searchItems" @navigate="go" />
       </div>
-
       <v-spacer />
+
+      <GlobalSearch v-if="!$vuetify.breakpoint.mdAndUp" compact :items="searchItems" @navigate="go" />
 
       <v-tooltip bottom>
         <template #activator="{ on, attrs }">
@@ -162,6 +176,13 @@
 
     <!-- MAIN -->
     <div class="app-content">
+      <v-sheet color="grey lighten-4" rounded="lg" class="d-flex align-center px-4 py-2 mb-3">
+        <v-breadcrumbs :items="crumbs" class="pa-0 text-body-2">
+          <template #divider>
+            <span class="grey--text">/</span>
+          </template>
+        </v-breadcrumbs>
+      </v-sheet>
       <div v-if="tabs.length > 1" class="app-tabs">
         <v-tabs
           :value="activeTab"
@@ -214,6 +235,7 @@
 </template>
 
 <script>
+import GlobalSearch from "@/components/layout/GlobalSearch.vue";
 import NavLink from "@/components/layout/NavLink.vue";
 import apiClient, { setAuthToken } from "@/service/axios";
 import { initialsOf } from "@/utils/team";
@@ -225,13 +247,26 @@ import {
   visibleItem,
 } from "@/utils/navigation";
 
+const COLLAPSED_KEY = "sidebar-collapsed";
+
+// Per-viewer convenience; storage may be blocked or empty
+function readCollapsed() {
+  try {
+    return localStorage.getItem(COLLAPSED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export default {
   name: "AppShell",
 
-  components: { NavLink },
+  components: { GlobalSearch, NavLink },
 
   data: () => ({
     drawer: false,
+    // Desktop only: icons-only sidebar, remembered per browser
+    collapsed: readCollapsed(),
     menu: false,
     logoutDialog: false,
     // Null until loaded; restricted items stay hidden until then
@@ -244,6 +279,11 @@ export default {
   computed: {
     isDesktop() {
       return this.$vuetify.breakpoint.lgAndUp;
+    },
+
+    // Phones and tablets always get the full slide-in menu
+    mini() {
+      return this.isDesktop && this.collapsed;
     },
 
     groups() {
@@ -264,6 +304,39 @@ export default {
 
     tabs() {
       return this.section?.tabs || [];
+    },
+
+    // Section / tab trail for the breadcrumb strip
+    crumbs() {
+      if (!this.section) return [{ text: "Dashboard", disabled: true }];
+      const tab = this.tabs[this.activeTab];
+      const list = [{ text: this.section.name, to: this.section.to, exact: true, disabled: !tab }];
+      if (tab && tab.name !== this.section.name) list.push({ text: tab.name, disabled: true });
+      else list[0].disabled = true;
+      return list;
+    },
+
+    // Every page this user can open, for the global search
+    searchItems() {
+      const entries = [
+        ...this.groups.flatMap((g) => g.items.map((item) => ({ item, group: g.title || "General" }))),
+        ...this.footer.map((item) => ({ item, group: "General" })),
+      ];
+      return entries.flatMap(({ item, group }) =>
+        item.tabs.map((tab) => {
+          const single = item.tabs.length === 1 || tab.name === item.name;
+          return {
+            key: `${item.id}:${tab.name}`,
+            text: single ? item.name : tab.name,
+            caption: single ? item.description || "" : `${item.name} › ${tab.name}`,
+            section: item.name,
+            group,
+            icon: item.icon,
+            to: tab.to,
+            search: `${item.name} ${tab.name} ${item.description || ""} ${group}`.toLowerCase(),
+          };
+        }),
+      );
     },
 
     activeTab() {
@@ -318,6 +391,15 @@ export default {
       return (item.badge && this.badges[item.badge]) || 0;
     },
 
+    toggleMini() {
+      this.collapsed = !this.collapsed;
+      try {
+        localStorage.setItem(COLLAPSED_KEY, this.collapsed ? "1" : "0");
+      } catch {
+        // storage unavailable: the choice lasts until reload
+      }
+    },
+
     go(to) {
       this.$router.push(to).catch(() => {});
       if (!this.isDesktop) this.drawer = false;
@@ -351,15 +433,21 @@ export default {
   border-right: 1px solid #e6e8f0 !important;
 }
 
-.app-nav__brand {
-  display: flex;
-  align-items: center;
-  height: 64px;
-  padding: 0 16px;
-  text-decoration: none;
-  border-bottom: 1px solid #f0f1f6;
-  margin-bottom: 8px;
+/* Round toggle on the sidebar's right edge (outside the drawer, so it isn't clipped) */
+.app-nav__toggle {
+  position: fixed !important;
+  top: 82px;
+  left: 242px;
+  z-index: 8;
+  border: 1px solid #e6e8f0 !important;
+  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.08) !important;
+  transition: left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.app-nav__toggle--mini {
+  left: 62px;
+}
+
 
 .app-nav__group {
   padding: 4px 10px;
@@ -382,6 +470,10 @@ export default {
 /* Top bar */
 .app-bar {
   border-bottom: 1px solid #e6e8f0 !important;
+}
+
+.app-bar__search {
+  max-width: 560px;
 }
 
 /* Content */
