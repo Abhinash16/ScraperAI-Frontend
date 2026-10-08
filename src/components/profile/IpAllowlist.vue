@@ -1,104 +1,128 @@
 <template>
-  <v-card outlined rounded="lg" class="pa-6">
-    <div class="d-flex align-center mb-1">
-      <div class="text-subtitle-1 font-weight-bold mr-2">IP allowlist</div>
-      <v-chip v-if="!loading" x-small outlined :color="allowlist.length ? 'success' : 'grey'">
-        {{ allowlist.length ? `${allowlist.length} allowed` : "Not set" }}
-      </v-chip>
-    </div>
-    <div class="text-body-2 grey--text text--darken-1 mb-4">
-      Restrict API-key requests to the IP addresses or CIDR ranges you list.
-      Dashboard logins aren't affected. Changes can take up to 15 minutes to
-      apply, and you can add up to 50 entries.
-    </div>
-
-    <!-- Add -->
-    <v-form
-      v-if="canManage"
-      ref="form"
-      class="add-row"
-      @submit.prevent="addIp"
-    >
-      <v-row dense>
-        <v-col cols="12" sm="5">
-          <v-text-field
-            v-model.trim="newIp"
-            label="IP address or CIDR range"
-            placeholder="8.8.8.8 or 192.168.1.0/24"
-            outlined
-            dense
-            autocomplete="off"
-            :rules="[ipRule]"
-          />
-        </v-col>
-        <v-col cols="12" sm="5">
-          <v-text-field
-            v-model.trim="newLabel"
-            label="Label (optional)"
-            placeholder="Office"
-            outlined
-            dense
-            maxlength="50"
-          />
-        </v-col>
-        <v-col cols="12" sm="2">
-          <v-btn
-            block
-            color="primary"
-            rounded
-            depressed
-            height="40"
-            type="submit"
-            :loading="adding"
-            :disabled="!isValidIpOrCidr(newIp) || allowlist.length >= 50"
+  <v-card outlined rounded="lg">
+    <div class="d-flex align-center px-5 py-4">
+      <v-avatar size="40" tile color="indigo lighten-5" class="rounded-lg mr-3 flex-shrink-0">
+        <v-icon size="20" color="indigo">$network</v-icon>
+      </v-avatar>
+      <div class="flex-grow-1">
+        <div class="d-flex align-center">
+          <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4 mr-2">IP allowlist</span>
+          <v-chip
+            v-if="!loading"
+            x-small
+            label
+            :color="allowlist.length ? 'green lighten-5' : 'grey lighten-4'"
+            :text-color="allowlist.length ? 'green darken-2' : 'grey darken-1'"
+            class="font-weight-bold"
           >
-            Add
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-form>
-
-    <!-- List -->
-    <v-progress-linear v-if="loading" indeterminate color="primary" class="mt-2" />
-
-    <v-alert v-else-if="loadError" type="error" text dense rounded="lg" class="text-body-2 mb-0">
-      {{ loadError }}
-      <v-btn small text color="error" class="ml-2" @click="load">Retry</v-btn>
-    </v-alert>
-
-    <div v-else-if="!allowlist.length" class="empty-state text-center">
-      <v-icon color="grey lighten-1" class="mb-1">$network</v-icon>
-      <div class="text-body-2 grey--text text--darken-1">
-        No IP addresses yet. API keys work from any IP.
-      </div>
-    </div>
-
-    <div v-else class="ip-list">
-      <div v-for="ip in allowlist" :key="ip._id" class="ip-row d-flex align-center">
-        <v-icon small class="mr-3" color="grey darken-1">
-          {{ ip.ipAddress.includes("/") ? "$network" : "$monitor" }}
-        </v-icon>
-        <div class="flex-grow-1" style="min-width: 0">
-          <code class="ip-code">{{ ip.ipAddress }}</code>
-          <div v-if="ip.label" class="text-caption grey--text text--darken-1">
-            {{ ip.label }}
-          </div>
+            {{ allowlist.length ? `${allowlist.length} allowed` : "Not set" }}
+          </v-chip>
         </div>
-        <v-btn
-          v-if="canManage"
-          icon
-          small
-          title="Remove"
-          :loading="removingId === ip._id"
-          @click="removeIp(ip)"
-        >
-          <v-icon small color="error">$trash-2</v-icon>
-        </v-btn>
+        <div class="text-caption grey--text text--darken-1">
+          Restrict API-key requests to the IP addresses or CIDR ranges you list. Dashboard logins
+          aren't affected. Changes can take up to 15 minutes to apply, and you can add up to 50
+          entries.
+        </div>
       </div>
     </div>
+    <v-divider />
 
-    <div v-if="!canManage && !loading" class="text-caption grey--text mt-3">
-      You can view this list. Ask an admin to change it.
+    <div class="pa-5">
+      <!-- Add -->
+      <v-form v-if="canManage" ref="form" @submit.prevent="addIp">
+        <v-row dense>
+          <v-col cols="12" sm="5">
+            <v-text-field
+              v-model.trim="newIp"
+              label="IP address or CIDR range"
+              placeholder="8.8.8.8 or 192.168.1.0/24"
+              prepend-inner-icon="$monitor"
+              outlined
+              dense
+              autocomplete="off"
+              :rules="[ipRule]"
+            />
+          </v-col>
+          <v-col cols="12" sm="5">
+            <v-text-field
+              v-model.trim="newLabel"
+              label="Label (optional)"
+              placeholder="Office"
+              prepend-inner-icon="$tag"
+              outlined
+              dense
+              maxlength="50"
+            />
+          </v-col>
+          <v-col cols="12" sm="2">
+            <v-btn
+              block
+              color="success"
+              depressed
+              height="40"
+              type="submit"
+              :loading="adding"
+              :disabled="!isValidIpOrCidr(newIp) || allowlist.length >= 50"
+            >
+              <v-icon left size="16">$plus</v-icon>
+              Add
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-form>
+
+      <!-- List -->
+      <v-skeleton-loader v-if="loading" type="list-item, list-item" />
+
+      <v-alert v-else-if="loadError" type="error" text dense rounded="lg" class="text-body-2 mb-0">
+        <div class="d-flex align-center flex-wrap">
+          <span class="mr-4">{{ loadError }}</span>
+          <v-spacer />
+          <v-btn small outlined color="error" @click="load">Retry</v-btn>
+        </div>
+      </v-alert>
+
+      <v-sheet
+        v-else-if="!allowlist.length"
+        color="grey lighten-5"
+        rounded="lg"
+        class="d-flex flex-column align-center text-center pa-5"
+      >
+        <v-icon color="grey" class="mb-1">$network</v-icon>
+        <div class="text-body-2 grey--text text--darken-1">No IP addresses yet. API keys work from any IP.</div>
+      </v-sheet>
+
+      <v-sheet v-else outlined rounded="lg">
+        <template v-for="(ip, i) in allowlist">
+          <v-divider v-if="i > 0" :key="`d-${ip._id}`" />
+          <div :key="ip._id" class="d-flex align-center px-4 py-2">
+            <v-icon size="18" class="mr-3" color="grey darken-1">
+              {{ ip.ipAddress.includes("/") ? "$network" : "$monitor" }}
+            </v-icon>
+            <div class="flex-grow-1 overflow-hidden">
+              <div class="text-body-2 font-weight-bold grey--text text--darken-4 text-break">
+                {{ ip.ipAddress }}
+              </div>
+              <div v-if="ip.label" class="text-caption grey--text text--darken-1">{{ ip.label }}</div>
+            </div>
+            <v-btn
+              v-if="canManage"
+              icon
+              small
+              color="error"
+              aria-label="Remove"
+              :loading="removingId === ip._id"
+              @click="removeIp(ip)"
+            >
+              <v-icon size="16">$trash-2</v-icon>
+            </v-btn>
+          </div>
+        </template>
+      </v-sheet>
+
+      <div v-if="!canManage && !loading" class="text-caption grey--text mt-3">
+        You can view this list. Ask an admin to change it.
+      </div>
     </div>
   </v-card>
 </template>
@@ -195,31 +219,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.empty-state {
-  border: 1px dashed #d6dbe8;
-  border-radius: 12px;
-  padding: 20px 16px;
-}
-
-.ip-list {
-  border: 1px solid #e4e8f2;
-  border-radius: 12px;
-}
-
-.ip-row {
-  padding: 10px 12px 10px 16px;
-}
-
-.ip-row + .ip-row {
-  border-top: 1px solid #e4e8f2;
-}
-
-.ip-code {
-  background: transparent !important;
-  padding: 0 !important;
-  font-size: 14px;
-  box-shadow: none !important;
-}
-</style>

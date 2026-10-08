@@ -2,15 +2,19 @@
   <div>
     <div class="d-flex align-center mb-3">
       <div>
-        <div class="group-title mb-0">Extra parameters</div>
+        <div class="d-flex align-center">
+          <v-icon size="16" color="grey darken-1" class="mr-2">$braces</v-icon>
+          <span class="text-caption font-weight-bold text-uppercase grey--text">Extra parameters</span>
+        </div>
         <div class="text-caption grey--text text--darken-1">
           Sent with every call. Values and the URL can use
           <code v-for="p in placeholders" :key="p" class="mr-1">{{ p }}</code>
         </div>
       </div>
       <v-spacer />
-      <v-btn small text rounded color="primary" :disabled="value.length >= 20" @click="add">
-        <v-icon small class="mr-1">$plus</v-icon> Add parameter
+      <v-btn small outlined color="primary" :disabled="value.length >= 20" @click="add">
+        <v-icon left size="14">$plus</v-icon>
+        Add parameter
       </v-btn>
     </div>
 
@@ -71,14 +75,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.group-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #757575;
-  margin-bottom: 12px;
-}
-</style>

@@ -1,27 +1,18 @@
 <template>
   <v-dialog :value="value" max-width="420" @input="$emit('input', $event)">
-    <v-card rounded="lg" class="pa-2">
-      <v-card-title class="d-flex align-center text-h6 font-weight-bold">
-        <v-avatar size="36" :color="`${color} lighten-5`" class="mr-3">
-          <v-icon small :color="color">{{ icon }}</v-icon>
+    <v-card rounded="lg">
+      <v-card-text class="pt-6 text-center">
+        <v-avatar size="56" :color="`${color} lighten-5`" class="mb-4">
+          <v-icon size="26" :color="color">{{ icon }}</v-icon>
         </v-avatar>
-        {{ title }}
-      </v-card-title>
-      <v-card-text class="text-body-2">
-        <slot>{{ text }}</slot>
+        <div class="text-h6 font-weight-bold grey--text text--darken-4 mb-2">{{ title }}</div>
+        <div class="text-body-2 grey--text text--darken-1">
+          <slot>{{ text }}</slot>
+        </div>
       </v-card-text>
-      <v-card-actions class="px-4 pb-4">
-        <v-spacer />
-        <v-btn text rounded :disabled="loading" @click="$emit('input', false)">
-          Cancel
-        </v-btn>
-        <v-btn
-          depressed
-          rounded
-          :color="color"
-          :loading="loading"
-          @click="$emit('confirm')"
-        >
+      <v-card-actions class="justify-center pb-5">
+        <v-btn text :disabled="loading" @click="$emit('input', false)">Cancel</v-btn>
+        <v-btn depressed :color="color" :loading="loading" @click="$emit('confirm')">
           {{ confirmLabel }}
         </v-btn>
       </v-card-actions>

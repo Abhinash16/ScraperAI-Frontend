@@ -2,22 +2,31 @@
   <div>
     <div class="d-flex align-center mb-3">
       <div>
-        <div class="headers-title">Headers</div>
+        <div class="d-flex align-center">
+          <v-icon size="16" color="grey darken-1" class="mr-2">$list</v-icon>
+          <span class="text-caption font-weight-bold text-uppercase grey--text">Headers</span>
+        </div>
         <div class="text-caption grey--text text--darken-1">
           Sent with every request. Saved values stay hidden.
         </div>
       </div>
       <v-spacer />
-      <v-btn small text rounded color="primary" @click="addRow">
-        <v-icon small class="mr-1">$plus</v-icon> Add header
+      <v-btn small outlined color="primary" @click="addRow">
+        <v-icon left size="14">$plus</v-icon>
+        Add header
       </v-btn>
     </div>
 
     <SecretNotice class="mb-3" />
 
-    <div v-if="!value.length" class="empty-headers text-body-2 mb-2">
+    <v-sheet
+      v-if="!value.length"
+      color="grey lighten-5"
+      rounded="lg"
+      class="text-body-2 grey--text text-center px-4 py-3 mb-2"
+    >
       No headers yet. Add one for API keys or auth tokens.
-    </div>
+    </v-sheet>
 
     <v-row v-for="row in value" :key="row.id" dense class="align-start">
       <v-col cols="12" sm="5">
@@ -107,20 +116,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.headers-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #757575;
-}
-
-.empty-headers {
-  border: 1px dashed #d6dbe8;
-  border-radius: 12px;
-  padding: 14px 16px;
-  color: #9e9e9e;
-}
-</style>

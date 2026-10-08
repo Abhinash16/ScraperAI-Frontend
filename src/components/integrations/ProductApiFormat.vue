@@ -1,30 +1,50 @@
 <template>
-  <div class="text-body-2">
-    <div class="field-title">How ScraperAI calls your API</div>
+  <div class="text-body-2 grey--text text--darken-3">
+    <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">How ScraperAI calls your API</div>
     <div class="mb-2">One URL, two kinds of requests:</div>
-    <ol class="list mb-4">
-      <li v-for="c in format.calls" :key="c.title">
-        <strong>{{ c.title }}.</strong> {{ c.when }}
-        <div><code>{{ c.request }}</code></div>
-        <div class="grey--text text--darken-1">{{ c.note }}</div>
-      </li>
-    </ol>
+    <v-sheet outlined rounded="lg" class="mb-5">
+      <template v-for="(c, i) in format.calls">
+        <v-divider v-if="i > 0" :key="`d-${c.title}`" />
+        <div :key="c.title" class="d-flex align-start px-4 py-3">
+          <v-avatar size="22" color="primary lighten-5" class="mr-3 mt-1 flex-shrink-0">
+            <span class="text-caption font-weight-bold primary--text">{{ i + 1 }}</span>
+          </v-avatar>
+          <div class="overflow-hidden">
+            <div><strong class="grey--text text--darken-4">{{ c.title }}.</strong> {{ c.when }}</div>
+            <div class="my-1"><code class="text-break">{{ c.request }}</code></div>
+            <div class="text-caption grey--text text--darken-1">{{ c.note }}</div>
+          </div>
+        </div>
+      </template>
+    </v-sheet>
 
-    <div class="field-title">Response</div>
+    <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">Response</div>
     <div class="mb-2">{{ format.response }} Each item:</div>
-    <pre class="format-example mb-4">{{ format.example }}</pre>
+    <v-sheet color="grey darken-4" dark rounded="lg" class="overflow-x-auto pa-4 mb-5">
+      <pre class="ma-0 text-caption">{{ format.example }}</pre>
+    </v-sheet>
 
-    <div class="field-title">Using your own field names</div>
+    <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">Using your own field names</div>
     <div class="mb-2">{{ format.mapping.intro }}</div>
-    <pre class="format-example mb-2">{{ format.mapping.theirs }}</pre>
+    <v-sheet color="grey darken-4" dark rounded="lg" class="overflow-x-auto pa-4 mb-2">
+      <pre class="ma-0 text-caption">{{ format.mapping.theirs }}</pre>
+    </v-sheet>
     <div class="mb-2">{{ format.mapping.map }}</div>
-    <pre class="format-example mb-2">{{ format.mapping.ours }}</pre>
-    <div class="mb-4">{{ format.mapping.stock }}</div>
+    <v-sheet color="grey darken-4" dark rounded="lg" class="overflow-x-auto pa-4 mb-2">
+      <pre class="ma-0 text-caption">{{ format.mapping.ours }}</pre>
+    </v-sheet>
+    <div class="mb-5">{{ format.mapping.stock }}</div>
 
-    <div class="field-title">Notes</div>
-    <ul class="list mb-0">
-      <li v-for="n in format.notes" :key="n">{{ n }}</li>
-    </ul>
+    <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">Notes</div>
+    <v-sheet outlined rounded="lg">
+      <template v-for="(n, i) in format.notes">
+        <v-divider v-if="i > 0" :key="`d-${i}`" />
+        <div :key="i" class="d-flex align-start px-4 py-2">
+          <v-icon size="14" color="grey" class="mr-2 mt-1 flex-shrink-0">$info</v-icon>
+          <span>{{ n }}</span>
+        </div>
+      </template>
+    </v-sheet>
   </div>
 </template>
 
@@ -39,32 +59,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.field-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #757575;
-  margin-bottom: 8px;
-}
-
-.list {
-  padding-left: 18px;
-}
-
-.list li {
-  margin-bottom: 6px;
-}
-
-.format-example {
-  background: #0f172a;
-  color: #e2e8f0;
-  padding: 14px 16px;
-  border-radius: 12px;
-  font-size: 12px;
-  overflow-x: auto;
-  white-space: pre;
-}
-</style>

@@ -1,149 +1,181 @@
 <template>
-  <v-card outlined rounded="lg" class="pa-6">
-    <div class="d-flex align-center mb-1">
-      <v-icon small class="mr-2">$play</v-icon>
-      <div class="text-subtitle-1 font-weight-bold">Try it</div>
-    </div>
-    <div class="text-body-2 grey--text text--darken-1 mb-4">
-      Calls your API with the settings above, including unsaved changes, and
-      shows each step: what we sent, what came back, how it maps to our
-      format, and what the AI sees. It also checks your full listing.
-    </div>
-
-    <v-form class="d-flex align-start" @submit.prevent="run">
-      <v-text-field
-        v-model.trim="query"
-        label="Search for"
-        placeholder="activa ev"
-        outlined
-        dense
-        class="mr-2"
-        autocomplete="off"
-      />
-      <v-btn
-        color="primary"
-        rounded
-        depressed
-        height="40"
-        type="submit"
-        :loading="running"
-        :disabled="running || !query"
-      >
-        Try it
-      </v-btn>
-    </v-form>
-
-    <v-alert v-if="error" type="error" text dense rounded="lg" class="text-body-2 mt-2 mb-0">
-      {{ error }}
-    </v-alert>
-
-    <template v-if="result">
-      <!-- Listing check -->
-      <div v-if="listing" class="mt-2 mb-3">
-        <div v-if="listing.ok === false" class="text-body-2 error--text">
-          <v-icon x-small color="error" class="mr-1">$circle-alert</v-icon>
-          Full listing failed: {{ listing.error }}
+  <v-card outlined rounded="lg">
+    <div class="d-flex align-center px-5 py-4">
+      <v-avatar size="40" tile color="green lighten-5" class="rounded-lg mr-3 flex-shrink-0">
+        <v-icon size="20" color="green darken-1">$play</v-icon>
+      </v-avatar>
+      <div>
+        <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">Try it</div>
+        <div class="text-caption grey--text text--darken-1">
+          Calls your API with the settings above, including unsaved changes, and shows each step:
+          what we sent, what came back, how it maps to our format, and what the AI sees. It also
+          checks your full listing.
         </div>
-        <template v-else>
-          <div class="text-body-2">
-            <v-icon x-small :color="listingGood ? 'success' : 'warning'" class="mr-1">
-              {{ listingGood ? "$circle-check" : "$triangle-alert" }}
-            </v-icon>
-            Full listing: {{ listing.items }} products · {{ listing.withPrices }}
-            with prices · {{ listing.withAvailability }} with stock status
-          </div>
-          <v-alert
-            v-if="listing.items && !listing.withAvailability"
-            type="warning"
-            text
-            dense
-            rounded="lg"
-            class="text-body-2 mt-2 mb-0"
-          >
-            Your full listing has no stock status, so the bot can't answer
-            "what's available?".
-          </v-alert>
-          <v-alert
-            v-if="listing.items && !listing.withPrices"
-            type="warning"
-            text
-            dense
-            rounded="lg"
-            class="text-body-2 mt-2 mb-0"
-          >
-            Your full listing has no prices, so the bot can't compare or quote
-            prices across products.
-          </v-alert>
-        </template>
       </div>
+    </div>
+    <v-divider />
 
-      <div class="text-body-2 mb-2">
-        <v-chip small dark :color="result.ok ? 'success' : 'error'" class="mr-2">
-          {{ result.ok ? "Call worked" : "Call failed" }}
-        </v-chip>
-        <span v-if="result.ms != null" class="grey--text text--darken-1 mr-2">{{ result.ms }} ms</span>
-        <span v-if="result.found != null">
-          {{ result.found }} found · {{ products.length }} after mapping
-        </span>
-      </div>
-      <div v-if="result.error" class="text-body-2 error--text mb-2">{{ result.error }}</div>
-
-      <v-tabs v-model="tab" color="primary" show-arrows class="mb-3">
-        <v-tab class="text-none">Request</v-tab>
-        <v-tab class="text-none">Their response</v-tab>
-        <v-tab class="text-none">After mapping</v-tab>
-        <v-tab class="text-none">What the AI sees</v-tab>
-      </v-tabs>
-
-      <OutputPanel
-        v-if="tab === 0"
-        title="What we sent"
-        subtitle="Secrets are masked."
-        :copy-text="json(result.request)"
-      >
-        <JsonTree :value="result.request" />
-      </OutputPanel>
-
-      <template v-if="tab === 1">
-        <OutputPanel
-          v-if="result.firstRawItem"
-          title="First product, as your API sends it"
-          subtitle="Use these field names in the mapping above."
-          :copy-text="json(result.firstRawItem)"
-          class="mb-4"
+    <div class="pa-5">
+      <v-form class="d-flex align-start" @submit.prevent="run">
+        <v-text-field
+          v-model.trim="query"
+          label="Search for"
+          placeholder="activa ev"
+          prepend-inner-icon="$search"
+          outlined
+          dense
+          class="mr-2"
+          autocomplete="off"
+        />
+        <v-btn
+          color="success"
+          depressed
+          height="40"
+          type="submit"
+          :loading="running"
+          :disabled="running || !query"
         >
-          <JsonTree :value="result.firstRawItem" />
-        </OutputPanel>
-        <OutputPanel title="Full response" :copy-text="json(result.raw)">
-          <template v-if="result.raw && result.raw.truncated">
-            <div class="text-caption grey--text mb-1">Over 20 KB, so only the start is shown.</div>
-            <pre>{{ result.raw.preview }}</pre>
+          <v-icon left size="16">$play</v-icon>
+          Try it
+        </v-btn>
+      </v-form>
+
+      <v-alert v-if="error" type="error" text dense rounded="lg" class="text-body-2 mt-2 mb-0">
+        {{ error }}
+      </v-alert>
+
+      <template v-if="result">
+        <!-- Listing check -->
+        <template v-if="listing">
+          <v-sheet
+            v-if="listing.ok === false"
+            rounded="lg"
+            color="red lighten-5"
+            class="d-flex align-center px-4 py-3 mb-3"
+          >
+            <v-icon size="18" color="error" class="mr-3">$circle-alert</v-icon>
+            <span class="text-body-2 grey--text text--darken-3">Full listing failed: {{ listing.error }}</span>
+          </v-sheet>
+          <template v-else>
+            <v-sheet
+              rounded="lg"
+              :color="listingGood ? 'green lighten-5' : 'amber lighten-5'"
+              class="d-flex align-center flex-wrap px-4 py-3 mb-3"
+            >
+              <v-icon size="18" :color="listingGood ? 'success' : 'amber darken-2'" class="mr-3">
+                {{ listingGood ? "$circle-check" : "$triangle-alert" }}
+              </v-icon>
+              <span class="text-body-2 font-weight-bold grey--text text--darken-3 mr-3">Full listing</span>
+              <v-chip x-small label class="font-weight-bold mr-1 my-1">{{ listing.items }} products</v-chip>
+              <v-chip x-small label class="font-weight-bold mr-1 my-1">{{ listing.withPrices }} with prices</v-chip>
+              <v-chip x-small label class="font-weight-bold my-1">
+                {{ listing.withAvailability }} with stock status
+              </v-chip>
+            </v-sheet>
+            <v-alert
+              v-if="listing.items && !listing.withAvailability"
+              type="warning"
+              text
+              dense
+              rounded="lg"
+              class="text-body-2 mb-3"
+            >
+              Your full listing has no stock status, so the bot can't answer "what's available?".
+            </v-alert>
+            <v-alert
+              v-if="listing.items && !listing.withPrices"
+              type="warning"
+              text
+              dense
+              rounded="lg"
+              class="text-body-2 mb-3"
+            >
+              Your full listing has no prices, so the bot can't compare or quote prices across
+              products.
+            </v-alert>
           </template>
-          <JsonTree v-else-if="result.raw != null" :value="result.raw" />
-          <div v-else class="output-empty">No response</div>
+        </template>
+
+        <!-- Call result -->
+        <div class="d-flex flex-wrap align-center mb-2">
+          <v-chip
+            small
+            label
+            :color="result.ok ? 'success' : 'error'"
+            text-color="white"
+            class="font-weight-bold mr-2 my-1"
+          >
+            <v-icon left size="14">{{ result.ok ? "$circle-check" : "$circle-x" }}</v-icon>
+            {{ result.ok ? "Call worked" : "Call failed" }}
+          </v-chip>
+          <span v-if="result.ms != null" class="d-inline-flex align-center text-body-2 grey--text text--darken-1 mr-3">
+            <v-icon size="14" class="mr-1">$clock</v-icon>
+            {{ result.ms }} ms
+          </span>
+          <span v-if="result.found != null" class="text-body-2 grey--text text--darken-3">
+            {{ result.found }} found · {{ products.length }} after mapping
+          </span>
+        </div>
+        <div v-if="result.error" class="text-body-2 error--text mb-2">{{ result.error }}</div>
+
+        <v-tabs v-model="tab" color="primary" background-color="transparent" height="40" slider-size="3" show-arrows>
+          <v-tab class="text-body-2 font-weight-bold">Request</v-tab>
+          <v-tab class="text-body-2 font-weight-bold">Their response</v-tab>
+          <v-tab class="text-body-2 font-weight-bold">After mapping</v-tab>
+          <v-tab class="text-body-2 font-weight-bold">What the AI sees</v-tab>
+        </v-tabs>
+        <v-divider class="mb-3" />
+
+        <OutputPanel
+          v-if="tab === 0"
+          title="What we sent"
+          subtitle="Secrets are masked."
+          :copy-text="json(result.request)"
+        >
+          <JsonTree :value="result.request" />
+        </OutputPanel>
+
+        <template v-if="tab === 1">
+          <OutputPanel
+            v-if="result.firstRawItem"
+            title="First product, as your API sends it"
+            subtitle="Use these field names in the mapping above."
+            :copy-text="json(result.firstRawItem)"
+            class="mb-4"
+          >
+            <JsonTree :value="result.firstRawItem" />
+          </OutputPanel>
+          <OutputPanel title="Full response" :copy-text="json(result.raw)">
+            <template v-if="result.raw && result.raw.truncated">
+              <div class="text-caption grey--text mb-1">Over 20 KB, so only the start is shown.</div>
+              <pre class="ma-0 text-pre-wrap text-break">{{ result.raw.preview }}</pre>
+            </template>
+            <JsonTree v-else-if="result.raw != null" :value="result.raw" />
+            <div v-else class="text-caption grey--text">No response</div>
+          </OutputPanel>
+        </template>
+
+        <OutputPanel
+          v-if="tab === 2"
+          title="Products after mapping"
+          subtitle="In our format. This is what the bot uses."
+          :copy-text="json(products)"
+        >
+          <JsonTree v-if="products.length" :value="products" />
+          <div v-else class="text-caption grey--text">No products</div>
+        </OutputPanel>
+
+        <OutputPanel
+          v-if="tab === 3"
+          title="What the AI sees"
+          subtitle="This exact text is added to the AI's instructions."
+          :copy-text="result.aiText || ''"
+        >
+          <pre v-if="result.aiText" class="ma-0 text-pre-wrap text-break">{{ result.aiText }}</pre>
+          <div v-else class="text-caption grey--text">(nothing)</div>
         </OutputPanel>
       </template>
-
-      <OutputPanel
-        v-if="tab === 2"
-        title="Products after mapping"
-        subtitle="In our format. This is what the bot uses."
-        :copy-text="json(products)"
-      >
-        <JsonTree v-if="products.length" :value="products" />
-        <div v-else class="output-empty">No products</div>
-      </OutputPanel>
-
-      <OutputPanel
-        v-if="tab === 3"
-        title="What the AI sees"
-        subtitle="This exact text is added to the AI's instructions."
-        :copy-text="result.aiText || ''"
-      >
-        <pre v-if="result.aiText">{{ result.aiText }}</pre>
-        <div v-else class="output-empty">(nothing)</div>
-      </OutputPanel>
-    </template>
+    </div>
   </v-card>
 </template>
 
@@ -210,16 +242,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.output-empty {
-  color: #94a3b8;
-  font-size: 13px;
-}
-</style>

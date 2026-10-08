@@ -1,140 +1,233 @@
 <template>
   <div>
-    <!-- ============ EMBED SCRIPT ============ -->
-    <v-card outlined rounded="lg" class="pa-6 mb-4">
-      <div class="text-subtitle-1 font-weight-bold mb-1">Embed script</div>
-      <div class="text-body-2 grey--text text--darken-1 mb-4">
-        Paste this before the closing <code>&lt;/body&gt;</code> tag of your
-        site's <code>index.html</code>. The chat widget appears on every page
-        that loads it.
-      </div>
-
-      <div class="code-box">
-        <div class="d-flex justify-space-between align-center mb-2">
-          <span class="code-label">HTML</span>
-          <v-btn x-small color="primary" depressed rounded @click="copyScript">
-            <v-icon x-small class="mr-1">$copy</v-icon> Copy
-          </v-btn>
-        </div>
-        <code class="code-text">{{ scriptTag }}</code>
-      </div>
-
-      <v-btn
-        text
-        rounded
-        color="primary"
-        class="mt-4 px-2"
-        to="/dashboard/documentation"
+    <!-- ============ STATUS ============ -->
+    <v-sheet
+      v-if="canManageSettings && !loading && !loadError"
+      rounded="lg"
+      :color="saved.length ? 'green lighten-5' : 'amber lighten-5'"
+      class="d-flex align-center pa-4 mb-4"
+    >
+      <v-avatar
+        size="36"
+        :color="saved.length ? 'success' : 'amber darken-2'"
+        class="mr-3 flex-shrink-0"
       >
-        <v-icon small class="mr-1">$book-open</v-icon>
-        View installation guide
-      </v-btn>
+        <v-icon size="18" color="white">{{
+          saved.length ? "$shield-check" : "$shield-alert"
+        }}</v-icon>
+      </v-avatar>
+      <div>
+        <div
+          class="text-body-2 font-weight-bold"
+          :class="
+            saved.length
+              ? 'green--text text--darken-3'
+              : 'amber--text text--darken-4'
+          "
+        >
+          <template v-if="saved.length">
+            Locked to {{ saved.length }} domain{{
+              saved.length === 1 ? "" : "s"
+            }}
+          </template>
+          <template v-else>Any website can load your widget</template>
+        </div>
+        <div class="text-caption grey--text text--darken-2">
+          <template v-if="saved.length">{{ saved.join(", ") }}</template>
+          <template v-else
+            >Add your domains below so nobody else can embed your
+            chatbot.</template
+          >
+        </div>
+      </div>
+    </v-sheet>
+
+    <!-- ============ EMBED SCRIPT ============ -->
+    <v-card outlined rounded="lg" class="mb-4">
+      <div class="d-flex align-center px-5 py-4">
+        <v-avatar
+          size="32"
+          tile
+          color="primary lighten-5"
+          class="rounded-lg mr-3 flex-shrink-0"
+        >
+          <v-icon size="16" color="primary">$code</v-icon>
+        </v-avatar>
+        <div>
+          <div
+            class="text-subtitle-2 font-weight-bold grey--text text--darken-4"
+          >
+            Embed script
+          </div>
+          <div class="text-caption grey--text text--darken-1">
+            Paste this before the closing <code>&lt;/body&gt;</code> tag of your
+            site's <code>index.html</code>. The chat widget appears on every
+            page that loads it.
+          </div>
+        </div>
+      </div>
+      <v-divider />
+      <div class="pa-5">
+        <v-sheet color="grey darken-4" dark rounded="lg" class="pa-4">
+          <div class="d-flex align-center mb-2">
+            <span
+              class="text-caption font-weight-bold text-uppercase grey--text"
+              >HTML</span
+            >
+            <v-spacer />
+            <v-btn x-small depressed color="success" @click="copyScript">
+              <v-icon left size="12">$copy</v-icon>
+              Copy
+            </v-btn>
+          </div>
+          <pre
+            class="text-body-2 text-pre-wrap text-break grey--text text--lighten-3"
+            >{{ scriptTag }}</pre
+          >
+        </v-sheet>
+
+        <v-btn
+          small
+          text
+          color="primary"
+          class="mt-3 px-2"
+          to="/dashboard/documentation"
+        >
+          <v-icon left size="14">$book-open</v-icon>
+          View installation guide
+        </v-btn>
+      </div>
     </v-card>
 
     <!-- ============ ALLOWED DOMAINS ============ -->
-    <v-card v-if="canManageSettings" outlined rounded="lg" class="pa-6 mb-4">
-      <div class="text-subtitle-1 font-weight-bold mb-1">Allowed domains</div>
-      <div class="text-body-2 grey--text text--darken-1 mb-4">
-        The widget only works on these websites. Use <code>example.com</code>
-        for one site or <code>*.example.com</code> for all its subdomains. Up
-        to {{ MAX_ORIGINS }} entries.
+    <v-card v-if="canManageSettings" outlined rounded="lg" class="mb-4">
+      <div class="d-flex align-center px-5 py-4">
+        <v-avatar
+          size="32"
+          tile
+          color="green lighten-5"
+          class="rounded-lg mr-3 flex-shrink-0"
+        >
+          <v-icon size="16" color="green darken-1">$globe-lock</v-icon>
+        </v-avatar>
+        <div>
+          <div
+            class="text-subtitle-2 font-weight-bold grey--text text--darken-4"
+          >
+            Allowed domains
+            <span v-if="origins.length" class="text-caption grey--text">
+              ({{ origins.length }}/{{ MAX_ORIGINS }})
+            </span>
+          </div>
+          <div class="text-caption grey--text text--darken-1">
+            The widget only works on these websites. Use
+            <code>example.com</code> for one site or
+            <code>*.example.com</code> for all its subdomains. Up to
+            {{ MAX_ORIGINS }} entries.
+          </div>
+        </div>
+      </div>
+      <v-divider />
+
+      <div class="pa-5">
+        <v-skeleton-loader v-if="loading" type="list-item, list-item" />
+
+        <v-alert
+          v-else-if="loadError"
+          type="error"
+          text
+          rounded="lg"
+          class="text-body-2 mb-0"
+        >
+          <div class="d-flex align-center flex-wrap">
+            <span class="mr-4">{{ loadError }}</span>
+            <v-spacer />
+            <v-btn small outlined color="error" @click="load">
+              <v-icon left size="14">$refresh-cw</v-icon>
+              Retry
+            </v-btn>
+          </div>
+        </v-alert>
+
+        <template v-else>
+          <div v-if="origins.length" class="d-flex flex-wrap mb-3">
+            <v-chip
+              v-for="origin in origins"
+              :key="origin"
+              close
+              label
+              color="green lighten-5"
+              text-color="green darken-3"
+              class="font-weight-bold mr-2 mb-2"
+              @click:close="removeOrigin(origin)"
+            >
+              <v-icon left size="14">$globe</v-icon>
+              {{ origin }}
+            </v-chip>
+          </div>
+          <div v-else class="text-body-2 grey--text mb-3">
+            No domains added yet.
+          </div>
+
+          <v-form class="d-flex align-start" @submit.prevent="addOrigin">
+            <v-text-field
+              v-model.trim="draft"
+              placeholder="example.com or *.example.com"
+              prepend-inner-icon="$globe"
+              outlined
+              dense
+              hide-details="auto"
+              :error-messages="draftError"
+              :disabled="origins.length >= MAX_ORIGINS"
+              class="mr-2"
+              @input="draftError = ''"
+            />
+            <v-btn
+              type="submit"
+              depressed
+              color="success"
+              height="40"
+              :disabled="!draft || origins.length >= MAX_ORIGINS"
+            >
+              <v-icon left size="16">$plus</v-icon>
+              Add
+            </v-btn>
+          </v-form>
+
+          <v-alert
+            v-if="saveError"
+            type="error"
+            dense
+            text
+            rounded="lg"
+            class="mt-4 mb-0 text-body-2"
+          >
+            {{ saveError }}
+          </v-alert>
+        </template>
       </div>
 
-      <v-progress-linear v-if="loading" indeterminate color="primary" />
-
-      <v-alert
-        v-else-if="loadError"
-        type="error"
-        outlined
-        rounded="lg"
-        class="mb-0"
-      >
-        {{ loadError }}
-        <v-btn small text color="error" class="ml-2" @click="load">
-          Retry
-        </v-btn>
-      </v-alert>
-
-      <template v-else>
-        <v-alert
-          v-if="!saved.length"
-          border="left"
-          colored-border
-          color="warning"
-          elevation="0"
-          outlined
-          rounded="lg"
-          class="text-body-2"
-        >
-          <strong>Any website can load your widget right now.</strong> Add your
-          domains so nobody else can embed your chatbot with your key.
-        </v-alert>
-
-        <div v-if="origins.length" class="mb-3">
-          <v-chip
-            v-for="origin in origins"
-            :key="origin"
-            close
-            outlined
-            class="mr-2 mb-2"
-            @click:close="removeOrigin(origin)"
+      <template v-if="!loading && !loadError">
+        <v-divider />
+        <div class="d-flex align-center px-5 py-3">
+          <span
+            v-if="dirty"
+            class="text-caption amber--text text--darken-3 font-weight-bold"
           >
-            {{ origin }}
-          </v-chip>
-        </div>
-
-        <v-form class="d-flex align-start" @submit.prevent="addOrigin">
-          <v-text-field
-            v-model.trim="draft"
-            placeholder="example.com or *.example.com"
-            outlined
-            dense
-            hide-details="auto"
-            :error-messages="draftError"
-            :disabled="origins.length >= MAX_ORIGINS"
-            background-color="#f8fafc"
-            class="mr-2"
-            @input="draftError = ''"
-          />
-          <v-btn
-            type="submit"
-            depressed
-            rounded
-            height="40"
-            :disabled="!draft || origins.length >= MAX_ORIGINS"
-            class="text-none"
-          >
-            Add
-          </v-btn>
-        </v-form>
-
-        <v-alert
-          v-if="saveError"
-          type="error"
-          dense
-          outlined
-          rounded="lg"
-          class="mt-4 mb-0 text-body-2"
-        >
-          {{ saveError }}
-        </v-alert>
-
-        <div class="d-flex justify-end mt-4">
+            Unsaved changes
+          </span>
+          <v-spacer />
           <v-btn
             v-if="dirty"
             text
-            rounded
-            class="text-none mr-2"
             :disabled="saving"
+            class="mr-2"
             @click="reset"
+            >Discard</v-btn
           >
-            Discard
-          </v-btn>
           <v-btn
             color="primary"
             depressed
-            rounded
-            class="text-none font-weight-bold"
             :disabled="!dirty"
             :loading="saving"
             @click="save"
@@ -146,41 +239,68 @@
     </v-card>
 
     <!-- ============ SUPPORT WHATSAPP ============ -->
-    <v-card v-if="canManageSettings" outlined rounded="lg" class="pa-6 mb-4">
-      <div class="text-subtitle-1 font-weight-bold mb-1">
-        Support WhatsApp number (for escalations)
+    <v-card v-if="canManageSettings" outlined rounded="lg" class="mb-4">
+      <div class="d-flex align-center px-5 py-4">
+        <v-avatar
+          size="32"
+          tile
+          color="green lighten-5"
+          class="rounded-lg mr-3 flex-shrink-0"
+        >
+          <v-icon size="16" color="green darken-1">$whatsapp</v-icon>
+        </v-avatar>
+        <div>
+          <div
+            class="text-subtitle-2 font-weight-bold grey--text text--darken-4"
+          >
+            Support WhatsApp number (for escalations)
+          </div>
+          <div class="text-caption grey--text text--darken-1">
+            When a website chat is escalated, the bot's reply links to this
+            number on WhatsApp. Enter it with the country code. Leave it empty
+            and customers see no WhatsApp link, only a note that your team will
+            contact them.
+          </div>
+        </div>
       </div>
-      <div class="text-body-2 grey--text text--darken-1 mb-4">
-        When a website chat is escalated, the bot's reply links to this number
-        on WhatsApp. Enter it with the country code. Leave it empty and
-        customers see no WhatsApp link, only a note that your team will
-        contact them.
-      </div>
+      <v-divider />
 
-      <v-progress-linear v-if="loading" indeterminate color="primary" />
+      <div class="pa-5">
+        <v-skeleton-loader v-if="loading" type="list-item" />
 
-      <template v-else-if="!loadError">
-        <v-form @submit.prevent="saveWhatsapp">
-          <v-text-field
-            v-model.trim="whatsapp"
-            placeholder="919876543210"
-            outlined
-            dense
-            hide-details="auto"
-            :error-messages="whatsappError"
-            background-color="#f8fafc"
-            prepend-inner-icon="$whatsapp"
-            @input="whatsappError = ''"
-          />
+        <v-form v-else-if="!loadError" @submit.prevent="saveWhatsapp">
+          <v-row dense>
+            <v-col cols="12" md="7">
+              <v-text-field
+                v-model.trim="whatsapp"
+                placeholder="919876543210"
+                outlined
+                dense
+                hide-details="auto"
+                :error-messages="whatsappError"
+                prepend-inner-icon="$whatsapp"
+                @input="whatsappError = ''"
+              />
+            </v-col>
+          </v-row>
         </v-form>
+      </div>
 
-        <div class="d-flex justify-end mt-4">
+      <template v-if="!loading && !loadError">
+        <v-divider />
+        <div class="d-flex align-center px-5 py-3">
+          <span
+            v-if="whatsappDirty"
+            class="text-caption amber--text text--darken-3 font-weight-bold"
+          >
+            Unsaved changes
+          </span>
+          <v-spacer />
           <v-btn
             v-if="whatsappDirty"
             text
-            rounded
-            class="text-none mr-2"
             :disabled="savingWhatsapp"
+            class="mr-2"
             @click="resetWhatsapp"
           >
             Discard
@@ -188,8 +308,6 @@
           <v-btn
             color="primary"
             depressed
-            rounded
-            class="text-none font-weight-bold"
             :disabled="!whatsappDirty"
             :loading="savingWhatsapp"
             @click="saveWhatsapp"
@@ -201,17 +319,33 @@
     </v-card>
 
     <!-- ============ THINGS TO KNOW ============ -->
-    <v-card outlined rounded="lg" class="pa-6">
-      <div class="text-subtitle-1 font-weight-bold mb-3">Things to know</div>
-      <div v-for="point in thingsToKnow" :key="point.title" class="d-flex mb-3">
-        <v-icon small color="primary" class="mr-3 mt-1">
-          {{ point.icon }}
-        </v-icon>
-        <div class="text-body-2">
-          <strong>{{ point.title }}</strong>
-          <span class="grey--text text--darken-2"> {{ point.text }}</span>
-        </div>
+    <v-card outlined rounded="lg">
+      <div class="d-flex align-center px-5 py-4">
+        <v-icon size="18" color="primary" class="mr-2">$info</v-icon>
+        <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4"
+          >Things to know</span
+        >
       </div>
+      <v-divider />
+      <template v-for="(point, i) in thingsToKnow">
+        <v-divider v-if="i > 0" :key="`d-${point.title}`" />
+        <div :key="point.title" class="d-flex align-start px-5 py-3">
+          <v-avatar
+            size="28"
+            tile
+            color="primary lighten-5"
+            class="rounded-lg mr-3 flex-shrink-0"
+          >
+            <v-icon size="14" color="primary">{{ point.icon }}</v-icon>
+          </v-avatar>
+          <div class="text-body-2">
+            <span class="font-weight-bold grey--text text--darken-4">{{
+              point.title
+            }}</span>
+            <span class="grey--text text--darken-2"> {{ point.text }}</span>
+          </div>
+        </div>
+      </template>
     </v-card>
   </div>
 </template>
@@ -434,30 +568,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.code-box {
-  background: #0f172a;
-  padding: 14px 16px;
-  border-radius: 12px;
-}
-
-.code-label {
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: #94a3b8;
-}
-
-.code-text {
-  display: block;
-  background: transparent !important;
-  color: #e2e8f0 !important;
-  padding: 0 !important;
-  font-family: monospace !important;
-  font-size: 13px;
-  font-weight: 400;
-  white-space: pre-wrap;
-  word-break: break-all;
-  box-shadow: none !important;
-}
-</style>

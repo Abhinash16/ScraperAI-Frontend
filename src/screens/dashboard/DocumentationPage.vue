@@ -1,54 +1,56 @@
 <template>
   <div class="docs-page">
     <!-- HEADER -->
-    <div class="d-flex align-start flex-wrap mb-4">
-      <div class="flex-grow-1 mr-4 mb-2">
-        <h1 class="text-h5 font-weight-bold mb-1">Guide</h1>
-        <p class="text-subtitle-2 grey--text mb-0">
-          What each feature does, what to know before going live, and what's
-          coming next.
-        </p>
+    <div class="d-flex flex-wrap align-center mb-4">
+      <div class="mr-4 mb-2">
+        <h1 class="text-h6 font-weight-bold grey--text text--darken-4">Guide</h1>
+        <div class="text-body-2 grey--text text--darken-1">
+          What each feature does, what to know before going live, and what's coming next.
+        </div>
       </div>
-      <v-btn color="primary" rounded depressed outlined @click="downloadDocs">
-        <v-icon left>$download</v-icon>
+      <v-spacer />
+      <v-btn outlined color="primary" class="mb-2" @click="downloadDocs">
+        <v-icon left size="16">$download</v-icon>
         Download
       </v-btn>
     </div>
 
     <v-tabs
       :value="tabIndex"
+      color="primary"
+      background-color="transparent"
+      height="44"
+      slider-size="3"
       show-arrows
-      class="mb-6 docs-tabs"
       @change="setTab(TABS[$event].id)"
     >
-      <v-tab v-for="t in TABS" :key="t.id" class="text-none">
-        <v-icon small left>{{ t.icon }}</v-icon>
+      <v-tab v-for="t in TABS" :key="t.id" class="text-body-2 font-weight-bold">
+        <v-icon size="16" class="mr-2">{{ t.icon }}</v-icon>
         {{ t.name }}
       </v-tab>
     </v-tabs>
+    <v-divider class="mb-4" />
 
     <!-- ================= GO-LIVE CHECKLIST ================= -->
     <div v-if="tab === 'checklist'">
-      <v-card outlined rounded="lg" class="pa-6 mb-4">
-        <div class="d-flex align-center flex-wrap">
+      <v-card outlined rounded="lg" class="mb-4">
+        <div class="d-flex align-center flex-wrap pa-5">
           <v-progress-circular
             :value="readiness"
-            size="64"
-            width="6"
-            color="primary"
-            class="mr-4"
+            :color="readiness === 100 ? 'success' : 'primary'"
+            size="72"
+            width="7"
+            class="mr-5 mb-2 flex-shrink-0"
           >
-            <strong>{{ readiness }}%</strong>
+            <span class="text-body-1 font-weight-bold grey--text text--darken-4">{{ readiness }}%</span>
           </v-progress-circular>
-          <div>
-            <div class="text-subtitle-1 font-weight-bold">
-              {{ requiredDone }} of {{ autoRequired.length }} required checks
-              passed
+          <div class="flex-grow-1 mb-2">
+            <div class="text-subtitle-1 font-weight-bold grey--text text--darken-4">
+              {{ requiredDone }} of {{ autoRequired.length }} required checks passed
             </div>
             <div class="text-body-2 grey--text text--darken-1">
-              Ticks are checked automatically where we can. Steps marked
-              "Check yourself" are ones we can't verify, so make sure they're
-              done.
+              Ticks are checked automatically where we can. Steps marked "Check yourself" are ones we
+              can't verify, so make sure they're done.
             </div>
           </div>
         </div>
@@ -57,34 +59,32 @@
       <v-card outlined rounded="lg">
         <template v-for="(item, i) in GO_LIVE_CHECKLIST">
           <v-divider v-if="i" :key="item.id + '-d'" />
-          <div :key="item.id" class="d-flex align-start pa-4">
-            <v-icon :color="statusColor(item)" class="mr-3 mt-1">
+          <div :key="item.id" class="d-flex align-start flex-wrap px-5 py-4">
+            <v-icon size="20" :color="statusColor(item)" class="mr-3 mt-1 flex-shrink-0">
               {{ statusIcon(item) }}
             </v-icon>
-            <div class="flex-grow-1 mr-2">
-              <div class="font-weight-bold">
-                {{ item.title }}
+            <div class="flex-grow-1 mr-3 overflow-hidden">
+              <div class="d-flex flex-wrap align-center">
+                <span class="text-body-2 font-weight-bold grey--text text--darken-4 mr-2">{{ item.title }}</span>
                 <v-chip
                   x-small
-                  outlined
-                  :color="item.required ? 'primary' : 'grey'"
-                  class="ml-1"
+                  label
+                  :color="item.required ? 'primary lighten-5' : 'grey lighten-4'"
+                  :text-color="item.required ? 'primary' : 'grey darken-1'"
+                  class="font-weight-bold"
                 >
                   {{ item.required ? "Required" : "Recommended" }}
                 </v-chip>
               </div>
-              <div class="text-body-2 grey--text text--darken-1">
-                {{ item.text }}
-              </div>
-              <div
-                v-if="statusOf(item) === null"
-                class="text-caption grey--text mt-1"
-              >
+              <div class="text-body-2 grey--text text--darken-1">{{ item.text }}</div>
+              <div v-if="statusOf(item) === null" class="d-flex align-center text-caption grey--text mt-1">
+                <v-icon size="12" class="mr-1">$info</v-icon>
                 {{ item.check ? "Couldn't check this" : "Check yourself" }}
               </div>
             </div>
-            <v-btn small text rounded color="primary" :to="item.route">
+            <v-btn small outlined color="primary" class="mt-1" :to="item.route">
               Open
+              <v-icon right size="14">$arrow-right</v-icon>
             </v-btn>
           </div>
         </template>
@@ -93,44 +93,58 @@
 
     <!-- ================= FEATURE GUIDES ================= -->
     <div v-if="tab === 'features'">
-      <v-expansion-panels v-model="openGuide" flat class="guides">
+      <v-expansion-panels v-model="openGuide" flat>
         <v-expansion-panel
           v-for="g in FEATURE_GUIDES"
           :id="'guide-' + g.id"
           :key="g.id"
           class="guide-panel mb-3"
         >
-          <v-expansion-panel-header>
+          <v-expansion-panel-header class="py-3">
             <div class="d-flex align-center">
-              <v-avatar size="36" rounded="lg" color="#eff2fb" class="mr-3">
-                <v-icon small color="primary">{{ g.icon }}</v-icon>
+              <v-avatar size="40" tile color="primary lighten-5" class="rounded-lg mr-3 flex-shrink-0">
+                <v-icon size="20" color="primary">{{ g.icon }}</v-icon>
               </v-avatar>
-              <div>
-                <div class="font-weight-bold">{{ g.name }}</div>
-                <div class="text-body-2 grey--text text--darken-1">
-                  {{ g.summary }}
-                </div>
+              <div class="overflow-hidden">
+                <div class="text-body-2 font-weight-bold grey--text text--darken-4">{{ g.name }}</div>
+                <div class="text-caption grey--text text--darken-1">{{ g.summary }}</div>
               </div>
             </div>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            <v-row>
+            <v-divider class="mb-4" />
+            <v-row dense>
               <v-col cols="12" md="6">
-                <div class="field-title">How to use it</div>
-                <ol class="text-body-2 list">
-                  <li v-for="s in g.steps" :key="s">{{ s }}</li>
-                </ol>
+                <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">How to use it</div>
+                <v-sheet outlined rounded="lg">
+                  <template v-for="(step, i) in g.steps">
+                    <v-divider v-if="i > 0" :key="`sd-${i}`" />
+                    <div :key="`s-${i}`" class="d-flex align-start px-4 py-2">
+                      <v-avatar size="22" color="green lighten-5" class="mr-3 mt-1 flex-shrink-0">
+                        <span class="text-caption font-weight-bold green--text text--darken-2">{{ i + 1 }}</span>
+                      </v-avatar>
+                      <span class="text-body-2 grey--text text--darken-3">{{ step }}</span>
+                    </div>
+                  </template>
+                </v-sheet>
               </v-col>
               <v-col cols="12" md="6">
-                <div class="field-title">Things to know</div>
-                <ul class="text-body-2 list">
-                  <li v-for="p in g.thingsToKnow" :key="p">{{ p }}</li>
-                </ul>
+                <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">Things to know</div>
+                <v-sheet outlined rounded="lg">
+                  <template v-for="(point, i) in g.thingsToKnow">
+                    <v-divider v-if="i > 0" :key="`pd-${i}`" />
+                    <div :key="`p-${i}`" class="d-flex align-start px-4 py-2">
+                      <v-icon size="14" color="primary" class="mr-3 mt-1 flex-shrink-0">$info</v-icon>
+                      <span class="text-body-2 grey--text text--darken-3">{{ point }}</span>
+                    </div>
+                  </template>
+                </v-sheet>
               </v-col>
             </v-row>
-            <ProductApiFormat v-if="g.format" class="mt-2 mb-4" />
-            <v-btn v-if="g.route" small depressed rounded color="primary" :to="g.route">
+            <ProductApiFormat v-if="g.format" class="mt-4" />
+            <v-btn v-if="g.route" small depressed color="primary" class="mt-4" :to="g.route">
               Go to {{ g.name }}
+              <v-icon right size="14">$arrow-right</v-icon>
             </v-btn>
           </v-expansion-panel-content>
         </v-expansion-panel>
@@ -140,18 +154,21 @@
     <!-- ================= COMING NEXT ================= -->
     <div v-if="tab === 'coming'">
       <div class="text-body-2 grey--text text--darken-1 mb-4">
-        Features we're building next, roughly in order. We'll let you know as
-        each one becomes available.
+        Features we're building next, roughly in order. We'll let you know as each one becomes
+        available.
       </div>
-      <v-row>
-        <v-col v-for="c in COMING_NEXT" :key="c.title" cols="12" sm="6">
-          <v-card outlined rounded="lg" class="pa-5 fill-height">
-            <div class="d-flex align-center mb-2">
-              <v-icon color="primary" class="mr-2">{{ c.icon }}</v-icon>
-              <span class="font-weight-bold">{{ c.title }}</span>
-            </div>
-            <div class="text-body-2 grey--text text--darken-2">
-              {{ c.text }}
+      <v-row dense>
+        <v-col v-for="(c, i) in COMING_NEXT" :key="c.title" cols="12" sm="6">
+          <v-card outlined rounded="lg" class="d-flex align-start pa-4 fill-height">
+            <v-avatar size="40" tile color="primary lighten-5" class="rounded-lg mr-3 flex-shrink-0">
+              <v-icon size="20" color="primary">{{ c.icon }}</v-icon>
+            </v-avatar>
+            <div class="flex-grow-1">
+              <div class="d-flex align-center">
+                <span class="text-body-2 font-weight-bold grey--text text--darken-4 mr-2">{{ c.title }}</span>
+                <v-chip x-small label color="grey lighten-4" class="font-weight-bold">#{{ i + 1 }}</v-chip>
+              </div>
+              <div class="text-body-2 grey--text text--darken-2">{{ c.text }}</div>
             </div>
           </v-card>
         </v-col>
@@ -160,35 +177,63 @@
 
     <!-- ================= INSTALL ================= -->
     <div v-if="tab === 'install'">
-      <v-card outlined rounded="lg" class="pa-6">
-        <div class="font-weight-bold mb-2">1. Copy the script</div>
-        <div class="code-box d-flex justify-space-between align-start mb-6">
-          <pre class="ma-0">{{ scriptCode }}</pre>
-          <v-btn icon small dark @click="copyScript">
-            <v-icon small>$copy</v-icon>
-          </v-btn>
+      <v-card outlined rounded="lg">
+        <div class="d-flex align-start px-5 py-4">
+          <v-avatar size="28" color="green" class="mr-3 flex-shrink-0">
+            <span class="text-caption font-weight-bold white--text">1</span>
+          </v-avatar>
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-2">Copy the script</div>
+            <v-sheet color="grey darken-4" dark rounded="lg" class="d-flex align-start pa-3">
+              <pre class="flex-grow-1 ma-0 text-caption text-pre-wrap text-break grey--text text--lighten-3">{{ scriptCode }}</pre>
+              <v-btn x-small depressed color="success" class="ml-2 flex-shrink-0" @click="copyScript">
+                <v-icon left size="12">$copy</v-icon>
+                Copy
+              </v-btn>
+            </v-sheet>
+          </div>
         </div>
-
-        <div class="font-weight-bold mb-1">2. Add it to your website</div>
-        <div class="text-body-2 grey--text text--darken-1 mb-6">
-          Paste the script just before the closing
-          <code>&lt;/body&gt;</code> tag on every page where you want the chat.
+        <v-divider />
+        <div class="d-flex align-start px-5 py-4">
+          <v-avatar size="28" color="green" class="mr-3 flex-shrink-0">
+            <span class="text-caption font-weight-bold white--text">2</span>
+          </v-avatar>
+          <div>
+            <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-1">Add it to your website</div>
+            <div class="text-body-2 grey--text text--darken-1">
+              Paste the script just before the closing <code>&lt;/body&gt;</code> tag on every page
+              where you want the chat.
+            </div>
+          </div>
         </div>
-
-        <div class="font-weight-bold mb-1">3. Lock it to your domains</div>
-        <div class="text-body-2 grey--text text--darken-1 mb-6">
-          In
-          <router-link to="/dashboard/integration?section=widget">
-            Integrations → Website Widget</router-link
-          >, add the domains where you installed it. After that, other
-          websites can't use your chatbot.
+        <v-divider />
+        <div class="d-flex align-start px-5 py-4">
+          <v-avatar size="28" color="green" class="mr-3 flex-shrink-0">
+            <span class="text-caption font-weight-bold white--text">3</span>
+          </v-avatar>
+          <div>
+            <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-1">Lock it to your domains</div>
+            <div class="text-body-2 grey--text text--darken-1">
+              In
+              <router-link to="/dashboard/integration?section=widget">Integrations → Website Widget</router-link>,
+              add the domains where you installed it. After that, other websites can't use your
+              chatbot.
+            </div>
+          </div>
         </div>
-
-        <div class="font-weight-bold mb-1">4. Check it works</div>
-        <div class="text-body-2 grey--text text--darken-1">
-          Open your website. The chat bubble appears in the bottom-right
-          corner. If it doesn't, make sure the domain you're on is in your
-          allowed list, then check the browser console for errors.
+        <v-divider />
+        <div class="d-flex align-start px-5 py-4">
+          <v-avatar size="28" color="green" class="mr-3 flex-shrink-0">
+            <span class="text-caption font-weight-bold white--text">4</span>
+          </v-avatar>
+          <div>
+            <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-1">Check it works</div>
+            <div class="text-body-2 grey--text text--darken-1">
+              Open your website. The chat bubble appears in the bottom-right corner. If it doesn't,
+              make sure the domain you're on is in your allowed list, then check the browser console
+              for errors.
+            </div>
+          </div>
         </div>
       </v-card>
     </div>
@@ -433,47 +478,13 @@ export default {
   max-width: 1000px;
 }
 
-.docs-tabs {
-  border-bottom: 1px solid #e0e0e0;
-}
-
+/* Outline each guide; Vuetify 2 panels have no border option */
 .guide-panel {
-  border: 1px solid #e0e0e0;
-  border-radius: 16px !important;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px !important;
 }
 
 .guide-panel::before {
   box-shadow: none !important;
-}
-
-.field-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #757575;
-  margin-bottom: 8px;
-}
-
-.list {
-  padding-left: 18px;
-}
-
-.list li {
-  margin-bottom: 6px;
-}
-
-.code-box {
-  background: #0f172a;
-  color: #fff;
-  padding: 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  overflow-x: auto;
-}
-
-.code-box pre {
-  white-space: pre-wrap;
-  word-break: break-all;
 }
 </style>

@@ -1,8 +1,10 @@
 <template>
   <div>
     <!-- Page header -->
-    <div class="mb-6">
-      <div class="text-h5 font-weight-bold">Integrations</div>
+    <div class="mb-4">
+      <h1 class="text-h6 font-weight-bold grey--text text--darken-4">
+        Integrations
+      </h1>
       <div class="text-body-2 grey--text text--darken-1">
         Connect scraperAI to your website, AI provider and business systems.
       </div>
@@ -13,7 +15,10 @@
       <v-col cols="12" md="3">
         <v-card outlined rounded="lg" class="pa-2 integration-nav">
           <template v-for="group in navGroups">
-            <div :key="group.title + '-title'" class="nav-group-title">
+            <div
+              :key="group.title + '-title'"
+              class="text-caption font-weight-bold text-uppercase grey--text px-3 pt-3 pb-1"
+            >
               {{ group.title }}
             </div>
             <v-list :key="group.title" dense nav class="py-0">
@@ -21,26 +26,37 @@
                 v-for="item in group.items"
                 :key="item.id"
                 :disabled="item.disabled"
-                :class="{ 'nav-active': section === item.id }"
-                class="rounded-lg"
+                :class="section === item.id ? 'green lighten-5' : ''"
+                class="rounded-lg mb-1"
                 @click="setSection(item.id)"
               >
-                <v-list-item-icon class="mr-3">
-                  <v-icon small :color="section === item.id ? 'primary' : ''">
-                    {{ item.icon }}
-                  </v-icon>
-                </v-list-item-icon>
+                <v-icon
+                  size="18"
+                  class="mr-3 flex-grow-0"
+                  :color="
+                    section === item.id ? 'green darken-1' : 'grey darken-1'
+                  "
+                >
+                  {{ item.icon }}
+                </v-icon>
                 <v-list-item-content>
-                  <v-list-item-title class="font-weight-medium">
+                  <v-list-item-title
+                    :class="
+                      section === item.id
+                        ? 'green--text text--darken-2 font-weight-bold'
+                        : 'grey--text text--darken-3 font-weight-medium'
+                    "
+                  >
                     {{ item.name }}
                   </v-list-item-title>
                 </v-list-item-content>
                 <v-list-item-action v-if="item.badge" class="my-0">
                   <v-chip
                     x-small
+                    label
                     outlined
                     :color="item.badge.color"
-                    class="px-2"
+                    class="font-weight-bold px-2"
                   >
                     {{ item.badge.text }}
                   </v-chip>
@@ -55,18 +71,27 @@
       <v-col cols="12" md="9">
         <div class="integration-content">
           <!-- Section header -->
-          <div class="d-flex align-center mb-6">
-            <v-avatar size="48" rounded="lg" color="#cde6ff" class="mr-4">
+          <div class="d-flex align-center mb-4">
+            <v-avatar
+              size="44"
+              tile
+              color="green lighten-5"
+              class="rounded-lg mr-4 flex-shrink-0"
+            >
               <v-img
                 v-if="activeItem.image"
                 :src="activeItem.image"
-                max-width="28"
+                max-width="24"
                 contain
               />
-              <v-icon v-else color="black">{{ activeItem.icon }}</v-icon>
+              <v-icon v-else size="22" color="green darken-1">{{
+                activeItem.icon
+              }}</v-icon>
             </v-avatar>
             <div>
-              <div class="text-h6 font-weight-bold">
+              <div
+                class="text-subtitle-1 font-weight-bold grey--text text--darken-4"
+              >
                 {{ activeItem.title || activeItem.name }}
               </div>
               <div class="text-body-2 grey--text text--darken-1">
@@ -92,54 +117,118 @@
 
           <!-- ================= AI PROVIDER ================= -->
           <div v-if="section === 'ai-provider'">
-            <v-card outlined rounded="lg" class="pa-6 mb-4">
-              <div class="d-flex align-center flex-wrap">
-                <div class="flex-grow-1 mr-4 mb-2">
+            <!-- Status -->
+            <v-sheet
+              rounded="lg"
+              :color="openaiConfigured ? 'green lighten-5' : 'amber lighten-5'"
+              class="d-flex align-center pa-4 mb-4"
+            >
+              <v-avatar
+                size="36"
+                :color="openaiConfigured ? 'success' : 'amber darken-2'"
+                class="mr-3 flex-shrink-0"
+              >
+                <v-icon size="18" color="white">
+                  {{ openaiConfigured ? "$circle-check" : "$circle-alert" }}
+                </v-icon>
+              </v-avatar>
+              <div>
+                <div class="text-body-2 font-weight-bold grey--text text--darken-4">
+                  {{ openaiConfigured ? "OpenAI is connected" : "OpenAI isn't connected yet" }}
+                </div>
+                <div class="text-caption grey--text text--darken-2">
+                  <template v-if="openaiConfigured">
+                    All chats are answered with {{ AI_MODEL }}.
+                    Automatic replies are {{ chatgptEnabled ? "on" : "off" }}.
+                  </template>
+                  <template v-else>Connect your OpenAI account so the bot can answer chats.</template>
+                </div>
+              </div>
+            </v-sheet>
+
+            <!-- OpenAI account -->
+            <v-card outlined rounded="lg" class="mb-4">
+              <div class="d-flex align-center flex-wrap px-5 py-4">
+                <v-avatar size="40" tile color="grey lighten-4" class="rounded-lg mr-3 flex-shrink-0">
+                  <v-img :src="activeItem.image" max-width="22" contain />
+                </v-avatar>
+                <div class="flex-grow-1 mr-4 my-1">
                   <div class="d-flex align-center">
-                    <div class="text-subtitle-1 font-weight-bold mr-2">
+                    <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4 mr-2">
                       OpenAI account
-                    </div>
+                    </span>
                     <v-chip
                       x-small
-                      outlined
-                      :color="openaiConfigured ? 'success' : 'grey'"
+                      label
+                      :color="openaiConfigured ? 'green lighten-5' : 'grey lighten-4'"
+                      :text-color="openaiConfigured ? 'success' : 'grey darken-1'"
+                      class="font-weight-bold"
                     >
                       {{ openaiConfigured ? "Connected" : "Not connected" }}
                     </v-chip>
                   </div>
-                  <div class="text-body-2 grey--text text--darken-1">
+                  <div class="text-caption grey--text text--darken-1">
                     All chats are answered using this API key and model.
-                    <span v-if="openaiConfigured">
-                      Model: <strong>{{ AI_MODEL }}</strong>
-                    </span>
                   </div>
                 </div>
                 <v-btn
+                  :outlined="openaiConfigured"
+                  :depressed="!openaiConfigured"
                   color="primary"
-                  depressed
-                  rounded
-                  class="mb-2"
+                  class="my-1"
                   @click="connectChatGptDialog = true"
                 >
+                  <v-icon left size="16">{{ openaiConfigured ? "$pencil" : "$plug" }}</v-icon>
                   {{ openaiConfigured ? "Edit connection" : "Connect OpenAI" }}
                 </v-btn>
               </div>
+              <v-divider />
+              <v-row no-gutters>
+                <v-col cols="12" sm="6">
+                  <div class="d-flex align-center px-5 py-3">
+                    <v-icon size="16" color="grey" class="mr-3">$key-round</v-icon>
+                    <div>
+                      <div class="text-caption grey--text">API key</div>
+                      <div class="text-body-2 grey--text text--darken-4">
+                        {{ openaiConfigured ? "Saved (hidden)" : "Not set" }}
+                      </div>
+                    </div>
+                  </div>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <div class="d-flex align-center px-5 py-3">
+                    <v-icon size="16" color="grey" class="mr-3">$brain</v-icon>
+                    <div>
+                      <div class="text-caption grey--text">Model</div>
+                      <div class="text-body-2 grey--text text--darken-4">{{ AI_MODEL }}</div>
+                    </div>
+                  </div>
+                </v-col>
+              </v-row>
             </v-card>
 
-            <v-card outlined rounded="lg" class="pa-6">
-              <div class="d-flex align-center">
+            <!-- Automatic replies -->
+            <v-card outlined rounded="lg">
+              <div class="d-flex align-center px-5 py-4">
+                <v-avatar
+                  size="40"
+                  tile
+                  :color="chatgptEnabled ? 'green lighten-5' : 'grey lighten-4'"
+                  class="rounded-lg mr-3 flex-shrink-0"
+                >
+                  <v-icon size="20" :color="chatgptEnabled ? 'success' : 'grey'">$bot</v-icon>
+                </v-avatar>
                 <div class="flex-grow-1 mr-4">
-                  <div class="text-subtitle-1 font-weight-bold">
+                  <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
                     Automatic AI replies
                   </div>
-                  <div class="text-body-2 grey--text text--darken-1">
-                    Let the AI answer customers on its own, without a human
-                    reviewing each reply.
+                  <div class="text-caption grey--text text--darken-1">
+                    Let the AI answer customers on its own, without a human reviewing each reply.
                   </div>
                 </div>
                 <v-switch
                   v-model="chatgptEnabled"
-                  color="primary"
+                  color="success"
                   inset
                   hide-details
                   class="mt-0 pt-0"
@@ -152,25 +241,21 @@
 
           <!-- ================= API CONFIG ================= -->
           <div v-if="section === 'api-config'">
-            <v-card v-if="!userLoaded" outlined rounded="lg" class="pa-6">
-              <v-progress-linear indeterminate color="primary" />
+            <v-card v-if="!userLoaded" outlined rounded="lg" class="pa-4">
+              <v-skeleton-loader type="list-item-two-line, list-item-two-line" />
             </v-card>
 
-            <v-alert
-              v-else-if="!canManageSettings"
-              type="warning"
-              outlined
-              rounded="lg"
-            >
-              You need the <code>settings:manage</code> permission to configure
-              APIs.
+            <v-alert v-else-if="!canManageSettings" type="warning" text rounded="lg" class="text-body-2">
+              You need the <code>settings:manage</code> permission to configure APIs.
             </v-alert>
 
             <template v-else>
               <v-tabs
                 :value="apiConfigTab"
                 color="primary"
-                class="sub-tabs mb-6"
+                background-color="transparent"
+                height="44"
+                slider-size="3"
                 show-arrows
                 @change="setSubTab"
               >
@@ -178,12 +263,13 @@
                   v-for="tab in apiConfigTabs"
                   :key="tab.id"
                   :tab-value="tab.id"
-                  class="text-none"
+                  class="text-body-2 font-weight-bold"
                 >
-                  <v-icon small class="mr-2">{{ tab.icon }}</v-icon>
+                  <v-icon size="16" class="mr-2">{{ tab.icon }}</v-icon>
                   {{ tab.name }}
                 </v-tab>
               </v-tabs>
+              <v-divider class="mb-4" />
 
               <CustomerApiSettings v-if="apiConfigTab === 'customer-api'" />
               <ProductApiSettings v-if="apiConfigTab === 'product-api'" />
@@ -195,7 +281,9 @@
             <v-tabs
               :value="webhookTab"
               color="primary"
-              class="sub-tabs mb-6"
+              background-color="transparent"
+              height="44"
+              slider-size="3"
               show-arrows
               @change="setSubTab"
             >
@@ -203,162 +291,192 @@
                 v-for="hook in webhookTypes"
                 :key="hook.id"
                 :tab-value="hook.id"
-                class="text-none"
+                class="text-body-2 font-weight-bold"
               >
                 {{ hook.name }}
-                <span
+                <v-icon
                   v-if="webhookStatus(hook.id) === 'on'"
-                  class="status-dot success ml-2"
+                  size="10"
+                  color="success"
+                  class="ml-2"
                   title="Enabled"
-                />
+                >
+                  $circle
+                </v-icon>
               </v-tab>
             </v-tabs>
+            <v-divider class="mb-4" />
 
-            <v-card outlined rounded="lg" class="pa-6">
-              <div class="d-flex align-start mb-4">
+            <v-card outlined rounded="lg">
+              <div class="d-flex align-center px-5 py-4">
+                <v-avatar
+                  size="40"
+                  tile
+                  :color="webhook.enabled ? 'green lighten-5' : 'grey lighten-4'"
+                  class="rounded-lg mr-3 flex-shrink-0"
+                >
+                  <v-icon size="20" :color="webhook.enabled ? 'green darken-1' : 'grey'">$webhook</v-icon>
+                </v-avatar>
                 <div class="flex-grow-1 mr-4">
-                  <div class="text-subtitle-1 font-weight-bold">
-                    {{ activeWebhook.name }} webhook
+                  <div class="d-flex align-center">
+                    <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4 mr-2">
+                      {{ activeWebhook.name }} webhook
+                    </span>
+                    <v-chip
+                      x-small
+                      label
+                      :color="webhook.enabled ? 'green lighten-5' : 'grey lighten-4'"
+                      :text-color="webhook.enabled ? 'success' : 'grey darken-1'"
+                      class="font-weight-bold"
+                    >
+                      {{ webhook.enabled ? "On" : "Off" }}
+                    </v-chip>
                   </div>
-                  <div class="text-body-2 grey--text text--darken-1">
+                  <div class="text-caption grey--text text--darken-1">
                     {{ activeWebhook.description }}
                   </div>
                 </div>
                 <v-switch
                   v-model="webhook.enabled"
-                  color="primary"
+                  color="success"
                   inset
                   hide-details
                   class="mt-0 pt-0"
-                  :label="webhook.enabled ? 'On' : 'Off'"
+                  :aria-label="`${activeWebhook.name} webhook on or off`"
                 />
               </div>
+              <v-divider />
 
-              <v-alert
-                v-if="autoDisabled"
-                type="warning"
-                text
-                dense
-                rounded="lg"
-                class="text-body-2"
-              >
-                Switched off after repeated failures. Escalations are being
-                emailed to your alert addresses. Fix the endpoint and turn it on
-                again.
-              </v-alert>
+              <div class="pa-5">
+                <v-alert v-if="autoDisabled" type="warning" text dense rounded="lg" class="text-body-2">
+                  Switched off after repeated failures. Escalations are being emailed to your alert
+                  addresses. Fix the endpoint and turn it on again.
+                </v-alert>
 
-              <v-divider class="mb-6" />
+                <div class="d-flex align-center mb-3">
+                  <v-icon size="16" color="grey darken-1" class="mr-2">$link</v-icon>
+                  <span class="text-caption font-weight-bold text-uppercase grey--text">Endpoint</span>
+                </div>
+                <v-row dense>
+                  <v-col cols="12" sm="3">
+                    <v-select v-model="webhook.method" :items="['POST', 'GET', 'PUT']" label="Method" outlined dense />
+                  </v-col>
+                  <v-col cols="12" sm="9">
+                    <v-text-field
+                      v-model.trim="webhook.url"
+                      label="Webhook URL"
+                      placeholder="https://example.com/hooks/scraperai"
+                      prepend-inner-icon="$globe"
+                      outlined
+                      dense
+                    />
+                  </v-col>
+                  <v-col cols="12" sm="4">
+                    <v-text-field
+                      v-model.number="webhook.timeout"
+                      label="Timeout (ms)"
+                      type="number"
+                      prepend-inner-icon="$clock"
+                      outlined
+                      dense
+                    />
+                  </v-col>
+                </v-row>
 
-              <div class="field-group-title">Endpoint</div>
-              <v-row dense>
-                <v-col cols="12" sm="3">
-                  <v-select
-                    v-model="webhook.method"
-                    :items="['POST', 'GET', 'PUT']"
-                    label="Method"
-                    outlined
-                    dense
-                  />
-                </v-col>
-                <v-col cols="12" sm="9">
-                  <v-text-field
-                    v-model.trim="webhook.url"
-                    label="Webhook URL"
-                    placeholder="https://example.com/hooks/scraperai"
-                    outlined
-                    dense
-                  />
-                </v-col>
-                <v-col cols="12" sm="4">
-                  <v-text-field
-                    v-model.number="webhook.timeout"
-                    label="Timeout (ms)"
-                    type="number"
-                    outlined
-                    dense
-                  />
-                </v-col>
-              </v-row>
+                <v-divider class="my-5" />
 
-              <v-divider class="mb-6" />
+                <HeadersEditor v-model="webhook.headerRows" />
 
-              <HeadersEditor v-model="webhook.headerRows" />
+                <v-alert text dense color="primary" rounded="lg" class="text-body-2 mt-4 mb-0">
+                  <template #prepend>
+                    <v-icon color="primary" size="16" class="mr-3">$info</v-icon>
+                  </template>
+                  <span class="grey--text text--darken-3">
+                    After 3 failed attempts, the webhook is disabled automatically.
+                  </span>
+                </v-alert>
+              </div>
 
-              <v-alert
-                type="info"
-                text
-                dense
-                rounded="lg"
-                class="text-body-2 mt-4 mb-0"
-              >
-                After 3 failed attempts, the webhook is disabled automatically.
-              </v-alert>
-
-              <div class="d-flex justify-end mt-6">
+              <v-divider />
+              <div class="d-flex align-center px-5 py-3">
+                <span v-if="!webhook.url" class="text-caption grey--text">Add a URL to save.</span>
+                <v-spacer />
                 <v-btn
                   color="primary"
-                  rounded
                   depressed
                   :disabled="!webhook.url"
                   :loading="webhookSaving"
                   @click="updateWebhook"
                 >
+                  <v-icon left size="16">$check</v-icon>
                   Save webhook
                 </v-btn>
               </div>
             </v-card>
 
-            <EscalationAlertEmails
-              v-if="webhookTab === 'escalate' && canManageSettings"
-            />
+            <EscalationAlertEmails v-if="webhookTab === 'escalate' && canManageSettings" />
           </div>
 
           <!-- ================= API KEYS ================= -->
           <div v-if="section === 'api-keys'">
-            <v-alert
-              border="left"
-              colored-border
-              color="warning"
-              elevation="0"
-              outlined
-              rounded="lg"
-              class="text-body-2 mb-4"
-            >
-              Your API key is disabled until payment is made or the billing
-              cycle lapses. Once we receive payment, the key is reactivated.
+            <v-alert text dense color="amber darken-3" rounded="lg" class="text-body-2 py-3 mb-4">
+              <template #prepend>
+                <v-icon color="amber darken-3" size="18" class="mr-3">$triangle-alert</v-icon>
+              </template>
+              <span class="grey--text text--darken-3">
+                Your API key is disabled until payment is made or the billing cycle lapses. Once we
+                receive payment, the key is reactivated.
+              </span>
             </v-alert>
 
-            <v-card outlined rounded="lg" class="pa-6">
-              <div class="code-box mb-4">
-                <div class="d-flex justify-space-between align-center mb-2">
-                  <span class="code-label">API KEY</span>
-                  <v-btn
-                    x-small
-                    color="primary"
-                    depressed
-                    rounded
-                    :disabled="!currentLoggedInUser.apiKey"
-                    @click="copyApiKey"
-                  >
-                    <v-icon x-small class="mr-1">$copy</v-icon> Copy
-                  </v-btn>
+            <v-card outlined rounded="lg">
+              <div class="d-flex align-center px-5 py-4">
+                <v-avatar size="40" tile color="primary lighten-5" class="rounded-lg mr-3 flex-shrink-0">
+                  <v-icon size="20" color="primary">$key</v-icon>
+                </v-avatar>
+                <div>
+                  <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">Your API key</div>
+                  <div class="text-caption grey--text text--darken-1">
+                    The website widget uses it to find your chatbot.
+                  </div>
                 </div>
-                <code class="code-text">
-                  {{ currentLoggedInUser.apiKey || "N/A" }}
-                </code>
               </div>
+              <v-divider />
 
-              <div class="d-flex align-start">
-                <v-icon small color="primary" class="mr-2 mt-1">
-                  $shield-check
-                </v-icon>
-                <div class="grey--text text--darken-3 text-body-2">
-                  <strong>This key is public by design.</strong> It's in the
-                  widget script on your website, so anyone can see it. What
-                  protects it is your
-                  <a @click="setSection('widget')">list of allowed domains</a>:
-                  once you add domains, the widget only works on those sites.
-                </div>
+              <div class="pa-5">
+                <v-sheet color="grey darken-4" dark rounded="lg" class="pa-4 mb-4">
+                  <div class="d-flex align-center mb-2">
+                    <span class="text-caption font-weight-bold text-uppercase grey--text">API key</span>
+                    <v-spacer />
+                    <v-btn
+                      x-small
+                      depressed
+                      color="success"
+                      :disabled="!currentLoggedInUser.apiKey"
+                      @click="copyApiKey"
+                    >
+                      <v-icon left size="12">$copy</v-icon>
+                      Copy
+                    </v-btn>
+                  </div>
+                  <div class="text-body-2 text-break grey--text text--lighten-3">
+                    {{ currentLoggedInUser.apiKey || "N/A" }}
+                  </div>
+                </v-sheet>
+
+                <v-sheet color="green lighten-5" rounded="lg" class="d-flex align-start flex-wrap pa-4">
+                  <v-icon size="18" color="success" class="mr-3 mt-1 flex-shrink-0">$shield-check</v-icon>
+                  <div class="flex-grow-1 text-body-2 grey--text text--darken-3 mr-3 mb-2">
+                    <strong class="grey--text text--darken-4">This key is public by design.</strong>
+                    It's in the widget script on your website, so anyone can see it. What protects it is
+                    your list of allowed domains: once you add domains, the widget only works on those
+                    sites.
+                  </div>
+                  <v-btn small outlined color="success" @click="setSection('widget')">
+                    <v-icon left size="14">$globe-lock</v-icon>
+                    Manage allowed domains
+                  </v-btn>
+                </v-sheet>
               </div>
             </v-card>
           </div>
@@ -367,97 +485,81 @@
     </v-row>
 
     <!-- ================= OPENAI DIALOG ================= -->
-    <v-dialog
-      v-model="connectChatGptDialog"
-      max-width="550"
-      persistent
-      rounded="lg"
-      overlay-color="#2c3e50"
-      overlay-opacity="0.8"
-    >
-      <v-card rounded="lg" :loading="loading">
-        <v-card-title class="d-flex align-center pb-0">
-          <v-avatar color="#eff2fb" rounded="lg" size="50" class="mr-4">
-            <v-img src="../../assets/images/chatgpt-icon.png"></v-img>
+    <v-dialog v-model="connectChatGptDialog" max-width="520" persistent>
+      <v-card rounded="lg">
+        <div class="d-flex align-center pa-5">
+          <v-avatar size="44" tile color="grey lighten-4" class="rounded-lg mr-4 flex-shrink-0">
+            <v-img src="../../assets/images/chatgpt-icon.png" max-width="24" contain></v-img>
           </v-avatar>
-          <div>
-            <div class="text-h6 font-weight-bold black--text">
-              OpenAI Settings
-            </div>
+          <div class="flex-grow-1">
+            <div class="text-h6 font-weight-bold grey--text text--darken-4">OpenAI settings</div>
             <div class="text-caption grey--text text--darken-1">
               Configure your chatbot intelligence
             </div>
           </div>
-          <v-spacer></v-spacer>
-          <v-btn icon @click="connectChatGptDialog = false">
+          <v-btn icon aria-label="Close" @click="connectChatGptDialog = false">
             <v-icon>$x</v-icon>
           </v-btn>
-        </v-card-title>
+        </div>
+        <v-divider />
+        <v-progress-linear v-if="loading" indeterminate color="success" height="2" />
 
-        <v-card-text class="pt-6">
-          <div class="mb-5">
-            <label
-              class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
-            >
-              API Key{{ openaiConfigured ? "" : " *" }}
-            </label>
-            <div class="text-caption mb-2">
-              {{
-                openaiConfigured
-                  ? "A key is saved. Leave this empty to keep it, or enter a new key to replace it."
-                  : "Connect your OpenAI account. Your key is never shown again after you save it."
-              }}
-            </div>
-            <v-text-field
-              v-model.trim="chatgptApiKey"
-              :placeholder="openaiConfigured ? '•••••••• (saved)' : 'sk-...'"
-              type="password"
-              autocomplete="new-password"
-              outlined
-              dense
-              hide-details="auto"
-              color="primary"
-              background-color="#f8fafc"
-            ></v-text-field>
-            <SecretNotice class="mt-2" />
+        <v-card-text class="pa-5">
+          <div class="text-caption font-weight-bold text-uppercase grey--text mb-1">
+            API key{{ openaiConfigured ? "" : " *" }}
           </div>
+          <div class="text-caption grey--text text--darken-1 mb-2">
+            {{
+              openaiConfigured
+                ? "A key is saved. Leave this empty to keep it, or enter a new key to replace it."
+                : "Connect your OpenAI account. Your key is never shown again after you save it."
+            }}
+          </div>
+          <v-text-field
+            v-model.trim="chatgptApiKey"
+            :placeholder="openaiConfigured ? '•••••••• (saved)' : 'sk-...'"
+            type="password"
+            autocomplete="new-password"
+            prepend-inner-icon="$key-round"
+            outlined
+            dense
+            hide-details="auto"
+            color="primary"
+          ></v-text-field>
+          <SecretNotice class="mt-2 mb-5" />
 
-          <div class="mb-2">
-            <label
-              class="text-subtitle-2 font-weight-bold black--text d-block mb-1"
-            >
-              AI Model
-              <v-chip x-small outlined color="grey" class="ml-1">
-                Selection coming soon
-              </v-chip>
-            </label>
-            <div class="text-caption mb-2">
-              All chats currently use {{ AI_MODEL }}.
-            </div>
-            <v-text-field
-              :value="AI_MODEL"
-              outlined
-              dense
-              disabled
-              hide-details
-              background-color="#f1f3f4"
-            ></v-text-field>
+          <div class="d-flex align-center mb-1">
+            <span class="text-caption font-weight-bold text-uppercase grey--text">AI model</span>
+            <v-chip x-small label color="grey lighten-4" class="font-weight-bold ml-2">
+              Selection coming soon
+            </v-chip>
           </div>
+          <div class="text-caption grey--text text--darken-1 mb-2">
+            All chats currently use {{ AI_MODEL }}.
+          </div>
+          <v-text-field
+            :value="AI_MODEL"
+            prepend-inner-icon="$brain"
+            outlined
+            dense
+            disabled
+            hide-details
+          ></v-text-field>
         </v-card-text>
 
-        <v-card-actions class="pa-4 pt-0">
+        <v-divider />
+        <v-card-actions class="px-5 py-3">
+          <v-spacer />
+          <v-btn text :disabled="loading" @click="connectChatGptDialog = false">Cancel</v-btn>
           <v-btn
-            block
-            x-large
             color="primary"
-            @click="updateChatGptSettings"
+            depressed
+            class="font-weight-bold"
             :loading="loading"
             :disabled="!chatgptApiKey"
-            depressed
-            rounded
-            class="text-none font-weight-bold"
+            @click="updateChatGptSettings"
           >
-            Save & Continue
+            Save & continue
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -852,70 +954,7 @@ export default {
   top: 88px;
 }
 
-.nav-group-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #9e9e9e;
-  padding: 12px 12px 4px;
-}
-
-.nav-active {
-  background: #eff2fb;
-}
-
-.nav-active .v-list-item__title {
-  color: var(--v-primary-base);
-  font-weight: 700 !important;
-}
-
 .integration-content {
   max-width: 900px;
-}
-
-.sub-tabs {
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.status-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.field-group-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #757575;
-  margin-bottom: 12px;
-}
-
-.code-box {
-  background: #0f172a;
-  padding: 14px 16px;
-  border-radius: 12px;
-}
-
-.code-label {
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: #94a3b8;
-}
-
-.code-text {
-  display: block;
-  background: transparent !important;
-  color: #e2e8f0 !important;
-  padding: 0 !important;
-  font-family: monospace !important;
-  font-size: 13px;
-  font-weight: 400;
-  white-space: pre-wrap;
-  word-break: break-all;
-  box-shadow: none !important;
 }
 </style>

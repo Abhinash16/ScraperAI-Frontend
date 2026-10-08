@@ -1,288 +1,335 @@
 <template>
   <div>
-    <v-card v-if="loading && !info" outlined rounded="lg" class="pa-6">
-      <v-progress-linear indeterminate color="primary" />
+    <!-- LOADING / NO ACCESS / ERROR -->
+    <v-card v-if="loading && !info" outlined rounded="lg" class="pa-4">
+      <v-skeleton-loader type="list-item-avatar-two-line, list-item-two-line, list-item-two-line" />
     </v-card>
 
-    <v-alert v-else-if="forbidden" type="warning" outlined rounded="lg">
+    <v-alert v-else-if="forbidden" type="warning" text rounded="lg" class="text-body-2">
       You need the <code>settings:manage</code> permission to set up WhatsApp.
     </v-alert>
 
-    <v-alert v-else-if="loadError && !info" type="error" outlined rounded="lg">
-      {{ loadError }}
-      <v-btn small text color="error" class="ml-2" @click="load">Retry</v-btn>
+    <v-alert v-else-if="loadError && !info" type="error" text rounded="lg" class="text-body-2">
+      <div class="d-flex align-center flex-wrap">
+        <span class="mr-4">{{ loadError }}</span>
+        <v-spacer />
+        <v-btn small outlined color="error" @click="load">
+          <v-icon left size="14">$refresh-cw</v-icon>
+          Retry
+        </v-btn>
+      </div>
     </v-alert>
 
     <template v-else-if="info">
+      <!-- ============ STATUS ============ -->
+      <v-sheet
+        rounded="lg"
+        :color="info.tellephantConfigured && info.autoWhatsappEnabled && receivedViaKey ? 'green lighten-5' : 'amber lighten-5'"
+        class="d-flex align-center pa-4 mb-4"
+      >
+        <v-avatar
+          size="36"
+          :color="info.tellephantConfigured && info.autoWhatsappEnabled && receivedViaKey ? 'success' : 'amber darken-2'"
+          class="mr-3 flex-shrink-0"
+        >
+          <v-icon size="18" color="white">$whatsapp</v-icon>
+        </v-avatar>
+        <div class="flex-grow-1">
+          <div class="text-body-2 font-weight-bold grey--text text--darken-4">
+            <template v-if="info.tellephantConfigured && info.autoWhatsappEnabled && receivedViaKey">
+              Your WhatsApp bot is live
+            </template>
+            <template v-else-if="!info.tellephantConfigured">Not connected yet: start with step 1</template>
+            <template v-else-if="!receivedViaKey">Almost there: add the webhook and send a test message</template>
+            <template v-else>Connected, but automatic replies are off</template>
+          </div>
+          <div class="text-caption grey--text text--darken-2">
+            <template v-if="info.whatsappNumber">Number {{ info.whatsappNumber }} · </template>
+            {{ info.provider || "Tellephant" }}
+          </div>
+        </div>
+      </v-sheet>
+
       <!-- ============ STEP 1: SENDING ============ -->
-      <v-card outlined rounded="lg" class="step pa-6 mb-4">
-        <div class="step-header">
-          <span :class="['step-badge', { done: info.tellephantConfigured }]">
-            <v-icon v-if="info.tellephantConfigured" small color="white">
-              $check
-            </v-icon>
-            <template v-else>1</template>
-          </span>
-          <div class="flex-grow-1">
-            <div class="text-subtitle-1 font-weight-bold">Connect sending</div>
+      <v-card outlined rounded="lg" class="mb-4">
+        <div class="d-flex align-start px-5 py-4">
+          <v-avatar
+            size="28"
+            :color="info.tellephantConfigured ? 'success' : 'grey lighten-3'"
+            class="mr-3 mt-1 flex-shrink-0"
+          >
+            <v-icon v-if="info.tellephantConfigured" size="14" color="white">$check</v-icon>
+            <span v-else class="text-caption font-weight-bold grey--text text--darken-2">1</span>
+          </v-avatar>
+          <div>
+            <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">Connect sending</div>
             <div class="text-body-2 grey--text text--darken-1">
-              The bot replies through your {{ info.provider || "Tellephant" }}
-              account. The key is checked with the provider when you save.
+              The bot replies through your {{ info.provider || "Tellephant" }} account. The key is
+              checked with the provider when you save.
               <span v-if="info.whatsappNumber">
                 Number: <strong>{{ info.whatsappNumber }}</strong>
               </span>
             </div>
           </div>
         </div>
+        <v-divider />
 
-        <v-form class="d-flex align-start mt-4" @submit.prevent="saveKey">
-          <v-text-field
-            v-model.trim="apiKey"
-            :label="
-              info.tellephantConfigured
-                ? 'API key saved (enter a new one to replace it)'
-                : 'Tellephant / KwikEngage API key'
-            "
-            outlined
-            dense
-            autocomplete="new-password"
-            class="mr-2"
-            :type="showKey ? 'text' : 'password'"
-            :append-icon="showKey ? '$eye-off' : '$eye'"
-            :error-messages="keyError"
-            @click:append="showKey = !showKey"
-            @input="keyError = ''"
-          />
-          <v-btn
-            color="primary"
-            rounded
-            depressed
-            height="40"
-            type="submit"
-            :loading="savingKey"
-            :disabled="!apiKey"
-          >
-            Save key
-          </v-btn>
-        </v-form>
-        <SecretNotice class="mb-4" />
-
-        <div class="d-flex align-center sub-row pa-4">
-          <div class="flex-grow-1 mr-4">
-            <div class="font-weight-medium">Automatic replies</div>
-            <div
-              v-if="!info.tellephantConfigured"
-              class="text-caption grey--text text--darken-1"
+        <div class="pa-5">
+          <v-form class="d-flex align-start" @submit.prevent="saveKey">
+            <v-text-field
+              v-model.trim="apiKey"
+              :label="
+                info.tellephantConfigured
+                  ? 'API key saved (enter a new one to replace it)'
+                  : 'Tellephant / KwikEngage API key'
+              "
+              prepend-inner-icon="$key-round"
+              outlined
+              dense
+              autocomplete="new-password"
+              class="mr-2"
+              :type="showKey ? 'text' : 'password'"
+              :append-icon="showKey ? '$eye-off' : '$eye'"
+              :error-messages="keyError"
+              @click:append="showKey = !showKey"
+              @input="keyError = ''"
+            />
+            <v-btn
+              color="primary"
+              depressed
+              height="40"
+              type="submit"
+              :loading="savingKey"
+              :disabled="!apiKey"
             >
-              Save an API key first.
+              Save key
+            </v-btn>
+          </v-form>
+          <SecretNotice class="mb-4" />
+
+          <v-sheet outlined rounded="lg" class="d-flex align-center px-4 py-3">
+            <v-icon size="18" :color="info.autoWhatsappEnabled ? 'success' : 'grey'" class="mr-3">
+              $bot
+            </v-icon>
+            <div class="flex-grow-1 mr-4">
+              <div class="text-body-2 font-weight-bold grey--text text--darken-4">Automatic replies</div>
+              <div class="text-caption grey--text text--darken-1">
+                <template v-if="!info.tellephantConfigured">Save an API key first.</template>
+                <template v-else-if="info.autoWhatsappEnabled">The bot answers WhatsApp messages.</template>
+                <template v-else>The bot doesn't answer WhatsApp messages.</template>
+              </div>
             </div>
-          </div>
-          <v-switch
-            :input-value="info.autoWhatsappEnabled"
-            color="primary"
-            inset
-            hide-details
-            class="mt-0 pt-0"
-            :disabled="!info.tellephantConfigured || savingKey"
-            :loading="toggling"
-            @change="toggleAutoReply"
-          />
+            <v-switch
+              :input-value="info.autoWhatsappEnabled"
+              color="success"
+              inset
+              hide-details
+              class="mt-0 pt-0"
+              :disabled="!info.tellephantConfigured || savingKey"
+              :loading="toggling"
+              @change="toggleAutoReply"
+            />
+          </v-sheet>
         </div>
       </v-card>
 
       <!-- ============ STEP 2: WEBHOOK ============ -->
-      <v-card outlined rounded="lg" class="step pa-6 mb-4">
-        <div class="step-header">
-          <span :class="['step-badge', { done: receivedViaKey }]">
-            <v-icon v-if="receivedViaKey" small color="white">$check</v-icon>
-            <template v-else>2</template>
-          </span>
-          <div class="flex-grow-1">
-            <div class="text-subtitle-1 font-weight-bold">
+      <v-card outlined rounded="lg" class="mb-4">
+        <div class="d-flex align-start px-5 py-4">
+          <v-avatar size="28" :color="receivedViaKey ? 'success' : 'grey lighten-3'" class="mr-3 mt-1 flex-shrink-0">
+            <v-icon v-if="receivedViaKey" size="14" color="white">$check</v-icon>
+            <span v-else class="text-caption font-weight-bold grey--text text--darken-2">2</span>
+          </v-avatar>
+          <div>
+            <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
               Add the webhook in your WhatsApp provider
             </div>
             <div class="text-body-2 grey--text text--darken-1">
-              In your Tellephant / KwikEngage dashboard, set this as the inbound
-              message (incoming webhook) URL for your WhatsApp number.
+              In your Tellephant / KwikEngage dashboard, set this as the inbound message (incoming
+              webhook) URL for your WhatsApp number.
             </div>
           </div>
         </div>
+        <v-divider />
 
-        <div class="webhook-box mt-4">
-          <code class="webhook-url">{{ displayUrl }}</code>
-          <div class="d-flex flex-shrink-0 ml-2">
-            <v-btn x-small text dark @click="showUrl = !showUrl">
-              <v-icon x-small class="mr-1">
-                {{ showUrl ? "$eye-off" : "$eye" }}
-              </v-icon>
-              {{ showUrl ? "Hide" : "Show" }}
-            </v-btn>
-            <v-btn x-small depressed rounded color="primary" @click="copyUrl">
-              <v-icon x-small class="mr-1">$copy</v-icon> Copy
-            </v-btn>
+        <div class="pa-5">
+          <v-sheet color="grey darken-4" dark rounded="lg" class="d-flex flex-wrap align-center pa-3">
+            <div class="flex-grow-1 overflow-hidden mr-2 my-1">
+              <div class="text-body-2 text-break grey--text text--lighten-3">{{ displayUrl }}</div>
+            </div>
+            <div class="d-flex flex-shrink-0 my-1">
+              <v-btn x-small text @click="showUrl = !showUrl">
+                <v-icon left size="12">{{ showUrl ? "$eye-off" : "$eye" }}</v-icon>
+                {{ showUrl ? "Hide" : "Show" }}
+              </v-btn>
+              <v-btn x-small depressed color="success" class="ml-1" @click="copyUrl">
+                <v-icon left size="12">$copy</v-icon>
+                Copy
+              </v-btn>
+            </div>
+          </v-sheet>
+          <div class="d-flex flex-wrap mt-2">
+            <v-chip x-small label outlined class="mr-2">Method: {{ info.method || "POST" }}</v-chip>
+            <v-chip x-small label outlined>Content-Type: {{ info.contentType || "application/json" }}</v-chip>
           </div>
-        </div>
-        <div class="text-caption grey--text text--darken-1 mt-2">
-          Method: {{ info.method || "POST" }} · Content-Type:
-          {{ info.contentType || "application/json" }}
-        </div>
 
-        <v-alert
-          type="warning"
-          text
-          dense
-          rounded="lg"
-          icon="$shield-alert"
-          class="text-body-2 mt-4 mb-0"
-        >
-          Keep it secret: anyone with this URL can send messages as your
-          customers.
-        </v-alert>
+          <v-alert type="warning" text dense rounded="lg" icon="$shield-alert" class="text-body-2 mt-4 mb-0">
+            Keep it secret: anyone with this URL can send messages as your customers.
+          </v-alert>
+        </div>
       </v-card>
 
       <!-- ============ STEP 3: TEST ============ -->
-      <v-card outlined rounded="lg" class="step pa-6 mb-4">
-        <div class="step-header">
-          <span :class="['step-badge', { done: receivedViaKey }]">
-            <v-icon v-if="receivedViaKey" small color="white">$check</v-icon>
-            <template v-else>3</template>
-          </span>
-          <div class="flex-grow-1">
-            <div class="text-subtitle-1 font-weight-bold">Test</div>
+      <v-card outlined rounded="lg" class="mb-4">
+        <div class="d-flex align-start px-5 py-4">
+          <v-avatar size="28" :color="receivedViaKey ? 'success' : 'grey lighten-3'" class="mr-3 mt-1 flex-shrink-0">
+            <v-icon v-if="receivedViaKey" size="14" color="white">$check</v-icon>
+            <span v-else class="text-caption font-weight-bold grey--text text--darken-2">3</span>
+          </v-avatar>
+          <div>
+            <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">Test</div>
             <div class="text-body-2 grey--text text--darken-1">
-              Send any message to your business WhatsApp number from your
-              phone, then click Refresh.
+              Send any message to your business WhatsApp number from your phone, then click Refresh.
             </div>
           </div>
         </div>
+        <v-divider />
 
-        <div class="d-flex align-center flex-wrap sub-row pa-4 mt-4">
-          <v-icon
-            small
-            class="mr-2"
-            :color="
-              !info.lastInbound ? 'grey' : receivedViaKey ? 'success' : 'warning'
-            "
+        <div class="pa-5">
+          <v-sheet
+            rounded="lg"
+            :color="!info.lastInbound ? 'grey lighten-5' : receivedViaKey ? 'green lighten-5' : 'amber lighten-5'"
+            class="d-flex align-center flex-wrap px-4 py-3"
           >
-            {{ info.lastInbound ? "$message-square-check" : "$message-square" }}
-          </v-icon>
-          <div class="flex-grow-1 text-body-2">
-            <template v-if="info.lastInbound">
-              Last message received:
-              <strong>{{ info.lastInbound.at | moment("from", "now") }}</strong>
-              <span :class="receivedViaKey ? 'success--text' : 'warning--text text--darken-2'">
-                ({{ receivedViaKey ? "via new URL" : "via OLD URL" }})
-              </span>
-            </template>
-            <span v-else class="grey--text text--darken-1">
-              No messages received yet.
-            </span>
-          </div>
-          <v-btn small rounded outlined color="primary" :loading="loading" @click="load">
-            <v-icon small class="mr-1">$refresh-cw</v-icon> Refresh
-          </v-btn>
+            <v-icon
+              size="18"
+              class="mr-3"
+              :color="!info.lastInbound ? 'grey' : receivedViaKey ? 'success' : 'amber darken-2'"
+            >
+              {{ info.lastInbound ? "$message-square-check" : "$message-square" }}
+            </v-icon>
+            <div class="flex-grow-1 text-body-2 mr-2 my-1">
+              <template v-if="info.lastInbound">
+                Last message received:
+                <strong>{{ info.lastInbound.at | moment("from", "now") }}</strong>
+                <span
+                  class="font-weight-bold"
+                  :class="receivedViaKey ? 'success--text' : 'amber--text text--darken-3'"
+                >
+                  ({{ receivedViaKey ? "via new URL" : "via OLD URL" }})
+                </span>
+              </template>
+              <span v-else class="grey--text text--darken-1">No messages received yet.</span>
+            </div>
+            <v-btn small outlined color="primary" class="my-1" :loading="loading" @click="load">
+              <v-icon left size="14">$refresh-cw</v-icon>
+              Refresh
+            </v-btn>
+          </v-sheet>
         </div>
       </v-card>
 
       <!-- ============ STEP 4: OLD URL ============ -->
-      <v-card
-        v-if="info.legacyWebhookEnabled"
-        outlined
-        rounded="lg"
-        class="step pa-6 mb-4"
-      >
-        <div class="step-header">
-          <span class="step-badge">4</span>
-          <div class="flex-grow-1">
-            <div class="text-subtitle-1 font-weight-bold">
-              Turn off the old URL
+      <v-card v-if="info.legacyWebhookEnabled" outlined rounded="lg" class="mb-4">
+        <div class="d-flex align-start px-5 py-4">
+          <v-avatar size="28" color="amber lighten-4" class="mr-3 mt-1 flex-shrink-0">
+            <span class="text-caption font-weight-bold amber--text text--darken-4">4</span>
+          </v-avatar>
+          <div>
+            <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">Turn off the old URL</div>
+            <div class="text-body-2 grey--text text--darken-1">
+              Your old webhook URL (based on your public widget key) still works and is insecure.
             </div>
           </div>
         </div>
-
-        <v-alert
-          type="warning"
-          outlined
-          dense
-          rounded="lg"
-          class="text-body-2 mt-4"
-        >
-          Your old webhook URL (based on your public widget key) still works and
-          is insecure.
-        </v-alert>
-
-        <div class="d-flex align-center flex-wrap">
+        <v-divider />
+        <div class="d-flex align-center flex-wrap pa-5">
           <v-btn
             color="warning"
-            rounded
             depressed
-            class="mr-3"
+            class="mr-3 my-1"
             :disabled="!receivedViaKey"
             :loading="disablingLegacy"
             @click="confirmDisableLegacy"
           >
+            <v-icon left size="14">$unlink</v-icon>
             Disable old URL
           </v-btn>
-          <span v-if="!receivedViaKey" class="text-caption grey--text text--darken-1">
-            Receive at least one message through the new URL first, or your bot
-            will stop replying.
+          <span v-if="!receivedViaKey" class="text-caption grey--text text--darken-1 my-1">
+            Receive at least one message through the new URL first, or your bot will stop replying.
           </span>
         </div>
       </v-card>
 
       <!-- ============ HELP ============ -->
-      <v-card outlined rounded="lg" class="pa-6 mb-4">
-        <div class="d-flex align-center mb-3">
-          <v-icon small class="mr-2">$circle-help</v-icon>
-          <div class="text-subtitle-1 font-weight-bold">
+      <v-card outlined rounded="lg" class="mb-4">
+        <div class="d-flex align-center px-5 py-4">
+          <v-icon size="18" color="primary" class="mr-2">$circle-help</v-icon>
+          <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
             Why didn't the bot reply?
+          </span>
+        </div>
+        <v-divider />
+        <div class="d-flex align-start px-5 py-3">
+          <v-icon size="16" color="grey darken-1" class="mr-3 mt-1">$unlink</v-icon>
+          <div class="text-body-2 grey--text text--darken-2">
+            <strong class="grey--text text--darken-4">Nothing arrives:</strong> the worker isn't
+            running, or the webhook URL isn't set in your provider. Check "Last message received"
+            above.
           </div>
         </div>
-        <ul class="help-list text-body-2">
-          <li>
-            <strong>Nothing arrives:</strong> the worker isn't running, or the
-            webhook URL isn't set in your provider. Check "Last message
-            received" above.
-          </li>
-          <li>
-            <strong>Chat escalated to a human:</strong> the bot stays silent on
-            purpose (for 30 minutes by default after an escalation).
-          </li>
-          <li>
-            <strong>Daily limit:</strong> 10 AI replies per customer per 24
-            hours. After that the customer gets one "assigning to support"
-            message, then silence.
-          </li>
-          <li>
-            <strong>Media:</strong> images, video, documents, audio and stickers
-            get a fixed acknowledgement, not an AI answer.
-          </li>
-          <li>
-            <strong>Invalid Tellephant API key:</strong> replies can't be sent.
-          </li>
-        </ul>
+        <v-divider />
+        <div class="d-flex align-start px-5 py-3">
+          <v-icon size="16" color="grey darken-1" class="mr-3 mt-1">$headset</v-icon>
+          <div class="text-body-2 grey--text text--darken-2">
+            <strong class="grey--text text--darken-4">Chat escalated to a human:</strong> the bot
+            stays silent on purpose (for 30 minutes by default after an escalation).
+          </div>
+        </div>
+        <v-divider />
+        <div class="d-flex align-start px-5 py-3">
+          <v-icon size="16" color="grey darken-1" class="mr-3 mt-1">$clock</v-icon>
+          <div class="text-body-2 grey--text text--darken-2">
+            <strong class="grey--text text--darken-4">Daily limit:</strong> 10 AI replies per customer
+            per 24 hours. After that the customer gets one "assigning to support" message, then
+            silence.
+          </div>
+        </div>
+        <v-divider />
+        <div class="d-flex align-start px-5 py-3">
+          <v-icon size="16" color="grey darken-1" class="mr-3 mt-1">$file</v-icon>
+          <div class="text-body-2 grey--text text--darken-2">
+            <strong class="grey--text text--darken-4">Media:</strong> images, video, documents, audio
+            and stickers get a fixed acknowledgement, not an AI answer.
+          </div>
+        </div>
+        <v-divider />
+        <div class="d-flex align-start px-5 py-3">
+          <v-icon size="16" color="grey darken-1" class="mr-3 mt-1">$key</v-icon>
+          <div class="text-body-2 grey--text text--darken-2">
+            <strong class="grey--text text--darken-4">Invalid Tellephant API key:</strong> replies
+            can't be sent.
+          </div>
+        </div>
       </v-card>
 
       <!-- ============ DANGER ZONE ============ -->
-      <v-card outlined rounded="lg" class="danger-zone pa-6">
-        <div class="d-flex align-center flex-wrap">
-          <div class="flex-grow-1 mr-4 mb-2">
-            <div class="text-subtitle-1 font-weight-bold error--text">
+      <v-card outlined rounded="lg">
+        <v-sheet color="red lighten-5" class="d-flex align-center px-5 py-3 rounded-t-lg">
+          <v-icon size="16" color="error" class="mr-2">$triangle-alert</v-icon>
+          <span class="text-caption font-weight-bold text-uppercase error--text">Danger zone</span>
+        </v-sheet>
+        <div class="d-flex align-center flex-wrap px-5 py-4">
+          <div class="flex-grow-1 mr-4 my-1">
+            <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
               Regenerate webhook URL
             </div>
             <div class="text-body-2 grey--text text--darken-1">
-              Use this if the URL has leaked. The current URL stops working
-              immediately.
+              Use this if the URL has leaked. The current URL stops working immediately.
             </div>
           </div>
-          <v-btn
-            color="error"
-            outlined
-            rounded
-            class="mb-2"
-            :loading="regenerating"
-            @click="confirmRegenerate"
-          >
+          <v-btn color="error" outlined class="my-1" :loading="regenerating" @click="confirmRegenerate">
+            <v-icon left size="14">$refresh-cw</v-icon>
             Regenerate
           </v-btn>
         </div>
@@ -291,22 +338,17 @@
 
     <!-- ============ CONFIRM DIALOG ============ -->
     <v-dialog v-model="confirm.open" max-width="420">
-      <v-card rounded="lg" class="pa-2">
-        <v-card-title class="text-h6 font-weight-bold">
-          {{ confirm.title }}
-        </v-card-title>
-        <v-card-text class="text-body-2">{{ confirm.text }}</v-card-text>
-        <v-card-actions class="px-4 pb-4">
-          <v-spacer />
-          <v-btn text rounded @click="confirm.open = false">Cancel</v-btn>
-          <v-btn
-            depressed
-            rounded
-            :color="confirm.color"
-            @click="runConfirm"
-          >
-            {{ confirm.action }}
-          </v-btn>
+      <v-card rounded="lg">
+        <v-card-text class="pt-6 text-center">
+          <v-avatar :color="`${confirm.color} lighten-5`" size="56" class="mb-4">
+            <v-icon :color="confirm.color" size="26">$triangle-alert</v-icon>
+          </v-avatar>
+          <div class="text-h6 font-weight-bold grey--text text--darken-4 mb-2">{{ confirm.title }}</div>
+          <div class="text-body-2 grey--text text--darken-1">{{ confirm.text }}</div>
+        </v-card-text>
+        <v-card-actions class="justify-center pb-5">
+          <v-btn text @click="confirm.open = false">Cancel</v-btn>
+          <v-btn depressed :color="confirm.color" @click="runConfirm">{{ confirm.action }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -501,70 +543,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.step-header {
-  display: flex;
-  align-items: flex-start;
-}
-
-.step-badge {
-  flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  margin-right: 14px;
-  margin-top: 1px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  background: #eff2fb;
-  color: var(--v-primary-base);
-}
-
-.step-badge.done {
-  background: var(--v-success-base);
-}
-
-.sub-row {
-  background: #f6f8fd;
-  border-radius: 12px;
-}
-
-.webhook-box {
-  display: flex;
-  align-items: center;
-  background: #0f172a;
-  border-radius: 12px;
-  padding: 10px 12px 10px 16px;
-}
-
-.webhook-url {
-  flex: 1 1 auto;
-  min-width: 0;
-  background: transparent !important;
-  color: #e2e8f0 !important;
-  padding: 0 !important;
-  box-shadow: none !important;
-  font-family: monospace !important;
-  font-size: 13px;
-  font-weight: 400;
-  word-break: break-all;
-}
-
-.help-list {
-  padding-left: 20px;
-  margin: 0;
-}
-
-.help-list li {
-  margin-bottom: 8px;
-  color: #424242;
-}
-
-.danger-zone {
-  border-color: #f5c2c2 !important;
-}
-</style>

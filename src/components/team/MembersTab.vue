@@ -1,57 +1,73 @@
 <template>
   <div>
-    <!-- Toolbar -->
-    <div class="d-flex align-center flex-wrap toolbar mb-4">
-      <v-text-field
-        v-model="search"
-        placeholder="Search name or email"
-        prepend-inner-icon="$search"
-        outlined
-        dense
-        hide-details
-        clearable
-        class="toolbar-search mr-3 mb-2"
-      />
-      <v-select
-        v-model="roleFilter"
-        :items="roleFilterItems"
-        outlined
-        dense
-        hide-details
-        class="toolbar-filter mr-3 mb-2"
-      />
-      <v-select
-        v-model="statusFilter"
-        :items="statusFilterItems"
-        outlined
-        dense
-        hide-details
-        class="toolbar-filter mr-3 mb-2"
-      />
-      <v-spacer />
-      <v-btn color="primary" rounded depressed class="mb-2" @click="openDialog('create')">
-        <v-icon left>$user-plus</v-icon> Add member
-      </v-btn>
-    </div>
+    <!-- TOOLBAR -->
+    <v-card outlined rounded="lg" class="px-3 py-2 mb-4">
+      <v-row dense align="center">
+        <v-col cols="12" sm="6" md="4">
+          <v-text-field
+            v-model="search"
+            placeholder="Search name or email"
+            prepend-inner-icon="$search"
+            outlined
+            dense
+            hide-details
+            clearable
+          />
+        </v-col>
+        <v-col cols="6" sm="3" md="2">
+          <v-select v-model="roleFilter" :items="roleFilterItems" outlined dense hide-details />
+        </v-col>
+        <v-col cols="6" sm="3" md="2">
+          <v-select v-model="statusFilter" :items="statusFilterItems" outlined dense hide-details />
+        </v-col>
+        <v-spacer />
+        <v-col cols="12" md="auto" class="text-right">
+          <v-btn color="primary" depressed @click="openDialog('create')">
+            <v-icon left size="16">$user-plus</v-icon>
+            Add member
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-card>
 
-    <v-alert v-if="loadError" type="error" outlined rounded="lg">
-      {{ loadError }}
-      <v-btn small text color="error" class="ml-2" @click="load">Retry</v-btn>
+    <v-alert v-if="loadError" type="error" text rounded="lg" class="text-body-2">
+      <div class="d-flex align-center flex-wrap">
+        <span class="mr-4">{{ loadError }}</span>
+        <v-spacer />
+        <v-btn small outlined color="error" @click="load">
+          <v-icon left size="14">$refresh-cw</v-icon>
+          Retry
+        </v-btn>
+      </div>
     </v-alert>
 
-    <v-card v-else outlined rounded="lg">
+    <v-card v-else outlined rounded="lg" class="overflow-hidden">
+      <div class="d-flex align-center px-5 py-3">
+        <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4">Members</span>
+        <v-chip v-if="users.length" x-small label class="font-weight-bold ml-2">
+          {{ filteredUsers.length }}<template v-if="filteredUsers.length !== users.length">
+            of {{ users.length }}</template
+          >
+        </v-chip>
+      </div>
+      <v-divider />
+
       <v-skeleton-loader v-if="loading && !users.length" type="table-row@4" class="pa-4" />
 
-      <div v-else-if="!filteredUsers.length" class="empty-state text-center pa-10">
-        <v-icon large color="grey lighten-1" class="mb-2">$user-search</v-icon>
-        <div class="text-body-1 font-weight-medium">
+      <div v-else-if="!filteredUsers.length" class="d-flex flex-column align-center text-center px-6 py-12">
+        <v-avatar color="grey lighten-4" size="64" class="mb-4">
+          <v-icon size="28" color="grey">$user-search</v-icon>
+        </v-avatar>
+        <div class="text-subtitle-1 font-weight-bold grey--text text--darken-3 mb-1">
           {{ users.length ? "No members match your filters" : "No members yet" }}
         </div>
         <div class="text-body-2 grey--text text--darken-1 mb-4">
           {{ users.length ? "Try a different search or filter." : "Add your first team member." }}
         </div>
-        <v-btn v-if="users.length" text rounded color="primary" @click="clearFilters">
-          Clear filters
+        <v-btn v-if="users.length" small outlined color="primary" @click="clearFilters">Clear filters</v-btn>
+        <v-btn v-else small depressed color="primary" @click="openDialog('create')">
+          <v-icon left size="14">$user-plus</v-icon>
+          Add member
         </v-btn>
       </div>
 
@@ -64,24 +80,30 @@
         :footer-props="{ 'items-per-page-options': [10, 25, 50, -1] }"
         :hide-default-footer="filteredUsers.length <= 25"
         mobile-breakpoint="700"
-        class="members-table"
       >
         <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template v-slot:item.name="{ item }">
           <div class="d-flex align-center py-2">
             <v-avatar size="36" :color="avatarColor(item)" class="mr-3 flex-shrink-0">
-              <span class="white--text text-caption font-weight-bold">
-                {{ initials(item) }}
-              </span>
+              <span class="white--text text-caption font-weight-bold">{{ initials(item) }}</span>
             </v-avatar>
-            <div style="min-width: 0">
-              <div class="font-weight-medium d-flex align-center">
-                <span class="text-truncate">{{ item.name || "—" }}</span>
-                <v-chip v-if="isSelf(item)" x-small color="primary" class="ml-2">You</v-chip>
+            <div class="overflow-hidden">
+              <div class="d-flex align-center">
+                <span class="text-body-2 font-weight-bold grey--text text--darken-4 text-truncate">
+                  {{ item.name || "—" }}
+                </span>
+                <v-chip
+                  v-if="isSelf(item)"
+                  x-small
+                  label
+                  color="green lighten-5"
+                  text-color="green darken-2"
+                  class="font-weight-bold ml-2"
+                >
+                  You
+                </v-chip>
               </div>
-              <div class="text-caption grey--text text--darken-1 text-truncate">
-                {{ item.email }}
-              </div>
+              <div class="text-caption grey--text text--darken-1 text-truncate">{{ item.email }}</div>
             </div>
           </div>
         </template>
@@ -93,22 +115,28 @@
 
         <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template v-slot:item.status="{ item }">
-          <span :class="['status-pill', item.status === 1 ? 'active' : 'inactive']">
-            <span class="dot" />
+          <v-chip
+            x-small
+            label
+            :color="item.status === 1 ? 'green lighten-5' : 'grey lighten-4'"
+            :text-color="item.status === 1 ? 'green darken-2' : 'grey darken-1'"
+            class="font-weight-bold"
+          >
+            <v-icon left size="8">$circle</v-icon>
             {{ item.status === 1 ? "Active" : "Inactive" }}
-          </span>
+          </v-chip>
         </template>
 
         <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template v-slot:item.createdAt="{ item }">
-          <span class="text-body-2 grey--text text--darken-2">
+          <span class="text-caption grey--text text--darken-1 text-no-wrap">
             {{ item.createdAt ? $moment(item.createdAt).format("D MMM YYYY") : "—" }}
           </span>
         </template>
 
         <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template v-slot:item.actions="{ item }">
-          <v-menu offset-y left>
+          <v-menu offset-y left nudge-bottom="4">
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                 icon
@@ -116,25 +144,28 @@
                 v-bind="attrs"
                 :disabled="!actionsFor(item).length"
                 :title="actionsFor(item).length ? 'Actions' : 'You can\'t manage this member'"
+                aria-label="Member actions"
                 v-on="on"
               >
-                <v-icon>$ellipsis</v-icon>
+                <v-icon size="18">$ellipsis-vertical</v-icon>
               </v-btn>
             </template>
-            <v-list dense class="py-1">
-              <v-list-item
-                v-for="action in actionsFor(item)"
-                :key="action.id"
-                @click="runAction(action.id, item)"
-              >
-                <v-list-item-icon class="mr-3">
-                  <v-icon small :color="action.color">{{ action.icon }}</v-icon>
-                </v-list-item-icon>
-                <v-list-item-title :class="action.color ? `${action.color}--text` : ''">
-                  {{ action.label }}
-                </v-list-item-title>
-              </v-list-item>
-            </v-list>
+            <v-card outlined rounded="lg">
+              <v-list dense nav class="py-1">
+                <v-list-item
+                  v-for="action in actionsFor(item)"
+                  :key="action.id"
+                  @click="runAction(action.id, item)"
+                >
+                  <v-icon size="16" class="mr-3 flex-grow-0" :color="action.color || 'grey darken-2'">
+                    {{ action.icon }}
+                  </v-icon>
+                  <v-list-item-title :class="action.color ? `${action.color}--text` : ''">
+                    {{ action.label }}
+                  </v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </v-card>
           </v-menu>
         </template>
       </v-data-table>
@@ -397,63 +428,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.toolbar-search {
-  flex: 1 1 240px;
-  max-width: 320px;
-}
-
-.toolbar-filter {
-  flex: 0 1 170px;
-}
-
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 2px 10px;
-  border-radius: 999px;
-}
-
-.status-pill .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  margin-right: 6px;
-}
-
-.status-pill.active {
-  background: #e7f6ec;
-  color: #1e7e34;
-}
-
-.status-pill.active .dot {
-  background: #28a745;
-}
-
-.status-pill.inactive {
-  background: #f1f3f5;
-  color: #6c757d;
-}
-
-.status-pill.inactive .dot {
-  background: #adb5bd;
-}
-
-.members-table ::v-deep th {
-  font-size: 12px !important;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-@media (max-width: 600px) {
-  .toolbar-search,
-  .toolbar-filter {
-    flex: 1 1 100%;
-    max-width: none;
-    margin-right: 0 !important;
-  }
-}
-</style>

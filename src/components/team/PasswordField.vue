@@ -4,6 +4,7 @@
       :value="value"
       :label="label"
       :type="show ? 'text' : 'password'"
+      prepend-inner-icon="$lock"
       outlined
       dense
       autocomplete="new-password"
@@ -14,23 +15,26 @@
     >
       <template v-slot:append>
         <v-btn icon small :title="show ? 'Hide' : 'Show'" @click="show = !show">
-          <v-icon small>{{ show ? "$eye-off" : "$eye" }}</v-icon>
+          <v-icon size="16">{{ show ? "$eye-off" : "$eye" }}</v-icon>
         </v-btn>
         <v-btn small text color="primary" class="ml-1 px-2" @click="generate">
-          <v-icon small class="mr-1">$wand-sparkles</v-icon> Generate
+          <v-icon left size="14">$wand-sparkles</v-icon>
+          Generate
         </v-btn>
       </template>
     </v-text-field>
 
     <div v-if="value" class="d-flex align-center mt-2">
-      <div class="strength-bar mr-2">
-        <div
-          v-for="i in 4"
-          :key="i"
-          :class="['strength-seg', i <= strength.score ? strength.color : 'grey lighten-3']"
-        />
-      </div>
-      <span :class="['text-caption', `${strength.color.split(' ')[0]}--text`]">
+      <v-progress-linear
+        :value="strength.score * 25"
+        :color="strength.color"
+        background-color="grey lighten-3"
+        height="4"
+        rounded
+        class="mr-3"
+        :aria-label="`Password strength: ${strength.label}`"
+      />
+      <span class="text-caption text-no-wrap" :class="`${strength.color.split(' ')[0]}--text`">
         {{ strength.label }}
       </span>
     </div>
@@ -71,17 +75,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.strength-bar {
-  display: flex;
-  gap: 4px;
-  width: 120px;
-}
-
-.strength-seg {
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-}
-</style>

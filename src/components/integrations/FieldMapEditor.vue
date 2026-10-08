@@ -11,7 +11,10 @@
       <span v-else>Run "Try it" below to get suggestions from your API.</span>
     </div>
 
-    <div class="sub-title">Product</div>
+    <div class="d-flex align-center mb-2">
+      <v-icon size="14" color="grey darken-1" class="mr-2">$tag</v-icon>
+      <span class="text-body-2 font-weight-bold grey--text text--darken-4">Product</span>
+    </div>
     <v-row dense>
       <v-col v-for="f in BASIC" :key="f.key" cols="12" sm="6" md="4">
         <v-combobox
@@ -30,7 +33,10 @@
       </v-col>
     </v-row>
 
-    <div class="sub-title mt-4">Price</div>
+    <div class="d-flex align-center mt-5 mb-2">
+      <v-icon size="14" color="grey darken-1" class="mr-2">$chart-column</v-icon>
+      <span class="text-body-2 font-weight-bold grey--text text--darken-4">Price</span>
+    </div>
     <div class="text-caption grey--text text--darken-1 mb-2">
       Either a path to a ready-made prices list in our format, or one amount
       with its label.
@@ -120,7 +126,10 @@
       </v-col>
     </v-row>
 
-    <div class="sub-title mt-4">Stock</div>
+    <div class="d-flex align-center mt-5 mb-2">
+      <v-icon size="14" color="grey darken-1" class="mr-2">$layers</v-icon>
+      <span class="text-body-2 font-weight-bold grey--text text--darken-4">Stock</span>
+    </div>
     <v-row dense>
       <v-col cols="12" sm="6" md="4">
         <v-combobox
@@ -188,11 +197,15 @@
         </v-btn>
       </v-col>
     </v-row>
-    <v-btn small text rounded color="primary" class="mb-2" @click="addRow('availabilityValues', { theirs: '', ours: '' })">
-      <v-icon small class="mr-1">$plus</v-icon> Map a stock value
+    <v-btn small outlined color="primary" class="mb-2" @click="addRow('availabilityValues', { theirs: '', ours: '' })">
+      <v-icon left size="14">$plus</v-icon>
+      Map a stock value
     </v-btn>
 
-    <div class="sub-title mt-4">Attributes</div>
+    <div class="d-flex align-center mt-5 mb-2">
+      <v-icon size="14" color="grey darken-1" class="mr-2">$list</v-icon>
+      <span class="text-body-2 font-weight-bold grey--text text--darken-4">Attributes</span>
+    </div>
     <div class="text-caption grey--text text--darken-1 mb-2">
       Shown as features. Name one <code>fuel</code> so customers can ask for
       "electric" or "petrol".
@@ -232,13 +245,13 @@
     </v-row>
     <v-btn
       small
-      text
-      rounded
+      outlined
       color="primary"
       :disabled="value.attributes.length >= 20"
       @click="addRow('attributes', { ours: '', path: '' })"
     >
-      <v-icon small class="mr-1">$plus</v-icon> Add attribute
+      <v-icon left size="14">$plus</v-icon>
+      Add attribute
     </v-btn>
   </div>
 </template>
@@ -284,11 +297,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.sub-title {
-  font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-</style>

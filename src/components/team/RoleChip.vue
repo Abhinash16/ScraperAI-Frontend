@@ -3,16 +3,15 @@
     v-if="role"
     :small="!xSmall"
     :x-small="xSmall"
+    label
     outlined
     :color="color"
-    class="font-weight-medium"
+    class="font-weight-bold"
   >
-    <v-icon v-if="owner" x-small left>$crown</v-icon>
+    <v-icon v-if="owner" left :size="xSmall ? 10 : 12">$crown</v-icon>
     {{ role.name }}
   </v-chip>
-  <v-chip v-else :small="!xSmall" :x-small="xSmall" outlined color="grey">
-    No role
-  </v-chip>
+  <v-chip v-else :small="!xSmall" :x-small="xSmall" label outlined color="grey">No role</v-chip>
 </template>
 
 <script>

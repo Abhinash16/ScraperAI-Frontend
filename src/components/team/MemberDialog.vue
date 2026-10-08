@@ -1,23 +1,27 @@
 <template>
   <v-dialog :value="value" max-width="560" scrollable @input="close">
     <v-card rounded="lg">
-      <v-card-title class="d-flex align-center pb-2">
-        <div>
-          <div class="text-h6 font-weight-bold">{{ title }}</div>
-          <div v-if="member && mode !== 'create'" class="text-caption grey--text text--darken-1">
+      <div class="d-flex align-center pa-5">
+        <v-avatar size="44" tile color="primary lighten-5" class="rounded-lg mr-4 flex-shrink-0">
+          <v-icon size="22" color="primary">{{ mode === "create" ? "$user-plus" : "$user-cog" }}</v-icon>
+        </v-avatar>
+        <div class="flex-grow-1 overflow-hidden">
+          <div class="text-h6 font-weight-bold grey--text text--darken-4">{{ title }}</div>
+          <div v-if="member && mode !== 'create'" class="text-caption grey--text text--darken-1 text-truncate">
             {{ member.name }} · {{ member.email }}
           </div>
         </div>
-        <v-spacer />
-        <v-btn icon :disabled="saving" @click="close"><v-icon>$x</v-icon></v-btn>
-      </v-card-title>
+        <v-btn icon aria-label="Close" :disabled="saving" @click="close"><v-icon>$x</v-icon></v-btn>
+      </div>
+      <v-divider />
 
-      <v-card-text class="pt-4">
+      <v-card-text class="pa-5">
         <v-form ref="form" @submit.prevent="save">
           <template v-if="mode !== 'role'">
             <v-text-field
               v-model.trim="form.name"
               label="Full name"
+              prepend-inner-icon="$user"
               outlined
               dense
               :error-messages="errors.name"
@@ -30,6 +34,7 @@
               v-model.trim="form.email"
               label="Email"
               type="email"
+              prepend-inner-icon="$message-square"
               outlined
               dense
               autocomplete="off"
@@ -45,13 +50,18 @@
           </template>
 
           <template v-if="showRolePicker">
-            <div class="picker-title">Role</div>
+            <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">Role</div>
             <div v-if="roleLocked" class="text-caption grey--text text--darken-1 mb-2">
               You can't change your own role.
             </div>
-            <div v-if="!roles.length" class="empty-roles text-center">
-              <v-icon color="grey lighten-1" class="mb-1">$shield-off</v-icon>
-              <div class="text-body-2 font-weight-medium">No roles available</div>
+            <v-sheet
+              v-if="!roles.length"
+              color="grey lighten-5"
+              rounded="lg"
+              class="d-flex flex-column align-center text-center pa-4"
+            >
+              <v-icon color="grey" class="mb-1">$shield-off</v-icon>
+              <div class="text-body-2 font-weight-bold grey--text text--darken-3">No roles available</div>
               <div class="text-caption grey--text text--darken-1">
                 A member needs a role.
                 <template v-if="canManageRoles">
@@ -60,74 +70,55 @@
                 </template>
                 <template v-else>Ask an admin to create one.</template>
               </div>
-            </div>
-            <v-item-group v-else v-model="form.roleId" class="role-picker">
-              <v-tooltip
-                v-for="role in roles"
-                :key="role._id"
-                top
-                :disabled="role.assignable !== false"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <div v-bind="attrs" v-on="on">
-                    <v-item
-                      v-slot="{ active, toggle }"
-                      :value="role._id"
-                      :disabled="roleLocked || role.assignable === false"
-                    >
-                      <div
-                        :class="[
-                          'role-option',
-                          {
-                            active,
-                            disabled: roleLocked || role.assignable === false,
-                          },
-                        ]"
-                        @click="!(roleLocked || role.assignable === false) && !active && toggle()"
-                      >
-                        <v-icon small :color="active ? 'primary' : 'grey lighten-1'" class="mr-3">
-                          {{ active ? "$circle-dot" : "$circle" }}
-                        </v-icon>
-                        <RoleChip :role="role" x-small class="mr-2" />
-                        <span class="text-caption grey--text text--darken-1">
-                          {{ summary(role) }}
-                        </span>
+            </v-sheet>
+            <v-sheet v-else outlined rounded="lg" class="overflow-hidden">
+              <v-item-group v-model="form.roleId">
+                <template v-for="(role, i) in roles">
+                  <v-divider v-if="i > 0" :key="`d-${role._id}`" />
+                  <v-tooltip :key="role._id" top :disabled="role.assignable !== false">
+                    <template v-slot:activator="{ on, attrs }">
+                      <div v-bind="attrs" v-on="on">
+                        <v-item
+                          v-slot="{ active, toggle }"
+                          :value="role._id"
+                          :disabled="roleLocked || role.assignable === false"
+                        >
+                          <v-card
+                            flat
+                            tile
+                            :color="active ? 'green lighten-5' : 'white'"
+                            :disabled="roleLocked || role.assignable === false"
+                            class="d-flex align-center px-4 py-3"
+                            @click="!active && toggle()"
+                          >
+                            <v-icon size="18" :color="active ? 'green darken-1' : 'grey lighten-1'" class="mr-3">
+                              {{ active ? "$circle-check" : "$circle" }}
+                            </v-icon>
+                            <RoleChip :role="role" x-small class="mr-2" />
+                            <span class="text-caption grey--text text--darken-1">{{ summary(role) }}</span>
+                          </v-card>
+                        </v-item>
                       </div>
-                    </v-item>
-                  </div>
+                    </template>
+                    You can only assign roles with permissions you have
+                  </v-tooltip>
                 </template>
-                You can only assign roles with permissions you have
-              </v-tooltip>
-            </v-item-group>
-            <div v-if="errors.role" class="error--text text-caption mt-1">
-              {{ errors.role }}
-            </div>
+              </v-item-group>
+            </v-sheet>
+            <div v-if="errors.role" class="error--text text-caption mt-1">{{ errors.role }}</div>
           </template>
 
-          <v-alert
-            v-if="errors.general"
-            type="error"
-            text
-            dense
-            rounded="lg"
-            class="text-body-2 mt-4 mb-0"
-          >
+          <v-alert v-if="errors.general" type="error" text dense rounded="lg" class="text-body-2 mt-4 mb-0">
             {{ errors.general }}
           </v-alert>
         </v-form>
       </v-card-text>
 
-      <v-card-actions class="px-6 pb-5">
+      <v-divider />
+      <v-card-actions class="px-5 py-3">
         <v-spacer />
-        <v-btn text rounded :disabled="saving" @click="close">Cancel</v-btn>
-        <v-btn
-          color="primary"
-          depressed
-          rounded
-          :loading="saving"
-          :disabled="!canSubmit"
-          @click="save"
-        >
+        <v-btn text :disabled="saving" @click="close">Cancel</v-btn>
+        <v-btn color="primary" depressed :loading="saving" :disabled="!canSubmit" @click="save">
           {{ mode === "create" ? "Add member" : "Save" }}
         </v-btn>
       </v-card-actions>
@@ -252,51 +243,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.picker-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #757575;
-  margin-bottom: 8px;
-}
-
-.empty-roles {
-  border: 1px dashed #d6dbe8;
-  border-radius: 12px;
-  padding: 16px;
-}
-
-.role-picker {
-  border: 1px solid #e4e8f2;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.role-option {
-  display: flex;
-  align-items: center;
-  padding: 10px 14px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.role-picker > div + div .role-option {
-  border-top: 1px solid #e4e8f2;
-}
-
-.role-option:hover {
-  background: #f6f8fd;
-}
-
-.role-option.active {
-  background: #eff2fb;
-}
-
-.role-option.disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-</style>

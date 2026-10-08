@@ -5,122 +5,135 @@
         A role is a set of permissions. Each member has one role.
       </div>
       <v-spacer />
-      <v-btn
-        color="primary"
-        rounded
-        depressed
-        class="mb-2"
-        :disabled="!catalog"
-        @click="openEditor()"
-      >
-        <v-icon left>$plus</v-icon> New role
+      <v-btn color="primary" depressed class="mb-2" :disabled="!catalog" @click="openEditor()">
+        <v-icon left size="16">$plus</v-icon>
+        New role
       </v-btn>
     </div>
 
-    <v-alert v-if="loadError" type="error" outlined rounded="lg">
-      {{ loadError }}
-      <v-btn small text color="error" class="ml-2" @click="load">Retry</v-btn>
+    <v-alert v-if="loadError" type="error" text rounded="lg" class="text-body-2">
+      <div class="d-flex align-center flex-wrap">
+        <span class="mr-4">{{ loadError }}</span>
+        <v-spacer />
+        <v-btn small outlined color="error" @click="load">
+          <v-icon left size="14">$refresh-cw</v-icon>
+          Retry
+        </v-btn>
+      </div>
     </v-alert>
 
-    <v-row v-else-if="loading && !roles.length">
-      <v-col v-for="i in 4" :key="i" cols="12" sm="6" lg="4">
-        <v-skeleton-loader type="card-heading, list-item-two-line" class="rounded-lg" />
+    <v-row v-else-if="loading && !roles.length" dense>
+      <v-col v-for="i in 3" :key="i" cols="12" sm="6" lg="4">
+        <v-card outlined rounded="lg" class="pa-3">
+          <v-skeleton-loader type="list-item-avatar-two-line, list-item" />
+        </v-card>
       </v-col>
     </v-row>
 
-    <template v-else>
-      <v-row>
-        <v-col v-for="role in sortedRoles" :key="role._id" cols="12" sm="6" lg="4">
-          <v-card outlined rounded="lg" class="role-card pa-5 d-flex flex-column">
-            <div class="d-flex align-start">
-              <v-avatar size="40" :color="`${color(role)} lighten-5`" class="mr-3">
-                <v-icon :color="color(role)">
-                  {{ owner(role) ? "$crown" : "$shield-user" }}
-                </v-icon>
-              </v-avatar>
-              <div class="flex-grow-1" style="min-width: 0">
-                <div class="d-flex align-center flex-wrap">
-                  <span class="font-weight-bold text-truncate mr-2">{{ role.name }}</span>
-                  <v-chip v-if="role.isDefault" x-small outlined color="grey darken-1">
-                    <v-icon x-small left>$lock</v-icon> Default
-                  </v-chip>
-                </div>
-                <div class="text-caption grey--text text--darken-1">
-                  {{ role.userCount || 0 }} member{{ role.userCount === 1 ? "" : "s" }}
-                  · {{ summary(role) }}
-                </div>
+    <v-row v-else dense>
+      <v-col v-for="role in sortedRoles" :key="role._id" cols="12" sm="6" lg="4">
+        <v-card outlined rounded="lg" class="d-flex flex-column fill-height">
+          <div class="d-flex align-start pa-4">
+            <v-avatar size="40" tile :color="`${color(role)} lighten-5`" class="rounded-lg mr-3 flex-shrink-0">
+              <v-icon size="20" :color="color(role)">{{ owner(role) ? "$crown" : "$shield-user" }}</v-icon>
+            </v-avatar>
+            <div class="flex-grow-1 overflow-hidden">
+              <div class="d-flex align-center flex-wrap">
+                <span class="text-body-2 font-weight-bold grey--text text--darken-4 text-truncate mr-2">
+                  {{ role.name }}
+                </span>
+                <v-chip v-if="role.isDefault" x-small label color="grey lighten-4" class="font-weight-bold">
+                  <v-icon left size="10">$lock</v-icon>
+                  Default
+                </v-chip>
+              </div>
+              <div class="d-flex align-center text-caption grey--text text--darken-1">
+                <v-icon size="12" class="mr-1">$users</v-icon>
+                {{ role.userCount || 0 }} member{{ role.userCount === 1 ? "" : "s" }} · {{ summary(role) }}
               </div>
             </div>
-
-            <div class="group-chips mt-3">
-              <v-chip
-                v-for="g in groupsFor(role)"
-                :key="g"
-                x-small
-                class="mr-1 mb-1"
-              >
-                {{ g }}
-              </v-chip>
-            </div>
-
-            <v-spacer />
-            <v-divider class="my-3" />
-
-            <div class="d-flex align-center">
-              <v-btn
-                small
-                text
-                rounded
-                color="primary"
-                :disabled="!role.editable"
-                :title="role.editable ? '' : lockedReason(role)"
-                @click="openEditor(role)"
-              >
-                <v-icon small class="mr-1">$pencil</v-icon> Edit
-              </v-btn>
-              <v-btn
-                small
-                text
-                rounded
-                :disabled="role.assignable === false"
-                :title="role.assignable === false ? 'You can only copy roles with permissions you have' : ''"
-                @click="openEditor(null, role)"
-              >
-                <v-icon small class="mr-1">$copy</v-icon> Duplicate
-              </v-btn>
-              <v-spacer />
-              <v-tooltip top :disabled="!deleteBlocked(role)">
-                <template v-slot:activator="{ on, attrs }">
-                  <span v-bind="attrs" v-on="on">
-                    <v-btn
-                      icon
-                      small
-                      :disabled="!!deleteBlocked(role)"
-                      title="Delete role"
-                      @click="confirmDelete(role)"
-                    >
-                      <v-icon small color="error">$trash-2</v-icon>
-                    </v-btn>
-                  </span>
-                </template>
-                {{ deleteBlocked(role) }}
-              </v-tooltip>
-            </div>
-          </v-card>
-        </v-col>
-
-        <!-- Empty state for custom roles -->
-        <v-col v-if="!customRoles.length" cols="12" sm="6" lg="4">
-          <div class="empty-card text-center pa-6" @click="catalog && openEditor()">
-            <v-icon large color="grey lighten-1" class="mb-2">$shield-plus</v-icon>
-            <div class="font-weight-medium">No custom roles yet</div>
-            <div class="text-caption grey--text text--darken-1">
-              Create one to fine-tune what each member can do.
-            </div>
           </div>
-        </v-col>
-      </v-row>
-    </template>
+
+          <div v-if="groupsFor(role).length" class="d-flex flex-wrap px-4 pb-3">
+            <v-chip
+              v-for="g in groupsFor(role)"
+              :key="g"
+              x-small
+              label
+              color="grey lighten-4"
+              class="mr-1 mb-1"
+            >
+              {{ g }}
+            </v-chip>
+          </div>
+
+          <v-spacer />
+          <v-divider />
+
+          <div class="d-flex align-center px-2 py-2">
+            <v-btn
+              small
+              text
+              color="primary"
+              :disabled="!role.editable"
+              :title="role.editable ? '' : lockedReason(role)"
+              @click="openEditor(role)"
+            >
+              <v-icon left size="14">$pencil</v-icon>
+              Edit
+            </v-btn>
+            <v-btn
+              small
+              text
+              color="grey darken-2"
+              :disabled="role.assignable === false"
+              :title="role.assignable === false ? 'You can only copy roles with permissions you have' : ''"
+              @click="openEditor(null, role)"
+            >
+              <v-icon left size="14">$copy</v-icon>
+              Duplicate
+            </v-btn>
+            <v-spacer />
+            <v-tooltip top :disabled="!deleteBlocked(role)">
+              <template v-slot:activator="{ on, attrs }">
+                <span v-bind="attrs" v-on="on">
+                  <v-btn
+                    icon
+                    small
+                    color="error"
+                    :disabled="!!deleteBlocked(role)"
+                    aria-label="Delete role"
+                    @click="confirmDelete(role)"
+                  >
+                    <v-icon size="16">$trash-2</v-icon>
+                  </v-btn>
+                </span>
+              </template>
+              {{ deleteBlocked(role) }}
+            </v-tooltip>
+          </div>
+        </v-card>
+      </v-col>
+
+      <!-- Empty state for custom roles -->
+      <v-col v-if="!customRoles.length" cols="12" sm="6" lg="4">
+        <v-card
+          outlined
+          rounded="lg"
+          class="d-flex flex-column align-center justify-center text-center pa-6 fill-height"
+          :disabled="!catalog"
+          @click="catalog && openEditor()"
+        >
+          <v-avatar size="48" color="green lighten-5" class="mb-3">
+            <v-icon size="22" color="green darken-1">$shield-plus</v-icon>
+          </v-avatar>
+          <div class="text-body-2 font-weight-bold grey--text text--darken-4">No custom roles yet</div>
+          <div class="text-caption grey--text text--darken-1">
+            Create one to fine-tune what each member can do.
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
 
     <RoleEditorDialog
       v-if="catalog"
@@ -140,8 +153,8 @@
       :loading="deleteDialog.loading"
       @confirm="remove"
     >
-      The <strong>{{ deleteDialog.role && deleteDialog.role.name }}</strong> role
-      will be deleted. This can't be undone.
+      The <strong>{{ deleteDialog.role && deleteDialog.role.name }}</strong> role will be deleted. This
+      can't be undone.
     </ConfirmDialog>
   </div>
 </template>
@@ -303,22 +316,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.role-card {
-  height: 100%;
-}
-
-.empty-card {
-  height: 100%;
-  min-height: 180px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed #cfd6e6;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-</style>

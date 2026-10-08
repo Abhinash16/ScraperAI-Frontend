@@ -1,42 +1,50 @@
 <template>
-  <div class="team-page">
-    <!-- Header -->
-    <div class="d-flex align-center mb-6">
-      <v-avatar size="48" rounded="lg" color="#cde6ff" class="mr-4">
-        <v-icon color="black">$users</v-icon>
-      </v-avatar>
-      <div>
-        <div class="text-h5 font-weight-bold">Team</div>
-        <div class="text-body-2 grey--text text--darken-1">
-          Invite people, decide what they can do, and keep access tidy.
-        </div>
+  <div>
+    <!-- HEADER -->
+    <div class="mb-4">
+      <h1 class="text-h6 font-weight-bold grey--text text--darken-4">Team</h1>
+      <div class="text-body-2 grey--text text--darken-1">
+        Invite people, decide what they can do, and keep access tidy.
       </div>
     </div>
 
     <ThingsToKnow feature="team" />
 
-    <v-card v-if="!me" outlined rounded="lg" class="pa-6">
-      <v-progress-linear v-if="!meError" indeterminate color="primary" />
-      <v-alert v-else type="error" outlined rounded="lg" class="mb-0">
-        {{ meError }}
-        <v-btn small text color="error" class="ml-2" @click="loadMe">Retry</v-btn>
+    <template v-if="!me">
+      <v-alert v-if="meError" type="error" text rounded="lg" class="text-body-2">
+        <div class="d-flex align-center flex-wrap">
+          <span class="mr-4">{{ meError }}</span>
+          <v-spacer />
+          <v-btn small outlined color="error" @click="loadMe">
+            <v-icon left size="14">$refresh-cw</v-icon>
+            Retry
+          </v-btn>
+        </div>
       </v-alert>
-    </v-card>
+      <v-card v-else outlined rounded="lg" class="pa-4">
+        <v-skeleton-loader type="list-item-avatar-two-line, list-item-avatar-two-line, list-item-avatar-two-line" />
+      </v-card>
+    </template>
 
     <template v-else>
       <v-tabs
         :value="tab"
         color="primary"
-        class="team-tabs mb-6"
+        background-color="transparent"
+        height="44"
+        slider-size="3"
         @change="setTab"
       >
-        <v-tab v-if="canManageUsers" tab-value="members" class="text-none">
-          <v-icon small class="mr-2">$users</v-icon> Members
+        <v-tab v-if="canManageUsers" tab-value="members" class="text-body-2 font-weight-bold">
+          <v-icon size="16" class="mr-2">$users</v-icon>
+          Members
         </v-tab>
-        <v-tab v-if="canManageRoles" tab-value="roles" class="text-none">
-          <v-icon small class="mr-2">$shield-user</v-icon> Roles
+        <v-tab v-if="canManageRoles" tab-value="roles" class="text-body-2 font-weight-bold">
+          <v-icon size="16" class="mr-2">$shield-user</v-icon>
+          Roles
         </v-tab>
       </v-tabs>
+      <v-divider class="mb-4" />
 
       <MembersTab
         v-if="tab === 'members'"
@@ -45,9 +53,9 @@
         @open-roles="setTab('roles')"
       />
       <RolesTab v-else-if="tab === 'roles'" :me="me" />
-      <v-alert v-else type="warning" outlined rounded="lg">
-        You need the <code>user:manage</code> or <code>role:manage</code>
-        permission to manage your team.
+      <v-alert v-else type="warning" text rounded="lg" class="text-body-2">
+        You need the <code>user:manage</code> or <code>role:manage</code> permission to manage your
+        team.
       </v-alert>
     </template>
   </div>
@@ -119,9 +127,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.team-tabs {
-  border-bottom: 1px solid #e0e0e0;
-}
-</style>

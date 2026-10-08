@@ -1,27 +1,24 @@
 <template>
-  <div class="output-panel">
+  <div class="d-flex flex-column fill-height">
     <div class="d-flex align-start mb-2">
       <div class="flex-grow-1">
-        <div class="output-title">{{ title }}</div>
-        <div v-if="subtitle" class="text-caption grey--text text--darken-1">
-          {{ subtitle }}
-        </div>
+        <div class="text-caption font-weight-bold text-uppercase grey--text">{{ title }}</div>
+        <div v-if="subtitle" class="text-caption grey--text text--darken-1">{{ subtitle }}</div>
       </div>
-      <v-btn
-        v-if="copyText"
-        x-small
-        text
-        rounded
-        color="primary"
-        class="ml-2"
-        @click="copy"
-      >
-        <v-icon x-small class="mr-1">$copy</v-icon> Copy
+      <v-btn v-if="copyText" x-small text color="primary" class="ml-2" @click="copy">
+        <v-icon left size="12">$copy</v-icon>
+        Copy
       </v-btn>
     </div>
-    <div class="output-box">
+    <v-sheet
+      color="grey darken-4"
+      dark
+      rounded="lg"
+      max-height="420"
+      class="output-box flex-grow-1 overflow-y-auto text-body-2 pa-4"
+    >
       <slot />
-    </div>
+    </v-sheet>
   </div>
 </template>
 
@@ -50,41 +47,11 @@ export default {
 </script>
 
 <style scoped>
-.output-panel {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.output-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #757575;
-}
-
-.output-box {
-  flex: 1 1 auto;
-  background: #0f172a;
-  color: #e2e8f0;
-  padding: 14px 16px;
-  border-radius: 12px;
-  max-height: 420px;
-  overflow: auto;
-}
-
+/* Text passed in by other components (AI context, raw responses) */
 .output-box ::v-deep pre {
   margin: 0;
-  font-family: monospace;
   font-size: 12.5px;
   white-space: pre-wrap;
   word-break: break-word;
-}
-
-.output-box ::v-deep .output-empty {
-  color: #94a3b8;
-  font-style: italic;
-  font-size: 13px;
 }
 </style>

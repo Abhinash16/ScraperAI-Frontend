@@ -1,59 +1,83 @@
 <template>
   <div>
-    <v-card v-if="loading" outlined rounded="lg" class="pa-6">
-      <v-progress-linear indeterminate color="primary" />
+    <!-- LOADING / NO ACCESS / ERROR -->
+    <v-card v-if="loading" outlined rounded="lg" class="pa-4">
+      <v-skeleton-loader type="list-item-avatar-two-line, list-item-two-line, list-item-two-line" />
     </v-card>
 
-    <v-alert v-else-if="forbidden" type="warning" outlined rounded="lg">
-      You need the <code>settings:manage</code> permission to view these
-      settings.
+    <v-alert v-else-if="forbidden" type="warning" text rounded="lg" class="text-body-2">
+      You need the <code>settings:manage</code> permission to view these settings.
     </v-alert>
 
-    <v-alert v-else-if="loadError" type="error" outlined rounded="lg">
-      {{ loadError }}
-      <v-btn small text color="error" class="ml-2" @click="load">Retry</v-btn>
+    <v-alert v-else-if="loadError" type="error" text rounded="lg" class="text-body-2">
+      <div class="d-flex align-center flex-wrap">
+        <span class="mr-4">{{ loadError }}</span>
+        <v-spacer />
+        <v-btn small outlined color="error" @click="load">
+          <v-icon left size="14">$refresh-cw</v-icon>
+          Retry
+        </v-btn>
+      </div>
     </v-alert>
 
     <template v-else>
       <!-- SETTINGS -->
-      <v-card outlined rounded="lg" class="pa-6 mb-6">
-        <div class="d-flex align-start mb-4">
+      <v-card outlined rounded="lg" class="mb-4">
+        <div class="d-flex align-center px-5 py-4">
+          <v-avatar
+            size="40"
+            tile
+            :color="form.enabled ? 'green lighten-5' : 'grey lighten-4'"
+            class="rounded-lg mr-3 flex-shrink-0"
+          >
+            <v-icon size="20" :color="form.enabled ? 'green darken-1' : 'grey'">$user-search</v-icon>
+          </v-avatar>
           <div class="flex-grow-1 mr-4">
-            <div class="text-subtitle-1 font-weight-bold">Customer lookup</div>
-            <div class="text-body-2 grey--text text--darken-1">
-              The WhatsApp bot calls this API with the customer's phone number
-              to fetch their bookings and bills.
+            <div class="d-flex align-center">
+              <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4 mr-2">
+                Customer lookup
+              </span>
+              <v-chip
+                x-small
+                label
+                :color="form.enabled ? 'green lighten-5' : 'grey lighten-4'"
+                :text-color="form.enabled ? 'success' : 'grey darken-1'"
+                class="font-weight-bold"
+              >
+                {{ form.enabled ? "On" : "Off" }}
+              </v-chip>
+            </div>
+            <div class="text-caption grey--text text--darken-1">
+              The WhatsApp bot calls this API with the customer's phone number to fetch their
+              bookings and bills.
             </div>
           </div>
           <v-switch
             v-model="form.enabled"
-            color="primary"
+            color="success"
             inset
             hide-details
             class="mt-0 pt-0"
-            :label="form.enabled ? 'On' : 'Off'"
+            aria-label="Customer lookup on or off"
           />
         </div>
+        <v-divider />
 
-        <v-divider class="mb-6" />
-
-        <v-form ref="form" @submit.prevent="save">
-          <div class="group-title">Endpoint</div>
+        <v-form ref="form" class="pa-5" @submit.prevent="save">
+          <div class="d-flex align-center mb-3">
+            <v-icon size="16" color="grey darken-1" class="mr-2">$link</v-icon>
+            <span class="text-caption font-weight-bold text-uppercase grey--text">Endpoint</span>
+          </div>
           <v-row dense>
             <v-col cols="12" sm="3">
-              <v-select
-                v-model="form.method"
-                :items="['GET', 'POST']"
-                label="Method"
-                outlined
-                dense
-              />
+              <v-select v-model="form.method" :items="['GET', 'POST']" label="Method" outlined dense />
             </v-col>
             <v-col cols="12" sm="9">
               <v-text-field
                 v-model.trim="form.url"
                 label="API URL"
                 placeholder="https://example.com/api/customer"
+                prepend-inner-icon="$globe"
                 outlined
                 dense
                 :rules="[urlRule]"
@@ -65,6 +89,7 @@
                 label="Phone parameter name"
                 placeholder="phone"
                 hint="Query param (GET) or body field (POST) carrying the phone number"
+                prepend-inner-icon="$phone"
                 outlined
                 dense
               />
@@ -77,6 +102,7 @@
                 min="500"
                 max="10000"
                 hint="500 – 10000"
+                prepend-inner-icon="$clock"
                 outlined
                 dense
                 :rules="[timeoutRule]"
@@ -86,7 +112,7 @@
 
           <ExtraParamsEditor v-model="paramRows" :placeholders="PLACEHOLDERS" class="mt-2" />
 
-          <v-divider class="my-4" />
+          <v-divider class="my-5" />
 
           <ApiAuthEditor v-model="authForm" />
 
@@ -94,174 +120,149 @@
 
           <v-expand-transition>
             <div v-if="form.enabled">
-              <v-divider class="my-6" />
-              <div class="group-title">Verification</div>
-              <v-text-field
-                v-model.trim="testPhone"
-                label="Test phone number"
-                placeholder="9876543210"
-                hint="The server calls your API with this number before saving. Saving fails if the call fails."
-                persistent-hint
-                outlined
-                dense
-              />
+              <v-divider class="my-5" />
+              <div class="d-flex align-center mb-3">
+                <v-icon size="16" color="grey darken-1" class="mr-2">$shield-check</v-icon>
+                <span class="text-caption font-weight-bold text-uppercase grey--text">Verification</span>
+              </div>
+              <v-row dense>
+                <v-col cols="12" md="7">
+                  <v-text-field
+                    v-model.trim="testPhone"
+                    label="Test phone number"
+                    placeholder="9876543210"
+                    hint="The server calls your API with this number before saving. Saving fails if the call fails."
+                    persistent-hint
+                    prepend-inner-icon="$phone"
+                    outlined
+                    dense
+                  />
+                </v-col>
+              </v-row>
             </div>
           </v-expand-transition>
 
-          <v-alert
-            v-if="saveError"
-            type="error"
-            text
-            dense
-            rounded="lg"
-            class="text-body-2 mt-6 mb-0"
-          >
+          <v-alert v-if="saveError" type="error" text dense rounded="lg" class="text-body-2 mt-5 mb-0">
             {{ saveError }}
           </v-alert>
-
-          <div class="d-flex align-center justify-end mt-6">
-            <span v-if="dirty" class="text-caption grey--text mr-3">
-              Unsaved changes
-            </span>
-            <v-btn
-              v-if="dirty"
-              text
-              rounded
-              class="mr-2"
-              :disabled="saving"
-              @click="discard"
-            >
-              Discard
-            </v-btn>
-            <v-btn
-              color="primary"
-              rounded
-              depressed
-              type="submit"
-              :loading="saving"
-            >
-              Save
-            </v-btn>
-          </div>
         </v-form>
+
+        <v-divider />
+        <div class="d-flex align-center px-5 py-3">
+          <span v-if="dirty" class="text-caption amber--text text--darken-3 font-weight-bold">
+            Unsaved changes
+          </span>
+          <v-spacer />
+          <v-btn v-if="dirty" text class="mr-2" :disabled="saving" @click="discard">Discard</v-btn>
+          <v-btn color="primary" depressed :loading="saving" @click="save">
+            <v-icon left size="16">$check</v-icon>
+            Save
+          </v-btn>
+        </div>
       </v-card>
 
       <!-- TEST PANEL -->
-      <v-card outlined rounded="lg" class="pa-6">
-        <div class="d-flex align-center mb-1">
-          <v-icon small class="mr-2">$flask-conical</v-icon>
-          <div class="text-subtitle-1 font-weight-bold">
-            Test with phone number
+      <v-card outlined rounded="lg">
+        <div class="d-flex align-center px-5 py-4">
+          <v-avatar size="40" tile color="green lighten-5" class="rounded-lg mr-3 flex-shrink-0">
+            <v-icon size="20" color="green darken-1">$flask-conical</v-icon>
+          </v-avatar>
+          <div>
+            <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
+              Test with a phone number
+            </div>
+            <div class="text-caption grey--text text--darken-1">
+              Calls your API live (no cache) using the saved settings.
+              <span v-if="dirty" class="amber--text text--darken-3 font-weight-bold">
+                Save your changes first to test them.
+              </span>
+            </div>
           </div>
         </div>
-        <div class="text-body-2 grey--text text--darken-1 mb-4">
-          Calls your API live (no cache) using the saved settings.
-          <span v-if="dirty" class="warning--text text--darken-2">
-            Save your changes first to test them.
-          </span>
-        </div>
+        <v-divider />
 
-        <v-form class="d-flex align-start" @submit.prevent="runTest">
-          <v-text-field
-            v-model.trim="testPanelPhone"
-            label="Test phone number"
-            placeholder="919876543210"
-            hint="Include the country code"
-            outlined
-            dense
-            class="mr-2"
-            autocomplete="off"
-          />
-          <v-btn
-            color="primary"
-            rounded
-            depressed
-            height="40"
-            type="submit"
-            :loading="testing"
-            :disabled="testing || !testPanelPhone"
-          >
-            Run test
-          </v-btn>
-        </v-form>
+        <div class="pa-5">
+          <v-form class="d-flex align-start" @submit.prevent="runTest">
+            <v-text-field
+              v-model.trim="testPanelPhone"
+              label="Test phone number"
+              placeholder="919876543210"
+              hint="Include the country code"
+              prepend-inner-icon="$phone"
+              outlined
+              dense
+              class="mr-2"
+              autocomplete="off"
+            />
+            <v-btn
+              color="success"
+              depressed
+              height="40"
+              type="submit"
+              :loading="testing"
+              :disabled="testing || !testPanelPhone"
+            >
+              <v-icon left size="16">$play</v-icon>
+              Run test
+            </v-btn>
+          </v-form>
 
-        <v-alert
-          v-if="testError"
-          type="error"
-          text
-          dense
-          rounded="lg"
-          class="text-body-2 mt-2 mb-0"
-        >
-          {{ testError }}
-        </v-alert>
-
-        <template v-if="testResult">
-          <div class="mt-4 mb-4">
-            <v-chip small dark :color="testResult.found ? 'success' : 'grey'">
-              <v-icon x-small left>
-                {{
-                  testResult.found
-                    ? "$user-check"
-                    : "$user-minus"
-                }}
-              </v-icon>
-              {{
-                testResult.found
-                  ? "Customer found"
-                  : "Not found — AI treats them as a new customer"
-              }}
-            </v-chip>
-          </div>
-
-          <v-alert
-            v-if="ignoredFields.length"
-            type="warning"
-            text
-            dense
-            rounded="lg"
-            class="text-body-2"
-          >
-            These fields are returned by your API but not used by the AI yet:
-            {{ ignoredFields.join(", ") }}
+          <v-alert v-if="testError" type="error" text dense rounded="lg" class="text-body-2 mt-2 mb-0">
+            {{ testError }}
           </v-alert>
 
-          <v-row>
-            <v-col cols="12" md="6">
-              <OutputPanel
-                title="API response"
-                :copy-text="formatJson(testResult.apiResponse)"
-              >
-                <JsonTree
-                  v-if="hasValue(testResult.apiResponse)"
-                  :value="testResult.apiResponse"
-                />
-                <div v-else class="output-empty">No API response</div>
-              </OutputPanel>
-            </v-col>
-            <v-col cols="12" md="6">
-              <OutputPanel
-                title="What the AI sees"
-                subtitle="This exact text is added to the AI's instructions when a real customer chats."
-                :copy-text="testResult.aiContext || ''"
-              >
-                <pre v-if="testResult.aiContext">{{ testResult.aiContext }}</pre>
-                <div v-else class="output-empty">
-                  (nothing — customer section is empty)
-                </div>
-              </OutputPanel>
-            </v-col>
-          </v-row>
-        </template>
+          <template v-if="testResult">
+            <v-sheet
+              rounded="lg"
+              :color="testResult.found ? 'green lighten-5' : 'grey lighten-4'"
+              class="d-flex align-center px-4 py-3 mt-4 mb-4"
+            >
+              <v-icon size="18" :color="testResult.found ? 'success' : 'grey darken-1'" class="mr-3">
+                {{ testResult.found ? "$user-check" : "$user-minus" }}
+              </v-icon>
+              <span class="text-body-2 font-weight-bold grey--text text--darken-3">
+                {{
+                  testResult.found
+                    ? "Customer found"
+                    : "Not found: the AI treats them as a new customer"
+                }}
+              </span>
+            </v-sheet>
 
-        <div class="panel-note mt-4">
-          <v-icon x-small class="mr-1">$info</v-icon>
-          Real chats look up customers on WhatsApp only (by the sender's
-          number). Results are cached for 5 minutes.
+            <v-alert v-if="ignoredFields.length" type="warning" text dense rounded="lg" class="text-body-2">
+              These fields are returned by your API but not used by the AI yet:
+              {{ ignoredFields.join(", ") }}
+            </v-alert>
+
+            <v-row dense>
+              <v-col cols="12" md="6">
+                <OutputPanel title="API response" :copy-text="formatJson(testResult.apiResponse)">
+                  <JsonTree v-if="hasValue(testResult.apiResponse)" :value="testResult.apiResponse" />
+                  <div v-else class="text-caption grey--text">No API response</div>
+                </OutputPanel>
+              </v-col>
+              <v-col cols="12" md="6">
+                <OutputPanel
+                  title="What the AI sees"
+                  subtitle="This exact text is added to the AI's instructions when a real customer chats."
+                  :copy-text="testResult.aiContext || ''"
+                >
+                  <pre v-if="testResult.aiContext">{{ testResult.aiContext }}</pre>
+                  <div v-else class="text-caption grey--text">(nothing: the customer section is empty)</div>
+                </OutputPanel>
+              </v-col>
+            </v-row>
+          </template>
+
+          <div class="d-flex align-start text-caption grey--text text--darken-1 mt-4">
+            <v-icon size="14" color="grey" class="mr-2 mt-1">$info</v-icon>
+            Real chats look up customers on WhatsApp only (by the sender's number). Results are
+            cached for 5 minutes.
+          </div>
         </div>
       </v-card>
 
-      <IntegrationCallLog kind="customer" class="mt-6" />
+      <IntegrationCallLog kind="customer" class="mt-4" />
     </template>
   </div>
 </template>
@@ -485,21 +486,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.group-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #757575;
-  margin-bottom: 12px;
-}
-
-.panel-note {
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  color: #757575;
-}
-</style>

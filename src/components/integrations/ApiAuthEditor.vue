@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div class="group-title">Sign-in</div>
+    <div class="d-flex align-center mb-3">
+      <v-icon size="16" color="grey darken-1" class="mr-2">$lock</v-icon>
+      <span class="text-caption font-weight-bold text-uppercase grey--text">Sign-in</span>
+    </div>
     <v-row dense>
       <v-col cols="12" sm="6">
         <v-select
@@ -110,14 +113,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.group-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #757575;
-  margin-bottom: 12px;
-}
-</style>
