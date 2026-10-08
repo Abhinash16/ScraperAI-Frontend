@@ -676,7 +676,8 @@ export default {
         tellephant: "whatsapp",
         "ai-provider": "ai-provider",
         webhooks: "webhooks",
-        "api-config": "webhooks",
+        "api-config":
+          this.apiConfigTab === "product-api" ? "product-api" : "webhooks",
       }[this.section];
     },
 

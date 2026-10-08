@@ -128,6 +128,7 @@
                 </ul>
               </v-col>
             </v-row>
+            <ProductApiFormat v-if="g.format" class="mt-2 mb-4" />
             <v-btn small depressed rounded color="primary" :to="g.route">
               Go to {{ g.name }}
             </v-btn>
@@ -200,7 +201,22 @@ import {
   FEATURE_GUIDES,
   GO_LIVE_CHECKLIST,
   COMING_NEXT,
+  PRODUCT_API_FORMAT,
 } from "@/content/featureGuides";
+import ProductApiFormat from "@/components/integrations/ProductApiFormat.vue";
+
+// Plain-text version of the Product API format, for the download
+function formatLines() {
+  const f = PRODUCT_API_FORMAT;
+  return [
+    "  How ScraperAI calls your API:",
+    ...f.calls.map((c) => `  - ${c.title}: ${c.request}. ${c.when} ${c.note}`),
+    `  Response: ${f.response} Each item:`,
+    ...f.example.split("\n").map((l) => `    ${l}`),
+    "  Notes:",
+    ...f.notes.map((n) => `  - ${n}`),
+  ];
+}
 
 const TABS = [
   { id: "checklist", name: "Go-live checklist", icon: "$rocket" },
@@ -210,6 +226,8 @@ const TABS = [
 ];
 
 export default {
+  components: { ProductApiFormat },
+
   data() {
     return {
       TABS,
@@ -388,6 +406,7 @@ export default {
           ...g.steps.map((s, n) => `  ${n + 1}. ${s}`),
           "  Things to know:",
           ...g.thingsToKnow.map((p) => `  - ${p}`),
+          ...(g.format ? formatLines() : []),
         ]),
         "",
         "COMING NEXT",

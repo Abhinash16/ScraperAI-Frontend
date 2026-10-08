@@ -73,6 +73,10 @@
             </template>
             <span v-else>—</span>
           </div>
+          <div v-if="stockLabel(product)" class="trace-row">
+            <span class="trace-label">Stock</span>
+            <span>{{ stockLabel(product) }}</span>
+          </div>
           <div v-if="catalogMatches.length" class="trace-row">
             <span class="trace-label">Catalog</span>
             <v-chip
@@ -106,7 +110,10 @@
               </v-icon>
               🔧 AI searched: '{{ call.query }}' →
               <span :class="['ml-1', toolModeClass(call.mode)]">
-                {{ call.mode }}
+                {{ call.mode === "catalog" ? "In-stock list" : call.mode }}
+              </span>
+              <span v-if="stockLabel(call)" class="ml-1">
+                · {{ stockLabel(call) }}
               </span>
               <span class="grey--text ml-1">
                 ({{ (call.products || []).length }}
@@ -232,7 +239,11 @@
 </template>
 
 <script>
-import { productModeInfo, catalogMatchLabel } from "@/utils/productModes";
+import {
+  productModeInfo,
+  catalogMatchLabel,
+  catalogStockLabel,
+} from "@/utils/productModes";
 
 export default {
   name: "AnswerTrace",
@@ -321,10 +332,14 @@ export default {
     matchLabel(match) {
       return catalogMatchLabel(match);
     },
+    stockLabel(result) {
+      return catalogStockLabel(result);
+    },
     toolModeClass(mode) {
       return (
         {
           live: "success--text",
+          catalog: "teal--text",
           no_match: "amber--text text--darken-3",
           unavailable: "error--text",
         }[mode] || "grey--text"

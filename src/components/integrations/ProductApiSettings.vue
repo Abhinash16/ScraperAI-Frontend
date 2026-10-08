@@ -12,6 +12,48 @@
       will send customers to the product page.
     </v-alert>
 
+    <v-card outlined rounded="xl" class="pa-6 mb-6">
+      <div class="text-subtitle-1 font-weight-bold mb-1">
+        What your API must return
+      </div>
+      <div class="text-body-2 grey--text text--darken-1">
+        We call your URL in two ways: a search when a customer names a model
+        (<code>?q=…&amp;limit=5</code>), and a full listing
+        (<code>?mode=index&amp;limit=2000&amp;q=</code>) for questions like
+        "what's available?". Both return the same items.
+        <strong>The full listing must include prices and availability</strong>,
+        or the bot can't tell customers what's in stock. Respond within 3
+        seconds.
+      </div>
+      <div class="d-flex flex-wrap mt-3">
+        <v-btn
+          text
+          rounded
+          color="primary"
+          class="text-none px-2 mr-2"
+          @click="showFormat = !showFormat"
+        >
+          <v-icon small class="mr-1">
+            {{ showFormat ? "$chevron-up" : "$chevron-down" }}
+          </v-icon>
+          See the full format
+        </v-btn>
+        <v-btn
+          text
+          rounded
+          color="primary"
+          class="text-none px-2"
+          to="/dashboard/documentation?guide=product-api"
+        >
+          <v-icon small class="mr-1">$book-open</v-icon>
+          Product API guide
+        </v-btn>
+      </div>
+      <v-expand-transition>
+        <ProductApiFormat v-if="showFormat" class="mt-4" />
+      </v-expand-transition>
+    </v-card>
+
     <v-card v-if="loading" outlined rounded="xl" class="pa-6">
       <v-progress-linear indeterminate color="primary" />
     </v-card>
@@ -275,6 +317,9 @@
             <v-chip small dark :color="modeInfo.color" class="mb-2">
               {{ modeInfo.label }}
             </v-chip>
+            <span v-if="stockLabel" class="text-body-2 ml-2">
+              {{ stockLabel }}
+            </span>
             <div class="text-body-2 mb-1">
               <span class="grey--text text--darken-1">Detected by:</span>
               <template v-if="detectedBy.length">
@@ -424,9 +469,11 @@ import { rowsFromHeaders, headersFromRows } from "@/utils/apiHeaders";
 import {
   productModeInfo,
   catalogMatchLabel,
+  catalogStockLabel,
   detectionSources,
 } from "@/utils/productModes";
 import ProductCatalogCard from "@/components/integrations/ProductCatalogCard.vue";
+import ProductApiFormat from "@/components/integrations/ProductApiFormat.vue";
 import { formatProductCell } from "@/utils/productFormat";
 
 const ENDPOINT = "/clients/product-api-settings";
@@ -437,12 +484,19 @@ const MAX_KEYWORD_LENGTH = 50;
 export default {
   name: "ProductApiSettings",
 
-  components: { HeadersEditor, JsonTree, OutputPanel, ProductCatalogCard },
+  components: {
+    HeadersEditor,
+    JsonTree,
+    OutputPanel,
+    ProductCatalogCard,
+    ProductApiFormat,
+  },
 
   data() {
     return {
       loading: false,
       saving: false,
+      showFormat: false,
       testing: false,
       forbidden: false,
       loadError: "",
@@ -479,6 +533,10 @@ export default {
 
     modeInfo() {
       return productModeInfo(this.testResult?.mode);
+    },
+
+    stockLabel() {
+      return catalogStockLabel(this.testResult);
     },
 
     detectedBy() {
