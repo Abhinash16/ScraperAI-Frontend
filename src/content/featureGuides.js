@@ -11,7 +11,7 @@ export const FEATURE_GUIDES = [
     summary:
       "Your bot's name, tone, business facts, and rules, all set by you.",
     steps: [
-      "Fill in Identity, Business facts, Rules, and Escalation, then save the draft.",
+      "Fill in Identity, Business facts, Rules, Escalation, and Conversation, then save the draft.",
       "Click Test in sandbox and ask the questions your customers ask.",
       "When the answers look right, click Publish.",
     ],
@@ -20,6 +20,9 @@ export const FEATURE_GUIDES = [
       "The sandbox tests your saved draft, so you can try changes before they go live.",
       "Business facts win over your website. If they disagree, the bot uses the facts on this page.",
       "Messages with an escalation keyword always go to a person.",
+      "When an answer takes more than a few seconds (6 by default), the customer first gets a short holding message. You can turn it off or change the timing under Conversation. The sandbox doesn't send it.",
+      "Under Conversation you can also set how many AI replies one chat gets in 24 hours (website and WhatsApp separately), and the handoff message sent when the limit is reached.",
+      "The holding and handoff messages can be Auto (the bot writes them for each customer, in their language and your tone) or Fixed text. Auto falls back to the fixed text if it fails.",
       "You can restore any of your last 20 published versions from History.",
     ],
   },
@@ -243,7 +246,28 @@ export const FEATURE_GUIDES = [
     thingsToKnow: [
       "Set up Escalate before going live, so \"I want to talk to a person\" reaches your team.",
       "Your endpoint should respond quickly. Slow endpoints can time out.",
+      "If we can't send an escalation to your system (the call fails, or the webhook was switched off after 3 failures), we email your alert addresses with the customer's phone, channel and message so someone can contact them. Set them under Escalate; empty means your account email. A webhook you turned off yourself sends no alerts.",
     ],
+  },
+  {
+    id: "product-api",
+    name: "Product API",
+    icon: "$tag",
+    route: "/dashboard/integration?section=api-config&tab=product-api",
+    summary:
+      "Let the bot answer price and stock questions from your own product system.",
+    steps: [
+      "Build one URL that answers both a search and a full listing, in the format below.",
+      "Open Integrations → API Config → Product API, enter the URL, and save. Saving test-calls it.",
+      "Try a customer message under \"Test with a customer message\", then ask \"what's available?\" in the sandbox.",
+    ],
+    thingsToKnow: [
+      "The bot only states prices and stock from this data, never from your website text.",
+      "The full listing must include prices and availability. Without availability, the bot can't say which products are in stock.",
+      "Broad questions like \"which bikes are available?\" or \"cheapest petrol scooty\" are answered from the full listing, filtered to what's in stock.",
+      "Respond within 3 seconds (the timeout setting). The full listing can be up to 10 MB.",
+    ],
+    format: true,
   },
   {
     id: "analytics",
@@ -294,6 +318,54 @@ export const FEATURE_GUIDES = [
     ],
   },
 ];
+
+// The format a client's Product API must follow. Rendered by
+// components/integrations/ProductApiFormat.vue on the Product API page and in
+// the Guide.
+export const PRODUCT_API_FORMAT = {
+  calls: [
+    {
+      title: "Search",
+      when: "When a customer names a model.",
+      request: "GET <your url>?q=<words>&limit=5",
+      note: "The parameter name is your \"Query parameter name\" setting (q by default). With POST, the same fields go in a JSON body.",
+    },
+    {
+      title: "Full listing",
+      when: "Every 6 hours for the product names, and live (cached 5 minutes) for \"what's available?\" questions.",
+      request: "GET <your url>?mode=index&limit=2000&q=",
+      note: "Must include every product you rent or sell, with prices and availability.",
+    },
+  ],
+  response:
+    "Both calls return the same item format: a JSON list of items, or an object holding the list. Set \"Results path\" (e.g. data.items) or leave it empty to auto-detect.",
+  example: `{
+  "sku": "2",                       // required, unique
+  "name": "Honda Navi",             // required
+  "category": "scooter",
+  "url": "https://…/honda-navi",    // the product page the bot links to
+  "aliases": ["navi", "scooty"],    // other names customers use
+  "prices": [
+    { "label": "Monthly", "amount": 3099, "unit": "month", "currency": "INR" },
+    { "label": "Weekly", "amount": null, "note": "Weekly plan not offered for this model" }
+  ],
+  "conditions": ["Minimum 3 months"],   // optional, quoted with the price
+  "attributes": { "fuel": "petrol", "engine": "110cc" },
+  "availability": {
+    "status": "in_stock",           // in_stock | limited | out_of_stock | on_request
+    "locations": ["Koramangala"],
+    "next_available_at": null       // ISO date if known
+  },
+  "updated_at": "2026-10-08T07:22:39+05:30"
+}`,
+  notes: [
+    "A plan with amount null and a note is shown as \"not offered\". The bot never invents a price.",
+    "Waitlisted or no units free → out_of_stock. Only a few left → limited.",
+    "Attributes are shown as features. \"fuel\" lets customers ask for \"electric\" or \"petrol\".",
+    "Aliases help the bot recognise the product when customers use other names.",
+    "The bot only states prices and stock from this data, never from website text.",
+  ],
+};
 
 export function featureGuide(id) {
   return FEATURE_GUIDES.find((g) => g.id === id);

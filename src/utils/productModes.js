@@ -2,6 +2,7 @@
 // endpoint and by sandbox answer traces.
 export const PRODUCT_MODES = {
   live: { label: "Products found", color: "success" },
+  catalog: { label: "In-stock list", color: "teal" },
   no_match: { label: "Searched, nothing matched", color: "amber darken-2" },
   unavailable: { label: "API error", color: "error" },
   none: { label: "Product API not enabled", color: "grey" },
@@ -13,6 +14,19 @@ export const PRODUCT_MODES = {
 
 export function productModeInfo(mode) {
   return PRODUCT_MODES[mode] || { label: mode || "Unknown", color: "grey" };
+}
+
+// "4 in stock, 26 out of stock (matching 'petrol scooty')" for a catalog
+// lookup; "" for any other mode.
+export function catalogStockLabel(result) {
+  if (result?.mode !== "catalog") return "";
+  const parts = [];
+  if (typeof result.inStock === "number") parts.push(`${result.inStock} in stock`);
+  if (typeof result.outOfStock === "number") {
+    parts.push(`${result.outOfStock} out of stock`);
+  }
+  const text = parts.join(", ");
+  return result.narrowedBy ? `${text} (matching '${result.narrowedBy}')`.trim() : text;
 }
 
 // "Honda Activa 6G (actva→activa, 6g)"
