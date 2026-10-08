@@ -20,6 +20,13 @@
       </div>
     </v-alert>
 
+    <KnowledgeHealthCard
+      v-if="perms && can(perms, 'knowledge:read')"
+      :permissions="perms"
+      compact
+      class="mb-8"
+    />
+
     <div v-for="(section, title) in dashboardData" :key="title" class="mb-12">
       <div class="d-flex align-center mb-6">
         <h2 class="text-h5 font-weight-bold grey--text text--darken-3">
@@ -98,9 +105,12 @@
 <script>
 import { can, loadIssueSummary, loadMyPermissions } from "@/utils/knowledge";
 import { checklistProgress, loadSetup } from "@/utils/setup";
+import KnowledgeHealthCard from "@/components/knowledge/KnowledgeHealthCard.vue";
 
 export default {
   name: "DashboardHome",
+
+  components: { KnowledgeHealthCard },
 
   data() {
     return {
@@ -223,6 +233,8 @@ export default {
   },
 
   methods: {
+    can,
+
     visibleItems(section) {
       return section.items.filter((i) => !i.permission || can(this.perms, i.permission));
     },

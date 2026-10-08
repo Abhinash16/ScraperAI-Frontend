@@ -32,10 +32,11 @@ export const FEATURE_GUIDES = [
     icon: "$folder-open",
     route: "/dashboard/knowledge",
     summary:
-      "Everything the chatbot knows, grouped into sources: your website pages, FAQs, notes you write, and answers learned from chats.",
+      "Everything the chatbot knows, grouped into sources: your website pages, documents you upload, FAQs, notes you write, and answers learned from chats.",
     steps: [
       "Create a Website source and import pages by URL, sitemap, or a CSV/JSON file.",
       "Add a Notes source for facts that aren't on your website, like policies, timings, or contact details.",
+      "Click Upload document to add a PDF, Word or text file.",
       "Open an item to check its text, edit it, and publish it. Only published items are used by the bot.",
     ],
     thingsToKnow: [
@@ -45,6 +46,8 @@ export const FEATURE_GUIDES = [
       "Pages behind a login, or sites that block bots, may come out empty or incomplete. Open the page to check its text.",
       "The chatbot treats everything published as true, so archive old offers and anything you don't want quoted.",
       "If the chatbot gives a wrong answer, find the item it came from, then fix it or unpublish it. \"What the bot searches\" on an item shows the exact text the bot uses.",
+      "Upload a PDF, Word or text file (up to 15 MB) and the bot learns from it: each section becomes an item you can review and edit. Scanned PDFs (pictures of pages) aren't supported yet; upload the original document or a PDF saved from Word. To update a document, upload the new version: its sections replace the old ones once it's ready, and the old version keeps working until then. We keep only the text, not the file.",
+      "We check your knowledge every day and every week: items past their 'valid until' date are hidden from the bot automatically, offers whose dates have passed and pages that disappeared from your website are flagged, and contradictions are re-checked. Your health score is the share of your published knowledge with no open problems. Every Monday we email your alert contacts a short report with what to fix first.",
     ],
   },
   {
@@ -103,6 +106,8 @@ export const FEATURE_GUIDES = [
       "When two items disagree, the more trusted one wins: FAQs over notes, and notes over website pages. The other is held (hidden from the bot) until the issue is resolved.",
       "\"Publish anyway\" needs a reason, which is saved with the item.",
       "A dismissed issue only comes back if the item's text changes. Editing, unpublishing, archiving, or deleting an item closes its issues.",
+      "Give an item a \"valid until\" date (pages, notes and document sections) and the bot stops using it after that date. Setting a later date or clearing it shows it again right away.",
+      "Issues found by the daily and weekly checks close themselves when the problem is gone. Info findings, like items no customer reply used in 60 days, are suggestions and don't lower your health score.",
     ],
   },
   {

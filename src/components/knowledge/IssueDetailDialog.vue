@@ -25,12 +25,13 @@
 
         <template v-else-if="issue">
           <v-alert
-            :type="issue.severity === 'blocker' ? 'error' : 'warning'"
+            :type="{ blocker: 'error', info: 'info' }[issue.severity] || 'warning'"
             outlined
             rounded="lg"
             class="text-body-2"
           >
             {{ issue.explanation }}
+            <div v-if="detectedByNote(issue)" class="text-caption mt-1">{{ detectedByNote(issue) }}</div>
           </v-alert>
 
           <div v-if="issue.status !== 'open'" class="text-body-2 grey--text text--darken-1 mb-4">
@@ -75,7 +76,19 @@
                       class="text-none"
                       @click="$emit('edit-item', item._id)"
                     >
-                      <v-icon small class="mr-1">$pencil</v-icon> Edit
+                      <v-icon small class="mr-1">{{ issue.type === "expired" ? "$calendar" : "$pencil" }}</v-icon>
+                      {{ editLabel }}
+                    </v-btn>
+                    <v-btn
+                      v-if="issue.type === 'broken_source' && item.type === 'page' && can(permissions, 'knowledge:write')"
+                      small
+                      text
+                      rounded
+                      class="text-none"
+                      :loading="busy === `reimport-${item._id}`"
+                      @click="reimport(item)"
+                    >
+                      <v-icon small class="mr-1">$refresh-cw</v-icon> Re-import
                     </v-btn>
                     <v-btn
                       v-if="can(permissions, 'knowledge:publish') && item.status !== 'archived'"
@@ -163,6 +176,7 @@ import {
   SEVERITY,
   apiError,
   can,
+  detectedByNote,
   formatDate,
 } from "@/utils/knowledge";
 
@@ -210,6 +224,12 @@ export default {
     typeLabel() {
       return ISSUE_TYPES[this.issue?.type] || this.issue?.type;
     },
+    // What fixes each kind of issue: a new date, or the text (or a date)
+    editLabel() {
+      return (
+        { expired: "Change date", obsolete: "Edit or set valid until" }[this.issue?.type] || "Edit"
+      );
+    },
   },
 
   watch: {
@@ -228,6 +248,7 @@ export default {
   methods: {
     can,
     formatDate,
+    detectedByNote,
     itemStatus: (item) => ITEM_STATUS[item.status] || ITEM_STATUS.draft,
 
     async load() {
@@ -287,6 +308,20 @@ export default {
         await this.load();
       } catch (err) {
         this.actionError = apiError(err, "Failed to archive");
+      } finally {
+        this.busy = null;
+      }
+    },
+
+    async reimport(item) {
+      this.busy = `reimport-${item._id}`;
+      this.actionError = "";
+      try {
+        await apiClient.post(`${KNOWLEDGE_API}/items/${item._id}/reimport`);
+        this.$toast.success("Re-import queued.");
+        this.$emit("changed");
+      } catch (err) {
+        this.actionError = apiError(err, "Failed to re-import");
       } finally {
         this.busy = null;
       }

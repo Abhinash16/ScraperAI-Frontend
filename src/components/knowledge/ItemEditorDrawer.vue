@@ -44,6 +44,9 @@
           <v-chip v-if="item.locked" small outlined class="mr-2 mb-1">
             <v-icon x-small left>$lock</v-icon> Edited by hand
           </v-chip>
+          <v-chip v-if="validity" small outlined :color="validity.color" class="mr-2 mb-1">
+            <v-icon x-small left>$calendar</v-icon> {{ validity.label }}
+          </v-chip>
           <span class="text-caption grey--text mb-1">
             v{{ item.version }} · {{ item.chunkCount || 0 }} chunks · updated
             {{ formatDate(item.updatedAt) }}
@@ -125,6 +128,18 @@
         >
           Published, but hidden from the bot: a more trusted item says
           something different. Resolve the issue below to show it again.
+        </v-alert>
+
+        <v-alert
+          v-if="validity && validity.expired"
+          type="warning"
+          dense
+          outlined
+          rounded="lg"
+          class="text-body-2"
+        >
+          Hidden from the bot: its valid-until date has passed. Set a later
+          date or clear it to show it again.
         </v-alert>
 
         <div v-if="issues.length" class="mb-4">
@@ -210,6 +225,21 @@
               class="body-field"
             />
           </template>
+
+          <v-text-field
+            v-if="expirable"
+            v-model="form.validUntil"
+            type="date"
+            label="Valid until (optional)"
+            hint="After this date the bot stops using it."
+            persistent-hint
+            prepend-inner-icon="$calendar"
+            outlined
+            dense
+            clearable
+            :readonly="!canWrite"
+            class="valid-field mb-4"
+          />
 
           <div v-if="canWrite" class="text-caption grey--text mb-3">
             <template v-if="item.status === 'published'">
@@ -425,9 +455,12 @@ import {
   ISSUE_TYPES,
   OVERRIDE_REASON_MIN,
   SEVERITY,
+  canExpire,
+  dayOf,
   healthOf,
   isBusy,
   isSuggested,
+  validityOf,
   workState,
 } from "@/utils/knowledge";
 
@@ -487,7 +520,7 @@ export default {
   data() {
     return {
       item: null,
-      form: { title: "", body: "" },
+      form: { title: "", body: "", validUntil: "" },
       faq: { question: "", answer: "", alternates: [], category: "" },
       issues: [],
       OVERRIDE_REASON_MIN,
@@ -535,10 +568,22 @@ export default {
     health() {
       return healthOf(this.item);
     },
-    dirty() {
+    expirable() {
+      return canExpire(this.item);
+    },
+    validity() {
+      return validityOf(this.item);
+    },
+    contentDirty() {
       if (!this.item) return false;
       if (this.isFaq) return !sameFaq(this.faq, faqOf(this.item));
       return this.form.title !== (this.item.title || "") || this.form.body !== (this.item.body || "");
+    },
+    dateDirty() {
+      return this.expirable && (this.form.validUntil || "") !== dayOf(this.item.validUntil);
+    },
+    dirty() {
+      return this.contentDirty || this.dateDirty;
     },
     confirmCopy() {
       return CONFIRM[this.confirming] || {};
@@ -614,7 +659,7 @@ export default {
     apply(item, { keepForm = false } = {}) {
       this.item = item;
       if (!keepForm) {
-        this.form = { title: item.title || "", body: item.body || "" };
+        this.form = { title: item.title || "", body: item.body || "", validUntil: dayOf(item.validUntil) };
         this.faq = faqOf(item);
       }
       this.stopPolling();
@@ -677,7 +722,10 @@ export default {
       this.actionError = "";
       try {
         // FAQs are edited field by field; their body is built by the server
-        const changes = this.isFaq
+        // Only what changed: re-sending the text would mark a page as edited
+        const changes = !this.contentDirty
+          ? {}
+          : this.isFaq
           ? {
               question: this.faq.question.trim(),
               answer: this.faq.answer.trim(),
@@ -685,6 +733,7 @@ export default {
               category: this.faq.category,
             }
           : { title: this.form.title.trim(), body: this.form.body };
+        if (this.dateDirty) changes.validUntil = this.form.validUntil || null;
         const { data } = await apiClient.patch(`${KNOWLEDGE_API}/items/${this.itemId}`, changes);
         this.apply(data.data);
         this.chunksFor = null;
@@ -766,6 +815,9 @@ export default {
 </script>
 
 <style scoped>
+.valid-field {
+  max-width: 280px;
+}
 .drawer-tabs {
   border-bottom: 1px solid #e0e0e0;
 }
