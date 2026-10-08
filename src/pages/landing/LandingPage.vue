@@ -203,7 +203,7 @@
                   </v-chip>
                 </v-sheet>
 
-                <v-sheet color="#efeae2" class="chat-body pa-4">
+                <v-sheet ref="chatBody" color="#efeae2" class="chat-body pa-4">
                   <transition-group name="msg" tag="div">
                     <div
                       v-for="m in shownMessages"
@@ -773,6 +773,27 @@ const DEMO_CHAT = [
     text: "Main aapko hamari team se connect kar raha hoon, woh jaldi aapse baat karenge.",
     sources: ["Handed to your team"],
   },
+  { id: 5, from: "customer", text: "Is the Indiranagar hub open on Sunday?" },
+  {
+    id: 6,
+    from: "bot",
+    text: "This Sunday Indiranagar is closed for maintenance. Koramangala is open 9 am to 8 pm, and you can pick up from there.",
+    sources: ["Notice: Indiranagar closed", "Business hours"],
+  },
+  { id: 7, from: "customer", text: "When does my current rental end?" },
+  {
+    id: 8,
+    from: "bot",
+    text: "Your rental L25J0126064 (EV) ends in 19 days, on 27 Oct. Would you like to extend it?",
+    sources: ["Customer API: your bookings"],
+  },
+  { id: 9, from: "customer", text: "Any offer for a 3-month rental?" },
+  {
+    id: 10,
+    from: "bot",
+    text: "Yes, book 3 months or more and get ₹500 off the first month. The offer runs till 31 Oct.",
+    sources: ["Notice: Festive offer"],
+  },
 ];
 
 const MARQUEE = [
@@ -1059,6 +1080,12 @@ export default {
     FAQS,
   }),
 
+  watch: {
+    // Keep the newest message (or the typing dots) in view
+    shownCount: "scrollChat",
+    botTyping: "scrollChat",
+  },
+
   computed: {
     // Phones: smaller buttons so a pair fits on one line
     compactCta() {
@@ -1115,6 +1142,17 @@ export default {
           this.shownCount === 0 ? 500 : 900,
         );
       }
+    },
+
+    scrollChat() {
+      this.$nextTick(() => {
+        const ref = this.$refs.chatBody;
+        const el = ref && (ref.$el || ref);
+        if (!el) return;
+        // Back to the top when the demo restarts
+        const top = this.shownCount === 0 ? 0 : el.scrollHeight;
+        el.scrollTo({ top, behavior: reducedMotion() ? "auto" : "smooth" });
+      });
     },
 
     // Smooth scroll, leaving room for the fixed top bar
@@ -1227,21 +1265,19 @@ export default {
 /* ---------- Example chat ---------- */
 .chat-shell {
   max-width: 460px;
-  animation: bob 6s ease-in-out infinite;
 }
 
-@keyframes bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
+/* Fixed size so the card never grows or shifts the page while the demo
+   plays. Messages start at the top; new ones scroll into view. */
 .chat-body {
-  min-height: 330px;
+  height: 360px;
+  overflow: hidden;
+}
+
+@media (max-width: 599px) {
+  .chat-body {
+    height: 320px;
+  }
 }
 
 .bubble {
@@ -1308,6 +1344,14 @@ export default {
 
 .msg-enter-active {
   transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.msg-leave-active {
+  transition: opacity 0.4s ease;
+}
+
+.msg-leave-to {
+  opacity: 0;
 }
 
 .msg-enter {
@@ -1456,7 +1500,6 @@ export default {
 
 @media (prefers-reduced-motion: reduce) {
   .blob,
-  .chat-shell,
   .marquee__track,
   .final-cta,
   .typing span {
