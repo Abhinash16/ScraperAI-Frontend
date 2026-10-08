@@ -141,7 +141,7 @@ const FILTERS = [
     outcome: "no_reply,handed_off",
     help: "Conversations where nobody replied, or the bot handed over and nobody from your team replied.",
   },
-  { value: "all", label: "All", outcome: undefined, help: "Every conversation in this period." },
+  { value: "all", label: "All", outcome: undefined, help: "Every conversation that has ended, by when it started." },
 ];
 
 const pct = (v) => (typeof v === "number" ? `${v}%` : "—");
@@ -274,6 +274,8 @@ export default {
         const { data } = await apiClient.get("/conversations", {
           params: {
             outcome: f.outcome,
+            // Ended ones only, like the report
+            status: "closed",
             from: this.stats.since,
             limit: PAGE_SIZE,
             offset: (this.page - 1) * PAGE_SIZE,
