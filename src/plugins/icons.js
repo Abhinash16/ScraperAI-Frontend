@@ -150,6 +150,9 @@ import {
   GitCompare,
   CheckCheck,
   House,
+  Sun,
+  Moon,
+  SunMoon,
   Inbox,
   LogOut,
 } from "lucide";
@@ -190,6 +193,9 @@ const LucideIcon = {
 
 const APP_ICONS = {
   "house": House,
+  "sun": Sun,
+  "moon": Moon,
+  "sun-moon": SunMoon,
   "inbox": Inbox,
   "log-out": LogOut,
   "star": Star,

@@ -5,8 +5,8 @@
         <v-card class="rounded-lg" outlined elevation="0">
           <!-- HEADER -->
           <v-toolbar flat>
-            <v-avatar color="#cde6ff" size="44" rounded="lg">
-              <v-icon color="black" size="28">$circle-user</v-icon>
+            <v-avatar color="blue lighten-4" size="44" rounded="lg">
+              <v-icon color="blue darken-2" size="28">$circle-user</v-icon>
             </v-avatar>
 
             <div class="ml-3">
@@ -138,7 +138,8 @@
 
           <!-- MESSAGES AREA -->
           <v-card-text
-            style="height: 380px; overflow-y: auto; background-color: #eff2fb"
+            class="blue-grey lighten-5"
+            style="height: 380px; overflow-y: auto"
             ref="chatMessages"
           >
             <!-- Loader -->

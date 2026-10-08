@@ -830,6 +830,30 @@ export default {
     },
     // Colours for the WhatsApp and website chat looks
     look() {
+      const dark = this.$vuetify.theme.dark;
+      if (dark) {
+        return this.isWhatsapp
+          ? {
+              header: "#202c33",
+              avatar: "#128c7e",
+              window: "#0b141a",
+              userBubble: "#005c4b",
+              userText: "white--text",
+              userTime: "grey--text text--lighten-1",
+              input: "#202c33",
+              send: "#00a884",
+            }
+          : {
+              header: "white",
+              avatar: "primary lighten-5",
+              window: "#17181d",
+              userBubble: "primary",
+              userText: "white--text",
+              userTime: "primary--text text--lighten-4",
+              input: "white",
+              send: "primary",
+            };
+      }
       return this.isWhatsapp
         ? {
             header: "#075e54",

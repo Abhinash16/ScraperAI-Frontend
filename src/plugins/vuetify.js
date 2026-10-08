@@ -16,6 +16,12 @@ export default new Vuetify({
       light: {
         primary: "#6c6ef6",
       },
+      // A lighter primary so text and outlines stay readable on dark surfaces
+      dark: {
+        primary: "#8b8df8",
+        // Brand name and other "secondary" text: dark grey in light mode
+        secondary: "#ececf1",
+      },
     },
   },
 });

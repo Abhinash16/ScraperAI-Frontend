@@ -13,13 +13,17 @@
       color="white"
       class="app-nav"
     >
-
-
       <nav aria-label="Main" class="pt-3">
-        <div v-for="(group, gi) in groups" :key="group.id" class="app-nav__group">
+        <div
+          v-for="(group, gi) in groups"
+          :key="group.id"
+          class="app-nav__group"
+        >
           <template v-if="group.title">
             <v-divider v-if="mini && gi > 0" class="mx-3 my-2" />
-            <div v-else-if="!mini" class="app-nav__heading">{{ group.title }}</div>
+            <div v-else-if="!mini" class="app-nav__heading">
+              {{ group.title }}
+            </div>
           </template>
           <nav-link
             v-for="item in group.items"
@@ -71,7 +75,9 @@
           v-on="on"
           @click="toggleMini"
         >
-          <v-icon size="16" color="primary">{{ mini ? "$chevron-right" : "$chevron-left" }}</v-icon>
+          <v-icon size="16" color="primary">{{
+            mini ? "$chevron-right" : "$chevron-left"
+          }}</v-icon>
         </v-btn>
       </template>
       <span>{{ mini ? "Expand sidebar" : "Collapse sidebar" }}</span>
@@ -79,26 +85,82 @@
 
     <!-- TOP BAR -->
     <v-app-bar app clipped-left flat color="white" height="64" class="app-bar">
-      <v-app-bar-nav-icon v-if="!isDesktop" aria-label="Open menu" class="mr-1" @click="drawer = !drawer" />
+      <v-app-bar-nav-icon
+        v-if="!isDesktop"
+        aria-label="Open menu"
+        class="mr-1"
+        @click="drawer = !drawer"
+      />
 
-      <router-link to="/dashboard" class="d-flex align-center text-decoration-none mr-4" aria-label="scraperAI home">
-        <v-avatar size="34" color="primary" tile class="rounded-lg mr-3 flex-shrink-0">
+      <router-link
+        to="/dashboard"
+        class="d-flex align-center text-decoration-none mr-4"
+        aria-label="scraperAI home"
+      >
+        <v-avatar
+          size="34"
+          color="primary"
+          tile
+          class="rounded-lg mr-3 flex-shrink-0"
+        >
           <v-img src="@/assets/13.png" alt="" />
         </v-avatar>
         <div class="hidden-xs-only min-w-0">
-          <div class="text-subtitle-1 font-weight-black secondary--text lh-tight">scraperAI</div>
-          <div v-if="companyName" class="text-caption grey--text text--darken-1 text-truncate lh-tight">
+          <div
+            class="text-subtitle-1 font-weight-black secondary--text lh-tight"
+          >
+            scraperAI
+          </div>
+          <div
+            v-if="companyName"
+            class="text-caption grey--text text--darken-1 text-truncate lh-tight"
+          >
             {{ companyName }}
           </div>
         </div>
       </router-link>
 
-      <div v-if="$vuetify.breakpoint.mdAndUp" class="flex-grow-1 ml-4 app-bar__search">
+      <div
+        v-if="$vuetify.breakpoint.mdAndUp"
+        class="flex-grow-1 ml-4 app-bar__search"
+      >
         <GlobalSearch :items="searchItems" @navigate="go" />
       </div>
       <v-spacer />
 
-      <GlobalSearch v-if="!$vuetify.breakpoint.mdAndUp" compact :items="searchItems" @navigate="go" />
+      <GlobalSearch
+        v-if="!$vuetify.breakpoint.mdAndUp"
+        compact
+        :items="searchItems"
+        @navigate="go"
+      />
+
+      <v-menu offset-y left nudge-bottom="8" content-class="app-menu">
+        <template #activator="{ on, attrs }">
+          <v-btn icon aria-label="Appearance" v-bind="attrs" v-on="on">
+            <v-icon size="20">{{ themeIcon }}</v-icon>
+          </v-btn>
+        </template>
+        <v-card width="200" flat>
+          <v-list dense nav class="py-2">
+            <v-list-item
+              v-for="t in THEME_OPTIONS"
+              :key="t.value"
+              @click="setThemePref(t.value)"
+            >
+              <v-icon size="18" class="mr-3 flex-grow-0">{{ t.icon }}</v-icon>
+              <v-list-item-title>{{ t.label }}</v-list-item-title>
+              <v-icon
+                v-if="themePref === t.value"
+                size="16"
+                color="primary"
+                class="flex-grow-0"
+                >$check</v-icon
+              >
+            </v-list-item>
+          </v-list>
+        </v-card>
+      </v-menu>
 
       <v-tooltip bottom>
         <template #activator="{ on, attrs }">
@@ -176,7 +238,11 @@
 
     <!-- MAIN -->
     <div class="app-content">
-      <v-sheet color="#F5F7FB" rounded="lg" class="d-flex align-center px-4 py-2 mb-5">
+      <v-sheet
+        :color="$vuetify.theme.dark ? 'grey darken-4' : '#F5F7FB'"
+        rounded="lg"
+        class="d-flex align-center px-4 py-2 mb-5"
+      >
         <v-breadcrumbs :items="crumbs" class="pa-0 text-body-2">
           <template #divider>
             <span class="grey--text">/</span>
@@ -239,6 +305,7 @@ import GlobalSearch from "@/components/layout/GlobalSearch.vue";
 import NavLink from "@/components/layout/NavLink.vue";
 import apiClient, { setAuthToken } from "@/service/axios";
 import { initialsOf } from "@/utils/team";
+import { setThemePref, themeState } from "@/utils/theme";
 import {
   NAV_FOOTER,
   activeItem,
@@ -265,6 +332,11 @@ export default {
 
   data: () => ({
     drawer: false,
+    THEME_OPTIONS: [
+      { value: "light", label: "Light", icon: "$sun" },
+      { value: "dark", label: "Dark", icon: "$moon" },
+      { value: "system", label: "System", icon: "$monitor" },
+    ],
     // Desktop only: icons-only sidebar, remembered per browser
     collapsed: readCollapsed(),
     menu: false,
@@ -277,6 +349,15 @@ export default {
   }),
 
   computed: {
+    themePref() {
+      return themeState.pref;
+    },
+
+    themeIcon() {
+      if (this.themePref === "system") return "$sun-moon";
+      return this.themePref === "dark" ? "$moon" : "$sun";
+    },
+
     isDesktop() {
       return this.$vuetify.breakpoint.lgAndUp;
     },
@@ -310,8 +391,16 @@ export default {
     crumbs() {
       if (!this.section) return [{ text: "Dashboard", disabled: true }];
       const tab = this.tabs[this.activeTab];
-      const list = [{ text: this.section.name, to: this.section.to, exact: true, disabled: !tab }];
-      if (tab && tab.name !== this.section.name) list.push({ text: tab.name, disabled: true });
+      const list = [
+        {
+          text: this.section.name,
+          to: this.section.to,
+          exact: true,
+          disabled: !tab,
+        },
+      ];
+      if (tab && tab.name !== this.section.name)
+        list.push({ text: tab.name, disabled: true });
       else list[0].disabled = true;
       return list;
     },
@@ -319,7 +408,9 @@ export default {
     // Every page this user can open, for the global search
     searchItems() {
       const entries = [
-        ...this.groups.flatMap((g) => g.items.map((item) => ({ item, group: g.title || "General" }))),
+        ...this.groups.flatMap((g) =>
+          g.items.map((item) => ({ item, group: g.title || "General" })),
+        ),
         ...this.footer.map((item) => ({ item, group: "General" })),
       ];
       return entries.flatMap(({ item, group }) =>
@@ -328,12 +419,16 @@ export default {
           return {
             key: `${item.id}:${tab.name}`,
             text: single ? item.name : tab.name,
-            caption: single ? item.description || "" : `${item.name} › ${tab.name}`,
+            caption: single
+              ? item.description || ""
+              : `${item.name} › ${tab.name}`,
             section: item.name,
             group,
             icon: item.icon,
             to: tab.to,
-            search: `${item.name} ${tab.name} ${item.description || ""} ${group}`.toLowerCase(),
+            search: `${item.name} ${tab.name} ${
+              item.description || ""
+            } ${group}`.toLowerCase(),
           };
         }),
       );
@@ -391,6 +486,8 @@ export default {
       return (item.badge && this.badges[item.badge]) || 0;
     },
 
+    setThemePref,
+
     toggleMini() {
       this.collapsed = !this.collapsed;
       try {
@@ -443,7 +540,6 @@ export default {
 .app-nav__toggle--mini {
   left: 62px;
 }
-
 
 .app-nav__group {
   padding: 4px 10px;

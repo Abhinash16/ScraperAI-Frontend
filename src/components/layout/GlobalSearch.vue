@@ -45,7 +45,7 @@
         class="overflow-hidden"
       >
         <!-- Search input -->
-        <v-sheet color="#EEF0FE" class="d-flex align-center px-5 py-3">
+        <v-sheet :color="tint" class="d-flex align-center px-5 py-3">
           <v-icon size="22" color="grey darken-1" class="mr-3">$search</v-icon>
           <input
             ref="input"
@@ -96,7 +96,7 @@
               v-for="c in categories"
               :key="c"
               :value="c"
-              :color="category === c ? '#EEF0FE' : undefined"
+              :color="category === c ? tint : undefined"
               small
               outlined
               class="font-weight-bold"
@@ -143,7 +143,7 @@
             :ref="`row-${i}`"
             flat
             rounded="lg"
-            :color="i === cursor ? '#EEF0FE' : 'transparent'"
+            :color="i === cursor ? tint : 'transparent'"
             class="d-flex align-center px-3 py-3 mb-1"
             @click="choose(item)"
             @mouseenter="cursor = i"
@@ -207,6 +207,11 @@ export default {
   data: () => ({ dialog: false, query: "", category: ALL, cursor: 0 }),
 
   computed: {
+    // Light primary wash for the header and highlights
+    tint() {
+      return this.$vuetify.theme.dark ? "rgba(139, 141, 248, 0.16)" : "#EEF0FE";
+    },
+
     fullscreen() {
       return this.$vuetify.breakpoint.smAndDown;
     },

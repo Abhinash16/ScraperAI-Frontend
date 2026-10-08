@@ -1,0 +1,618 @@
+/*
+ * Dark mode for the dashboard.
+ *
+ * The screens use Vuetify's light colour helpers (tinted backgrounds like
+ * "green lighten-5", dark text like "grey--text text--darken-4") and a few
+ * fixed colours. When the dark theme is on (utils/theme.js), this file maps
+ * them to dark-friendly equivalents, so screens don't need two sets of
+ * classes. Everything is scoped to .theme--dark, so light mode is untouched.
+ */
+
+/* ---------- Surfaces ---------- */
+
+.theme--dark.v-application .white:not(.v-btn--fab):not(.v-chip),
+.theme--dark.v-application .white.v-btn--fab {
+  background-color: #1e1e1e !important;
+  border-color: #1e1e1e !important;
+}
+.theme--dark.v-application .v-chip.white {
+  background-color: transparent !important;
+}
+
+/* Grey tints become faint white overlays */
+.theme--dark.v-application .grey.lighten-5 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+.theme--dark.v-application .grey.lighten-4 {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+.theme--dark.v-application .grey.lighten-3 {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Colour tints become translucent washes of the same colour */
+.theme--dark.v-application .red.lighten-5 {
+  background-color: rgba(244, 67, 54, 0.14) !important;
+  border-color: rgba(244, 67, 54, 0.14) !important;
+}
+.theme--dark.v-application .red.lighten-4 {
+  background-color: rgba(244, 67, 54, 0.2) !important;
+  border-color: rgba(244, 67, 54, 0.2) !important;
+}
+.theme--dark.v-application .red.lighten-3 {
+  background-color: rgba(244, 67, 54, 0.26) !important;
+  border-color: rgba(244, 67, 54, 0.26) !important;
+}
+.theme--dark.v-application .pink.lighten-5 {
+  background-color: rgba(233, 30, 99, 0.14) !important;
+  border-color: rgba(233, 30, 99, 0.14) !important;
+}
+.theme--dark.v-application .pink.lighten-4 {
+  background-color: rgba(233, 30, 99, 0.2) !important;
+  border-color: rgba(233, 30, 99, 0.2) !important;
+}
+.theme--dark.v-application .pink.lighten-3 {
+  background-color: rgba(233, 30, 99, 0.26) !important;
+  border-color: rgba(233, 30, 99, 0.26) !important;
+}
+.theme--dark.v-application .purple.lighten-5 {
+  background-color: rgba(156, 39, 176, 0.14) !important;
+  border-color: rgba(156, 39, 176, 0.14) !important;
+}
+.theme--dark.v-application .purple.lighten-4 {
+  background-color: rgba(156, 39, 176, 0.2) !important;
+  border-color: rgba(156, 39, 176, 0.2) !important;
+}
+.theme--dark.v-application .purple.lighten-3 {
+  background-color: rgba(156, 39, 176, 0.26) !important;
+  border-color: rgba(156, 39, 176, 0.26) !important;
+}
+.theme--dark.v-application .deep-purple.lighten-5 {
+  background-color: rgba(103, 58, 183, 0.14) !important;
+  border-color: rgba(103, 58, 183, 0.14) !important;
+}
+.theme--dark.v-application .deep-purple.lighten-4 {
+  background-color: rgba(103, 58, 183, 0.2) !important;
+  border-color: rgba(103, 58, 183, 0.2) !important;
+}
+.theme--dark.v-application .deep-purple.lighten-3 {
+  background-color: rgba(103, 58, 183, 0.26) !important;
+  border-color: rgba(103, 58, 183, 0.26) !important;
+}
+.theme--dark.v-application .indigo.lighten-5 {
+  background-color: rgba(63, 81, 181, 0.14) !important;
+  border-color: rgba(63, 81, 181, 0.14) !important;
+}
+.theme--dark.v-application .indigo.lighten-4 {
+  background-color: rgba(63, 81, 181, 0.2) !important;
+  border-color: rgba(63, 81, 181, 0.2) !important;
+}
+.theme--dark.v-application .indigo.lighten-3 {
+  background-color: rgba(63, 81, 181, 0.26) !important;
+  border-color: rgba(63, 81, 181, 0.26) !important;
+}
+.theme--dark.v-application .blue.lighten-5 {
+  background-color: rgba(33, 150, 243, 0.14) !important;
+  border-color: rgba(33, 150, 243, 0.14) !important;
+}
+.theme--dark.v-application .blue.lighten-4 {
+  background-color: rgba(33, 150, 243, 0.2) !important;
+  border-color: rgba(33, 150, 243, 0.2) !important;
+}
+.theme--dark.v-application .blue.lighten-3 {
+  background-color: rgba(33, 150, 243, 0.26) !important;
+  border-color: rgba(33, 150, 243, 0.26) !important;
+}
+.theme--dark.v-application .light-blue.lighten-5 {
+  background-color: rgba(3, 169, 244, 0.14) !important;
+  border-color: rgba(3, 169, 244, 0.14) !important;
+}
+.theme--dark.v-application .light-blue.lighten-4 {
+  background-color: rgba(3, 169, 244, 0.2) !important;
+  border-color: rgba(3, 169, 244, 0.2) !important;
+}
+.theme--dark.v-application .light-blue.lighten-3 {
+  background-color: rgba(3, 169, 244, 0.26) !important;
+  border-color: rgba(3, 169, 244, 0.26) !important;
+}
+.theme--dark.v-application .cyan.lighten-5 {
+  background-color: rgba(0, 188, 212, 0.14) !important;
+  border-color: rgba(0, 188, 212, 0.14) !important;
+}
+.theme--dark.v-application .cyan.lighten-4 {
+  background-color: rgba(0, 188, 212, 0.2) !important;
+  border-color: rgba(0, 188, 212, 0.2) !important;
+}
+.theme--dark.v-application .cyan.lighten-3 {
+  background-color: rgba(0, 188, 212, 0.26) !important;
+  border-color: rgba(0, 188, 212, 0.26) !important;
+}
+.theme--dark.v-application .teal.lighten-5 {
+  background-color: rgba(0, 150, 136, 0.14) !important;
+  border-color: rgba(0, 150, 136, 0.14) !important;
+}
+.theme--dark.v-application .teal.lighten-4 {
+  background-color: rgba(0, 150, 136, 0.2) !important;
+  border-color: rgba(0, 150, 136, 0.2) !important;
+}
+.theme--dark.v-application .teal.lighten-3 {
+  background-color: rgba(0, 150, 136, 0.26) !important;
+  border-color: rgba(0, 150, 136, 0.26) !important;
+}
+.theme--dark.v-application .green.lighten-5 {
+  background-color: rgba(76, 175, 80, 0.14) !important;
+  border-color: rgba(76, 175, 80, 0.14) !important;
+}
+.theme--dark.v-application .green.lighten-4 {
+  background-color: rgba(76, 175, 80, 0.2) !important;
+  border-color: rgba(76, 175, 80, 0.2) !important;
+}
+.theme--dark.v-application .green.lighten-3 {
+  background-color: rgba(76, 175, 80, 0.26) !important;
+  border-color: rgba(76, 175, 80, 0.26) !important;
+}
+.theme--dark.v-application .light-green.lighten-5 {
+  background-color: rgba(139, 195, 74, 0.14) !important;
+  border-color: rgba(139, 195, 74, 0.14) !important;
+}
+.theme--dark.v-application .light-green.lighten-4 {
+  background-color: rgba(139, 195, 74, 0.2) !important;
+  border-color: rgba(139, 195, 74, 0.2) !important;
+}
+.theme--dark.v-application .light-green.lighten-3 {
+  background-color: rgba(139, 195, 74, 0.26) !important;
+  border-color: rgba(139, 195, 74, 0.26) !important;
+}
+.theme--dark.v-application .lime.lighten-5 {
+  background-color: rgba(205, 220, 57, 0.14) !important;
+  border-color: rgba(205, 220, 57, 0.14) !important;
+}
+.theme--dark.v-application .lime.lighten-4 {
+  background-color: rgba(205, 220, 57, 0.2) !important;
+  border-color: rgba(205, 220, 57, 0.2) !important;
+}
+.theme--dark.v-application .lime.lighten-3 {
+  background-color: rgba(205, 220, 57, 0.26) !important;
+  border-color: rgba(205, 220, 57, 0.26) !important;
+}
+.theme--dark.v-application .yellow.lighten-5 {
+  background-color: rgba(255, 235, 59, 0.14) !important;
+  border-color: rgba(255, 235, 59, 0.14) !important;
+}
+.theme--dark.v-application .yellow.lighten-4 {
+  background-color: rgba(255, 235, 59, 0.2) !important;
+  border-color: rgba(255, 235, 59, 0.2) !important;
+}
+.theme--dark.v-application .yellow.lighten-3 {
+  background-color: rgba(255, 235, 59, 0.26) !important;
+  border-color: rgba(255, 235, 59, 0.26) !important;
+}
+.theme--dark.v-application .amber.lighten-5 {
+  background-color: rgba(255, 193, 7, 0.14) !important;
+  border-color: rgba(255, 193, 7, 0.14) !important;
+}
+.theme--dark.v-application .amber.lighten-4 {
+  background-color: rgba(255, 193, 7, 0.2) !important;
+  border-color: rgba(255, 193, 7, 0.2) !important;
+}
+.theme--dark.v-application .amber.lighten-3 {
+  background-color: rgba(255, 193, 7, 0.26) !important;
+  border-color: rgba(255, 193, 7, 0.26) !important;
+}
+.theme--dark.v-application .orange.lighten-5 {
+  background-color: rgba(255, 152, 0, 0.14) !important;
+  border-color: rgba(255, 152, 0, 0.14) !important;
+}
+.theme--dark.v-application .orange.lighten-4 {
+  background-color: rgba(255, 152, 0, 0.2) !important;
+  border-color: rgba(255, 152, 0, 0.2) !important;
+}
+.theme--dark.v-application .orange.lighten-3 {
+  background-color: rgba(255, 152, 0, 0.26) !important;
+  border-color: rgba(255, 152, 0, 0.26) !important;
+}
+.theme--dark.v-application .deep-orange.lighten-5 {
+  background-color: rgba(255, 87, 34, 0.14) !important;
+  border-color: rgba(255, 87, 34, 0.14) !important;
+}
+.theme--dark.v-application .deep-orange.lighten-4 {
+  background-color: rgba(255, 87, 34, 0.2) !important;
+  border-color: rgba(255, 87, 34, 0.2) !important;
+}
+.theme--dark.v-application .deep-orange.lighten-3 {
+  background-color: rgba(255, 87, 34, 0.26) !important;
+  border-color: rgba(255, 87, 34, 0.26) !important;
+}
+.theme--dark.v-application .brown.lighten-5 {
+  background-color: rgba(121, 85, 72, 0.14) !important;
+  border-color: rgba(121, 85, 72, 0.14) !important;
+}
+.theme--dark.v-application .brown.lighten-4 {
+  background-color: rgba(121, 85, 72, 0.2) !important;
+  border-color: rgba(121, 85, 72, 0.2) !important;
+}
+.theme--dark.v-application .brown.lighten-3 {
+  background-color: rgba(121, 85, 72, 0.26) !important;
+  border-color: rgba(121, 85, 72, 0.26) !important;
+}
+.theme--dark.v-application .blue-grey.lighten-5 {
+  background-color: rgba(96, 125, 139, 0.14) !important;
+  border-color: rgba(96, 125, 139, 0.14) !important;
+}
+.theme--dark.v-application .blue-grey.lighten-4 {
+  background-color: rgba(96, 125, 139, 0.2) !important;
+  border-color: rgba(96, 125, 139, 0.2) !important;
+}
+.theme--dark.v-application .blue-grey.lighten-3 {
+  background-color: rgba(96, 125, 139, 0.26) !important;
+  border-color: rgba(96, 125, 139, 0.26) !important;
+}
+.theme--dark.v-application .primary.lighten-5 {
+  background-color: rgba(139, 141, 248, 0.14) !important;
+  border-color: rgba(139, 141, 248, 0.14) !important;
+}
+.theme--dark.v-application .primary.lighten-4 {
+  background-color: rgba(139, 141, 248, 0.2) !important;
+  border-color: rgba(139, 141, 248, 0.2) !important;
+}
+.theme--dark.v-application .primary.lighten-3 {
+  background-color: rgba(139, 141, 248, 0.26) !important;
+  border-color: rgba(139, 141, 248, 0.26) !important;
+}
+.theme--dark.v-application .success.lighten-5 {
+  background-color: rgba(76, 175, 80, 0.14) !important;
+  border-color: rgba(76, 175, 80, 0.14) !important;
+}
+.theme--dark.v-application .success.lighten-4 {
+  background-color: rgba(76, 175, 80, 0.2) !important;
+  border-color: rgba(76, 175, 80, 0.2) !important;
+}
+.theme--dark.v-application .success.lighten-3 {
+  background-color: rgba(76, 175, 80, 0.26) !important;
+  border-color: rgba(76, 175, 80, 0.26) !important;
+}
+.theme--dark.v-application .error.lighten-5 {
+  background-color: rgba(255, 82, 82, 0.14) !important;
+  border-color: rgba(255, 82, 82, 0.14) !important;
+}
+.theme--dark.v-application .error.lighten-4 {
+  background-color: rgba(255, 82, 82, 0.2) !important;
+  border-color: rgba(255, 82, 82, 0.2) !important;
+}
+.theme--dark.v-application .error.lighten-3 {
+  background-color: rgba(255, 82, 82, 0.26) !important;
+  border-color: rgba(255, 82, 82, 0.26) !important;
+}
+.theme--dark.v-application .warning.lighten-5 {
+  background-color: rgba(251, 140, 0, 0.14) !important;
+  border-color: rgba(251, 140, 0, 0.14) !important;
+}
+.theme--dark.v-application .warning.lighten-4 {
+  background-color: rgba(251, 140, 0, 0.2) !important;
+  border-color: rgba(251, 140, 0, 0.2) !important;
+}
+.theme--dark.v-application .warning.lighten-3 {
+  background-color: rgba(251, 140, 0, 0.26) !important;
+  border-color: rgba(251, 140, 0, 0.26) !important;
+}
+.theme--dark.v-application .info.lighten-5 {
+  background-color: rgba(33, 150, 243, 0.14) !important;
+  border-color: rgba(33, 150, 243, 0.14) !important;
+}
+.theme--dark.v-application .info.lighten-4 {
+  background-color: rgba(33, 150, 243, 0.2) !important;
+  border-color: rgba(33, 150, 243, 0.2) !important;
+}
+.theme--dark.v-application .info.lighten-3 {
+  background-color: rgba(33, 150, 243, 0.26) !important;
+  border-color: rgba(33, 150, 243, 0.26) !important;
+}
+
+/* ---------- Text ---------- */
+/* Dark greys used for headings and body text become light */
+.theme--dark.v-application .grey--text.text--darken-4 {
+  color: rgba(255, 255, 255, 0.92) !important;
+  caret-color: rgba(255, 255, 255, 0.92) !important;
+}
+.theme--dark.v-application .grey--text.text--darken-3 {
+  color: rgba(255, 255, 255, 0.84) !important;
+  caret-color: rgba(255, 255, 255, 0.84) !important;
+}
+.theme--dark.v-application .grey--text.text--darken-2 {
+  color: rgba(255, 255, 255, 0.74) !important;
+  caret-color: rgba(255, 255, 255, 0.74) !important;
+}
+.theme--dark.v-application .grey--text.text--darken-1 {
+  color: rgba(255, 255, 255, 0.64) !important;
+  caret-color: rgba(255, 255, 255, 0.64) !important;
+}
+.theme--dark.v-application .black--text {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* Darkened colour text (e.g. green--text text--darken-2) is lightened */
+.theme--dark.v-application .red--text.text--darken-1,
+.theme--dark.v-application .red--text.text--darken-2,
+.theme--dark.v-application .red--text.text--darken-3,
+.theme--dark.v-application .red--text.text--darken-4 {
+  color: #ef9a9a !important;
+  caret-color: #ef9a9a !important;
+}
+.theme--dark.v-application .pink--text.text--darken-1,
+.theme--dark.v-application .pink--text.text--darken-2,
+.theme--dark.v-application .pink--text.text--darken-3,
+.theme--dark.v-application .pink--text.text--darken-4 {
+  color: #f48fb1 !important;
+  caret-color: #f48fb1 !important;
+}
+.theme--dark.v-application .purple--text.text--darken-1,
+.theme--dark.v-application .purple--text.text--darken-2,
+.theme--dark.v-application .purple--text.text--darken-3,
+.theme--dark.v-application .purple--text.text--darken-4 {
+  color: #ce93d8 !important;
+  caret-color: #ce93d8 !important;
+}
+.theme--dark.v-application .deep-purple--text.text--darken-1,
+.theme--dark.v-application .deep-purple--text.text--darken-2,
+.theme--dark.v-application .deep-purple--text.text--darken-3,
+.theme--dark.v-application .deep-purple--text.text--darken-4 {
+  color: #b39ddb !important;
+  caret-color: #b39ddb !important;
+}
+.theme--dark.v-application .indigo--text.text--darken-1,
+.theme--dark.v-application .indigo--text.text--darken-2,
+.theme--dark.v-application .indigo--text.text--darken-3,
+.theme--dark.v-application .indigo--text.text--darken-4 {
+  color: #9fa8da !important;
+  caret-color: #9fa8da !important;
+}
+.theme--dark.v-application .blue--text.text--darken-1,
+.theme--dark.v-application .blue--text.text--darken-2,
+.theme--dark.v-application .blue--text.text--darken-3,
+.theme--dark.v-application .blue--text.text--darken-4 {
+  color: #90caf9 !important;
+  caret-color: #90caf9 !important;
+}
+.theme--dark.v-application .light-blue--text.text--darken-1,
+.theme--dark.v-application .light-blue--text.text--darken-2,
+.theme--dark.v-application .light-blue--text.text--darken-3,
+.theme--dark.v-application .light-blue--text.text--darken-4 {
+  color: #81d4fa !important;
+  caret-color: #81d4fa !important;
+}
+.theme--dark.v-application .cyan--text.text--darken-1,
+.theme--dark.v-application .cyan--text.text--darken-2,
+.theme--dark.v-application .cyan--text.text--darken-3,
+.theme--dark.v-application .cyan--text.text--darken-4 {
+  color: #80deea !important;
+  caret-color: #80deea !important;
+}
+.theme--dark.v-application .teal--text.text--darken-1,
+.theme--dark.v-application .teal--text.text--darken-2,
+.theme--dark.v-application .teal--text.text--darken-3,
+.theme--dark.v-application .teal--text.text--darken-4 {
+  color: #80cbc4 !important;
+  caret-color: #80cbc4 !important;
+}
+.theme--dark.v-application .green--text.text--darken-1,
+.theme--dark.v-application .green--text.text--darken-2,
+.theme--dark.v-application .green--text.text--darken-3,
+.theme--dark.v-application .green--text.text--darken-4 {
+  color: #a5d6a7 !important;
+  caret-color: #a5d6a7 !important;
+}
+.theme--dark.v-application .light-green--text.text--darken-1,
+.theme--dark.v-application .light-green--text.text--darken-2,
+.theme--dark.v-application .light-green--text.text--darken-3,
+.theme--dark.v-application .light-green--text.text--darken-4 {
+  color: #c5e1a5 !important;
+  caret-color: #c5e1a5 !important;
+}
+.theme--dark.v-application .lime--text.text--darken-1,
+.theme--dark.v-application .lime--text.text--darken-2,
+.theme--dark.v-application .lime--text.text--darken-3,
+.theme--dark.v-application .lime--text.text--darken-4 {
+  color: #e6ee9c !important;
+  caret-color: #e6ee9c !important;
+}
+.theme--dark.v-application .yellow--text.text--darken-1,
+.theme--dark.v-application .yellow--text.text--darken-2,
+.theme--dark.v-application .yellow--text.text--darken-3,
+.theme--dark.v-application .yellow--text.text--darken-4 {
+  color: #fff59d !important;
+  caret-color: #fff59d !important;
+}
+.theme--dark.v-application .amber--text.text--darken-1,
+.theme--dark.v-application .amber--text.text--darken-2,
+.theme--dark.v-application .amber--text.text--darken-3,
+.theme--dark.v-application .amber--text.text--darken-4 {
+  color: #ffe082 !important;
+  caret-color: #ffe082 !important;
+}
+.theme--dark.v-application .orange--text.text--darken-1,
+.theme--dark.v-application .orange--text.text--darken-2,
+.theme--dark.v-application .orange--text.text--darken-3,
+.theme--dark.v-application .orange--text.text--darken-4 {
+  color: #ffcc80 !important;
+  caret-color: #ffcc80 !important;
+}
+.theme--dark.v-application .deep-orange--text.text--darken-1,
+.theme--dark.v-application .deep-orange--text.text--darken-2,
+.theme--dark.v-application .deep-orange--text.text--darken-3,
+.theme--dark.v-application .deep-orange--text.text--darken-4 {
+  color: #ffab91 !important;
+  caret-color: #ffab91 !important;
+}
+.theme--dark.v-application .brown--text.text--darken-1,
+.theme--dark.v-application .brown--text.text--darken-2,
+.theme--dark.v-application .brown--text.text--darken-3,
+.theme--dark.v-application .brown--text.text--darken-4 {
+  color: #bcaaa4 !important;
+  caret-color: #bcaaa4 !important;
+}
+.theme--dark.v-application .blue-grey--text.text--darken-1,
+.theme--dark.v-application .blue-grey--text.text--darken-2,
+.theme--dark.v-application .blue-grey--text.text--darken-3,
+.theme--dark.v-application .blue-grey--text.text--darken-4 {
+  color: #b0bec5 !important;
+  caret-color: #b0bec5 !important;
+}
+.theme--dark.v-application .primary--text.text--darken-1,
+.theme--dark.v-application .primary--text.text--darken-2,
+.theme--dark.v-application .primary--text.text--darken-3,
+.theme--dark.v-application .primary--text.text--darken-4 {
+  color: #b4b5fb !important;
+  caret-color: #b4b5fb !important;
+}
+.theme--dark.v-application .success--text.text--darken-1,
+.theme--dark.v-application .success--text.text--darken-2,
+.theme--dark.v-application .success--text.text--darken-3,
+.theme--dark.v-application .success--text.text--darken-4 {
+  color: #a5d6a7 !important;
+  caret-color: #a5d6a7 !important;
+}
+.theme--dark.v-application .error--text.text--darken-1,
+.theme--dark.v-application .error--text.text--darken-2,
+.theme--dark.v-application .error--text.text--darken-3,
+.theme--dark.v-application .error--text.text--darken-4 {
+  color: #ff8a80 !important;
+  caret-color: #ff8a80 !important;
+}
+.theme--dark.v-application .warning--text.text--darken-1,
+.theme--dark.v-application .warning--text.text--darken-2,
+.theme--dark.v-application .warning--text.text--darken-3,
+.theme--dark.v-application .warning--text.text--darken-4 {
+  color: #ffcc80 !important;
+  caret-color: #ffcc80 !important;
+}
+.theme--dark.v-application .info--text.text--darken-1,
+.theme--dark.v-application .info--text.text--darken-2,
+.theme--dark.v-application .info--text.text--darken-3,
+.theme--dark.v-application .info--text.text--darken-4 {
+  color: #90caf9 !important;
+  caret-color: #90caf9 !important;
+}
+
+/* ---------- Shell (AppShell, NavLink) ---------- */
+.theme--dark.v-application .app-nav,
+.theme--dark.v-application .app-bar {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+.theme--dark.v-application .app-nav__footer {
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+.theme--dark.v-application .app-nav__heading {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+.theme--dark.v-application .app-nav__toggle {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+.theme--dark.v-application .nav-link {
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+.theme--dark.v-application .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+.theme--dark.v-application .nav-link--active,
+.theme--dark.v-application .nav-link--active:hover {
+  background-color: rgba(139, 141, 248, 0.16) !important;
+  color: var(--v-primary-base) !important;
+}
+.theme--dark .app-menu,
+.app-menu.theme--dark {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ---------- Tabs (segmented control in App.vue) ---------- */
+.theme--dark.v-application .v-tabs:not(.v-tabs--vertical) > .v-tabs-bar {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+.theme--dark.v-application .v-tabs:not(.v-tabs--vertical) .v-tab {
+  color: rgba(255, 255, 255, 0.66) !important;
+}
+.theme--dark.v-application .v-tabs:not(.v-tabs--vertical) .v-tab--active {
+  background-color: #2b2c33;
+  color: var(--v-primary-base) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Charts (ApexCharts) ---------- */
+.theme--dark.v-application .apexcharts-text,
+.theme--dark.v-application .apexcharts-legend-text {
+  fill: rgba(255, 255, 255, 0.7) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+.theme--dark.v-application .apexcharts-gridline,
+.theme--dark.v-application .apexcharts-xaxis-tick,
+.theme--dark.v-application .apexcharts-xaxis line {
+  stroke: rgba(255, 255, 255, 0.08) !important;
+}
+.theme--dark.v-application .apexcharts-tooltip {
+  background: #2b2c33 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+
+/* ---------- Component styles with fixed light colours ---------- */
+/* Cards and panels that set their own light background */
+.theme--dark.v-application .setup-card,
+.theme--dark.v-application .trace-body,
+.theme--dark.v-application .answer,
+.theme--dark.v-application .knew,
+.theme--dark.v-application .item-body,
+.theme--dark.v-application .competitor-card {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+.theme--dark.v-application .hero-card {
+  background: linear-gradient(135deg, rgba(139, 141, 248, 0.14), rgba(139, 141, 248, 0.06)) !important;
+}
+.theme--dark.v-application .seo-card {
+  background: rgba(255, 152, 0, 0.12) !important;
+}
+
+/* Light borders and dividers */
+.theme--dark.v-application .needs-row--border,
+.theme--dark.v-application .conv-row,
+.theme--dark.v-application .conv-item,
+.theme--dark.v-application .sections,
+.theme--dark.v-application .section,
+.theme--dark.v-application .list-box,
+.theme--dark.v-application .import-tabs,
+.theme--dark.v-application .drawer-tabs,
+.theme--dark.v-application .conv-divider::after,
+.theme--dark.v-application .item-body .evidence-extra {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Muted text set in component styles */
+.theme--dark.v-application .section-label,
+.theme--dark.v-application .conv-divider,
+.theme--dark.v-application .conv-footer,
+.theme--dark.v-application .urls,
+.theme--dark.v-application .detail-label,
+.theme--dark.v-application .secret-notice {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+.theme--dark.v-application .conv-summary,
+.theme--dark.v-application .chat-conversations .summary {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+.theme--dark.v-application .knew-toggle {
+  color: var(--v-primary-base) !important;
+}
+
+/* Highlights inside text */
+.theme--dark.v-application .answer mark.hit {
+  background: rgba(244, 67, 54, 0.35) !important;
+  color: inherit;
+}
+.theme--dark.v-application .item-body mark {
+  background: rgba(255, 193, 7, 0.35) !important;
+  color: inherit;
+}

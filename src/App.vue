@@ -7,7 +7,25 @@
 </template>
 
 <script>
-export default {};
+import { applyTheme, themeState } from "@/utils/theme";
+
+export default {
+  computed: {
+    // Re-apply whenever the page, the chosen mode or the OS setting changes
+    themeKey() {
+      return `${this.$route.path}|${themeState.pref}|${themeState.systemDark}`;
+    },
+  },
+
+  watch: {
+    themeKey: {
+      immediate: true,
+      handler() {
+        applyTheme(this.$vuetify.theme, this.$route.path);
+      },
+    },
+  },
+};
 </script>
 
 <style>
