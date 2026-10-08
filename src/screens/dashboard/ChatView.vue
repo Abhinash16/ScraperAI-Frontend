@@ -53,6 +53,26 @@
 
             <v-spacer></v-spacer>
 
+            <v-chip
+              v-if="openConversation"
+              small
+              outlined
+              :color="openStatus.color"
+              class="mr-2"
+            >
+              {{ openStatus.label }}
+            </v-chip>
+            <v-btn
+              small
+              text
+              rounded
+              class="text-none"
+              @click="showConversations = !showConversations"
+            >
+              <v-icon small class="mr-1">$history</v-icon>
+              Conversations<span v-if="conversations.length">&nbsp;({{ conversations.length }})</span>
+            </v-btn>
+
             <!-- Status Update Menu -->
             <v-menu offset-y :disabled="statusUpdating">
               <template v-slot:activator="{ on, attrs }">
@@ -90,6 +110,17 @@
 
           <v-divider></v-divider>
 
+          <v-expand-transition>
+            <div v-if="showConversations">
+              <ChatConversations
+                :conversations="conversations"
+                :loading="conversationsLoading"
+                @select="scrollToConversation"
+              />
+              <v-divider></v-divider>
+            </div>
+          </v-expand-transition>
+
           <!-- MESSAGES AREA -->
           <v-card-text
             style="height: 380px; overflow-y: auto; background-color: #eff2fb"
@@ -113,10 +144,22 @@
               <div class="mt-2">No messages yet. Start the conversation!</div>
             </div>
 
-            <!-- Messages -->
+            <!-- Messages, grouped into conversations -->
+            <template v-for="{ message, divider, footer, key } in rows">
+            <div
+              v-if="divider"
+              :id="divider._id ? `conv-${divider._id}` : 'conv-earlier'"
+              :key="key"
+              class="conv-divider text-caption"
+            >
+              <span>{{ dividerLabel(divider) }}</span>
+            </div>
+            <div v-else-if="footer" :key="key" class="conv-footer text-caption mb-4">
+              {{ endedLabel(footer) }}
+            </div>
             <v-row
-              v-for="message in messages"
-              :key="message._id || message.timestamp"
+              v-else
+              :key="key"
               no-gutters
               class="mb-3"
               :justify="message.sender === 'user' ? 'start' : 'end'"
@@ -247,6 +290,8 @@
               </v-col>
             </v-row>
 
+            </template>
+
             <!-- i want  this to show on the right when AI is typing...-->
             <v-row
               v-if="showTypingIndicator"
@@ -376,9 +421,18 @@
 import { io } from "socket.io-client";
 import apiClient from "@/service/axios";
 import LiveTrace from "@/components/traces/LiveTrace.vue";
+import ChatConversations from "@/components/chats/ChatConversations.vue";
+import {
+  OPEN_STATUS,
+  endedLabel,
+  fetchConversations,
+  formatStart,
+  groupMessages,
+  isOpen,
+} from "@/utils/conversations";
 
 export default {
-  components: { LiveTrace },
+  components: { LiveTrace, ChatConversations },
 
   props: {
     chatId: {
@@ -394,6 +448,9 @@ export default {
   data() {
     return {
       messages: [],
+      conversations: [],
+      conversationsLoading: false,
+      showConversations: false,
       newMessage: "",
       socket: null,
 
@@ -467,6 +524,15 @@ export default {
   },
 
   computed: {
+    rows() {
+      return groupMessages(this.messages, this.conversations);
+    },
+    openConversation() {
+      return this.conversations.find(isOpen) || null;
+    },
+    openStatus() {
+      return OPEN_STATUS[this.openConversation?.status] || OPEN_STATUS.open;
+    },
     typingSender() {
       if (this.typingState.agent) return "agent";
       if (this.typingState.ai) return "ai";
@@ -498,6 +564,7 @@ export default {
 
       try {
         await this.fetchChatInfo();
+        this.loadConversations();
         await this.connectSocket();
       } catch (error) {
         this.showError("Failed to initialize chat");
@@ -568,6 +635,8 @@ export default {
             }
 
             this.messages.push(message);
+            // A new conversation started, or a known one changed state
+            if (message.conversationId) this.loadConversations({ quiet: true });
           }
         });
 
@@ -636,6 +705,8 @@ export default {
         });
 
         this.ticketStatus = status;
+        // Resolving also closes the open conversation
+        this.loadConversations({ quiet: true });
 
         this.$emit("statusUpdated", {
           chatId: this.chatId,
@@ -681,6 +752,40 @@ export default {
       this.newMessage = "";
     },
 
+    async loadConversations({ quiet = false } = {}) {
+      const chatId = this.chatId;
+      if (!quiet) this.conversationsLoading = true;
+      try {
+        const list = await fetchConversations(chatId);
+        if (chatId === this.chatId) this.conversations = list;
+      } catch {
+        // Older backends have no conversations: the chat shows ungrouped
+      } finally {
+        this.conversationsLoading = false;
+      }
+    },
+
+    formatStart,
+    endedLabel,
+
+    dividerLabel(divider) {
+      if (divider.earlier) return "Earlier messages";
+      return divider.startedAt
+        ? `New conversation · ${formatStart(divider.startedAt)}`
+        : "New conversation";
+    },
+
+    scrollToConversation(id) {
+      const box = this.$refs.chatMessages;
+      const el = document.getElementById(`conv-${id}`);
+      if (!box || !el) return;
+      const container = box.$el || box;
+      container.scrollTo({
+        top: container.scrollTop + el.getBoundingClientRect().top - container.getBoundingClientRect().top - 8,
+        behavior: "smooth",
+      });
+    },
+
     resetChat() {
       if (this.socket) {
         this.socket.disconnect();
@@ -688,6 +793,7 @@ export default {
       }
 
       this.messages = [];
+      this.conversations = [];
     },
 
     scrollToBottom() {
@@ -760,3 +866,26 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.conv-divider {
+  display: flex;
+  align-items: center;
+  color: #6b7280;
+  margin: 12px 0;
+}
+.conv-divider::before,
+.conv-divider::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid #d5dbea;
+}
+.conv-divider span {
+  padding: 0 10px;
+  white-space: nowrap;
+}
+.conv-footer {
+  text-align: center;
+  color: #9ca3af;
+}
+</style>
