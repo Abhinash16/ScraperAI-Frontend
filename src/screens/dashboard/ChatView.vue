@@ -239,6 +239,11 @@
                     {{ formatTime(message.timestamp) }}
                   </span>
                 </div>
+                <LiveTrace
+                  v-if="message.traceId"
+                  :trace-id="String(message.traceId)"
+                  class="mt-1"
+                />
               </v-col>
             </v-row>
 
@@ -370,8 +375,11 @@
 <script>
 import { io } from "socket.io-client";
 import apiClient from "@/service/axios";
+import LiveTrace from "@/components/traces/LiveTrace.vue";
 
 export default {
+  components: { LiveTrace },
+
   props: {
     chatId: {
       type: String,

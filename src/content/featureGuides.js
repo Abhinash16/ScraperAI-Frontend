@@ -287,6 +287,25 @@ export const FEATURE_GUIDES = [
     format: true,
   },
   {
+    id: "bot-health",
+    name: "Bot health",
+    icon: "$activity",
+    route: "/dashboard/bot-health",
+    summary:
+      "How your bot's live replies went: errors, handoffs, answer time, and AI cost.",
+    steps: [
+      "Open Bot Health and pick 24 hours, 7 days or 30 days.",
+      "Check the Problems list. Open the chat for any error, since the customer may not have received a proper answer.",
+      "In any chat, click \"Why this answer\" under a bot reply to see what the bot searched and used.",
+    ],
+    thingsToKnow: [
+      "Every live bot reply on your website and WhatsApp is recorded: the customer's message, the reply, timing, tokens, product lookups, and what the bot used to answer.",
+      "Records are kept for 30 days. Older replies have no \"Why this answer\".",
+      "AI costs are estimates from OpenAI's list prices. Your OpenAI bill is the exact amount.",
+      "An error means the customer may not have received a proper answer, so open the chat and follow up.",
+    ],
+  },
+  {
     id: "analytics",
     name: "Analytics & insights",
     icon: "$chart-line",

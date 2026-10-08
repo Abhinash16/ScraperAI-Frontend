@@ -1,6 +1,6 @@
 <template>
   <div class="answer-trace">
-    <button type="button" class="trace-toggle" @click="open = !open">
+    <button v-if="!embedded" type="button" class="trace-toggle" @click="open = !open">
       <v-icon x-small class="mr-1">
         {{ open ? "$chevron-up" : "$chevron-down" }}
       </v-icon>
@@ -8,7 +8,7 @@
     </button>
 
     <v-expand-transition>
-      <div v-if="open" class="trace-body mt-2">
+      <div v-if="open" :class="embedded ? '' : 'trace-body mt-2'">
         <!-- Intent -->
         <div class="trace-row">
           <span class="trace-label">Intent</span>
@@ -250,9 +250,13 @@ export default {
 
   props: {
     trace: { type: Object, required: true },
+    // Inside another panel: always open, without the toggle
+    embedded: { type: Boolean, default: false },
   },
 
-  data: () => ({ open: false, openTools: [] }),
+  data() {
+    return { open: this.embedded, openTools: [] };
+  },
 
   computed: {
     product() {

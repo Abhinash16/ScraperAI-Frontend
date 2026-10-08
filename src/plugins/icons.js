@@ -133,6 +133,7 @@ import {
   Webhook,
   X,
   Zap,
+  Activity,
   Folder,
   FolderOpen,
   NotebookPen,
@@ -313,6 +314,7 @@ const APP_ICONS = {
   "webhook": Webhook,
   "x": X,
   "zap": Zap,
+  "activity": Activity,
 };
 
 const VUETIFY_ICONS = {

@@ -126,6 +126,11 @@ const routes = [
         component: () => import("../screens/dashboard/DocumentationPage.vue"),
       },
       {
+        path: "bot-health",
+        component: () => import("../screens/dashboard/BotHealth.vue"),
+        meta: { permission: "analytics:view" },
+      },
+      {
         path: "chat-analytics",
         name: "Chat Analytics",
         component: () => import("../screens/dashboard/AnalyticsDashboard.vue"),
