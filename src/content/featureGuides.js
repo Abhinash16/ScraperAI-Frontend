@@ -243,6 +243,7 @@ export const FEATURE_GUIDES = [
     thingsToKnow: [
       "Set up Escalate before going live, so \"I want to talk to a person\" reaches your team.",
       "Your endpoint should respond quickly. Slow endpoints can time out.",
+      "If we can't send an escalation to your system (the call fails, or the webhook was switched off after 3 failures), we email your alert addresses with the customer's phone, channel and message so someone can contact them. Set them under Escalate; empty means your account email. A webhook you turned off yourself sends no alerts.",
     ],
   },
   {

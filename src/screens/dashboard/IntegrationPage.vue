@@ -234,6 +234,19 @@
                 />
               </div>
 
+              <v-alert
+                v-if="autoDisabled"
+                type="warning"
+                text
+                dense
+                rounded="lg"
+                class="text-body-2"
+              >
+                Switched off after repeated failures. Escalations are being
+                emailed to your alert addresses. Fix the endpoint and turn it on
+                again.
+              </v-alert>
+
               <v-divider class="mb-6" />
 
               <div class="field-group-title">Endpoint</div>
@@ -294,6 +307,10 @@
                 </v-btn>
               </div>
             </v-card>
+
+            <EscalationAlertEmails
+              v-if="webhookTab === 'escalate' && canManageSettings"
+            />
           </div>
 
           <!-- ================= API KEYS ================= -->
@@ -454,6 +471,7 @@ import ProductApiSettings from "@/components/integrations/ProductApiSettings.vue
 import HeadersEditor from "@/components/integrations/HeadersEditor.vue";
 import TellephantSettings from "@/components/integrations/TellephantSettings.vue";
 import WidgetSettings from "@/components/integrations/WidgetSettings.vue";
+import EscalationAlertEmails from "@/components/integrations/EscalationAlertEmails.vue";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import { rowsFromHeaders, headersFromRows } from "@/utils/apiHeaders";
 import chatgptIcon from "@/assets/images/chatgpt-icon.png";
@@ -493,6 +511,7 @@ export default {
     HeadersEditor,
     TellephantSettings,
     WidgetSettings,
+    EscalationAlertEmails,
     ThingsToKnow,
   },
 
@@ -673,6 +692,14 @@ export default {
       return WEBHOOK_TYPES.some((t) => t.id === tab)
         ? tab
         : WEBHOOK_TYPES[0].id;
+    },
+
+    // Only the escalate webhook falls back to alert emails, and only when
+    // the backend switched it off, not the client.
+    autoDisabled() {
+      if (this.webhookTab !== "escalate") return false;
+      const hook = this.currentLoggedInUser.webhooks?.escalate;
+      return hook?.enabled === false && (hook.failureCount || 0) >= 3;
     },
 
     activeWebhook() {
