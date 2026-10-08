@@ -73,142 +73,151 @@
       </div>
     </v-card>
 
-    <v-card v-if="statsLoading && !stats" outlined rounded="xl" class="pa-6">
-      <v-progress-linear indeterminate color="primary" />
-    </v-card>
+    <v-tabs v-model="view" color="primary" class="health-tabs mb-6">
+      <v-tab tab-value="replies" class="text-none">Replies</v-tab>
+      <v-tab tab-value="conversations" class="text-none">Conversations</v-tab>
+    </v-tabs>
 
-    <v-alert v-else-if="statsError" type="error" outlined rounded="xl">
-      {{ statsError }}
-      <v-btn small text color="error" class="ml-2" @click="loadStats">Retry</v-btn>
-    </v-alert>
+    <ConversationReport v-if="view === 'conversations'" :days="days" />
 
-    <v-card
-      v-else-if="stats && !stats.replies"
-      outlined
-      rounded="xl"
-      class="pa-10 text-center grey--text text--darken-1"
-    >
-      <v-icon large color="grey lighten-1">$activity</v-icon>
-      <div class="mt-2">
-        No live replies in this period yet. Traces are kept for 30 days.
-      </div>
-    </v-card>
+    <div v-show="view === 'replies'">
+      <v-card v-if="statsLoading && !stats" outlined rounded="xl" class="pa-6">
+        <v-progress-linear indeterminate color="primary" />
+      </v-card>
 
-    <template v-else-if="stats">
-      <!-- Tiles -->
-      <v-row class="mb-2">
-        <v-col v-for="t in tiles" :key="t.label" cols="6" sm="4" md>
-          <v-card outlined rounded="xl" class="pa-4 fill-height">
-            <div class="text-caption grey--text text--darken-1">{{ t.label }}</div>
-            <div :class="['text-h5 font-weight-bold', t.color]">{{ t.value }}</div>
-            <div v-if="t.hint" class="text-caption grey--text">{{ t.hint }}</div>
-          </v-card>
-        </v-col>
-      </v-row>
-
-      <!-- Charts -->
-      <v-row class="mb-2">
-        <v-col cols="12" md="6">
-          <v-card outlined rounded="xl" class="pa-4 fill-height">
-            <div class="text-subtitle-2 font-weight-bold mb-2">Replies and errors per day</div>
-            <apexchart type="bar" height="240" :options="perDayOptions" :series="perDaySeries" />
-          </v-card>
-        </v-col>
-        <v-col cols="12" sm="6" md="3">
-          <v-card outlined rounded="xl" class="pa-4 fill-height">
-            <div class="text-subtitle-2 font-weight-bold mb-2">By channel</div>
-            <apexchart
-              v-if="channelSeries.some((n) => n > 0)"
-              type="donut"
-              height="240"
-              :options="channelOptions"
-              :series="channelSeries"
-            />
-            <div v-else class="text-body-2 grey--text">No replies.</div>
-          </v-card>
-        </v-col>
-        <v-col cols="12" sm="6" md="3">
-          <v-card outlined rounded="xl" class="pa-4 fill-height">
-            <div class="text-subtitle-2 font-weight-bold mb-2">Product lookups</div>
-            <apexchart
-              v-if="lookupSeries[0].data.length"
-              type="bar"
-              height="240"
-              :options="lookupOptions"
-              :series="lookupSeries"
-            />
-            <div v-else class="text-body-2 grey--text">No product lookups.</div>
-          </v-card>
-        </v-col>
-      </v-row>
-    </template>
-
-    <!-- Problems -->
-    <v-card v-if="stats && stats.replies" outlined rounded="xl" class="pa-6">
-      <div class="d-flex align-center mb-1">
-        <div class="text-subtitle-1 font-weight-bold">Problems</div>
-        <v-spacer />
-        <span v-if="problemsTotal" class="text-caption grey--text">
-          {{ problemsTotal }} in this period
-        </span>
-      </div>
-      <div class="text-body-2 grey--text text--darken-1 mb-4">
-        Errors and handoffs. After an error the customer may not have received
-        a proper answer, so open the chat.
-      </div>
-
-      <v-progress-linear v-if="problemsLoading" indeterminate color="primary" />
-      <v-alert v-else-if="problemsError" type="error" text dense rounded="lg" class="text-body-2 mb-0">
-        {{ problemsError }}
+      <v-alert v-else-if="statsError" type="error" outlined rounded="xl">
+        {{ statsError }}
+        <v-btn small text color="error" class="ml-2" @click="loadStats">Retry</v-btn>
       </v-alert>
-      <div v-else-if="!problems.length" class="text-body-2 grey--text">
-        No errors or handoffs in this period.
-      </div>
-      <template v-else>
-        <v-simple-table dense>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Channel</th>
-              <th>Customer message</th>
-              <th>What happened</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="p in problems" :key="p._id">
-              <td class="text-no-wrap">{{ formatDate(p.createdAt) }}</td>
-              <td>{{ PLATFORMS[p.platform] || p.platform }}</td>
-              <td class="message-cell" :title="p.customerText">{{ p.customerText }}</td>
-              <td class="problem-cell">
-                <v-chip x-small dark :color="statusInfo(p.status).color" class="mr-1">
-                  {{ statusInfo(p.status).label }}
-                </v-chip>
-                <span v-if="p.error" class="text-caption" :title="p.error">{{ p.error }}</span>
-              </td>
-              <td class="text-right text-no-wrap">
-                <v-btn
-                  v-if="p.chatId"
-                  small
-                  text
-                  rounded
-                  class="text-none"
-                  :to="`/dashboard/chat/${p.chatId}`"
-                >
-                  Open chat
-                </v-btn>
-                <v-btn small text rounded color="primary" class="text-none" @click="openTraceId = p._id">
-                  Why this answer
-                </v-btn>
-              </td>
-            </tr>
-          </tbody>
-        </v-simple-table>
-        <div v-if="pageCount > 1" class="d-flex justify-center mt-4">
-          <v-pagination v-model="page" :length="pageCount" total-visible="7" />
+
+      <v-card
+        v-else-if="stats && !stats.replies"
+        outlined
+        rounded="xl"
+        class="pa-10 text-center grey--text text--darken-1"
+      >
+        <v-icon large color="grey lighten-1">$activity</v-icon>
+        <div class="mt-2">
+          No live replies in this period yet. Traces are kept for 30 days.
         </div>
+      </v-card>
+
+      <template v-else-if="stats">
+        <!-- Tiles -->
+        <v-row class="mb-2">
+          <v-col v-for="t in tiles" :key="t.label" cols="6" sm="4" md>
+            <v-card outlined rounded="xl" class="pa-4 fill-height">
+              <div class="text-caption grey--text text--darken-1">{{ t.label }}</div>
+              <div :class="['text-h5 font-weight-bold', t.color]">{{ t.value }}</div>
+              <div v-if="t.hint" class="text-caption grey--text">{{ t.hint }}</div>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <!-- Charts -->
+        <v-row class="mb-2">
+          <v-col cols="12" md="6">
+            <v-card outlined rounded="xl" class="pa-4 fill-height">
+              <div class="text-subtitle-2 font-weight-bold mb-2">Replies and errors per day</div>
+              <apexchart type="bar" height="240" :options="perDayOptions" :series="perDaySeries" />
+            </v-card>
+          </v-col>
+          <v-col cols="12" sm="6" md="3">
+            <v-card outlined rounded="xl" class="pa-4 fill-height">
+              <div class="text-subtitle-2 font-weight-bold mb-2">By channel</div>
+              <apexchart
+                v-if="channelSeries.some((n) => n > 0)"
+                type="donut"
+                height="240"
+                :options="channelOptions"
+                :series="channelSeries"
+              />
+              <div v-else class="text-body-2 grey--text">No replies.</div>
+            </v-card>
+          </v-col>
+          <v-col cols="12" sm="6" md="3">
+            <v-card outlined rounded="xl" class="pa-4 fill-height">
+              <div class="text-subtitle-2 font-weight-bold mb-2">Product lookups</div>
+              <apexchart
+                v-if="lookupSeries[0].data.length"
+                type="bar"
+                height="240"
+                :options="lookupOptions"
+                :series="lookupSeries"
+              />
+              <div v-else class="text-body-2 grey--text">No product lookups.</div>
+            </v-card>
+          </v-col>
+        </v-row>
       </template>
-    </v-card>
+
+      <!-- Problems -->
+      <v-card v-if="stats && stats.replies" outlined rounded="xl" class="pa-6">
+        <div class="d-flex align-center mb-1">
+          <div class="text-subtitle-1 font-weight-bold">Problems</div>
+          <v-spacer />
+          <span v-if="problemsTotal" class="text-caption grey--text">
+            {{ problemsTotal }} in this period
+          </span>
+        </div>
+        <div class="text-body-2 grey--text text--darken-1 mb-4">
+          Errors and handoffs. After an error the customer may not have received
+          a proper answer, so open the chat.
+        </div>
+
+        <v-progress-linear v-if="problemsLoading" indeterminate color="primary" />
+        <v-alert v-else-if="problemsError" type="error" text dense rounded="lg" class="text-body-2 mb-0">
+          {{ problemsError }}
+        </v-alert>
+        <div v-else-if="!problems.length" class="text-body-2 grey--text">
+          No errors or handoffs in this period.
+        </div>
+        <template v-else>
+          <v-simple-table dense>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Channel</th>
+                <th>Customer message</th>
+                <th>What happened</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="p in problems" :key="p._id">
+                <td class="text-no-wrap">{{ formatDate(p.createdAt) }}</td>
+                <td>{{ PLATFORMS[p.platform] || p.platform }}</td>
+                <td class="message-cell" :title="p.customerText">{{ p.customerText }}</td>
+                <td class="problem-cell">
+                  <v-chip x-small dark :color="statusInfo(p.status).color" class="mr-1">
+                    {{ statusInfo(p.status).label }}
+                  </v-chip>
+                  <span v-if="p.error" class="text-caption" :title="p.error">{{ p.error }}</span>
+                </td>
+                <td class="text-right text-no-wrap">
+                  <v-btn
+                    v-if="p.chatId"
+                    small
+                    text
+                    rounded
+                    class="text-none"
+                    :to="`/dashboard/chat/${p.chatId}`"
+                  >
+                    Open chat
+                  </v-btn>
+                  <v-btn small text rounded color="primary" class="text-none" @click="openTraceId = p._id">
+                    Why this answer
+                  </v-btn>
+                </td>
+              </tr>
+            </tbody>
+          </v-simple-table>
+          <div v-if="pageCount > 1" class="d-flex justify-center mt-4">
+            <v-pagination v-model="page" :length="pageCount" total-visible="7" />
+          </div>
+        </template>
+      </v-card>
+    </div>
 
     <!-- Trace of one problem -->
     <v-dialog :value="!!openTraceId" max-width="720" scrollable @input="openTraceId = null">
@@ -231,6 +240,7 @@ import VueApexCharts from "vue-apexcharts";
 import apiClient from "@/service/axios";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import TraceDetails from "@/components/traces/TraceDetails.vue";
+import ConversationReport from "@/components/chats/ConversationReport.vue";
 import { apiError, formatDate } from "@/utils/knowledge";
 import {
   TRACES_API,
@@ -248,13 +258,14 @@ const PAGE_SIZE = 20;
 export default {
   name: "BotHealth",
 
-  components: { apexchart: VueApexCharts, ThingsToKnow, TraceDetails },
+  components: { apexchart: VueApexCharts, ThingsToKnow, TraceDetails, ConversationReport },
 
   data() {
     return {
       RANGES,
       PLATFORMS,
       days: 7,
+      view: "replies",
 
       stats: null,
       statsLoading: false,
@@ -445,6 +456,9 @@ export default {
 </script>
 
 <style scoped>
+.health-tabs {
+  border-bottom: 1px solid #e0e0e0;
+}
 .message-cell {
   max-width: 260px;
   overflow: hidden;

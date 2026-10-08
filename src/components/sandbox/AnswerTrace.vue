@@ -130,6 +130,12 @@
           </div>
         </template>
 
+        <!-- What the bot remembered from this customer's last conversation -->
+        <template v-if="trace.memory">
+          <div class="trace-heading">Remembered from the last conversation</div>
+          <pre class="trace-pre">{{ trace.memory }}</pre>
+        </template>
+
         <!-- Customer -->
         <template v-if="customer">
           <div class="trace-heading">Customer</div>
