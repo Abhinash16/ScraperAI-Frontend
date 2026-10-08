@@ -274,17 +274,40 @@ export const FEATURE_GUIDES = [
     summary:
       "Let the bot answer price and stock questions from your own product system.",
     steps: [
-      "Build one URL that answers both a search and a full listing, in the format below.",
-      "Open Integrations → API Config → Product API, enter the URL, and save. Saving test-calls it.",
-      "Try a customer message under \"Test with a customer message\", then ask \"what's available?\" in the sandbox.",
+      "Build one URL that answers both a search and a full listing. Use our format, or map your own field names under Field mapping.",
+      "Open Integrations → API Config → Product API, enter the URL and how we sign in, and use \"Try it\" before saving. It shows what we send, what comes back, and what the AI sees.",
+      "Save (saving test-calls your API), then ask \"what's available?\" in the sandbox.",
+      "Check Recent calls on the same page if answers stop showing live data.",
     ],
     thingsToKnow: [
       "The bot only states prices and stock from this data, never from your website text.",
       "The full listing must include prices and availability. Without availability, the bot can't say which products are in stock.",
       "Broad questions like \"which bikes are available?\" or \"cheapest petrol scooty\" are answered from the full listing, filtered to what's in stock.",
       "Respond within 3 seconds (the timeout setting). The full listing can be up to 10 MB.",
+      "Sign-in: headers (as before), a bearer token, a username and password (Basic), or an API key in the URL (e.g. ?api_key=…). Tokens, passwords and keys are encrypted and never shown again.",
+      "Extra parameters are sent with every call. Values and the URL can use {{query}} and {{limit}}, e.g. https://api.example.com/products/search/{{query}}.",
+      "Reliability: we retry once on connection errors, never wait longer than your timeout, and pause calls for 60 seconds after 5 failures in a minute, so customers aren't kept waiting. Recent calls on the settings page shows every call from the last 7 days.",
     ],
     format: true,
+  },
+  {
+    id: "customer-api",
+    name: "Customer API",
+    icon: "$user-search",
+    route: "/dashboard/integration?section=api-config&tab=customer-api",
+    summary:
+      "Let the WhatsApp bot look up a customer's bookings and bills by their phone number.",
+    steps: [
+      "Open Integrations → API Config → Customer API and enter your URL and the phone parameter name.",
+      "Choose how we sign in, and add any extra parameters your API needs.",
+      "Save with a test phone number (saving test-calls your API), then run a test with a phone number.",
+    ],
+    thingsToKnow: [
+      "Real chats look up customers on WhatsApp only, by the sender's number.",
+      "Sign-in: headers (as before), a bearer token, a username and password (Basic), or an API key in the URL (e.g. ?api_key=…). Tokens, passwords and keys are encrypted and never shown again.",
+      "Extra parameters are sent with every call. Values and the URL can use {{phone}}.",
+      "Reliability: we retry once on connection errors, never wait longer than your timeout, and pause calls for 60 seconds after 5 failures in a minute, so customers aren't kept waiting. Recent calls on the settings page shows every call from the last 7 days.",
+    ],
   },
   {
     id: "bot-health",
@@ -395,6 +418,28 @@ export const PRODUCT_API_FORMAT = {
   },
   "updated_at": "2026-10-08T07:22:39+05:30"
 }`,
+  mapping: {
+    intro:
+      "Your API doesn't have to match this format. Under Field mapping, tell us where each field is inside one of your products. For example, if your API sends:",
+    theirs: `{
+  "id": 17,
+  "title": "Ather 450X",
+  "pricing": { "monthly": 4999 },
+  "stock": { "state": "Waitlist" },
+  "specs": { "fuel_type": "electric" }
+}`,
+    map:
+      "map Name → title, Amount → pricing.monthly (label Monthly, per month), Stock value → stock.state with \"Waitlist\" meaning out of stock, and an attribute fuel → specs.fuel_type. We then read it as:",
+    ours: `{
+  "sku": "17",
+  "name": "Ather 450X",
+  "prices": [{ "label": "Monthly", "amount": 4999, "unit": "month", "currency": "INR" }],
+  "attributes": { "fuel": "electric" },
+  "availability": { "status": "out_of_stock" }
+}`,
+    stock:
+      "Stock values understood without mapping: in_stock, limited, out_of_stock, on_request, true/false, and numbers (0 = out of stock). A value we don't understand makes no stock claim, so the bot won't say the product is in stock.",
+  },
   notes: [
     "A plan with amount null and a note is shown as \"not offered\". The bot never invents a price.",
     "Waitlisted or no units free → out_of_stock. Only a few left → limited.",

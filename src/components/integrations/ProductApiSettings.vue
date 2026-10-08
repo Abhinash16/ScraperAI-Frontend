@@ -138,7 +138,11 @@
             </v-col>
           </v-row>
 
+          <ExtraParamsEditor v-model="paramRows" :placeholders="PLACEHOLDERS" class="mt-2" />
+
           <v-divider class="my-4" />
+
+          <ApiAuthEditor v-model="authForm" />
 
           <HeadersEditor v-model="headerRows" />
 
@@ -185,6 +189,26 @@
               />
             </v-col>
           </v-row>
+
+          <v-divider class="my-4" />
+
+          <div class="d-flex align-center">
+            <div class="group-title mb-0">Field mapping</div>
+            <v-chip v-if="mappingCount" x-small class="ml-2">{{ mappingCount }} mapped</v-chip>
+            <v-spacer />
+            <v-btn small text rounded color="primary" class="text-none" @click="showMapping = !showMapping">
+              <v-icon small class="mr-1">{{ showMapping ? "$chevron-up" : "$chevron-down" }}</v-icon>
+              {{ showMapping ? "Hide" : "Show" }}
+            </v-btn>
+          </div>
+          <v-expand-transition>
+            <FieldMapEditor
+              v-if="showMapping"
+              v-model="mapForm"
+              :suggestions="suggestions"
+              class="mt-3"
+            />
+          </v-expand-transition>
 
           <v-divider class="my-4" />
 
@@ -258,6 +282,12 @@
           </div>
         </v-form>
       </v-card>
+
+      <ProductApiPreview
+        :get-settings="previewSettings"
+        class="mb-6"
+        @first-item="onFirstItem"
+      />
 
       <ProductCatalogCard ref="catalog" class="mb-6" />
 
@@ -456,6 +486,8 @@
           it never quotes prices and sends customers to the product page.
         </div>
       </v-card>
+
+      <IntegrationCallLog kind="product" class="mt-6" />
     </template>
   </div>
 </template>
@@ -474,6 +506,20 @@ import {
 } from "@/utils/productModes";
 import ProductCatalogCard from "@/components/integrations/ProductCatalogCard.vue";
 import ProductApiFormat from "@/components/integrations/ProductApiFormat.vue";
+import ProductApiPreview from "@/components/integrations/ProductApiPreview.vue";
+import ApiAuthEditor from "@/components/integrations/ApiAuthEditor.vue";
+import ExtraParamsEditor from "@/components/integrations/ExtraParamsEditor.vue";
+import FieldMapEditor from "@/components/integrations/FieldMapEditor.vue";
+import IntegrationCallLog from "@/components/integrations/IntegrationCallLog.vue";
+import {
+  authToForm,
+  authFromForm,
+  pairsToRows,
+  rowsToPairs,
+  fieldMapToForm,
+  fieldMapFromForm,
+  keyPaths,
+} from "@/utils/integrationApi";
 import { formatProductCell } from "@/utils/productFormat";
 
 const ENDPOINT = "/clients/product-api-settings";
@@ -490,6 +536,11 @@ export default {
     OutputPanel,
     ProductCatalogCard,
     ProductApiFormat,
+    ProductApiPreview,
+    ApiAuthEditor,
+    ExtraParamsEditor,
+    FieldMapEditor,
+    IntegrationCallLog,
   },
 
   data() {
@@ -515,6 +566,13 @@ export default {
         triggerKeywords: [],
       },
       headerRows: [],
+      authForm: authToForm(),
+      paramRows: [],
+      mapForm: fieldMapToForm(),
+      showMapping: false,
+      suggestions: [],
+      PLACEHOLDERS: ["{{query}}", "{{limit}}"],
+      savedExtras: "",
       savedConfig: null,
       savedSnapshot: "",
       testQuery: "",
@@ -529,6 +587,11 @@ export default {
   computed: {
     dirty() {
       return this.snapshot() !== this.savedSnapshot;
+    },
+
+    mappingCount() {
+      const { fieldMap } = fieldMapFromForm(this.mapForm);
+      return fieldMap ? Object.keys(fieldMap).length : 0;
     },
 
     modeInfo() {
@@ -623,7 +686,59 @@ export default {
     },
 
     snapshot() {
-      return JSON.stringify({ form: this.form, headers: this.headerRows });
+      return JSON.stringify({
+        form: this.form,
+        headers: this.headerRows,
+        auth: this.authForm,
+        params: this.paramRows,
+        map: this.mapForm,
+      });
+    },
+
+    // The optional fields, as sent to the API, or { error }
+    extras() {
+      const auth = authFromForm(this.authForm);
+      if (auth.error) return { error: auth.error };
+      const params = rowsToPairs(this.paramRows);
+      if (params.error) return { error: params.error };
+      const map = fieldMapFromForm(this.mapForm);
+      if (map.error) return { error: map.error };
+      return {
+        values: { auth: auth.auth, extraParams: params.value, fieldMap: map.fieldMap },
+      };
+    },
+
+    // The whole form in the PUT shape, or { error }
+    settingsBody() {
+      const { headers, error } = headersFromRows(this.headerRows);
+      if (error) return { error };
+      const extras = this.extras();
+      if (extras.error) return { error: extras.error };
+      return {
+        body: {
+          enabled: this.form.enabled,
+          url: this.form.url,
+          method: this.form.method,
+          queryParam: this.form.queryParam || "q",
+          headers,
+          resultsPath: this.form.resultsPath,
+          maxResults: Number(this.form.maxResults),
+          timeout: Number(this.form.timeout),
+          cacheTtl: Number(this.form.cacheTtl),
+          triggerKeywords: this.form.triggerKeywords,
+          ...extras.values,
+        },
+      };
+    },
+
+    // Paths in their first product, offered in the mapping editor
+    onFirstItem(item) {
+      this.suggestions = keyPaths(item);
+    },
+
+    previewSettings() {
+      const { body, error } = this.settingsBody();
+      return error ? { error } : { settings: body };
     },
 
     applyConfig(data) {
@@ -643,6 +758,10 @@ export default {
           : [],
       };
       this.headerRows = rowsFromHeaders(cfg.headers);
+      this.authForm = authToForm(cfg.auth);
+      this.paramRows = pairsToRows(cfg.extraParams);
+      this.mapForm = fieldMapToForm(cfg.fieldMap);
+      this.savedExtras = JSON.stringify(this.extras().values || {});
       this.savedSnapshot = this.snapshot();
     },
 
@@ -673,24 +792,16 @@ export default {
       this.saveError = "";
       if (!this.$refs.form.validate()) return;
 
-      const { headers, error } = headersFromRows(this.headerRows);
+      const { body, error } = this.settingsBody();
       if (error) {
         this.saveError = error;
         return;
       }
-
-      const body = {
-        enabled: this.form.enabled,
-        url: this.form.url,
-        method: this.form.method,
-        queryParam: this.form.queryParam || "q",
-        headers,
-        resultsPath: this.form.resultsPath,
-        maxResults: Number(this.form.maxResults),
-        timeout: Number(this.form.timeout),
-        cacheTtl: Number(this.form.cacheTtl),
-        triggerKeywords: this.form.triggerKeywords,
-      };
+      // The optional fields go only when changed, so untouched setups stay as they are
+      const saved = JSON.parse(this.savedExtras || "{}");
+      ["auth", "extraParams", "fieldMap"].forEach((k) => {
+        if (JSON.stringify(body[k]) === JSON.stringify(saved[k])) delete body[k];
+      });
       if (this.form.enabled && this.testQuery) body.testQuery = this.testQuery;
 
       this.saving = true;

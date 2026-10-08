@@ -264,6 +264,7 @@ const APP_ICONS = {
   "message-circle-more": MessageCircleMore,
   "message-circle-warning": MessageCircleWarning,
   "message-circle-x": MessageCircleX,
+  "circle-x": CircleX,
   "message-square": MessageSquare,
   "message-square-check": MessageSquareCheck,
   "message-square-text": MessageSquareText,

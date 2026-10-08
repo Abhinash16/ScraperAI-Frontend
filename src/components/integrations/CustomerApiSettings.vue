@@ -84,7 +84,11 @@
             </v-col>
           </v-row>
 
+          <ExtraParamsEditor v-model="paramRows" :placeholders="PLACEHOLDERS" class="mt-2" />
+
           <v-divider class="my-4" />
+
+          <ApiAuthEditor v-model="authForm" />
 
           <HeadersEditor v-model="headerRows" />
 
@@ -256,6 +260,8 @@
           number). Results are cached for 5 minutes.
         </div>
       </v-card>
+
+      <IntegrationCallLog kind="customer" class="mt-6" />
     </template>
   </div>
 </template>
@@ -266,13 +272,29 @@ import HeadersEditor from "@/components/integrations/HeadersEditor.vue";
 import JsonTree from "@/components/integrations/JsonTree.vue";
 import OutputPanel from "@/components/integrations/OutputPanel.vue";
 import { rowsFromHeaders, headersFromRows } from "@/utils/apiHeaders";
+import ApiAuthEditor from "@/components/integrations/ApiAuthEditor.vue";
+import ExtraParamsEditor from "@/components/integrations/ExtraParamsEditor.vue";
+import IntegrationCallLog from "@/components/integrations/IntegrationCallLog.vue";
+import {
+  authToForm,
+  authFromForm,
+  pairsToRows,
+  rowsToPairs,
+} from "@/utils/integrationApi";
 
 const ENDPOINT = "/clients/customer-api-settings";
 
 export default {
   name: "CustomerApiSettings",
 
-  components: { HeadersEditor, JsonTree, OutputPanel },
+  components: {
+    HeadersEditor,
+    JsonTree,
+    OutputPanel,
+    ApiAuthEditor,
+    ExtraParamsEditor,
+    IntegrationCallLog,
+  },
 
   data() {
     return {
@@ -292,6 +314,10 @@ export default {
         timeout: 3000,
       },
       headerRows: [],
+      authForm: authToForm(),
+      paramRows: [],
+      PLACEHOLDERS: ["{{phone}}"],
+      savedExtras: "",
       savedConfig: null,
       savedSnapshot: "",
       testPhone: "",
@@ -328,7 +354,21 @@ export default {
     },
 
     snapshot() {
-      return JSON.stringify({ form: this.form, headers: this.headerRows });
+      return JSON.stringify({
+        form: this.form,
+        headers: this.headerRows,
+        auth: this.authForm,
+        params: this.paramRows,
+      });
+    },
+
+    // The optional fields, as sent to the API, or { error }
+    extras() {
+      const auth = authFromForm(this.authForm);
+      if (auth.error) return { error: auth.error };
+      const params = rowsToPairs(this.paramRows);
+      if (params.error) return { error: params.error };
+      return { values: { auth: auth.auth, extraParams: params.value } };
     },
 
     applyConfig(data) {
@@ -342,6 +382,9 @@ export default {
         timeout: cfg.timeout || 3000,
       };
       this.headerRows = rowsFromHeaders(cfg.headers);
+      this.authForm = authToForm(cfg.auth);
+      this.paramRows = pairsToRows(cfg.extraParams);
+      this.savedExtras = JSON.stringify(this.extras().values || {});
       this.savedSnapshot = this.snapshot();
     },
 
@@ -386,6 +429,16 @@ export default {
         headers,
         timeout: Number(this.form.timeout),
       };
+      const extras = this.extras();
+      if (extras.error) {
+        this.saveError = extras.error;
+        return;
+      }
+      // The optional fields go only when changed, so untouched setups stay as they are
+      const saved = JSON.parse(this.savedExtras || "{}");
+      Object.entries(extras.values).forEach(([k, v]) => {
+        if (JSON.stringify(v) !== JSON.stringify(saved[k])) body[k] = v;
+      });
       if (this.form.enabled && this.testPhone) body.testPhone = this.testPhone;
 
       this.saving = true;

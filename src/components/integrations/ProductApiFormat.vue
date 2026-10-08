@@ -14,6 +14,13 @@
     <div class="mb-2">{{ format.response }} Each item:</div>
     <pre class="format-example mb-4">{{ format.example }}</pre>
 
+    <div class="field-title">Using your own field names</div>
+    <div class="mb-2">{{ format.mapping.intro }}</div>
+    <pre class="format-example mb-2">{{ format.mapping.theirs }}</pre>
+    <div class="mb-2">{{ format.mapping.map }}</div>
+    <pre class="format-example mb-2">{{ format.mapping.ours }}</pre>
+    <div class="mb-4">{{ format.mapping.stock }}</div>
+
     <div class="field-title">Notes</div>
     <ul class="list mb-0">
       <li v-for="n in format.notes" :key="n">{{ n }}</li>

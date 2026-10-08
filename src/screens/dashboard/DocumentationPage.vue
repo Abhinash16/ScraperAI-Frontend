@@ -213,6 +213,11 @@ function formatLines() {
     ...f.calls.map((c) => `  - ${c.title}: ${c.request}. ${c.when} ${c.note}`),
     `  Response: ${f.response} Each item:`,
     ...f.example.split("\n").map((l) => `    ${l}`),
+    `  ${f.mapping.intro}`,
+    ...f.mapping.theirs.split("\n").map((l) => `    ${l}`),
+    `  ${f.mapping.map}`,
+    ...f.mapping.ours.split("\n").map((l) => `    ${l}`),
+    `  ${f.mapping.stock}`,
     "  Notes:",
     ...f.notes.map((n) => `  - ${n}`),
   ];
