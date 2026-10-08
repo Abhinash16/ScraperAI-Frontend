@@ -52,7 +52,7 @@ These screens follow the backend's API on the `feat/w0-widget-sessions` branch o
 - **Bot Profile** (`/api/clients/bot-profile`) — draft → publish with versions. The sandbox tests the draft.
 - **Quality** (`/api/eval`, `settings:manage`) — test questions and graded runs compared with a baseline.
 - **Setup** (`/api/setup`, `settings:manage`) — go-live wizard. New sources are staged (invisible to live chats) until a switch-over. The sandbox and test runs take `knowledgeMode: "live" | "staging"`.
-- **Guide copy** — all client-facing feature text (the Guide hub and the "Things to know" cards rendered by `components/ThingsToKnow.vue`) lives in `src/content/featureGuides.js`. Update it when a feature's behaviour changes.
+- **Guide copy** — all client-facing feature text (the Guide hub and the per-page help) lives in `src/content/featureGuides.js`. Update it when a feature's behaviour changes. A page declares its topic with `<ThingsToKnow feature="..." />`, which renders nothing in the page: the shell shows an "About this page" button in the breadcrumb strip that opens the topic in a side panel (`components/layout/HelpPanel.vue`, store in `utils/pageHelp.js`).
 
 The router's `meta.permission` check only guards routes. Screens hide buttons with `can(perms, key)` from `utils/knowledge.js`, after `loadMyPermissions()`.
 

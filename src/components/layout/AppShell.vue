@@ -249,6 +249,28 @@
             <span class="grey--text">/</span>
           </template>
         </v-breadcrumbs>
+        <v-spacer />
+        <v-badge
+          v-if="helpFeature"
+          :value="!seenHelp[helpFeature]"
+          dot
+          overlap
+          color="primary"
+          offset-x="10"
+          offset-y="10"
+        >
+          <v-btn
+            small
+            text
+            color="primary"
+            :icon="$vuetify.breakpoint.xsOnly"
+            aria-label="About this page"
+            @click="openHelp"
+          >
+            <v-icon size="16" :left="!$vuetify.breakpoint.xsOnly">$info</v-icon>
+            <span v-if="!$vuetify.breakpoint.xsOnly">About this page</span>
+          </v-btn>
+        </v-badge>
       </v-sheet>
       <div v-if="tabs.length > 1" class="app-tabs">
         <v-tabs
@@ -273,6 +295,9 @@
         <slot />
       </div>
     </div>
+
+    <!-- PAGE HELP -->
+    <HelpPanel v-model="helpOpen" :feature="helpFeature" />
 
     <!-- LOGOUT -->
     <v-dialog v-model="logoutDialog" max-width="380">
@@ -303,6 +328,8 @@
 
 <script>
 import GlobalSearch from "@/components/layout/GlobalSearch.vue";
+import HelpPanel from "@/components/layout/HelpPanel.vue";
+import { currentHelp, markSeen, readSeen } from "@/utils/pageHelp";
 import NavLink from "@/components/layout/NavLink.vue";
 import apiClient, { setAuthToken } from "@/service/axios";
 import { initialsOf } from "@/utils/team";
@@ -329,10 +356,13 @@ function readCollapsed() {
 export default {
   name: "AppShell",
 
-  components: { GlobalSearch, NavLink },
+  components: { GlobalSearch, HelpPanel, NavLink },
 
   data: () => ({
     drawer: false,
+    helpOpen: false,
+    // Help topics already opened in this browser (hides the "new" dot)
+    seenHelp: readSeen(),
     THEME_OPTIONS: [
       { value: "light", label: "Light", icon: "$sun" },
       { value: "dark", label: "Dark", icon: "$moon" },
@@ -350,6 +380,11 @@ export default {
   }),
 
   computed: {
+    // Help topic of the page on screen (declared by <ThingsToKnow>)
+    helpFeature() {
+      return currentHelp();
+    },
+
     themePref() {
       return themeState.pref;
     },
@@ -488,6 +523,12 @@ export default {
     },
 
     setThemePref,
+
+    openHelp() {
+      this.helpOpen = true;
+      markSeen(this.helpFeature);
+      this.seenHelp = { ...this.seenHelp, [this.helpFeature]: true };
+    },
 
     toggleMini() {
       this.collapsed = !this.collapsed;
