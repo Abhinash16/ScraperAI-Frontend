@@ -498,7 +498,7 @@
               Send a message when an answer takes a while
             </div>
             <div class="text-body-2 grey--text text--darken-1">
-              If an answer takes longer than this, the customer gets this
+              If an answer takes longer than this, the customer gets a short
               message first, then the answer. Only in live website and
               WhatsApp chats, not the sandbox.
             </div>
@@ -512,52 +512,56 @@
             :label="form.conversation.holdingEnabled ? 'On' : 'Off'"
           />
         </div>
-        <v-row dense class="mb-4">
-          <v-col cols="12" sm="9">
-            <v-text-field
-              v-model="form.conversation.holdingText"
-              label="Message"
-              :placeholder="DEFAULT_HOLDING_TEXT"
-              persistent-placeholder
-              outlined
-              dense
-              :counter="LINE_MAX"
-              :disabled="!form.conversation.holdingEnabled"
-            />
-          </v-col>
-          <v-col cols="12" sm="3">
-            <v-text-field
-              v-model="form.conversation.holdingSeconds"
-              label="After (seconds)"
-              :placeholder="String(DEFAULT_HOLDING_SECONDS)"
-              persistent-placeholder
-              type="number"
-              min="3"
-              max="30"
-              outlined
-              dense
-              :rules="[intRule(3, 30)]"
-              :disabled="!form.conversation.holdingEnabled"
-            />
-          </v-col>
-        </v-row>
+        <template v-if="form.conversation.holdingEnabled">
+          <v-radio-group v-model="form.conversation.holdingMode" class="mt-2 mb-2" hide-details>
+            <v-radio v-for="m in MESSAGE_MODES" :key="m.value" :value="m.value" class="mb-2">
+              <template #label>
+                <div>
+                  <div class="text-body-2 font-weight-bold black--text">{{ m.text }}</div>
+                  <div class="text-caption grey--text">{{ m.help }}</div>
+                </div>
+              </template>
+            </v-radio>
+          </v-radio-group>
+          <v-row dense class="mt-2 mb-4">
+            <v-col v-if="form.conversation.holdingMode === 'fixed'" cols="12" sm="9">
+              <v-text-field
+                v-model="form.conversation.holdingText"
+                label="Message"
+                outlined
+                dense
+                :counter="LINE_MAX"
+              />
+            </v-col>
+            <v-col cols="12" sm="3">
+              <v-text-field
+                v-model="form.conversation.holdingSeconds"
+                label="After (seconds)"
+                type="number"
+                min="3"
+                max="30"
+                outlined
+                dense
+                :rules="[intRule(3, 30)]"
+              />
+            </v-col>
+          </v-row>
+        </template>
 
-        <v-divider class="mb-6" />
+        <v-divider class="my-6" />
 
         <div class="text-subtitle-2 font-weight-bold">
           AI replies per chat per day before handing off
         </div>
         <div class="text-body-2 grey--text text--darken-1 mb-4">
           After this many AI replies in one chat within 24 hours, the bot stops
-          and sends the handoff message. Leave empty to use your account limit.
+          and sends the handoff message.
         </div>
         <v-row dense class="mb-2">
           <v-col cols="12" sm="4">
             <v-text-field
               v-model="form.conversation.limitWeb"
               label="Website"
-              :placeholder="String(DEFAULT_LIMITS.web)"
-              persistent-placeholder
               type="number"
               min="1"
               max="500"
@@ -570,8 +574,6 @@
             <v-text-field
               v-model="form.conversation.limitWhatsapp"
               label="WhatsApp"
-              :placeholder="String(DEFAULT_LIMITS.whatsapp)"
-              persistent-placeholder
               type="number"
               min="1"
               max="500"
@@ -582,15 +584,26 @@
           </v-col>
         </v-row>
 
+        <div class="text-subtitle-2 font-weight-bold mb-1">Handoff message</div>
+        <v-radio-group v-model="form.conversation.handoffMode" class="mt-2 mb-2" hide-details>
+          <v-radio v-for="m in MESSAGE_MODES" :key="m.value" :value="m.value" class="mb-2">
+            <template #label>
+              <div>
+                <div class="text-body-2 font-weight-bold black--text">{{ m.text }}</div>
+                <div class="text-caption grey--text">{{ m.help }}</div>
+              </div>
+            </template>
+          </v-radio>
+        </v-radio-group>
         <v-text-field
+          v-if="form.conversation.handoffMode === 'fixed'"
           v-model="form.conversation.handoffMessage"
-          label="Handoff message"
-          :placeholder="DEFAULT_HANDOFF.web"
-          persistent-placeholder
-          :hint="`Leave empty to use the defaults. On WhatsApp: &quot;${DEFAULT_HANDOFF.whatsapp}&quot;`"
+          label="Message"
+          :hint="`Used on both the website and WhatsApp. Clear it to use each channel's default; WhatsApp's is &quot;${defaultHandoff.whatsapp}&quot;`"
           persistent-hint
           outlined
           dense
+          class="mt-2"
           :counter="LINE_MAX"
         />
       </v-card>
@@ -727,14 +740,34 @@ const POLICY_MAX = 2000;
 const CUSTOM_MAX = 10000;
 const DEFAULT_THRESHOLD = 0.6;
 const DEFAULT_TIMEZONE = "Asia/Kolkata";
-// Used by the backend when a conversation field is left empty
-const DEFAULT_HOLDING_TEXT = "Let me check that for you, one moment please.";
-const DEFAULT_HOLDING_SECONDS = 6;
-const DEFAULT_LIMITS = { web: 20, whatsapp: 10 };
-const DEFAULT_HANDOFF = {
-  web: "I will connect you with our support team shortly.",
-  whatsapp: "I will assign this to available chat support. They will help you shortly.",
+// Fallback for data.defaults.conversation, which GET bot-profile returns
+const CONVERSATION_DEFAULTS = {
+  holdingMessage: {
+    enabled: true,
+    mode: "auto",
+    text: "Let me check that for you, one moment please.",
+    afterSeconds: 6,
+  },
+  aiReplyLimit: { web: 20, whatsapp: 10 },
+  handoffMode: "auto",
+  handoffMessage: {
+    web: "I will connect you with our support team shortly.",
+    whatsapp: "I will assign this to available chat support. They will help you shortly.",
+  },
 };
+
+const MESSAGE_MODES = [
+  {
+    value: "auto",
+    text: "Written by the bot (Auto, recommended)",
+    help: "The bot writes this message for each customer, in their language. If that fails, the fixed text is used.",
+  },
+  {
+    value: "fixed",
+    text: "Fixed text",
+    help: "Customers get exactly the text you write.",
+  },
+];
 
 const TABS = [
   { id: "identity", label: "Identity", icon: "$user" },
@@ -835,7 +868,9 @@ const clean = (list) => arr(list).map((s) => String(s).trim()).filter(Boolean);
 
 // API profile → editable form. Lists of sentences become one-per-line text,
 // and hours become one entry per weekday.
-function toForm(profile = {}) {
+// Empty conversation fields are filled with the defaults, so every field shows
+// its real value.
+function toForm(profile = {}, defaults = CONVERSATION_DEFAULTS) {
   const identity = profile.identity || {};
   const facts = profile.facts || {};
   const rules = profile.rules || {};
@@ -843,7 +878,11 @@ function toForm(profile = {}) {
   const conversation = profile.conversation || {};
   const holding = conversation.holdingMessage || {};
   const limit = conversation.aiReplyLimit || {};
-  const numStr = (v) => (typeof v === "number" ? String(v) : "");
+  const dHolding = defaults.holdingMessage || CONVERSATION_DEFAULTS.holdingMessage;
+  const dLimit = defaults.aiReplyLimit || CONVERSATION_DEFAULTS.aiReplyLimit;
+  const dHandoff = defaults.handoffMessage || CONVERSATION_DEFAULTS.handoffMessage;
+  const numStr = (v, d) => String(typeof v === "number" ? v : d ?? "");
+  const mode = (v, d) => (v === "fixed" || v === "auto" ? v : d || "auto");
 
   const hours = {};
   DAYS.forEach(({ id }) => {
@@ -897,11 +936,13 @@ function toForm(profile = {}) {
     },
     conversation: {
       holdingEnabled: holding.enabled !== false,
-      holdingText: str(holding.text),
-      holdingSeconds: numStr(holding.afterSeconds),
-      limitWeb: numStr(limit.web),
-      limitWhatsapp: numStr(limit.whatsapp),
-      handoffMessage: str(conversation.handoffMessage),
+      holdingMode: mode(holding.mode, dHolding.mode),
+      holdingText: str(holding.text) || str(dHolding.text),
+      holdingSeconds: numStr(holding.afterSeconds, dHolding.afterSeconds),
+      limitWeb: numStr(limit.web, dLimit.web),
+      limitWhatsapp: numStr(limit.whatsapp, dLimit.whatsapp),
+      handoffMode: mode(conversation.handoffMode, defaults.handoffMode),
+      handoffMessage: str(conversation.handoffMessage) || str(dHandoff.web),
     },
     customInstructions: str(profile.customInstructions),
   };
@@ -951,6 +992,7 @@ function toProfile(form) {
     conversation: {
       holdingMessage: {
         enabled: form.conversation.holdingEnabled,
+        mode: form.conversation.holdingMode,
         text: form.conversation.holdingText.trim() || null,
         afterSeconds: toInt(form.conversation.holdingSeconds),
       },
@@ -958,6 +1000,7 @@ function toProfile(form) {
         web: toInt(form.conversation.limitWeb),
         whatsapp: toInt(form.conversation.limitWhatsapp),
       },
+      handoffMode: form.conversation.handoffMode,
       handoffMessage: form.conversation.handoffMessage.trim() || null,
     },
     customInstructions: form.customInstructions.trim(),
@@ -997,10 +1040,8 @@ export default {
       LINE_MAX,
       CUSTOM_MAX,
       DEFAULT_THRESHOLD,
-      DEFAULT_HOLDING_TEXT,
-      DEFAULT_HOLDING_SECONDS,
-      DEFAULT_LIMITS,
-      DEFAULT_HANDOFF,
+      MESSAGE_MODES,
+      defaults: CONVERSATION_DEFAULTS,
       timezones: supportedTimezones(),
 
       tab: "identity",
@@ -1032,6 +1073,10 @@ export default {
   computed: {
     dirty() {
       return JSON.stringify(toProfile(this.form)) !== this.savedJson;
+    },
+
+    defaultHandoff() {
+      return this.defaults.handoffMessage || CONVERSATION_DEFAULTS.handoffMessage;
     },
 
     statusChip() {
@@ -1079,7 +1124,8 @@ export default {
     },
 
     apply(data) {
-      this.form = toForm(data?.draft || {});
+      this.defaults = data?.defaults?.conversation || CONVERSATION_DEFAULTS;
+      this.form = toForm(data?.draft || {}, this.defaults);
       this.savedJson = JSON.stringify(toProfile(this.form));
       this.version = data?.version || 0;
       this.publishedVersion = data?.publishedVersion || null;
@@ -1106,7 +1152,7 @@ export default {
     },
 
     discard() {
-      this.form = toForm(JSON.parse(this.savedJson));
+      this.form = toForm(JSON.parse(this.savedJson), this.defaults);
       this.actionError = "";
     },
 
