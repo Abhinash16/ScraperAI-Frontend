@@ -1,261 +1,374 @@
 <template>
   <div>
-    <!-- Header Section -->
-    <v-row class="mb-6">
-      <v-col cols="auto">
-        <v-btn icon text color="primary" @click="$router.back()">
-          <v-icon>$arrow-left</v-icon>
-        </v-btn>
-      </v-col>
-      <v-col>
-        <div>
-          <h1 class="text-h5 font-weight-bold mb-1">Batch Call Analysis</h1>
-          <p class="text-subtitle-2 grey--text mb-0">
-            Insights and performance metrics from processed calls
-          </p>
-          <p>{{ batchInfo.batchName }}</p>
-        </div>
-      </v-col>
-    </v-row>
+    <v-btn
+      text
+      small
+      color="grey darken-2"
+      class="mb-3 px-2"
+      to="/dashboard/call-batches"
+    >
+      <v-icon left size="16">$arrow-left</v-icon>
+      All batches
+    </v-btn>
 
-    <!-- Batch Summary Card -->
-    <v-card outlined rounded="lg" class="mb-8 overflow-hidden">
-      <v-card-text class="pa-0">
-        <v-expansion-panels flat>
-          <v-expansion-panel>
-            <v-expansion-panel-header class="pa-6">
-              <div class="d-flex align-center w-100">
-                <!-- Quality Score Badge -->
-                <div class="d-flex flex-column align-center mr-6">
-                  <v-avatar
-                    :color="
-                      batchInfo.averageQualityScore >= 4 ? 'success' : 'error'
-                    "
-                    size="80"
-                    class="elevation-2"
-                  >
-                    <span class="text-h5 font-weight-bold white--text">
-                      {{
-                        Math.round(batchInfo.averageQualityScore * 100) / 100 ||
-                        "-"
-                      }}
-                    </span>
-                  </v-avatar>
-                  <span class="text-caption grey--text mt-2"
-                    >Quality Score</span
-                  >
-                </div>
-
-                <!-- Summary Content -->
-                <div class="flex-grow-1">
-                  <h3 class="text-h6 font-weight-medium mb-2">
-                    {{ batchInfo.batchSummary }}
-                  </h3>
-                  <div class="d-flex gap-4 flex-wrap">
-                    <div>
-                      <span class="text-caption grey--text">Total Calls</span>
-                      <p class="text-subtitle-1 font-weight-bold">
-                        {{ calls.length }}
-                      </p>
-                    </div>
-                    <div>
-                      <span class="text-caption grey--text">Success Rate</span>
-                      <p class="text-subtitle-1 font-weight-bold success--text">
-                        {{ successRate }}%
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </v-expansion-panel-header>
-
-            <v-expansion-panel-content>
-              <v-divider class="mb-6" />
-
-              <div class="mb-2">
-                <h4 class="text-subtitle-1 font-weight-bold mb-4">
-                  <v-icon small class="mr-2">$lightbulb</v-icon>
-                  Key Insights & Recommendations
-                </h4>
-              </div>
-
-              <v-row>
-                <v-col
-                  cols="12"
-                  md="6"
-                  v-for="(insight, index) in batchInfo.batchInsights"
-                  :key="index"
-                >
-                  <v-card outlined rounded="lg" class="h-100">
-                    <v-card-text class="pa-4">
-                      <div class="d-flex align-center mb-3">
-                        <v-icon small color="primary" class="mr-2">
-                          $circle-alert
-                        </v-icon>
-                        <span class="font-weight-bold text-body-2">
-                          {{ insight.issue }}
-                        </span>
-                      </div>
-
-                      <v-chip
-                        small
-                        outlined
-                        label
-                        color="grey"
-                        class="mb-4 rounded-lg"
-                      >
-                        <v-icon small left>$repeat</v-icon>
-                        {{ insight.frequency }} occurrences
-                      </v-chip>
-
-                      <div
-                        class="text-caption grey--text mb-2 font-weight-bold"
-                      >
-                        Suggested Action
-                      </div>
-
-                      <p class="text-body-2 mb-0">
-                        {{ insight.suggestion }}
-                      </p>
-                    </v-card-text>
-                  </v-card>
-                </v-col>
-              </v-row>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </v-card-text>
-    </v-card>
-
-    <!-- Calls Table Section -->
-    <div>
-      <h3 class="text-h6 font-weight-bold mb-4">Call Details</h3>
-
-      <v-card outlined rounded="lg" class="overflow-hidden">
-        <v-data-table
-          :headers="callHeaders"
-          :items="calls"
-          :loading="loading"
-          loading-text="Loading calls..."
-          no-data-text="No calls available"
-          mobile-breakpoint="600"
-          class="elevation-0"
+    <!-- HEADER -->
+    <div class="d-flex flex-wrap align-center mb-4">
+      <div class="mr-4 mb-2 overflow-hidden">
+        <h1
+          class="text-h6 font-weight-bold grey--text text--darken-4 text-break"
         >
-          <!-- Agent Name -->
-          <template v-slot:[`item.agentName`]="{ item }">
-            <div class="d-flex align-center">
-              <v-avatar size="32" color="primary" class="mr-3">
-                <span class="white--text text-caption font-weight-bold">
-                  {{ item.agentName.charAt(0) }}
-                </span>
-              </v-avatar>
-              <span class="font-weight-medium">{{ item.agentName }}</span>
-            </div>
-          </template>
-
-          <!-- Recording -->
-          <template v-slot:[`item.recordingUrl`]="{ item }">
-            <v-btn
-              small
-              color="primary"
-              text
-              :href="item.recordingUrl"
-              target="_blank"
-              @click.stop
-            >
-              <v-icon left small>$headphones</v-icon>
-              Open
-            </v-btn>
-          </template>
-
-          <!-- Status -->
-          <template v-slot:[`item.status`]="{ item }">
-            <v-chip
-              small
-              :color="statusColor(item.status)"
-              class="rounded-lg"
-              :text-color="statusTextColor(item.status)"
-              label
-            >
-              <v-icon left small>{{ statusIcon(item.status) }}</v-icon>
-              {{ item.status | capitalize }}
-            </v-chip>
-          </template>
-
-          <!-- Quality Score -->
-          <template v-slot:[`item.qualityScore`]="{ item }">
-            <div class="">
-              <!-- <v-progress-linear
-                :value="(item.qualityScore / 100) * 100"
-                :color="item.qualityScore >= 4 ? 'success' : 'error'"
-                height="4"
-                class="mr-2"
-                style="width: 60px"
-              /> -->
-              <span
-                :class="
-                  item.qualityScore >= 4 ? 'success--text' : 'error--text'
-                "
-                class="font-weight-bold text-body-2"
-              >
-                {{ item.qualityScore || "-" }}
-              </span>
-            </div>
-          </template>
-
-          <!-- Actions -->
-          <template v-slot:[`item.actions`]="{ item }">
-            <div class="gap-2">
-              <v-btn
-                v-if="item.status === 'failed'"
-                small
-                color="primary"
-                outlined
-                rounded
-                :loading="retryingId === item._id"
-                @click="retryCall(item._id)"
-              >
-                <v-icon small left>$refresh-cw</v-icon>
-                Retry
-              </v-btn>
-
-              <v-btn
-                v-if="item.status === 'completed'"
-                small
-                color="primary"
-                outlined
-                rounded
-                @click="viewReport(item)"
-              >
-                <v-icon small left>$file-text</v-icon>
-                Report
-              </v-btn>
-
-              <v-menu offset-y v-if="item.status === 'processing'">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn small icon v-bind="attrs" v-on="on">
-                    <v-icon>$ellipsis-vertical</v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                  <v-list-item @click="viewReport(item)">
-                    <v-list-item-icon>
-                      <v-icon>$file-text</v-icon>
-                    </v-list-item-icon>
-                    <v-list-item-title>View Details</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </div>
-          </template>
-        </v-data-table>
-      </v-card>
+          {{ batchInfo.batchName || "Call batch" }}
+        </h1>
+        <div class="text-body-2 grey--text text--darken-1">
+          How the calls in this batch went, and what to improve.
+        </div>
+      </div>
+      <v-spacer />
+      <v-btn
+        small
+        outlined
+        color="primary"
+        class="mb-2"
+        :loading="loading"
+        @click="fetchBatch"
+      >
+        <v-icon left size="14">$refresh-cw</v-icon>
+        Refresh
+      </v-btn>
     </div>
+
+    <!-- LOADING -->
+    <template v-if="loading && !calls.length">
+      <v-row dense class="mb-3">
+        <v-col v-for="n in 4" :key="n" cols="6" md="3">
+          <v-card outlined rounded="lg" class="pa-3">
+            <v-skeleton-loader type="list-item-avatar-two-line" />
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-card outlined rounded="lg" class="pa-4">
+        <v-skeleton-loader
+          type="paragraph, list-item-two-line, list-item-two-line"
+        />
+      </v-card>
+    </template>
+
+    <template v-else>
+      <!-- SUMMARY TILES -->
+      <v-row dense class="mb-3">
+        <v-col cols="6" md="3">
+          <v-card
+            outlined
+            rounded="lg"
+            class="d-flex align-center pa-4 fill-height"
+          >
+            <v-progress-circular
+              :value="scoreValue * 20"
+              :color="
+                scoreValue
+                  ? scoreValue >= 4
+                    ? 'success'
+                    : 'error'
+                  : 'grey lighten-2'
+              "
+              size="48"
+              width="5"
+              class="mr-3 flex-shrink-0"
+            >
+              <v-icon size="16" :color="scoreValue >= 4 ? 'success' : 'error'"
+                >$star</v-icon
+              >
+            </v-progress-circular>
+            <div>
+              <div
+                class="text-h6 font-weight-bold"
+                :class="scoreText(scoreValue)"
+              >
+                {{ formatScore(scoreValue) }}
+              </div>
+              <div class="text-caption grey--text text--darken-1">
+                Quality score
+              </div>
+            </div>
+          </v-card>
+        </v-col>
+        <v-col v-for="t in tiles" :key="t.label" cols="6" md="3">
+          <v-card
+            outlined
+            rounded="lg"
+            class="d-flex align-center pa-4 fill-height"
+          >
+            <v-avatar
+              size="44"
+              tile
+              :color="`${t.tone} lighten-5`"
+              class="rounded-lg mr-3 flex-shrink-0"
+            >
+              <v-icon size="22" :color="t.tone">{{ t.icon }}</v-icon>
+            </v-avatar>
+            <div>
+              <div class="text-h6 font-weight-bold grey--text text--darken-4">
+                {{ t.value }}
+              </div>
+              <div class="text-caption grey--text text--darken-1">
+                {{ t.label }}
+              </div>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <!-- SUMMARY + INSIGHTS -->
+      <v-card
+        v-if="batchInfo.batchSummary || insights.length"
+        outlined
+        rounded="lg"
+        class="mb-4"
+      >
+        <div v-if="batchInfo.batchSummary" class="d-flex align-start pa-5">
+          <v-avatar
+            size="36"
+            tile
+            color="primary lighten-5"
+            class="rounded-lg mr-3 flex-shrink-0"
+          >
+            <v-icon size="18" color="primary">$file-text</v-icon>
+          </v-avatar>
+          <div>
+            <div
+              class="text-caption font-weight-bold text-uppercase grey--text mb-1"
+            >
+              Summary
+            </div>
+            <div class="text-body-2 grey--text text--darken-3 text-break">
+              {{ batchInfo.batchSummary }}
+            </div>
+          </div>
+        </div>
+
+        <template v-if="insights.length">
+          <v-divider />
+          <div class="d-flex align-center px-5 pt-4">
+            <v-icon size="18" color="amber darken-2" class="mr-2"
+              >$lightbulb</v-icon
+            >
+            <span
+              class="text-subtitle-2 font-weight-bold grey--text text--darken-4"
+            >
+              Key insights and recommendations
+            </span>
+          </div>
+          <v-row dense class="pa-4">
+            <v-col
+              v-for="(insight, index) in insights"
+              :key="index"
+              cols="12"
+              md="6"
+            >
+              <v-card outlined rounded="lg" class="pa-4 fill-height">
+                <div class="d-flex align-start mb-2">
+                  <v-icon
+                    size="16"
+                    color="error"
+                    class="mr-2 mt-1 flex-shrink-0"
+                    >$circle-alert</v-icon
+                  >
+                  <span
+                    class="text-body-2 font-weight-bold grey--text text--darken-4 text-break"
+                  >
+                    {{ insight.issue }}
+                  </span>
+                </div>
+                <v-chip
+                  x-small
+                  label
+                  color="grey lighten-4"
+                  class="font-weight-bold mb-3"
+                >
+                  <v-icon left size="10">$repeat</v-icon>
+                  {{ insight.frequency }} occurrence{{
+                    insight.frequency === 1 ? "" : "s"
+                  }}
+                </v-chip>
+                <v-sheet color="green lighten-5" rounded="lg" class="pa-3">
+                  <div
+                    class="text-caption font-weight-bold green--text text--darken-2 mb-1"
+                  >
+                    Suggested action
+                  </div>
+                  <div class="text-body-2 grey--text text--darken-3 text-break">
+                    {{ insight.suggestion }}
+                  </div>
+                </v-sheet>
+              </v-card>
+            </v-col>
+          </v-row>
+        </template>
+      </v-card>
+
+      <!-- CALLS -->
+      <v-card outlined rounded="lg" class="px-3 py-2 mb-4">
+        <v-row dense align="center">
+          <v-col cols="12" md="auto" class="overflow-x-auto">
+            <v-btn-toggle
+              v-model="statusFilter"
+              mandatory
+              dense
+              color="success"
+            >
+              <v-btn
+                v-for="f in STATUS_FILTERS"
+                :key="f.value"
+                :value="f.value"
+                small
+              >
+                {{ f.label }}
+                <span class="grey--text ml-1">({{ countFor(f.value) }})</span>
+              </v-btn>
+            </v-btn-toggle>
+          </v-col>
+          <v-spacer />
+          <v-col cols="12" sm="6" md="4">
+            <v-text-field
+              v-model="search"
+              placeholder="Search agents"
+              prepend-inner-icon="$search"
+              outlined
+              dense
+              clearable
+              hide-details
+            />
+          </v-col>
+        </v-row>
+      </v-card>
+
+      <v-card
+        v-if="!filteredCalls.length"
+        outlined
+        rounded="lg"
+        class="d-flex flex-column align-center text-center px-6 py-10"
+      >
+        <v-avatar color="grey lighten-4" size="56" class="mb-3">
+          <v-icon size="24" color="grey">$phone</v-icon>
+        </v-avatar>
+        <div class="text-body-2 font-weight-bold grey--text text--darken-3">
+          {{
+            calls.length
+              ? "No calls match these filters"
+              : "No calls in this batch"
+          }}
+        </div>
+      </v-card>
+
+      <v-card
+        v-for="item in filteredCalls"
+        :key="item._id"
+        outlined
+        rounded="lg"
+        class="d-flex flex-wrap align-center pa-4 mb-3"
+      >
+        <div class="d-flex align-center flex-grow-1 mr-4 overflow-hidden">
+          <v-avatar
+            size="40"
+            color="primary lighten-5"
+            class="mr-3 flex-shrink-0"
+          >
+            <span class="primary--text text-body-2 font-weight-bold">{{
+              initialOf(item.agentName)
+            }}</span>
+          </v-avatar>
+          <div class="overflow-hidden">
+            <div
+              class="text-body-2 font-weight-bold grey--text text--darken-4 text-truncate"
+            >
+              {{ item.agentName || "Unknown agent" }}
+            </div>
+            <div class="d-flex flex-wrap align-center mt-1">
+              <v-chip
+                x-small
+                label
+                :color="statusColor(item.status)"
+                text-color="white"
+                class="font-weight-bold mr-2"
+              >
+                <v-icon left size="10">{{ statusIcon(item.status) }}</v-icon>
+                {{ item.status | capitalize }}
+              </v-chip>
+              <v-chip v-if="item.language" x-small label outlined class="mr-2">
+                <v-icon left size="10">$globe</v-icon>
+                {{ item.language }}
+              </v-chip>
+              <a
+                v-if="item.recordingUrl"
+                :href="item.recordingUrl"
+                target="_blank"
+                rel="noopener"
+                class="d-inline-flex align-center text-caption primary--text text-decoration-none"
+              >
+                <v-icon size="12" color="primary" class="mr-1"
+                  >$headphones</v-icon
+                >
+                Recording
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex align-center ml-auto mt-3 mt-sm-0">
+          <div class="text-right mr-4">
+            <div
+              class="text-h6 font-weight-bold"
+              :class="scoreText(item.qualityScore)"
+            >
+              {{ formatScore(item.qualityScore) }}
+            </div>
+            <div class="text-caption grey--text">Score</div>
+          </div>
+          <v-btn
+            v-if="item.status === 'failed'"
+            small
+            outlined
+            color="primary"
+            :loading="retryingId === item._id"
+            @click="retryCall(item._id)"
+          >
+            <v-icon left size="14">$refresh-cw</v-icon>
+            Retry
+          </v-btn>
+          <v-btn
+            v-else-if="item.status === 'completed'"
+            small
+            depressed
+            color="primary"
+            @click="viewReport(item)"
+          >
+            <v-icon left size="14">$file-text</v-icon>
+            Report
+          </v-btn>
+          <v-btn
+            v-else-if="item.status === 'processing'"
+            small
+            text
+            color="grey darken-2"
+            @click="viewReport(item)"
+          >
+            View details
+          </v-btn>
+        </div>
+      </v-card>
+    </template>
   </div>
 </template>
 
 <script>
 import apiClient from "@/service/axios";
+
+const STATUS_FILTERS = [
+  { value: "all", label: "All" },
+  { value: "completed", label: "Completed" },
+  { value: "processing", label: "Processing" },
+  { value: "failed", label: "Failed" },
+];
 
 export default {
   filters: {
@@ -276,28 +389,56 @@ export default {
       },
       loading: false,
       retryingId: null,
-
-      callHeaders: [
-        { text: "Agent", value: "agentName", align: "start" },
-        {
-          text: "Recording",
-          value: "recordingUrl",
-          align: "start",
-          sortable: false,
-        },
-        { text: "Language", value: "language", align: "start" },
-        { text: "Status", value: "status", align: "center" },
-        { text: "Quality Score", value: "qualityScore", align: "center" },
-        { text: "Action", value: "actions", align: "center", sortable: false },
-      ],
+      STATUS_FILTERS,
+      statusFilter: "all",
+      search: "",
     };
   },
 
   computed: {
+    insights() {
+      return Array.isArray(this.batchInfo.batchInsights)
+        ? this.batchInfo.batchInsights
+        : [];
+    },
+    scoreValue() {
+      const s = this.batchInfo.averageQualityScore;
+      return typeof s === "number" ? s : 0;
+    },
+    tiles() {
+      return [
+        {
+          label: "Calls",
+          value: this.calls.length,
+          icon: "$phone",
+          tone: "blue",
+        },
+        {
+          label: "Success rate",
+          value: `${this.successRate}%`,
+          icon: "$circle-check",
+          tone: "green",
+        },
+        {
+          label: "Failed",
+          value: this.countFor("failed"),
+          icon: "$circle-alert",
+          tone: "red",
+        },
+      ];
+    },
+    filteredCalls() {
+      const q = (this.search || "").trim().toLowerCase();
+      return this.calls.filter(
+        (c) =>
+          (this.statusFilter === "all" || c.status === this.statusFilter) &&
+          (!q || (c.agentName || "").toLowerCase().includes(q))
+      );
+    },
     successRate() {
       if (this.calls.length === 0) return 0;
       const completed = this.calls.filter(
-        (call) => call.status === "completed",
+        (call) => call.status === "completed"
       ).length;
       return Math.round((completed / this.calls.length) * 100);
     },
@@ -308,6 +449,27 @@ export default {
   },
 
   methods: {
+    countFor(status) {
+      return status === "all"
+        ? this.calls.length
+        : this.calls.filter((c) => c.status === status).length;
+    },
+
+    initialOf(name) {
+      return (name || "?").trim().charAt(0).toUpperCase() || "?";
+    },
+
+    formatScore(score) {
+      return typeof score === "number" && score
+        ? Math.round(score * 100) / 100
+        : "—";
+    },
+
+    scoreText(score) {
+      if (typeof score !== "number" || !score) return "grey--text";
+      return score >= 4 ? "success--text" : "error--text";
+    },
+
     statusColor(status) {
       const colorMap = {
         completed: "success",
@@ -315,15 +477,6 @@ export default {
         processing: "warning",
       };
       return colorMap[status] || "grey";
-    },
-
-    statusTextColor(status) {
-      const textColorMap = {
-        completed: "white",
-        failed: "white",
-        processing: "white",
-      };
-      return textColorMap[status] || "black";
     },
 
     statusIcon(status) {

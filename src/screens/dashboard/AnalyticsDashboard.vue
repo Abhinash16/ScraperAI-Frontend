@@ -1,181 +1,166 @@
 <template>
   <div>
-    <!-- LOADER OVERLAY -->
-    <v-overlay :value="loading" absolute opacity="0.7">
-      <div class="d-flex flex-column align-center">
-        <v-progress-circular indeterminate size="64" color="primary" />
-        <v-subheader class="mt-4">Loading analytics...</v-subheader>
+    <!-- HEADER -->
+    <div class="d-flex flex-wrap align-center mb-4">
+      <div class="mr-4 mb-2">
+        <h1 class="text-h6 font-weight-bold grey--text text--darken-4">
+          Conversations
+        </h1>
+        <div class="text-body-2 grey--text text--darken-1">
+          How many chats your bot handled, how they ended, and where they came
+          from.
+        </div>
       </div>
-    </v-overlay>
+      <v-spacer />
+      <v-chip
+        small
+        label
+        color="green lighten-5"
+        text-color="green darken-2"
+        class="font-weight-bold mb-2"
+      >
+        <v-icon left size="14">{{ platformIcon }}</v-icon>
+        {{ platformLabel }}
+      </v-chip>
+    </div>
 
     <ThingsToKnow feature="analytics" />
 
-    <!-- HEADER -->
-    <v-row>
-      <v-col cols="12">
-        <v-card elevation="0" class="pa-6 rounded-lg hero-card">
-          <div class="d-flex align-center justify-space-between flex-wrap">
-            <div>
-              <div class="text-h5 font-weight-bold">Chat Analytics</div>
+    <!-- FILTERS -->
+    <v-card outlined rounded="lg" class="mb-4">
+      <div class="d-flex flex-wrap align-center px-4 pt-3 pb-2">
+        <span
+          class="text-caption font-weight-bold text-uppercase grey--text mr-3 my-1"
+          >Range</span
+        >
+        <v-btn
+          v-for="r in quickRanges"
+          :key="r.label"
+          small
+          depressed
+          :outlined="activeRange !== r.value"
+          :color="activeRange === r.value ? 'success' : 'grey darken-1'"
+          class="mr-2 my-1"
+          @click="setRange(r.value)"
+        >
+          {{ r.label }}
+        </v-btn>
+        <v-chip
+          v-if="activeRange === null"
+          small
+          label
+          color="green lighten-5"
+          text-color="green darken-2"
+          class="font-weight-bold my-1"
+        >
+          Custom dates
+        </v-chip>
+      </div>
+      <v-divider />
+      <v-row dense align="center" class="px-4 py-3">
+        <v-col cols="12" sm="6" md="3">
+          <v-select
+            v-model="selectedPlatform"
+            :items="platformItems"
+            label="Channel"
+            prepend-inner-icon="$messages-square"
+            placeholder="All channels"
+            outlined
+            dense
+            clearable
+            hide-details
+          />
+        </v-col>
+        <v-col cols="6" sm="6" md="3">
+          <v-text-field
+            v-model="startDate"
+            label="From"
+            type="date"
+            outlined
+            dense
+            hide-details
+          />
+        </v-col>
+        <v-col cols="6" sm="6" md="3">
+          <v-text-field
+            v-model="endDate"
+            label="To"
+            type="date"
+            outlined
+            dense
+            hide-details
+          />
+        </v-col>
+        <v-col cols="12" sm="6" md="3">
+          <v-btn
+            block
+            depressed
+            color="primary"
+            class="font-weight-bold"
+            :loading="loading"
+            @click="applyFilters"
+          >
+            <v-icon left size="16">$funnel</v-icon>
+            Apply
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-progress-linear
+        v-if="loading"
+        indeterminate
+        color="success"
+        height="3"
+      />
+    </v-card>
 
-              <div class="grey--text mt-1">
-                Insights into conversations & engagement
-              </div>
+    <!-- KPI TILES -->
+    <v-row dense class="mb-3">
+      <v-col v-for="t in kpis" :key="t.label" cols="6" md="3">
+        <v-card
+          outlined
+          rounded="lg"
+          class="d-flex align-center pa-4 fill-height"
+        >
+          <v-avatar
+            size="44"
+            tile
+            :color="`${t.tone} lighten-5`"
+            class="rounded-lg mr-3 flex-shrink-0"
+          >
+            <v-icon size="22" :color="t.tone">{{ t.icon }}</v-icon>
+          </v-avatar>
+          <div>
+            <div class="text-h5 font-weight-bold grey--text text--darken-4">
+              {{ t.value }}
             </div>
-
-            <v-chip outlined color="primary">
-              {{ selectedPlatform || "All Platforms" }}
-            </v-chip>
+            <div class="text-caption grey--text text--darken-1">
+              {{ t.label }}
+            </div>
           </div>
         </v-card>
       </v-col>
     </v-row>
 
-    <!-- FILTERS SECTION -->
-    <v-card class="mb-8 mt-4" rounded="lg" outlined>
-      <v-card-text>
-        <v-row>
-          <!-- Platform Select -->
-          <v-col cols="12" sm="6" md="3">
-            <v-select
-              v-model="selectedPlatform"
-              :items="platforms"
-              label="Platform"
-              outlined
-              dense
-              clearable
-            />
-          </v-col>
-
-          <!-- Start Date -->
-          <v-col cols="12" sm="6" md="3">
-            <v-text-field
-              v-model="startDate"
-              label="Start Date"
-              type="date"
-              outlined
-              dense
-            />
-          </v-col>
-
-          <!-- End Date -->
-          <v-col cols="12" sm="6" md="3">
-            <v-text-field
-              v-model="endDate"
-              label="End Date"
-              type="date"
-              outlined
-              dense
-            />
-          </v-col>
-
-          <!-- Apply Button -->
-          <v-col cols="12" sm="6" md="3" class="d-flex">
-            <v-btn
-              rounded
-              block
-              depressed
-              color="primary"
-              @click="applyFilters"
-              class="font-weight-bold"
-            >
-              <v-icon left>$funnel</v-icon>
-              Apply
-            </v-btn>
-          </v-col>
-        </v-row>
-
-        <!-- Quick Range Filters -->
-        <div class="d-flex gap-2 flex-wrap">
-          <v-btn
-            rounded
-            v-for="days in quickRanges"
-            :key="days.label"
-            :outlined="activeRange !== days.value"
-            :color="activeRange === days.value ? 'primary' : 'grey'"
-            small
-            depressed
-            @click="setRange(days.value)"
-          >
-            {{ days.label }}
-          </v-btn>
-          <!-- <v-btn
-            :outlined="activeRange !== 'today'"
-            :color="activeRange === 'today' ? 'primary' : 'grey'"
-            small
-            @click="setToday"
-          >
-            Today
-          </v-btn> -->
-        </div>
-      </v-card-text>
-    </v-card>
-
-    <!-- KPI CARDS -->
-    <v-row class="mb-8">
-      <v-col cols="12" sm="6" lg="4">
-        <v-card class="stat-card stat-active" outlined elevation="0">
-          <v-card-text>
-            <div class="d-flex justify-space-between align-start">
-              <div>
-                <p class="overline font-weight-bold mb-1">Active Chats</p>
-                <h2 class="display-2 font-weight-bold">
-                  {{ stats.activeChats || 0 }}
-                </h2>
-              </div>
-              <v-icon size="48" class="stat-icon-active">$message-circle</v-icon>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" sm="6" lg="4">
-        <v-card class="stat-card stat-completed" outlined elevation="0">
-          <v-card-text>
-            <div class="d-flex justify-space-between align-start">
-              <div>
-                <p class="overline font-weight-bold mb-1">Completed</p>
-                <h2 class="display-2 font-weight-bold">
-                  {{ stats.completedChats || 0 }}
-                </h2>
-              </div>
-              <v-icon size="48" class="stat-icon-completed"
-                >$circle-check</v-icon
-              >
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" sm="6" lg="4">
-        <v-card class="stat-card stat-disconnected" outlined elevation="0">
-          <v-card-text>
-            <div class="d-flex justify-space-between align-start">
-              <div>
-                <p class="overline font-weight-bold mb-1">Disconnected</p>
-                <h2 class="display-2 font-weight-bold">
-                  {{ stats.disconnectedChats || 0 }}
-                </h2>
-              </div>
-              <v-icon size="48" class="stat-icon-disconnected"
-                >$unlink</v-icon
-              >
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <!-- CHARTS SECTION -->
-    <v-row class="mb-8">
-      <!-- Active Chats Trend -->
+    <!-- CHARTS -->
+    <v-row dense class="mb-3">
       <v-col cols="12" lg="8">
-        <v-card outlined rounded="lg" elevation="0">
-          <v-card-title>
-            <v-icon left>$chart-line</v-icon>
-            Active Chats Trend
-          </v-card-title>
-          <v-card-text>
+        <v-card outlined rounded="lg" class="fill-height">
+          <div class="d-flex align-center px-4 py-3">
+            <v-avatar
+              size="32"
+              tile
+              color="blue lighten-5"
+              class="rounded-lg mr-3"
+            >
+              <v-icon size="16" color="blue">$chart-line</v-icon>
+            </v-avatar>
+            <span
+              class="text-subtitle-2 font-weight-bold grey--text text--darken-4"
+              >Active chats trend</span
+            >
+          </div>
+          <v-divider />
+          <div class="pa-3">
             <apexchart
               v-if="lineSeries.length > 0"
               type="line"
@@ -184,18 +169,28 @@
               :series="lineSeries"
             />
             <v-skeleton-loader v-else type="image" />
-          </v-card-text>
+          </div>
         </v-card>
       </v-col>
 
-      <!-- Platform Distribution -->
       <v-col cols="12" lg="4">
-        <v-card outlined rounded="lg" elevation="0">
-          <v-card-title>
-            <v-icon left>$chart-pie</v-icon>
-            Platform Distribution
-          </v-card-title>
-          <v-card-text>
+        <v-card outlined rounded="lg" class="fill-height">
+          <div class="d-flex align-center px-4 py-3">
+            <v-avatar
+              size="32"
+              tile
+              color="green lighten-5"
+              class="rounded-lg mr-3"
+            >
+              <v-icon size="16" color="green">$chart-pie</v-icon>
+            </v-avatar>
+            <span
+              class="text-subtitle-2 font-weight-bold grey--text text--darken-4"
+              >By channel</span
+            >
+          </div>
+          <v-divider />
+          <div class="pa-3">
             <apexchart
               v-if="pieSeries.length > 0"
               type="pie"
@@ -204,32 +199,37 @@
               :series="pieSeries"
             />
             <v-skeleton-loader v-else type="image" />
-          </v-card-text>
+          </div>
         </v-card>
       </v-col>
     </v-row>
 
-    <!-- Messages Per Day -->
-    <v-row>
-      <v-col cols="12">
-        <v-card outlined rounded="lg" elevation="0">
-          <v-card-title>
-            <v-icon left>$messages-square</v-icon>
-            Messages Per Day
-          </v-card-title>
-          <v-card-text>
-            <apexchart
-              v-if="msgSeries.length > 0"
-              type="bar"
-              height="320"
-              :options="msgOptions"
-              :series="msgSeries"
-            />
-            <v-skeleton-loader v-else type="image" />
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+    <v-card outlined rounded="lg">
+      <div class="d-flex align-center px-4 py-3">
+        <v-avatar
+          size="32"
+          tile
+          color="indigo lighten-5"
+          class="rounded-lg mr-3"
+        >
+          <v-icon size="16" color="indigo">$messages-square</v-icon>
+        </v-avatar>
+        <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4"
+          >Messages per day</span
+        >
+      </div>
+      <v-divider />
+      <div class="pa-3">
+        <apexchart
+          v-if="msgSeries.length > 0"
+          type="bar"
+          height="320"
+          :options="msgOptions"
+          :series="msgSeries"
+        />
+        <v-skeleton-loader v-else type="image" />
+      </div>
+    </v-card>
   </div>
 </template>
 
@@ -237,6 +237,8 @@
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 import VueApexCharts from "vue-apexcharts";
+
+const CHANNEL_NAMES = { whatsapp: "WhatsApp", webchat: "Website" };
 
 export default {
   components: { ThingsToKnow, apexchart: VueApexCharts },
@@ -342,6 +344,57 @@ export default {
     this.setRange(30);
   },
 
+  computed: {
+    // Display names for the channel filter; values stay as the API expects
+    platformItems() {
+      return this.platforms.map((value) => ({
+        value,
+        text: CHANNEL_NAMES[value] || value,
+      }));
+    },
+    platformLabel() {
+      return this.selectedPlatform
+        ? CHANNEL_NAMES[this.selectedPlatform] || this.selectedPlatform
+        : "All channels";
+    },
+    platformIcon() {
+      if (this.selectedPlatform === "whatsapp") return "$whatsapp";
+      return this.selectedPlatform ? "$globe" : "$messages-square";
+    },
+    kpis() {
+      const s = this.stats;
+      const active = s.activeChats || 0;
+      const completed = s.completedChats || 0;
+      const disconnected = s.disconnectedChats || 0;
+      return [
+        {
+          label: "Total chats",
+          value: active + completed + disconnected,
+          icon: "$messages-square",
+          tone: "indigo",
+        },
+        {
+          label: "Active",
+          value: active,
+          icon: "$message-circle",
+          tone: "blue",
+        },
+        {
+          label: "Completed",
+          value: completed,
+          icon: "$circle-check",
+          tone: "green",
+        },
+        {
+          label: "Disconnected",
+          value: disconnected,
+          icon: "$unlink",
+          tone: "red",
+        },
+      ];
+    },
+  },
+
   methods: {
     getParams() {
       return {
@@ -383,7 +436,7 @@ export default {
       try {
         const res = await apiClient.get(
           "/analytics/active-trend",
-          this.getParams(),
+          this.getParams()
         );
         const d = res.data.data || [];
 
@@ -412,7 +465,7 @@ export default {
       try {
         const res = await apiClient.get(
           "/analytics/platform",
-          this.getParams(),
+          this.getParams()
         );
         const d = res.data.data || [];
 
@@ -427,7 +480,7 @@ export default {
       try {
         const res = await apiClient.get(
           "/analytics/messages",
-          this.getParams(),
+          this.getParams()
         );
         const d = res.data.data || [];
 
@@ -480,55 +533,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.hero-card {
-  background: linear-gradient(135deg, #f5f7ff, #eef1ff);
-}
-
-.stat-card {
-  border-radius: 12px;
-  border: 1px solid #e0e0e0 !important;
-}
-
-.stat-active {
-  border-left: 4px solid #1976d2;
-}
-
-.stat-active .stat-icon-active {
-  color: #1976d2;
-  opacity: 0.2;
-}
-
-.stat-completed {
-  border-left: 4px solid #43a047;
-}
-
-.stat-completed .stat-icon-completed {
-  color: #43a047;
-  opacity: 0.2;
-}
-
-.stat-disconnected {
-  border-left: 4px solid #e53935;
-}
-
-.stat-disconnected .stat-icon-disconnected {
-  color: #e53935;
-  opacity: 0.2;
-}
-
-.gap-2 {
-  gap: 8px;
-}
-
-::v-deep .apexcharts-toolbar {
-  right: 0;
-  top: -40px;
-}
-
-::v-deep .apexcharts-menu {
-  right: 0;
-  left: auto;
-}
-</style>
