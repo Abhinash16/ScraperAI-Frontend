@@ -133,6 +133,7 @@ import {
   Webhook,
   X,
   Zap,
+  Activity,
   Folder,
   FolderOpen,
   NotebookPen,
@@ -263,6 +264,7 @@ const APP_ICONS = {
   "message-circle-more": MessageCircleMore,
   "message-circle-warning": MessageCircleWarning,
   "message-circle-x": MessageCircleX,
+  "circle-x": CircleX,
   "message-square": MessageSquare,
   "message-square-check": MessageSquareCheck,
   "message-square-text": MessageSquareText,
@@ -313,6 +315,7 @@ const APP_ICONS = {
   "webhook": Webhook,
   "x": X,
   "zap": Zap,
+  "activity": Activity,
 };
 
 const VUETIFY_ICONS = {

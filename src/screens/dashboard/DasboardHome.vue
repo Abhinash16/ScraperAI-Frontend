@@ -125,6 +125,13 @@ export default {
               icon: "$flask-conical",
               description: "Test your bot as a customer",
             },
+            {
+              name: "Bot Health",
+              link: "/dashboard/bot-health",
+              icon: "$activity",
+              description: "Errors, speed and AI cost",
+              permission: "analytics:view",
+            },
             // {
             //   name: "WhatsApp Bot",
             //   link: "/dashboard/whatsapp-bot",

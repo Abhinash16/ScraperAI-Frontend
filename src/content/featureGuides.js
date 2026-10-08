@@ -233,6 +233,23 @@ export const FEATURE_GUIDES = [
     ],
   },
   {
+    id: "security",
+    name: "Security: how we protect your keys",
+    icon: "$shield-check",
+    summary:
+      "What happens to the API keys, WhatsApp key and headers you give us.",
+    steps: [
+      "Create a dedicated OpenAI project key just for ScraperAI, with a monthly spending limit (OpenAI dashboard → Projects → API keys / Limits). You can revoke it at any time without affecting your other systems.",
+      "To change a key, enter a new one. To stop its use, remove it.",
+    ],
+    thingsToKnow: [
+      "Encrypted before it's stored. Your API keys, WhatsApp key and integration/webhook headers are encrypted with AES-256-GCM (the encryption standard banks use) before they reach our database. Database backups only ever contain the encrypted form.",
+      "Never shown again. Once saved, a key is never sent back to any screen or API, not to you, your team or our support staff. You'll only see that it's set and, for headers, masked values (********). To change it, enter a new one.",
+      "Used only for its purpose. Your OpenAI key is used only to write your bot's replies to your customers. It's decrypted in memory just for that request, sent only to OpenAI over an encrypted connection (HTTPS), and never written to logs.",
+      "You stay in control. Replace or remove a key at any time. Removing it stops its use immediately.",
+    ],
+  },
+  {
     id: "webhooks",
     name: "Webhooks & API config",
     icon: "$webhook",
@@ -257,17 +274,60 @@ export const FEATURE_GUIDES = [
     summary:
       "Let the bot answer price and stock questions from your own product system.",
     steps: [
-      "Build one URL that answers both a search and a full listing, in the format below.",
-      "Open Integrations → API Config → Product API, enter the URL, and save. Saving test-calls it.",
-      "Try a customer message under \"Test with a customer message\", then ask \"what's available?\" in the sandbox.",
+      "Build one URL that answers both a search and a full listing. Use our format, or map your own field names under Field mapping.",
+      "Open Integrations → API Config → Product API, enter the URL and how we sign in, and use \"Try it\" before saving. It shows what we send, what comes back, and what the AI sees.",
+      "Save (saving test-calls your API), then ask \"what's available?\" in the sandbox.",
+      "Check Recent calls on the same page if answers stop showing live data.",
     ],
     thingsToKnow: [
       "The bot only states prices and stock from this data, never from your website text.",
       "The full listing must include prices and availability. Without availability, the bot can't say which products are in stock.",
       "Broad questions like \"which bikes are available?\" or \"cheapest petrol scooty\" are answered from the full listing, filtered to what's in stock.",
       "Respond within 3 seconds (the timeout setting). The full listing can be up to 10 MB.",
+      "Sign-in: headers (as before), a bearer token, a username and password (Basic), or an API key in the URL (e.g. ?api_key=…). Tokens, passwords and keys are encrypted and never shown again.",
+      "Extra parameters are sent with every call. Values and the URL can use {{query}} and {{limit}}, e.g. https://api.example.com/products/search/{{query}}.",
+      "Reliability: we retry once on connection errors, never wait longer than your timeout, and pause calls for 60 seconds after 5 failures in a minute, so customers aren't kept waiting. Recent calls on the settings page shows every call from the last 7 days.",
     ],
     format: true,
+  },
+  {
+    id: "customer-api",
+    name: "Customer API",
+    icon: "$user-search",
+    route: "/dashboard/integration?section=api-config&tab=customer-api",
+    summary:
+      "Let the WhatsApp bot look up a customer's bookings and bills by their phone number.",
+    steps: [
+      "Open Integrations → API Config → Customer API and enter your URL and the phone parameter name.",
+      "Choose how we sign in, and add any extra parameters your API needs.",
+      "Save with a test phone number (saving test-calls your API), then run a test with a phone number.",
+    ],
+    thingsToKnow: [
+      "Real chats look up customers on WhatsApp only, by the sender's number.",
+      "Sign-in: headers (as before), a bearer token, a username and password (Basic), or an API key in the URL (e.g. ?api_key=…). Tokens, passwords and keys are encrypted and never shown again.",
+      "Extra parameters are sent with every call. Values and the URL can use {{phone}}.",
+      "Reliability: we retry once on connection errors, never wait longer than your timeout, and pause calls for 60 seconds after 5 failures in a minute, so customers aren't kept waiting. Recent calls on the settings page shows every call from the last 7 days.",
+    ],
+  },
+  {
+    id: "bot-health",
+    name: "Bot health",
+    icon: "$activity",
+    route: "/dashboard/bot-health",
+    summary:
+      "How your bot's live replies went: errors, handoffs, answer time, and AI cost.",
+    steps: [
+      "Open Bot Health and pick 24 hours, 7 days or 30 days.",
+      "Check the Problems list. Open the chat for any error, since the customer may not have received a proper answer.",
+      "In any chat, click \"Why this answer\" under a bot reply to see what the bot searched and used.",
+    ],
+    thingsToKnow: [
+      "Every live bot reply on your website and WhatsApp is recorded: the customer's message, the reply, timing, tokens, product lookups, and what the bot used to answer.",
+      "Records are kept for 30 days. Older replies have no \"Why this answer\".",
+      "AI costs are estimates from OpenAI's list prices. Your OpenAI bill is the exact amount.",
+      "An error means the customer may not have received a proper answer, so open the chat and follow up.",
+      "If many replies fail or your product API stops responding, we email your alert addresses, once when it starts and once when it's fixed. Alerts show up 5–10 minutes after a problem starts. The addresses are set under Integrations → Webhooks → Escalate.",
+    ],
   },
   {
     id: "analytics",
@@ -358,6 +418,28 @@ export const PRODUCT_API_FORMAT = {
   },
   "updated_at": "2026-10-08T07:22:39+05:30"
 }`,
+  mapping: {
+    intro:
+      "Your API doesn't have to match this format. Under Field mapping, tell us where each field is inside one of your products. For example, if your API sends:",
+    theirs: `{
+  "id": 17,
+  "title": "Ather 450X",
+  "pricing": { "monthly": 4999 },
+  "stock": { "state": "Waitlist" },
+  "specs": { "fuel_type": "electric" }
+}`,
+    map:
+      "map Name → title, Amount → pricing.monthly (label Monthly, per month), Stock value → stock.state with \"Waitlist\" meaning out of stock, and an attribute fuel → specs.fuel_type. We then read it as:",
+    ours: `{
+  "sku": "17",
+  "name": "Ather 450X",
+  "prices": [{ "label": "Monthly", "amount": 4999, "unit": "month", "currency": "INR" }],
+  "attributes": { "fuel": "electric" },
+  "availability": { "status": "out_of_stock" }
+}`,
+    stock:
+      "Stock values understood without mapping: in_stock, limited, out_of_stock, on_request, true/false, and numbers (0 = out of stock). A value we don't understand makes no stock claim, so the bot won't say the product is in stock.",
+  },
   notes: [
     "A plan with amount null and a note is shown as \"not offered\". The bot never invents a price.",
     "Waitlisted or no units free → out_of_stock. Only a few left → limited.",
@@ -366,6 +448,11 @@ export const PRODUCT_API_FORMAT = {
     "The bot only states prices and stock from this data, never from website text.",
   ],
 };
+
+// Short version shown next to every field that takes a secret
+// (components/SecretNotice.vue). Keep it no stronger than the security guide.
+export const SECRET_NOTICE =
+  "Encrypted with AES-256-GCM before it's stored, and never shown again once saved. Replace or remove it at any time.";
 
 export function featureGuide(id) {
   return FEATURE_GUIDES.find((g) => g.id === id);

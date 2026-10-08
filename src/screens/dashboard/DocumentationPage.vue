@@ -129,7 +129,7 @@
               </v-col>
             </v-row>
             <ProductApiFormat v-if="g.format" class="mt-2 mb-4" />
-            <v-btn small depressed rounded color="primary" :to="g.route">
+            <v-btn v-if="g.route" small depressed rounded color="primary" :to="g.route">
               Go to {{ g.name }}
             </v-btn>
           </v-expansion-panel-content>
@@ -213,6 +213,11 @@ function formatLines() {
     ...f.calls.map((c) => `  - ${c.title}: ${c.request}. ${c.when} ${c.note}`),
     `  Response: ${f.response} Each item:`,
     ...f.example.split("\n").map((l) => `    ${l}`),
+    `  ${f.mapping.intro}`,
+    ...f.mapping.theirs.split("\n").map((l) => `    ${l}`),
+    `  ${f.mapping.map}`,
+    ...f.mapping.ours.split("\n").map((l) => `    ${l}`),
+    `  ${f.mapping.stock}`,
     "  Notes:",
     ...f.notes.map((n) => `  - ${n}`),
   ];

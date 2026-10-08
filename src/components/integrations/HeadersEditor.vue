@@ -13,6 +13,8 @@
       </v-btn>
     </div>
 
+    <SecretNotice class="mb-3" />
+
     <div v-if="!value.length" class="empty-headers text-body-2 mb-2">
       No headers yet. Add one for API keys or auth tokens.
     </div>
@@ -72,10 +74,13 @@
 
 <script>
 import { newHeaderRow } from "@/utils/apiHeaders";
+import SecretNotice from "@/components/SecretNotice.vue";
 
 // v-model is an array of rows from rowsFromHeaders()/newHeaderRow().
 export default {
   name: "HeadersEditor",
+
+  components: { SecretNotice },
 
   props: {
     value: { type: Array, required: true },
