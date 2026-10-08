@@ -490,6 +490,111 @@
         </v-btn>
       </v-card>
 
+      <!-- ============ CONVERSATION ============ -->
+      <v-card v-show="tab === 'conversation'" outlined rounded="xl" class="pa-6">
+        <div class="d-flex align-start mb-2">
+          <div class="flex-grow-1 mr-4">
+            <div class="text-subtitle-2 font-weight-bold">
+              Send a message when an answer takes a while
+            </div>
+            <div class="text-body-2 grey--text text--darken-1">
+              If an answer takes longer than this, the customer gets this
+              message first, then the answer. Only in live website and
+              WhatsApp chats, not the sandbox.
+            </div>
+          </div>
+          <v-switch
+            v-model="form.conversation.holdingEnabled"
+            color="primary"
+            inset
+            hide-details
+            class="mt-0 pt-0"
+            :label="form.conversation.holdingEnabled ? 'On' : 'Off'"
+          />
+        </div>
+        <v-row dense class="mb-4">
+          <v-col cols="12" sm="9">
+            <v-text-field
+              v-model="form.conversation.holdingText"
+              label="Message"
+              :placeholder="DEFAULT_HOLDING_TEXT"
+              persistent-placeholder
+              outlined
+              dense
+              :counter="LINE_MAX"
+              :disabled="!form.conversation.holdingEnabled"
+            />
+          </v-col>
+          <v-col cols="12" sm="3">
+            <v-text-field
+              v-model="form.conversation.holdingSeconds"
+              label="After (seconds)"
+              :placeholder="String(DEFAULT_HOLDING_SECONDS)"
+              persistent-placeholder
+              type="number"
+              min="3"
+              max="30"
+              outlined
+              dense
+              :rules="[intRule(3, 30)]"
+              :disabled="!form.conversation.holdingEnabled"
+            />
+          </v-col>
+        </v-row>
+
+        <v-divider class="mb-6" />
+
+        <div class="text-subtitle-2 font-weight-bold">
+          AI replies per chat per day before handing off
+        </div>
+        <div class="text-body-2 grey--text text--darken-1 mb-4">
+          After this many AI replies in one chat within 24 hours, the bot stops
+          and sends the handoff message. Leave empty to use your account limit.
+        </div>
+        <v-row dense class="mb-2">
+          <v-col cols="12" sm="4">
+            <v-text-field
+              v-model="form.conversation.limitWeb"
+              label="Website"
+              :placeholder="String(DEFAULT_LIMITS.web)"
+              persistent-placeholder
+              type="number"
+              min="1"
+              max="500"
+              outlined
+              dense
+              :rules="[intRule(1, 500)]"
+            />
+          </v-col>
+          <v-col cols="12" sm="4">
+            <v-text-field
+              v-model="form.conversation.limitWhatsapp"
+              label="WhatsApp"
+              :placeholder="String(DEFAULT_LIMITS.whatsapp)"
+              persistent-placeholder
+              type="number"
+              min="1"
+              max="500"
+              outlined
+              dense
+              :rules="[intRule(1, 500)]"
+            />
+          </v-col>
+        </v-row>
+
+        <v-text-field
+          v-model="form.conversation.handoffMessage"
+          label="Handoff message"
+          :placeholder="DEFAULT_HANDOFF.web"
+          persistent-placeholder
+          :hint="`Leave empty to use the defaults. On WhatsApp: &quot;${DEFAULT_HANDOFF.whatsapp}&quot;`"
+          persistent-hint
+          outlined
+          dense
+          :counter="LINE_MAX"
+        />
+      </v-card>
+
       <!-- ============ ADVANCED ============ -->
       <v-card v-show="tab === 'advanced'" outlined rounded="xl" class="pa-6">
         <div class="text-body-2 grey--text text--darken-1 mb-4">
@@ -622,12 +727,21 @@ const POLICY_MAX = 2000;
 const CUSTOM_MAX = 10000;
 const DEFAULT_THRESHOLD = 0.6;
 const DEFAULT_TIMEZONE = "Asia/Kolkata";
+// Used by the backend when a conversation field is left empty
+const DEFAULT_HOLDING_TEXT = "Let me check that for you, one moment please.";
+const DEFAULT_HOLDING_SECONDS = 6;
+const DEFAULT_LIMITS = { web: 20, whatsapp: 10 };
+const DEFAULT_HANDOFF = {
+  web: "I will connect you with our support team shortly.",
+  whatsapp: "I will assign this to available chat support. They will help you shortly.",
+};
 
 const TABS = [
   { id: "identity", label: "Identity", icon: "$user" },
   { id: "facts", label: "Business facts", icon: "$store" },
   { id: "rules", label: "Rules", icon: "$list-checks" },
   { id: "escalation", label: "Escalation", icon: "$headset" },
+  { id: "conversation", label: "Conversation", icon: "$message-square-text" },
   { id: "advanced", label: "Advanced", icon: "$braces" },
   { id: "history", label: "History", icon: "$history" },
 ];
@@ -726,6 +840,10 @@ function toForm(profile = {}) {
   const facts = profile.facts || {};
   const rules = profile.rules || {};
   const escalation = rules.escalation || {};
+  const conversation = profile.conversation || {};
+  const holding = conversation.holdingMessage || {};
+  const limit = conversation.aiReplyLimit || {};
+  const numStr = (v) => (typeof v === "number" ? String(v) : "");
 
   const hours = {};
   DAYS.forEach(({ id }) => {
@@ -777,6 +895,14 @@ function toForm(profile = {}) {
             : DEFAULT_THRESHOLD,
       },
     },
+    conversation: {
+      holdingEnabled: holding.enabled !== false,
+      holdingText: str(holding.text),
+      holdingSeconds: numStr(holding.afterSeconds),
+      limitWeb: numStr(limit.web),
+      limitWhatsapp: numStr(limit.whatsapp),
+      handoffMessage: str(conversation.handoffMessage),
+    },
     customInstructions: str(profile.customInstructions),
   };
 }
@@ -821,8 +947,28 @@ function toProfile(form) {
         confidenceThreshold: form.rules.escalation.confidenceThreshold,
       },
     },
+    // Empty fields go as null, which means "use the default"
+    conversation: {
+      holdingMessage: {
+        enabled: form.conversation.holdingEnabled,
+        text: form.conversation.holdingText.trim() || null,
+        afterSeconds: toInt(form.conversation.holdingSeconds),
+      },
+      aiReplyLimit: {
+        web: toInt(form.conversation.limitWeb),
+        whatsapp: toInt(form.conversation.limitWhatsapp),
+      },
+      handoffMessage: form.conversation.handoffMessage.trim() || null,
+    },
     customInstructions: form.customInstructions.trim(),
   };
+}
+
+// "" → null; anything else goes as a number so the backend can reject
+// fractions with its own message.
+function toInt(value) {
+  const s = String(value ?? "").trim();
+  return s === "" ? null : Number(s);
 }
 
 function supportedTimezones() {
@@ -851,6 +997,10 @@ export default {
       LINE_MAX,
       CUSTOM_MAX,
       DEFAULT_THRESHOLD,
+      DEFAULT_HOLDING_TEXT,
+      DEFAULT_HOLDING_SECONDS,
+      DEFAULT_LIMITS,
+      DEFAULT_HANDOFF,
       timezones: supportedTimezones(),
 
       tab: "identity",
@@ -919,6 +1069,15 @@ export default {
   },
 
   methods: {
+    intRule(min, max) {
+      return (v) => {
+        const s = String(v ?? "").trim();
+        if (s === "") return true;
+        const n = Number(s);
+        return (Number.isInteger(n) && n >= min && n <= max) || `A whole number from ${min} to ${max}`;
+      };
+    },
+
     apply(data) {
       this.form = toForm(data?.draft || {});
       this.savedJson = JSON.stringify(toProfile(this.form));

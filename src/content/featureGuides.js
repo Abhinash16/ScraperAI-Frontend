@@ -11,7 +11,7 @@ export const FEATURE_GUIDES = [
     summary:
       "Your bot's name, tone, business facts, and rules, all set by you.",
     steps: [
-      "Fill in Identity, Business facts, Rules, and Escalation, then save the draft.",
+      "Fill in Identity, Business facts, Rules, Escalation, and Conversation, then save the draft.",
       "Click Test in sandbox and ask the questions your customers ask.",
       "When the answers look right, click Publish.",
     ],
@@ -20,6 +20,8 @@ export const FEATURE_GUIDES = [
       "The sandbox tests your saved draft, so you can try changes before they go live.",
       "Business facts win over your website. If they disagree, the bot uses the facts on this page.",
       "Messages with an escalation keyword always go to a person.",
+      "When an answer takes more than a few seconds (6 by default), the customer first gets \"Let me check that for you, one moment please.\" You can change the text and timing, or turn it off, under Conversation. The sandbox doesn't send it.",
+      "Under Conversation you can also set how many AI replies one chat gets in 24 hours (website and WhatsApp separately) and the handoff message sent when the limit is reached.",
       "You can restore any of your last 20 published versions from History.",
     ],
   },
