@@ -315,6 +315,24 @@ export const FEATURE_GUIDES = [
     ],
   },
   {
+    id: "conversations",
+    name: "Conversations",
+    icon: "$history",
+    route: "/dashboard/chat",
+    summary:
+      "Each chat is split into conversations. A conversation ends after a while without messages, and the next message starts a new one.",
+    steps: [
+      "Set how long a conversation lasts without messages under Bot Profile → Conversation (website in minutes, WhatsApp in hours).",
+      "In a chat, click Conversations to see each one with its outcome, and jump to it.",
+    ],
+    thingsToKnow: [
+      "The next message after a conversation ends starts a new conversation, and the bot starts fresh (it doesn't carry over the earlier messages).",
+      "Outcomes: \"Handled by the bot\" means the bot answered without your team; \"Handled by your team\" means someone from your team replied; \"Handed to your team, no reply\" means the bot handed the chat over but nobody replied; \"No reply needed\" means nothing needed an answer.",
+      "Marking a chat as resolved also ends its open conversation.",
+      "Messages from before conversations existed are shown together as \"Earlier messages\".",
+    ],
+  },
+  {
     id: "bot-health",
     name: "Bot health",
     icon: "$activity",

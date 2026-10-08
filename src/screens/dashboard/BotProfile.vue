@@ -551,6 +551,46 @@
         <v-divider class="my-6" />
 
         <div class="text-subtitle-2 font-weight-bold">
+          When a conversation ends
+        </div>
+        <div class="text-body-2 grey--text text--darken-1 mb-4">
+          End a conversation after this long without messages. The next
+          message starts a new conversation, and the bot starts fresh (it
+          doesn't carry over the earlier messages).
+        </div>
+        <v-row dense class="mb-2">
+          <v-col cols="12" sm="4">
+            <v-text-field
+              v-model="form.conversation.idleWeb"
+              label="Website"
+              suffix="minutes"
+              type="number"
+              min="5"
+              max="1440"
+              outlined
+              dense
+              :rules="[intRule(5, 1440)]"
+            />
+          </v-col>
+          <v-col cols="12" sm="4">
+            <v-text-field
+              v-model="form.conversation.idleWhatsappHours"
+              label="WhatsApp"
+              suffix="hours"
+              type="number"
+              min="0.5"
+              max="168"
+              step="0.5"
+              outlined
+              dense
+              :rules="[hoursRule]"
+            />
+          </v-col>
+        </v-row>
+
+        <v-divider class="my-6" />
+
+        <div class="text-subtitle-2 font-weight-bold">
           AI replies per chat per day before handing off
         </div>
         <div class="text-body-2 grey--text text--darken-1 mb-4">
@@ -749,6 +789,7 @@ const CONVERSATION_DEFAULTS = {
     afterSeconds: 6,
   },
   aiReplyLimit: { web: 20, whatsapp: 10 },
+  idleMinutes: { web: 60, whatsapp: 1440 },
   handoffMode: "auto",
   handoffMessage: {
     web: "I will connect you with our support team shortly.",
@@ -878,6 +919,9 @@ function toForm(profile = {}, defaults = CONVERSATION_DEFAULTS) {
   const conversation = profile.conversation || {};
   const holding = conversation.holdingMessage || {};
   const limit = conversation.aiReplyLimit || {};
+  const idle = conversation.idleMinutes || {};
+  const dIdle = defaults.idleMinutes || CONVERSATION_DEFAULTS.idleMinutes;
+  const waMinutes = typeof idle.whatsapp === "number" ? idle.whatsapp : dIdle.whatsapp;
   const dHolding = defaults.holdingMessage || CONVERSATION_DEFAULTS.holdingMessage;
   const dLimit = defaults.aiReplyLimit || CONVERSATION_DEFAULTS.aiReplyLimit;
   const dHandoff = defaults.handoffMessage || CONVERSATION_DEFAULTS.handoffMessage;
@@ -941,6 +985,9 @@ function toForm(profile = {}, defaults = CONVERSATION_DEFAULTS) {
       holdingSeconds: numStr(holding.afterSeconds, dHolding.afterSeconds),
       limitWeb: numStr(limit.web, dLimit.web),
       limitWhatsapp: numStr(limit.whatsapp, dLimit.whatsapp),
+      idleWeb: numStr(idle.web, dIdle.web),
+      // Shown in hours, stored in minutes
+      idleWhatsappHours: typeof waMinutes === "number" ? String(+(waMinutes / 60).toFixed(2)) : "",
       handoffMode: mode(conversation.handoffMode, defaults.handoffMode),
       handoffMessage: str(conversation.handoffMessage) || str(dHandoff.web),
     },
@@ -1002,9 +1049,19 @@ function toProfile(form) {
       },
       handoffMode: form.conversation.handoffMode,
       handoffMessage: form.conversation.handoffMessage.trim() || null,
+      idleMinutes: {
+        web: toInt(form.conversation.idleWeb),
+        whatsapp: hoursToMinutes(form.conversation.idleWhatsappHours),
+      },
     },
     customInstructions: form.customInstructions.trim(),
   };
+}
+
+// WhatsApp idle time: hours in the form, whole minutes in the profile
+function hoursToMinutes(value) {
+  const s = String(value ?? "").trim();
+  return s === "" ? null : Math.round(Number(s) * 60);
 }
 
 // "" → null; anything else goes as a number so the backend can reject
@@ -1121,6 +1178,14 @@ export default {
         const n = Number(s);
         return (Number.isInteger(n) && n >= min && n <= max) || `A whole number from ${min} to ${max}`;
       };
+    },
+
+    // 30 minutes to 7 days
+    hoursRule(v) {
+      const s = String(v ?? "").trim();
+      if (s === "") return true;
+      const m = Math.round(Number(s) * 60);
+      return (Number.isFinite(m) && m >= 30 && m <= 10080) || "From 0.5 to 168 hours";
     },
 
     apply(data) {
