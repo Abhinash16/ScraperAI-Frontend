@@ -173,7 +173,6 @@
             <v-text-field
               v-model.trim="draft"
               placeholder="example.com or *.example.com"
-              prepend-inner-icon="$globe"
               outlined
               dense
               hide-details="auto"
@@ -278,7 +277,6 @@
                 dense
                 hide-details="auto"
                 :error-messages="whatsappError"
-                prepend-inner-icon="$whatsapp"
                 @input="whatsappError = ''"
               />
             </v-col>

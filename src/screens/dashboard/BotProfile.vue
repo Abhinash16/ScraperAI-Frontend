@@ -154,7 +154,6 @@
               v-model="form.identity.botName"
               label="Bot name"
               placeholder="e.g. Aria"
-              prepend-inner-icon="$bot"
               outlined
               dense
               :counter="LINE_MAX"
@@ -166,7 +165,6 @@
               label="Company name"
               hint="Leave empty to use the company name on your account."
               persistent-hint
-              prepend-inner-icon="$building-2"
               outlined
               dense
               :counter="LINE_MAX"
@@ -256,7 +254,6 @@
                   v-model="form.facts.timezone"
                   :items="timezones"
                   label="Timezone"
-                  prepend-inner-icon="$globe"
                   outlined
                   dense
                   clearable
@@ -266,7 +263,6 @@
                   v-model="form.facts.timezone"
                   label="Timezone"
                   placeholder="Asia/Kolkata"
-                  prepend-inner-icon="$globe"
                   outlined
                   dense
                 />
@@ -325,17 +321,16 @@
           <v-divider />
           <v-row dense class="pa-5">
             <v-col cols="12" md="4">
-              <v-text-field v-model="form.facts.contact.phone" label="Phone" prepend-inner-icon="$phone" outlined dense />
+              <v-text-field v-model="form.facts.contact.phone" label="Phone" outlined dense />
             </v-col>
             <v-col cols="12" md="4">
-              <v-text-field v-model="form.facts.contact.email" label="Email" prepend-inner-icon="$message-square" outlined dense />
+              <v-text-field v-model="form.facts.contact.email" label="Email" outlined dense />
             </v-col>
             <v-col cols="12" md="4">
               <v-text-field
                 v-model="form.facts.contact.website"
                 label="Website"
                 placeholder="https://"
-                prepend-inner-icon="$globe"
                 outlined
                 dense
               />
@@ -433,7 +428,6 @@
                 v-model="form.rules.do"
                 label="Always"
                 placeholder="Mention free delivery on orders over ₹999"
-                prepend-inner-icon="$circle-check"
                 outlined
                 rows="5"
                 auto-grow
@@ -444,7 +438,6 @@
                 v-model="form.rules.dont"
                 label="Never"
                 placeholder="Promise delivery dates"
-                prepend-inner-icon="$circle-x"
                 outlined
                 rows="5"
                 auto-grow
@@ -646,7 +639,6 @@
                   type="number"
                   min="5"
                   max="1440"
-                  prepend-inner-icon="$globe"
                   outlined
                   dense
                   :rules="[intRule(5, 1440)]"
@@ -661,7 +653,6 @@
                   min="0.5"
                   max="168"
                   step="0.5"
-                  prepend-inner-icon="$whatsapp"
                   outlined
                   dense
                   :rules="[hoursRule]"
@@ -686,7 +677,6 @@
                   type="number"
                   min="1"
                   max="500"
-                  prepend-inner-icon="$globe"
                   outlined
                   dense
                   :rules="[intRule(1, 500)]"
@@ -699,7 +689,6 @@
                   type="number"
                   min="1"
                   max="500"
-                  prepend-inner-icon="$whatsapp"
                   outlined
                   dense
                   :rules="[intRule(1, 500)]"

@@ -65,7 +65,6 @@
             v-model.trim="draft"
             placeholder="support@example.com"
             type="email"
-            prepend-inner-icon="$message-square"
             outlined
             dense
             hide-details="auto"

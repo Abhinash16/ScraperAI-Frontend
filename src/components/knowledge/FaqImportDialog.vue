@@ -19,7 +19,6 @@
           label="CSV file"
           accept=".csv,text/csv"
           prepend-icon=""
-          prepend-inner-icon="$file-spreadsheet"
           outlined
           dense
           show-size

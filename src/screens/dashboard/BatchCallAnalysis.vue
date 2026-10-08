@@ -232,7 +232,6 @@
             <v-text-field
               v-model="search"
               placeholder="Search agents"
-              prepend-inner-icon="$search"
               outlined
               dense
               clearable

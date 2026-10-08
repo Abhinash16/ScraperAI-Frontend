@@ -77,7 +77,6 @@
                 v-model.trim="form.url"
                 label="API URL"
                 placeholder="https://example.com/api/customer"
-                prepend-inner-icon="$globe"
                 outlined
                 dense
                 :rules="[urlRule]"
@@ -89,7 +88,6 @@
                 label="Phone parameter name"
                 placeholder="phone"
                 hint="Query param (GET) or body field (POST) carrying the phone number"
-                prepend-inner-icon="$phone"
                 outlined
                 dense
               />
@@ -102,7 +100,6 @@
                 min="500"
                 max="10000"
                 hint="500 – 10000"
-                prepend-inner-icon="$clock"
                 outlined
                 dense
                 :rules="[timeoutRule]"
@@ -133,7 +130,6 @@
                     placeholder="9876543210"
                     hint="The server calls your API with this number before saving. Saving fails if the call fails."
                     persistent-hint
-                    prepend-inner-icon="$phone"
                     outlined
                     dense
                   />
@@ -188,7 +184,6 @@
               label="Test phone number"
               placeholder="919876543210"
               hint="Include the country code"
-              prepend-inner-icon="$phone"
               outlined
               dense
               class="mr-2"

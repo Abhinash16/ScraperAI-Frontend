@@ -189,7 +189,6 @@
                   v-model.trim="phone"
                   label="Customer phone"
                   placeholder="919876543210"
-                  prepend-inner-icon="$phone"
                   hint="The bot looks up this customer's real bookings and dues through your customer API."
                   persistent-hint
                   outlined

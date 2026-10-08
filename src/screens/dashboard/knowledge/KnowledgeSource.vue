@@ -323,7 +323,6 @@
               :placeholder="
                 faqSource ? 'Search questions and answers' : 'Search titles'
               "
-              prepend-inner-icon="$search"
               outlined
               dense
               hide-details
@@ -340,7 +339,6 @@
               v-model="categoryFilter"
               :items="knownCategories"
               placeholder="All categories"
-              prepend-inner-icon="$tag"
               outlined
               dense
               hide-details
@@ -725,7 +723,6 @@
               v-model="settings.rootUrl"
               label="Website address"
               placeholder="https://example.com"
-              prepend-inner-icon="$globe"
               outlined
               dense
             />

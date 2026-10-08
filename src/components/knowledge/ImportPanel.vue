@@ -45,7 +45,6 @@
       label="CSV of URLs, or a JSON list of URLs"
       accept=".csv,.json,text/csv,application/json"
       prepend-icon=""
-      prepend-inner-icon="$file-up"
       hint='JSON can be ["https://…"] or [{ "url": "https://…" }].'
       persistent-hint
       outlined

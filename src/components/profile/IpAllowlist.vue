@@ -36,7 +36,6 @@
               v-model.trim="newIp"
               label="IP address or CIDR range"
               placeholder="8.8.8.8 or 192.168.1.0/24"
-              prepend-inner-icon="$monitor"
               outlined
               dense
               autocomplete="off"
@@ -48,7 +47,6 @@
               v-model.trim="newLabel"
               label="Label (optional)"
               placeholder="Office"
-              prepend-inner-icon="$tag"
               outlined
               dense
               maxlength="50"

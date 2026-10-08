@@ -50,7 +50,6 @@
           dense
           hide-details
           readonly
-          prepend-inner-icon="$lock"
         />
         <v-text-field
           v-else

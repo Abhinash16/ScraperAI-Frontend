@@ -435,7 +435,6 @@
               v-model="draft.rootUrl"
               label="Website address (optional)"
               placeholder="https://example.com"
-              prepend-inner-icon="$globe"
               outlined
               dense
             />

@@ -366,7 +366,6 @@
                       v-model.trim="webhook.url"
                       label="Webhook URL"
                       placeholder="https://example.com/hooks/scraperai"
-                      prepend-inner-icon="$globe"
                       outlined
                       dense
                     />
@@ -376,7 +375,6 @@
                       v-model.number="webhook.timeout"
                       label="Timeout (ms)"
                       type="number"
-                      prepend-inner-icon="$clock"
                       outlined
                       dense
                     />
@@ -520,7 +518,6 @@
             :placeholder="openaiConfigured ? '•••••••• (saved)' : 'sk-...'"
             type="password"
             autocomplete="new-password"
-            prepend-inner-icon="$key-round"
             outlined
             dense
             hide-details="auto"
@@ -539,7 +536,6 @@
           </div>
           <v-text-field
             :value="AI_MODEL"
-            prepend-inner-icon="$brain"
             outlined
             dense
             disabled

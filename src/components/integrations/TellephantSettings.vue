@@ -83,7 +83,6 @@
                   ? 'API key saved (enter a new one to replace it)'
                   : 'Tellephant / KwikEngage API key'
               "
-              prepend-inner-icon="$key-round"
               outlined
               dense
               autocomplete="new-password"

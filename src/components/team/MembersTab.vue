@@ -7,7 +7,6 @@
           <v-text-field
             v-model="search"
             placeholder="Search name or email"
-            prepend-inner-icon="$search"
             outlined
             dense
             hide-details

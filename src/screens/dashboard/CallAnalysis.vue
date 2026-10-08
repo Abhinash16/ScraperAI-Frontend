@@ -60,7 +60,6 @@
           <v-text-field
             v-model="search"
             placeholder="Search batches"
-            prepend-inner-icon="$search"
             outlined
             dense
             clearable
@@ -240,7 +239,6 @@
             v-model="batchName"
             label="Batch name"
             placeholder="Example: Sales Calls - July"
-            prepend-inner-icon="$tag"
             outlined
             dense
           />
@@ -306,7 +304,6 @@
                 accept=".csv"
                 label="Upload CSV File"
                 prepend-icon=""
-                prepend-inner-icon="$file-spreadsheet"
                 show-size
               />
             </v-tab-item>
@@ -318,7 +315,6 @@
                   <v-text-field
                     v-model="manualForm.agent_name"
                     label="Agent name"
-                    prepend-inner-icon="$user"
                     outlined
                     dense
                   />
@@ -327,7 +323,6 @@
                   <v-text-field
                     v-model="manualForm.recording_url"
                     label="Recording URL"
-                    prepend-inner-icon="$link"
                     outlined
                     dense
                   />
@@ -336,7 +331,6 @@
                   <v-text-field
                     v-model="manualForm.email"
                     label="Agent email"
-                    prepend-inner-icon="$message-square"
                     outlined
                     dense
                   />

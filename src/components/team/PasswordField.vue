@@ -4,7 +4,6 @@
       :value="value"
       :label="label"
       :type="show ? 'text' : 'password'"
-      prepend-inner-icon="$lock"
       outlined
       dense
       autocomplete="new-password"

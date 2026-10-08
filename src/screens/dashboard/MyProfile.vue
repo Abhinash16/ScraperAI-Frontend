@@ -140,7 +140,6 @@
                   <v-text-field
                     v-model.trim="company.company_name"
                     label="Company name"
-                    prepend-inner-icon="$building-2"
                     outlined
                     dense
                   />
@@ -149,7 +148,6 @@
                   <v-text-field
                     v-model.trim="company.name"
                     label="Account owner name"
-                    prepend-inner-icon="$user"
                     outlined
                     dense
                   />
@@ -158,7 +156,6 @@
                   <v-text-field
                     :value="account.email"
                     label="Account email"
-                    prepend-inner-icon="$message-square"
                     outlined
                     dense
                     disabled
@@ -170,7 +167,6 @@
                   <v-text-field
                     :value="account.phone"
                     label="Account phone"
-                    prepend-inner-icon="$phone"
                     outlined
                     dense
                     disabled
@@ -202,7 +198,6 @@
                     v-model.trim="company[link.key]"
                     :label="link.label"
                     :placeholder="link.placeholder"
-                    :prepend-inner-icon="link.icon"
                     :rules="[urlRule]"
                     outlined
                     dense

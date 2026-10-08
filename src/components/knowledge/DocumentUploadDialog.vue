@@ -30,7 +30,6 @@
           :accept="DOCUMENT_ACCEPT"
           label="File"
           prepend-icon=""
-          prepend-inner-icon="$file-up"
           outlined
           dense
           show-size

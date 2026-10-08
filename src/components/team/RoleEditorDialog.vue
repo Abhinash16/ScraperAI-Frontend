@@ -15,7 +15,6 @@
           v-model.trim="name"
           label="Role name"
           placeholder="e.g. Support agent"
-          prepend-inner-icon="$tag"
           outlined
           dense
           :error-messages="nameError"

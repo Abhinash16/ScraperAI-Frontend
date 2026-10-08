@@ -21,7 +21,6 @@
             <v-text-field
               v-model.trim="form.name"
               label="Full name"
-              prepend-inner-icon="$user"
               outlined
               dense
               :error-messages="errors.name"
@@ -34,7 +33,6 @@
               v-model.trim="form.email"
               label="Email"
               type="email"
-              prepend-inner-icon="$message-square"
               outlined
               dense
               autocomplete="off"

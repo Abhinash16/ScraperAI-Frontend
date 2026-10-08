@@ -421,7 +421,6 @@
             <v-text-field
               v-model="caseSearch"
               placeholder="Search questions"
-              prepend-inner-icon="$search"
               outlined
               dense
               hide-details
@@ -695,7 +694,6 @@
             v-model="runForm.note"
             label="Note (optional)"
             placeholder="e.g. After updating refund FAQs"
-            prepend-inner-icon="$pencil"
             outlined
             dense
             hide-details

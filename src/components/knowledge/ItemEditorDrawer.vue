@@ -233,7 +233,6 @@
             label="Valid until (optional)"
             hint="After this date the bot stops using it."
             persistent-hint
-            prepend-inner-icon="$calendar"
             outlined
             dense
             clearable

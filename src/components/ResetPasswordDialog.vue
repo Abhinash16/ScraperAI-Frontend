@@ -14,7 +14,6 @@
           v-model="password"
           label="New Password"
           type="password"
-          prepend-inner-icon="$lock"
           outlined
           dense
           hide-details="auto"

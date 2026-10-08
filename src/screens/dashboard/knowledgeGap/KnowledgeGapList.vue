@@ -53,7 +53,6 @@
           <v-text-field
             v-model="search"
             placeholder="Search questions, press Enter"
-            prepend-inner-icon="$search"
             outlined
             dense
             clearable

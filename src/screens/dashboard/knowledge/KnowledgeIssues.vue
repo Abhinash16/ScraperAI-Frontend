@@ -71,7 +71,6 @@
             v-model="severityFilter"
             :items="SEVERITY_ITEMS"
             placeholder="Any severity"
-            prepend-inner-icon="$funnel"
             outlined
             dense
             rounded
@@ -84,7 +83,6 @@
             v-model="typeFilter"
             :items="TYPE_ITEMS"
             placeholder="Any type"
-            prepend-inner-icon="$tag"
             outlined
             dense
             rounded

@@ -125,7 +125,6 @@
                 v-model.trim="form.url"
                 label="API URL"
                 placeholder="https://example.com/api/products/search"
-                prepend-inner-icon="$globe"
                 outlined
                 dense
                 :rules="[urlRule]"
@@ -137,7 +136,6 @@
                 label="Query parameter name"
                 placeholder="q"
                 hint="Query param (GET) or body field (POST) carrying the search text"
-                prepend-inner-icon="$search"
                 outlined
                 dense
               />
@@ -150,7 +148,6 @@
                 min="500"
                 max="10000"
                 hint="500 – 10000"
-                prepend-inner-icon="$clock"
                 outlined
                 dense
                 :rules="[rangeRule(500, 10000)]"
@@ -280,7 +277,6 @@
                     placeholder="activa 6g"
                     hint="The server test-calls your API with this query before saving. Saving fails if the call fails."
                     persistent-hint
-                    prepend-inner-icon="$search"
                     outlined
                     dense
                   />
@@ -338,7 +334,6 @@
               v-model.trim="testMessage"
               label="Test customer message"
               placeholder="What is the monthly rent for Activa 6G?"
-              prepend-inner-icon="$message-square"
               outlined
               dense
               hide-details

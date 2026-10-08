@@ -63,7 +63,6 @@
             v-model="selectedPlatform"
             :items="platformItems"
             label="Channel"
-            prepend-inner-icon="$messages-square"
             placeholder="All channels"
             outlined
             dense

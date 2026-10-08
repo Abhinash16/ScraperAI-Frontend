@@ -131,7 +131,6 @@
                     v-model.trim="startForm.websiteUrl"
                     label="Website address (optional)"
                     placeholder="https://example.com"
-                    prepend-inner-icon="$globe"
                     outlined
                     dense
                     hide-details

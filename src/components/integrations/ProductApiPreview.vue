@@ -21,7 +21,6 @@
           v-model.trim="query"
           label="Search for"
           placeholder="activa ev"
-          prepend-inner-icon="$search"
           outlined
           dense
           class="mr-2"
