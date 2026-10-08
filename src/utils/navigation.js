@@ -65,13 +65,21 @@ export const NAV_GROUPS = [
             to: link("/dashboard/knowledge"),
             permission: "knowledge:read",
             match: (r) =>
-              startsWith("/dashboard/knowledge")(r) && !startsWith("/dashboard/knowledge/issues")(r),
+              startsWith("/dashboard/knowledge")(r) &&
+              !startsWith("/dashboard/knowledge/issues")(r) &&
+              !startsWith("/dashboard/knowledge/notices")(r),
           },
           {
             name: "Issues",
             to: link("/dashboard/knowledge/issues"),
             permission: "knowledge:read",
             match: startsWith("/dashboard/knowledge/issues"),
+          },
+          {
+            name: "Notices",
+            to: link("/dashboard/knowledge/notices"),
+            permission: ["knowledge:read", "notices:manage"],
+            match: startsWith("/dashboard/knowledge/notices"),
           },
           {
             name: "Setup",

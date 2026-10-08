@@ -50,6 +50,12 @@ const routes = [
         meta: { permission: "settings:manage" },
       },
       {
+        path: "knowledge/notices",
+        component: () =>
+          import("../screens/dashboard/knowledge/KnowledgeNotices.vue"),
+        meta: { permission: ["knowledge:read", "notices:manage"] },
+      },
+      {
         path: "knowledge/issues",
         component: () =>
           import("../screens/dashboard/knowledge/KnowledgeIssues.vue"),

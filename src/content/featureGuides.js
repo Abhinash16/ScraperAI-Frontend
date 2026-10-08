@@ -315,6 +315,25 @@ export const FEATURE_GUIDES = [
     ],
   },
   {
+    id: "notices",
+    name: "Notices",
+    icon: "$calendar",
+    route: "/dashboard/knowledge/notices",
+    summary:
+      "Temporary things the bot should know for a while: a hub closed for a festival, special hours, app maintenance, an announcement or an offer.",
+    steps: [
+      "Open Knowledge → Notices and click Add notice.",
+      "Pick the type, write the title and details the way you'd tell a customer, and choose the days and locations.",
+      "For closures and maintenance, you can also show a banner on the website chat.",
+    ],
+    thingsToKnow: [
+      "Notices apply immediately, with no publishing step, and end by themselves.",
+      "The bot knows every active notice, and notices starting in the next 7 days, on every reply. It also always knows today's date and time.",
+      "Put conditions in the details (\"10% off weekly plans, code FEST10, new bookings only\"): the bot repeats them to customers.",
+      "Your own system can add and remove notices through our API. Ask support for a service token with the notices:manage permission. Notices from your system are marked \"From your system\", and your system may overwrite edits made here.",
+    ],
+  },
+  {
     id: "conversations",
     name: "Conversations",
     icon: "$history",

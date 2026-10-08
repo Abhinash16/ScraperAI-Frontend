@@ -46,6 +46,11 @@
       </div>
     </v-card>
 
+    <ActiveNoticeStrip
+      v-if="perms && (can(perms, 'knowledge:read') || can(perms, 'notices:manage'))"
+      class="mb-6"
+    />
+
     <KnowledgeHealthCard
       v-if="perms && can(perms, 'knowledge:read')"
       :permissions="perms"
@@ -149,6 +154,7 @@ import { can } from "@/utils/knowledge";
 import { BADGE, loadAttentionCounts, visibleGroups } from "@/utils/navigation";
 import { checklistProgress, loadSetup } from "@/utils/setup";
 import KnowledgeHealthCard from "@/components/knowledge/KnowledgeHealthCard.vue";
+import ActiveNoticeStrip from "@/components/knowledge/ActiveNoticeStrip.vue";
 
 const GROUP_STYLE = {
   operate: { label: "Operate", color: "indigo" },
@@ -159,7 +165,7 @@ const GROUP_STYLE = {
 export default {
   name: "DashboardHome",
 
-  components: { KnowledgeHealthCard },
+  components: { KnowledgeHealthCard, ActiveNoticeStrip },
 
   data() {
     return {
