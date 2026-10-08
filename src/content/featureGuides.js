@@ -327,7 +327,8 @@ export const FEATURE_GUIDES = [
     ],
     thingsToKnow: [
       "The next message after a conversation ends starts a new conversation, and the bot starts fresh (it doesn't carry over the earlier messages).",
-      "Outcomes: \"Handled by the bot\" means the bot answered without your team; \"Handled by your team\" means someone from your team replied; \"Handed to your team, no reply\" means the bot handed the chat over but nobody replied; \"No reply needed\" means nothing needed an answer.",
+      "Outcomes: \"Handled by the bot\" means the bot answered without your team; \"Handled by your team\" means someone from your team replied; \"Handed to your team, no reply\" means the bot handed the chat over but nobody from your team replied.",
+      "No reply sent: the customer wrote but neither the bot nor your team answered. Open the chat to follow up.",
       "Marking a chat as resolved also ends its open conversation.",
       "Messages from before conversations existed are shown together as \"Earlier messages\".",
     ],

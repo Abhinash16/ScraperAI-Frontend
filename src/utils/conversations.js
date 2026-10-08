@@ -11,7 +11,8 @@ export const OUTCOMES = {
   ai: { label: "Handled by the bot", color: "primary" },
   agent: { label: "Handled by your team", color: "success" },
   handed_off: { label: "Handed to your team, no reply", color: "warning" },
-  no_reply: { label: "No reply needed", color: "grey" },
+  // The customer wrote and nobody answered: worth a look
+  no_reply: { label: "No reply sent", color: "amber darken-3" },
 };
 
 export const CLOSED_REASONS = {
@@ -24,7 +25,8 @@ export const CLOSED_REASONS = {
 export const OPEN_STATUS = {
   open: { label: "Open", color: "primary" },
   escalated: { label: "With your team", color: "deep-purple" },
-  waiting: { label: "Waiting for the customer", color: "grey" },
+  // On hold for something else (an action or callback)
+  waiting: { label: "On hold", color: "grey" },
 };
 
 export const isOpen = (c) => c && c.status !== "closed";
