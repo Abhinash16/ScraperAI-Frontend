@@ -316,10 +316,19 @@
     </v-row>
 
     <!-- CHAT VIEW (mobile) -->
-    <v-bottom-sheet v-model="chatViewBottomSheet" scrollable>
-      <v-card rounded="t-lg">
-        <div class="d-flex align-center pl-4 pr-2 py-2">
-          <span class="text-subtitle-2 font-weight-bold text-truncate">
+    <v-dialog
+      v-model="chatViewBottomSheet"
+      fullscreen
+      hide-overlay
+      scrollable
+      transition="dialog-bottom-transition"
+    >
+      <v-card tile>
+        <div class="d-flex align-center pl-2 pr-2 py-2">
+          <v-btn icon aria-label="Back to chats" @click="chatViewBottomSheet = false">
+            <v-icon>$arrow-left</v-icon>
+          </v-btn>
+          <span class="text-subtitle-2 font-weight-bold text-truncate ml-1">
             {{ selectedChatId }}
           </span>
           <v-spacer />
@@ -338,7 +347,7 @@
           />
         </v-card-text>
       </v-card>
-    </v-bottom-sheet>
+    </v-dialog>
 
     <!-- Error Snackbar -->
     <v-snackbar v-model="snackbar" color="error" top right>

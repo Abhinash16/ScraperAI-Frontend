@@ -10,6 +10,7 @@
       :clipped="isDesktop"
       mini-variant-width="76"
       width="256"
+      floating
       color="white"
       class="app-nav"
     >

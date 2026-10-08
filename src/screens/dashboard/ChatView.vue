@@ -4,124 +4,136 @@
       <v-col cols="12">
         <v-card class="rounded-lg" outlined elevation="0">
           <!-- HEADER -->
-          <v-toolbar flat>
-            <v-avatar color="blue lighten-4" size="44" rounded="lg">
-              <v-icon color="blue darken-2" size="28">$circle-user</v-icon>
-            </v-avatar>
+          <div class="px-4 pt-3 pb-2">
+            <div class="d-flex align-center">
+              <v-avatar color="blue lighten-4" size="40" rounded="lg" class="flex-shrink-0">
+                <v-icon color="blue darken-2" size="22">$circle-user</v-icon>
+              </v-avatar>
 
-            <div class="ml-3">
-              <div class="d-flex">
-                <div class="font-weight-bold">Chat Room: {{ chatId }}</div>
-                <v-chip
-                  @click="testSound"
-                  v-if="!loading"
-                  small
-                  class="ml-2 text-capitalize text-caption"
-                  :color="ticketStatus === 'open' ? 'orange' : 'green'"
-                  text-color="white"
-                >
-                  {{ ticketStatus }}
-                </v-chip>
+              <div class="flex-grow-1 overflow-hidden mx-3">
+                <div class="d-flex align-center">
+                  <span class="text-body-1 font-weight-bold grey--text text--darken-4 text-truncate">
+                    {{ chatId }}
+                  </span>
+                  <v-chip
+                    v-if="!loading"
+                    x-small
+                    label
+                    :color="ticketStatus === 'open' ? 'orange' : 'green'"
+                    text-color="white"
+                    class="font-weight-bold text-capitalize ml-2 flex-shrink-0"
+                    @click="testSound"
+                  >
+                    {{ ticketStatus }}
+                  </v-chip>
+                </div>
+                <div class="text-caption grey--text text--darken-1">Chat room</div>
               </div>
-              <div class="text-caption d-flex align-center">
-                <span class="green--text">● Online</span>
 
-                <v-divider vertical class="mx-2"></v-divider>
+              <v-btn
+                small
+                text
+                color="grey darken-2"
+                class="flex-shrink-0"
+                :icon="$vuetify.breakpoint.xsOnly"
+                :aria-label="`Conversations (${conversations.length})`"
+                @click="showConversations = !showConversations"
+              >
+                <v-icon size="16" :left="!$vuetify.breakpoint.xsOnly">$history</v-icon>
+                <template v-if="!$vuetify.breakpoint.xsOnly">
+                  Conversations<span v-if="conversations.length">&nbsp;({{ conversations.length }})</span>
+                </template>
+              </v-btn>
 
-                <v-icon size="16" class="mr-1" color="primary">$bot</v-icon>
+              <!-- Status Update Menu -->
+              <v-menu offset-y left :disabled="statusUpdating">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn icon small class="flex-shrink-0" aria-label="Chat actions" v-bind="attrs" v-on="on">
+                    <v-icon size="18">$ellipsis-vertical</v-icon>
+                  </v-btn>
+                </template>
 
-                <span class="mr-2">
-                  {{ aiEnabledLocal ? "AI Active" : "AI Disabled" }}
+                <v-list dense>
+                  <v-list-item @click="updateTicketStatus('open')" :disabled="statusUpdating">
+                    <v-list-item-title>Reopen Ticket</v-list-item-title>
+                  </v-list-item>
+
+                  <v-list-item @click="updateTicketStatus('resolved')" :disabled="statusUpdating">
+                    <v-list-item-title class="d-flex align-center">
+                      <v-progress-circular
+                        v-if="statusUpdating"
+                        indeterminate
+                        size="16"
+                        width="2"
+                        class="mr-2"
+                      />
+                      Mark as Resolved
+                    </v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </div>
+
+            <!-- Status line: wraps on small screens -->
+            <div class="d-flex flex-wrap align-center text-caption mt-2">
+              <span class="d-inline-flex align-center green--text mr-3 my-1">
+                <v-icon size="8" color="green" class="mr-1">$circle</v-icon>
+                Online
+              </span>
+
+              <span class="d-inline-flex align-center mr-3 my-1">
+                <v-icon size="14" color="primary" class="mr-1">$bot</v-icon>
+                <span class="grey--text text--darken-2 mr-2 text-no-wrap">
+                  {{ aiEnabledLocal ? "AI on" : "AI off" }}
                 </span>
-
                 <v-switch
                   v-model="aiEnabledLocal"
                   dense
+                  inset
                   hide-details
+                  color="success"
+                  class="mt-0 pt-0"
+                  aria-label="AI replies on or off"
                   :loading="aiUpdating"
                   :disabled="aiUpdating"
                   @change="toggleAI"
                 ></v-switch>
+              </span>
 
-                <div class="green-text" v-if="showTypingIndicator">
-                  {{ typingMessage }}
-                </div>
-              </div>
+              <span v-if="showTypingIndicator" class="green--text font-italic mr-3 my-1">
+                {{ typingMessage }}
+              </span>
+
+              <v-tooltip v-if="replyWindow" bottom max-width="280">
+                <template #activator="{ on, attrs }">
+                  <v-chip
+                    x-small
+                    label
+                    outlined
+                    :color="replyWindow.color"
+                    class="font-weight-bold mr-2 my-1"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon left size="10">$clock</v-icon>
+                    <span class="text-truncate">{{ replyWindow.label }}</span>
+                  </v-chip>
+                </template>
+                WhatsApp lets businesses send free-form replies for 24 hours after the customer's
+                last message.
+              </v-tooltip>
+              <v-chip
+                v-if="openConversation"
+                x-small
+                label
+                outlined
+                :color="openStatus.color"
+                class="font-weight-bold my-1"
+              >
+                {{ openStatus.label }}
+              </v-chip>
             </div>
-
-            <v-spacer></v-spacer>
-
-            <v-tooltip v-if="replyWindow" bottom max-width="280">
-              <template #activator="{ on, attrs }">
-                <v-chip
-                  small
-                  outlined
-                  :color="replyWindow.color"
-                  class="mr-2"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon x-small left>$clock</v-icon>
-                  {{ replyWindow.label }}
-                </v-chip>
-              </template>
-              WhatsApp lets businesses send free-form replies for 24 hours after
-              the customer's last message.
-            </v-tooltip>
-            <v-chip
-              v-if="openConversation"
-              small
-              outlined
-              :color="openStatus.color"
-              class="mr-2"
-            >
-              {{ openStatus.label }}
-            </v-chip>
-            <v-btn
-              small
-              text
-              rounded
-              class="text-none"
-              @click="showConversations = !showConversations"
-            >
-              <v-icon small class="mr-1">$history</v-icon>
-              Conversations<span v-if="conversations.length">&nbsp;({{ conversations.length }})</span>
-            </v-btn>
-
-            <!-- Status Update Menu -->
-            <v-menu offset-y :disabled="statusUpdating">
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn icon v-bind="attrs" v-on="on">
-                  <v-icon>$ellipsis-vertical</v-icon>
-                </v-btn>
-              </template>
-
-              <v-list dense>
-                <v-list-item
-                  @click="updateTicketStatus('open')"
-                  :disabled="statusUpdating"
-                >
-                  <v-list-item-title> Reopen Ticket </v-list-item-title>
-                </v-list-item>
-
-                <v-list-item
-                  @click="updateTicketStatus('resolved')"
-                  :disabled="statusUpdating"
-                >
-                  <v-list-item-title class="d-flex align-center">
-                    <v-progress-circular
-                      v-if="statusUpdating"
-                      indeterminate
-                      size="16"
-                      width="2"
-                      class="mr-2"
-                    />
-                    Mark as Resolved
-                  </v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </v-toolbar>
+          </div>
 
           <v-divider></v-divider>
 
