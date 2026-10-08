@@ -28,7 +28,16 @@ export const SOURCE_NOTES = {
   handoff: "AI reply limit reached; handoff message sent.",
   escalated: "Chat is with your team.",
   media: "The customer sent media, so there was no AI answer.",
+  failed: "The reply could not be completed. See the error above.",
 };
+
+// "25 min", "2 h 10 min"
+export function formatDuration(from, to) {
+  const min = Math.max(1, Math.round((new Date(to) - new Date(from)) / 60000));
+  if (min < 60) return `${min} min`;
+  const h = Math.floor(min / 60);
+  return min % 60 ? `${h} h ${min % 60} min` : `${h} h`;
+}
 
 export const productLookupLabel = (mode) => (mode ? productModeInfo(mode).label : "");
 

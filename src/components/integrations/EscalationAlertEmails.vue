@@ -8,7 +8,8 @@
       with the customer's details so someone can contact them. Leave empty to
       use your account email<template v-if="defaultEmail">
         (<strong>{{ defaultEmail }}</strong>)</template
-      >. Up to {{ MAX_EMAILS }} addresses.
+      >. Up to {{ MAX_EMAILS }} addresses. We also email them when many
+      bot replies fail or your product API stops responding.
     </div>
 
     <v-progress-linear v-if="loading" indeterminate color="primary" />

@@ -303,6 +303,7 @@ export const FEATURE_GUIDES = [
       "Records are kept for 30 days. Older replies have no \"Why this answer\".",
       "AI costs are estimates from OpenAI's list prices. Your OpenAI bill is the exact amount.",
       "An error means the customer may not have received a proper answer, so open the chat and follow up.",
+      "If many replies fail or your product API stops responding, we email your alert addresses, once when it starts and once when it's fixed. Alerts show up 5–10 minutes after a problem starts. The addresses are set under Integrations → Webhooks → Escalate.",
     ],
   },
   {

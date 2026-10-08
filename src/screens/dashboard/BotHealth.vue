@@ -28,6 +28,51 @@
 
     <ThingsToKnow feature="bot-health" />
 
+    <!-- Alerts: open ones as banners, recent ones as a list -->
+    <v-alert
+      v-for="a in openAlerts"
+      :key="a._id"
+      type="error"
+      prominent
+      rounded="xl"
+      class="mb-4"
+    >
+      <div class="font-weight-bold">{{ a.title }}</div>
+      <div class="text-body-2">
+        Since {{ formatDate(a.openedAt) }}. We've emailed your alert addresses.
+        <router-link to="/dashboard/integration?section=webhooks&tab=escalate" class="white--text">
+          Change who gets alerts
+        </router-link>
+      </div>
+    </v-alert>
+
+    <v-card v-if="recentAlerts.length" outlined rounded="xl" class="pa-6 mb-6">
+      <div class="d-flex align-center mb-2">
+        <div class="text-subtitle-1 font-weight-bold">Recent alerts</div>
+        <v-spacer />
+        <v-btn
+          small
+          text
+          rounded
+          color="primary"
+          class="text-none"
+          to="/dashboard/integration?section=webhooks&tab=escalate"
+        >
+          Change who gets alerts
+        </v-btn>
+      </div>
+      <div v-for="a in recentAlerts" :key="a._id" class="d-flex align-start py-1 grey--text text--darken-1">
+        <v-icon x-small color="grey" class="mr-2 mt-1">$circle-check</v-icon>
+        <div class="text-body-2">
+          {{ a.title }}
+          <span class="text-caption">
+            · {{ formatDate(a.openedAt) }}
+            <template v-if="a.resolvedAt">· lasted {{ duration(a.openedAt, a.resolvedAt) }}</template>
+          </span>
+        </div>
+      </div>
+    </v-card>
+
     <v-card v-if="statsLoading && !stats" outlined rounded="xl" class="pa-6">
       <v-progress-linear indeterminate color="primary" />
     </v-card>
@@ -193,6 +238,7 @@ import {
   statusInfo,
   formatCost,
   formatSeconds as seconds,
+  formatDuration,
   productLookupLabel,
 } from "@/utils/traces";
 
@@ -221,10 +267,20 @@ export default {
       page: 1,
 
       openTraceId: null,
+
+      alerts: [],
     };
   },
 
   computed: {
+    openAlerts() {
+      return this.alerts.filter((a) => a.status === "open");
+    },
+
+    recentAlerts() {
+      return this.alerts.filter((a) => a.status !== "open");
+    },
+
     tiles() {
       const s = this.stats;
       const latency = s.aiLatencyMs || {};
@@ -321,9 +377,24 @@ export default {
     page: "loadProblems",
   },
 
+  created() {
+    this.loadAlerts();
+  },
+
   methods: {
     formatDate,
     statusInfo,
+    duration: formatDuration,
+
+    // Not tied to the range: open alerts first, then the last 7 days'
+    async loadAlerts() {
+      try {
+        const { data } = await apiClient.get(`${TRACES_API}/alerts`);
+        this.alerts = Array.isArray(data.data) ? data.data : [];
+      } catch {
+        this.alerts = [];
+      }
+    },
 
     async reload() {
       await this.loadStats();
