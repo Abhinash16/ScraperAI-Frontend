@@ -9,7 +9,19 @@ export const SOURCE_TYPES = {
   faq: { label: "FAQs", icon: "$message-circle-question-mark", color: "deep-purple" },
   manual: { label: "Notes", icon: "$notebook-pen", color: "teal" },
   knowledge_gap: { label: "Learned from chats", icon: "$messages-square", color: "orange" },
+  document: { label: "Document", icon: "$file-text", color: "blue-grey" },
 };
+
+// Uploaded documents (source.document)
+export const DOCUMENT_KINDS = { pdf: "PDF", docx: "Word", text: "Text" };
+export const DOCUMENT_STATUS = {
+  processing: { label: "Reading…", color: "primary", busy: true },
+  ready: { label: "Ready", color: "success" },
+  failed: { label: "Failed", color: "error" },
+  replaced: { label: "Replaced", color: "grey" },
+};
+export const DOCUMENT_ACCEPT = ".pdf,.docx,.txt,.md";
+export const DOCUMENT_MAX_MB = 15;
 
 export const sourceType = (type) =>
   SOURCE_TYPES[type] || { label: type, icon: "$folder", color: "grey" };
@@ -47,12 +59,45 @@ export const ISSUE_TYPES = {
   pii: "Personal details",
   secret: "Secret or ID number",
   injection: "Instructions to the bot",
+  expired: "Past its valid-until date",
+  obsolete: "Date has passed",
+  broken_source: "Page no longer found",
+  unused: "Not used lately",
 };
 
 export const SEVERITY = {
   blocker: { label: "Blocker", color: "error" },
   warning: { label: "Warning", color: "amber darken-3" },
+  info: { label: "Info", color: "grey" },
 };
+
+// Scheduled issues: expiry, past dates and unused items come from the daily
+// check; contradictions and missing pages from the weekly one.
+const DAILY_TYPES = ["expired", "obsolete", "unused"];
+export const detectedByNote = (issue) =>
+  issue?.detectedBy === "scheduled"
+    ? `Found by the ${DAILY_TYPES.includes(issue.type) ? "daily" : "weekly"} check`
+    : "";
+
+// Items types that can have a valid-until date (not FAQs yet)
+export const canExpire = (item) => !!item && item.type !== "faq";
+
+const localDay = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+// "2026-12-31" from an ISO date or date string, or ""
+export const dayOf = (value) => (value ? String(value).slice(0, 10) : "");
+
+// "Expires 31 Dec" / "Expired" chip for an item's validUntil, or null
+export function validityOf(item) {
+  const day = dayOf(item?.validUntil);
+  if (!day) return null;
+  if (day < localDay()) return { label: "Expired", color: "error", expired: true };
+  const date = new Date(`${day}T00:00:00`);
+  const opts = { day: "numeric", month: "short" };
+  if (date.getFullYear() !== new Date().getFullYear()) opts.year = "numeric";
+  return { label: `Expires ${date.toLocaleDateString(undefined, opts)}`, color: "blue-grey" };
+}
 
 export const ISSUE_STATUS = {
   open: { label: "Open", color: "primary" },
@@ -67,7 +112,7 @@ export const DISMISS_REASON_MIN = 3;
 export async function loadIssueSummary() {
   try {
     const { data } = await apiClient.get(`${KNOWLEDGE_API}/issues/summary`);
-    return data.data || { blocker: 0, warning: 0 };
+    return data.data || { blocker: 0, warning: 0, info: 0 };
   } catch {
     return null;
   }

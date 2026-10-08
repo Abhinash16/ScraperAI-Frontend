@@ -35,6 +35,15 @@
       </v-btn>
       <v-btn
         v-if="can(perms, 'knowledge:write')"
+        rounded
+        depressed
+        class="text-none ml-2 my-1"
+        @click="uploadOpen = true"
+      >
+        <v-icon small class="mr-1">$upload</v-icon> Upload document
+      </v-btn>
+      <v-btn
+        v-if="can(perms, 'knowledge:write')"
         color="primary"
         depressed
         rounded
@@ -67,6 +76,8 @@
       </div>
     </v-alert>
 
+    <KnowledgeHealthCard :permissions="perms" class="mb-6" @checked="loadSummary" />
+
     <ThingsToKnow feature="knowledge" />
 
     <v-card v-if="loading && !sources.length" outlined rounded="xl" class="pa-6">
@@ -87,7 +98,8 @@
       <v-icon size="40" color="grey lighten-1" class="mb-3">$folder</v-icon>
       <div class="text-subtitle-1 font-weight-bold mb-1">No sources yet</div>
       <div class="text-body-2 grey--text text--darken-1 mb-4">
-        Import your website, or add notes for facts that aren't online.
+        Import your website, upload a document, or add notes for facts that
+        aren't online.
       </div>
       <v-btn
         v-if="can(perms, 'knowledge:write')"
@@ -125,7 +137,10 @@
               </div>
               <div class="text-caption grey--text">
                 {{ typeOf(source).label }}
-                <template v-if="source.config && source.config.rootUrl">
+                <template v-if="source.document">
+                  · {{ source.document.fileName }} · {{ kindOf(source) }} · v{{ source.document.latestVersion }}
+                </template>
+                <template v-else-if="source.config && source.config.rootUrl">
                   · {{ source.config.rootUrl }}
                 </template>
               </div>
@@ -139,6 +154,16 @@
               </v-chip>
               <v-chip v-if="source.status === 'paused'" x-small outlined color="warning">
                 Paused
+              </v-chip>
+              <v-chip
+                v-if="docStatus(source)"
+                x-small
+                outlined
+                :color="docStatus(source).color"
+                :title="source.document.error || ''"
+              >
+                <v-icon v-if="docStatus(source).busy" x-small left class="icon-spin">$loader-circle</v-icon>
+                {{ docStatus(source).label }}
               </v-chip>
             </div>
           </div>
@@ -278,10 +303,16 @@
       <v-card v-if="deleting" rounded="xl">
         <v-card-title class="text-h6">Delete "{{ deleting.name }}"?</v-card-title>
         <v-card-text class="text-body-2">
-          This permanently deletes the source and all
-          {{ stat(deleting, "itemCount") }} of its items. The bot stops using
-          them right away, and this can't be undone. To hide it from the bot
-          for now, pause it instead.
+          <template v-if="deleting.type === 'document'">
+            Deletes the document and its {{ stat(deleting, "itemCount") }}
+            sections from the bot immediately. This can't be undone.
+          </template>
+          <template v-else>
+            This permanently deletes the source and all
+            {{ stat(deleting, "itemCount") }} of its items. The bot stops using
+            them right away, and this can't be undone.
+          </template>
+          To hide it from the bot for now, pause it instead.
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -301,13 +332,23 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <DocumentUploadDialog
+      v-model="uploadOpen"
+      :can-publish="can(perms, 'knowledge:publish')"
+      @uploaded="(s) => $router.push(`/dashboard/knowledge/${s._id}`)"
+    />
   </div>
 </template>
 
 <script>
 import apiClient from "@/service/axios";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
+import DocumentUploadDialog from "@/components/knowledge/DocumentUploadDialog.vue";
+import KnowledgeHealthCard from "@/components/knowledge/KnowledgeHealthCard.vue";
 import {
+  DOCUMENT_KINDS,
+  DOCUMENT_STATUS,
   KNOWLEDGE_API,
   apiError,
   can,
@@ -330,7 +371,7 @@ const emptyDraft = () => ({ type: "website", name: "", rootUrl: "", autoPublish:
 export default {
   name: "KnowledgeSources",
 
-  components: { ThingsToKnow },
+  components: { ThingsToKnow, DocumentUploadDialog, KnowledgeHealthCard },
 
   data() {
     return {
@@ -348,6 +389,8 @@ export default {
       draft: emptyDraft(),
 
       deleting: null,
+      uploadOpen: false,
+      pollTimer: null,
     };
   },
 
@@ -359,10 +402,14 @@ export default {
 
   created() {
     this.load();
-    loadIssueSummary().then((s) => (this.summary = s));
+    this.loadSummary();
     loadMyPermissions()
       .then((p) => (this.perms = p))
       .catch(() => {});
+  },
+
+  beforeDestroy() {
+    clearTimeout(this.pollTimer);
   },
 
   methods: {
@@ -370,6 +417,12 @@ export default {
     formatDate,
     typeOf: (source) => sourceType(source.type),
     stat: (source, key) => source.stats?.[key] ?? 0,
+    kindOf: (source) => DOCUMENT_KINDS[source.document?.kind] || source.document?.kind,
+    docStatus: (source) => (source.document ? DOCUMENT_STATUS[source.document.status] || null : null),
+
+    async loadSummary() {
+      this.summary = await loadIssueSummary();
+    },
 
     async load() {
       this.loading = true;
@@ -381,6 +434,11 @@ export default {
         this.loadError = apiError(err, "Failed to load your knowledge sources");
       } finally {
         this.loading = false;
+      }
+      // Documents being read: refresh until they're done
+      clearTimeout(this.pollTimer);
+      if (this.sources.some((s) => s.document?.status === "processing")) {
+        this.pollTimer = setTimeout(this.load, 5000);
       }
     },
 

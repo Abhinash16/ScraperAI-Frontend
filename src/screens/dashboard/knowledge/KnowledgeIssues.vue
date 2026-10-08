@@ -12,8 +12,9 @@
       <div class="mr-4">
         <div class="text-h5 font-weight-bold">Knowledge issues</div>
         <div class="text-body-2 grey--text text--darken-1">
-          Problems found when knowledge was published: contradictions,
-          duplicates, and private details.
+          Problems found when knowledge is published and by the daily and
+          weekly checks: contradictions, duplicates, private details, expired
+          or out-of-date items, and pages that disappeared.
         </div>
       </div>
       <v-spacer />
@@ -21,8 +22,11 @@
         <v-chip small :color="summary.blocker ? 'error' : 'grey'" text-color="white" class="mr-2">
           {{ summary.blocker }} blocker{{ summary.blocker === 1 ? "" : "s" }}
         </v-chip>
-        <v-chip small :color="summary.warning ? 'amber darken-3' : 'grey'" text-color="white">
+        <v-chip small :color="summary.warning ? 'amber darken-3' : 'grey'" text-color="white" class="mr-2">
           {{ summary.warning }} warning{{ summary.warning === 1 ? "" : "s" }}
+        </v-chip>
+        <v-chip small outlined color="grey darken-1">
+          {{ summary.info || 0 }} info
         </v-chip>
       </div>
     </div>
@@ -82,6 +86,7 @@
             <div class="explanation">{{ item.explanation }}</div>
             <div class="text-caption grey--text mt-1">
               {{ itemTitles(item) }}
+              <span v-if="detectedByNote(item)" class="ml-1">· {{ detectedByNote(item) }}</span>
             </div>
           </div>
         </template>
@@ -131,6 +136,7 @@ import {
   KNOWLEDGE_API,
   SEVERITY,
   apiError,
+  detectedByNote,
   formatDate,
   loadIssueSummary,
   loadMyPermissions,
@@ -164,8 +170,9 @@ export default {
       loading: false,
       options: { page: 1, itemsPerPage: 20 },
       statusFilter: "open",
-      severityFilter: null,
-      typeFilter: null,
+      // Linked from the health card, e.g. ?severity=blocker
+      severityFilter: SEVERITY[this.$route.query.severity] ? this.$route.query.severity : null,
+      typeFilter: ISSUE_TYPES[this.$route.query.type] ? this.$route.query.type : null,
 
       openIssueId: this.$route.query.issue || null,
       editItemId: null,
@@ -216,6 +223,7 @@ export default {
 
   methods: {
     formatDate,
+    detectedByNote,
     severityOf: (issue) => SEVERITY[issue.severity] || SEVERITY.warning,
     statusOf: (issue) => ISSUE_STATUS[issue.status] || ISSUE_STATUS.open,
     typeLabel: (issue) => ISSUE_TYPES[issue.type] || issue.type,

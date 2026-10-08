@@ -101,6 +101,30 @@
           Save alert emails
         </v-btn>
       </div>
+
+      <v-divider class="my-6" />
+
+      <div class="d-flex align-start">
+        <div class="flex-grow-1 mr-4">
+          <div class="text-subtitle-2 font-weight-bold">Weekly knowledge report</div>
+          <div class="text-body-2 grey--text text--darken-1">
+            Every Monday morning: your bot's knowledge health, new problems,
+            unanswered questions and what to fix first. Sent to the addresses
+            above.
+          </div>
+        </div>
+        <v-switch
+          :input-value="weeklyDigest"
+          color="primary"
+          inset
+          hide-details
+          class="mt-0 pt-0"
+          :loading="savingDigest"
+          :disabled="savingDigest"
+          :label="weeklyDigest ? 'On' : 'Off'"
+          @change="saveDigest"
+        />
+      </div>
     </template>
   </v-card>
 </template>
@@ -122,6 +146,8 @@ export default {
       saved: [],
       emails: [],
       defaultEmail: "",
+      weeklyDigest: true,
+      savingDigest: false,
       draft: "",
       draftError: "",
 
@@ -150,6 +176,24 @@ export default {
       this.saved = [...(data?.emails || [])];
       this.emails = [...this.saved];
       this.defaultEmail = data?.defaultEmail || "";
+      this.weeklyDigest = data?.weeklyDigest !== false;
+    },
+
+    // Sent alone, so unsaved address edits stay as they are
+    async saveDigest(on) {
+      const value = !!on;
+      this.weeklyDigest = value;
+      this.savingDigest = true;
+      try {
+        const { data } = await apiClient.put(ENDPOINT, { weeklyDigest: value });
+        this.weeklyDigest = data.data?.weeklyDigest !== false;
+        this.$toast.success(value ? "Weekly report turned on" : "Weekly report turned off");
+      } catch (err) {
+        this.weeklyDigest = !value;
+        this.$toast.error(err.response?.data?.message || "Failed to update the weekly report");
+      } finally {
+        this.savingDigest = false;
+      }
     },
 
     async load() {

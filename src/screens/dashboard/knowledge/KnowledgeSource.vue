@@ -115,6 +115,14 @@
         @imported="onImported"
       />
 
+      <DocumentStatusCard
+        v-if="source.type === 'document'"
+        :source="source"
+        :can-write="can(perms, 'knowledge:write')"
+        :can-publish="can(perms, 'knowledge:publish')"
+        @changed="refresh()"
+      />
+
       <FaqExtractPanel
         v-if="source.type === 'faq'"
         v-model="extractOpen"
@@ -242,7 +250,7 @@
         <v-data-table
           v-model="selected"
           :headers="headers"
-          :items="items"
+          :items="displayItems"
           :options.sync="options"
           :server-items-length="total"
           :loading="itemsLoading"
@@ -291,6 +299,17 @@
             >
               <v-icon x-small left>{{ healthOf(item).icon }}</v-icon>
               {{ healthOf(item).label }}
+            </v-chip>
+            <v-chip
+              v-if="validityOf(item)"
+              x-small
+              outlined
+              :color="validityOf(item).color"
+              class="ml-1"
+              :title="validityOf(item).expired ? 'Hidden from the bot: its valid-until date has passed' : ''"
+            >
+              <v-icon x-small left>$calendar</v-icon>
+              {{ validityOf(item).label }}
             </v-chip>
             <v-tooltip v-if="workOf(item)" bottom :disabled="!workOf(item).error">
               <template #activator="{ on, attrs }">
@@ -348,6 +367,8 @@
                   ? "No items match."
                   : source.type === "website"
                   ? "No pages yet. Import some above."
+                  : source.type === "document"
+                  ? "No sections yet. They appear once the document has been read."
                   : faqSource
                   ? "No FAQs yet."
                   : "No notes yet."
@@ -484,9 +505,16 @@
       <v-card v-if="source" rounded="xl">
         <v-card-title class="text-h6">Delete "{{ source.name }}"?</v-card-title>
         <v-card-text class="text-body-2">
-          This permanently deletes the source and all {{ stat("itemCount") }}
-          of its items. The bot stops using them right away, and this can't be
-          undone. To hide it from the bot for now, pause it instead.
+          <template v-if="source.type === 'document'">
+            Deletes the document and its {{ stat("itemCount") }} sections from
+            the bot immediately. This can't be undone.
+          </template>
+          <template v-else>
+            This permanently deletes the source and all {{ stat("itemCount") }}
+            of its items. The bot stops using them right away, and this can't be
+            undone.
+          </template>
+          To hide it from the bot for now, pause it instead.
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -535,6 +563,7 @@ import FaqImportDialog from "@/components/knowledge/FaqImportDialog.vue";
 import ImportPanel from "@/components/knowledge/ImportPanel.vue";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import ItemEditorDrawer from "@/components/knowledge/ItemEditorDrawer.vue";
+import DocumentStatusCard from "@/components/knowledge/DocumentStatusCard.vue";
 import {
   ITEM_STATUS,
   KNOWLEDGE_API,
@@ -547,6 +576,7 @@ import {
   isSuggested,
   loadMyPermissions,
   sourceType,
+  validityOf,
   workState,
 } from "@/utils/knowledge";
 
@@ -585,6 +615,7 @@ export default {
     ImportPanel,
     ItemEditorDrawer,
     ThingsToKnow,
+    DocumentStatusCard,
   },
 
   data() {
@@ -647,6 +678,12 @@ export default {
     allSuggested() {
       return this.selected.length > 0 && this.selected.every(isSuggested);
     },
+    // Document sections in document order (within the page)
+    displayItems() {
+      if (this.source?.type !== "document") return this.items;
+      const order = (i) => (typeof i.data?.order === "number" ? i.data.order : Infinity);
+      return [...this.items].sort((a, b) => order(a) - order(b));
+    },
     canBulk() {
       return can(this.perms, "knowledge:publish") || can(this.perms, "knowledge:delete");
     },
@@ -661,7 +698,7 @@ export default {
         ];
       }
       return [
-        { text: "Title", value: "title", sortable: false },
+        { text: this.source?.type === "document" ? "Section" : "Title", value: "title", sortable: false },
         { text: "Status", value: "status", sortable: false },
         { text: "Chunks", value: "chunkCount", sortable: false, align: "end" },
         { text: "Updated", value: "updatedAt", sortable: false },
@@ -719,6 +756,7 @@ export default {
     formatDate,
     isSuggested,
     healthOf,
+    validityOf,
     statusOf: (item) => ITEM_STATUS[item.status] || ITEM_STATUS.draft,
     workOf: (item) => workState(item),
 
@@ -763,6 +801,7 @@ export default {
           },
         });
         this.items = data.data.items || [];
+
         this.total = data.data.total || 0;
         // Categories seen so far feed the filter and the FAQ editors
         const seen = new Set(this.knownCategories);
