@@ -1,5 +1,5 @@
 <template>
-  <v-app class="app-shell">
+  <v-app>
     <!-- SIDEBAR -->
     <v-navigation-drawer
       v-model="drawer"
@@ -176,7 +176,7 @@
 
     <!-- MAIN -->
     <div class="app-content">
-      <v-sheet color="grey lighten-4" rounded="lg" class="d-flex align-center px-4 py-2 mb-3">
+      <v-sheet color="#F5F7FB" rounded="lg" class="d-flex align-center px-4 py-2 mb-5">
         <v-breadcrumbs :items="crumbs" class="pa-0 text-body-2">
           <template #divider>
             <span class="grey--text">/</span>
@@ -202,9 +202,9 @@
         </v-tabs>
       </div>
 
-      <v-card flat rounded="lg" class="app-card pa-4 pa-sm-6 pa-md-8">
+      <div class="app-page">
         <slot />
-      </v-card>
+      </div>
     </div>
 
     <!-- LOGOUT -->
@@ -416,10 +416,6 @@ export default {
 </script>
 
 <style scoped>
-.app-shell {
-  background-color: #eff2fb !important;
-}
-
 .min-w-0 {
   min-width: 0;
 }
@@ -477,13 +473,13 @@ export default {
 }
 
 /* Content */
+/* One padding for the breadcrumb, tabs and page, so they share a left edge */
 .app-content {
   padding: 16px;
 }
 
 .app-tabs {
-  margin-bottom: 12px;
-  border-bottom: 1px solid #e1e4ee;
+  margin-bottom: 16px;
 }
 
 .app-tabs ::v-deep .v-tab {
@@ -491,13 +487,13 @@ export default {
   padding: 0 14px;
 }
 
-.app-card {
-  min-height: calc(100vh - 64px - 32px);
+.app-page {
+  min-height: calc(100vh - 64px - 120px);
 }
 
 @media (min-width: 960px) {
   .app-content {
-    padding: 24px;
+    padding: 24px 32px;
   }
 }
 </style>

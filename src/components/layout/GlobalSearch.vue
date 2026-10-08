@@ -45,7 +45,7 @@
         class="overflow-hidden"
       >
         <!-- Search input -->
-        <v-sheet color="green lighten-5" class="d-flex align-center px-5 py-3">
+        <v-sheet color="#EEF0FE" class="d-flex align-center px-5 py-3">
           <v-icon size="22" color="grey darken-1" class="mr-3">$search</v-icon>
           <input
             ref="input"
@@ -90,12 +90,13 @@
             v-model="category"
             mandatory
             show-arrows
-            active-class="green lighten-5 green--text text--darken-2"
+            active-class="primary--text"
           >
             <v-chip
               v-for="c in categories"
               :key="c"
               :value="c"
+              :color="category === c ? '#EEF0FE' : undefined"
               small
               outlined
               class="font-weight-bold"
@@ -142,14 +143,14 @@
             :ref="`row-${i}`"
             flat
             rounded="lg"
-            :color="i === cursor ? 'green lighten-5' : 'transparent'"
+            :color="i === cursor ? '#EEF0FE' : 'transparent'"
             class="d-flex align-center px-3 py-3 mb-1"
             @click="choose(item)"
             @mouseenter="cursor = i"
           >
             <v-icon
               size="20"
-              color="green darken-1"
+              color="primary"
               class="mr-4 flex-shrink-0"
               >{{ item.icon }}</v-icon
             >

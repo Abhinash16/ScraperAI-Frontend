@@ -208,6 +208,7 @@
 
     <!-- TABS -->
     <v-tabs
+      class="mb-4"
       v-model="tab"
       color="primary"
       background-color="transparent"
@@ -226,7 +227,6 @@
         }}</v-chip>
       </v-tab>
     </v-tabs>
-    <v-divider class="mb-4" />
 
     <!-- ============ RUNS ============ -->
     <div v-show="tab === 'runs'">

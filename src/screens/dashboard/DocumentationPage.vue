@@ -1,5 +1,5 @@
 <template>
-  <div class="docs-page">
+  <div>
     <!-- HEADER -->
     <div class="d-flex flex-wrap align-center mb-4">
       <div class="mr-4 mb-2">
@@ -16,6 +16,7 @@
     </div>
 
     <v-tabs
+      class="mb-4"
       :value="tabIndex"
       color="primary"
       background-color="transparent"
@@ -29,7 +30,6 @@
         {{ t.name }}
       </v-tab>
     </v-tabs>
-    <v-divider class="mb-4" />
 
     <!-- ================= GO-LIVE CHECKLIST ================= -->
     <div v-if="tab === 'checklist'">
@@ -474,10 +474,6 @@ export default {
 </script>
 
 <style scoped>
-.docs-page {
-  max-width: 1000px;
-}
-
 /* Outline each guide; Vuetify 2 panels have no border option */
 .guide-panel {
   border: 1px solid rgba(0, 0, 0, 0.12);

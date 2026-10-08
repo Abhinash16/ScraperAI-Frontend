@@ -127,6 +127,7 @@
 
       <!-- ============ TABS ============ -->
       <v-tabs
+        class="mb-4"
         v-model="tab"
         color="primary"
         background-color="transparent"
@@ -139,7 +140,6 @@
           {{ t.label }}
         </v-tab>
       </v-tabs>
-      <v-divider class="mb-4" />
 
       <!-- ============ IDENTITY ============ -->
       <v-card v-show="tab === 'identity'" outlined rounded="lg">

@@ -1,92 +1,100 @@
 <template>
-  <v-card outlined rounded="lg" class="pa-6">
-    <div class="d-flex align-center mb-3">
-      <v-icon small class="mr-2">$shield-check</v-icon>
-      <div class="text-subtitle-1 font-weight-bold">Knowledge health</div>
-      <v-spacer />
-      <v-btn
-        v-if="canCheck"
-        small
-        text
-        rounded
-        class="text-none"
-        :loading="checking"
-        @click="checkNow"
-      >
-        <v-icon small class="mr-1">$refresh-cw</v-icon> Check now
+  <v-card outlined rounded="lg">
+    <!-- Header -->
+    <div class="d-flex align-center flex-wrap px-5 py-4">
+      <v-avatar size="40" tile color="green lighten-5" class="rounded-lg mr-3 flex-shrink-0">
+        <v-icon size="20" color="green darken-1">$shield-check</v-icon>
+      </v-avatar>
+      <div class="flex-grow-1 mr-4 my-1">
+        <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">Knowledge health</div>
+        <div class="text-caption grey--text text--darken-1">
+          Share of your published knowledge with no open problems.
+        </div>
+      </div>
+      <v-btn v-if="canCheck" small outlined color="primary" class="my-1" :loading="checking" @click="checkNow">
+        <v-icon left size="14">$refresh-cw</v-icon>
+        Check now
       </v-btn>
-      <v-btn
-        v-if="compact"
-        small
-        text
-        rounded
-        color="primary"
-        class="text-none"
-        to="/dashboard/knowledge"
-      >
+      <v-btn v-if="compact" small text color="primary" class="my-1" to="/dashboard/knowledge">
         Open Knowledge
+        <v-icon right size="14">$arrow-right</v-icon>
       </v-btn>
     </div>
+    <v-divider />
 
-    <v-progress-linear
-      v-if="loading && !current"
-      indeterminate
-      color="primary"
-    />
-    <div v-else-if="error" class="text-body-2 error--text">{{ error }}</div>
+    <div class="pa-5">
+      <v-skeleton-loader v-if="loading && !current" type="list-item-avatar-two-line" />
 
-    <div
-      v-else-if="current && current.score == null"
-      class="text-body-2 grey--text text--darken-1"
-    >
-      No published knowledge yet. The score appears once the bot uses some.
-    </div>
+      <v-alert v-else-if="error" type="error" text dense rounded="lg" class="text-body-2 mb-0">
+        {{ error }}
+      </v-alert>
 
-    <div v-else-if="current" class="d-flex align-center flex-wrap">
-      <div class="mr-8 mb-2">
-        <div class="d-flex align-baseline">
-          <span :class="['score font-weight-bold', scoreColor]">{{
-            current.score
-          }}</span>
-          <span class="text-body-1 grey--text ml-1">/ 100</span>
-          <span
-            v-if="trend"
-            :class="['text-body-2 font-weight-bold ml-3', trend.color]"
-            :title="trend.title"
-          >
-            <v-icon x-small :color="trend.iconColor">{{ trend.icon }}</v-icon>
-            {{ trend.text }}
-          </span>
-        </div>
-        <div class="text-body-2 grey--text text--darken-1">
-          {{ current.healthy }} of {{ current.published }} published item{{
-            current.published === 1 ? " is" : "s are"
-          }}
-          healthy
-        </div>
+      <div v-else-if="current && current.score == null" class="text-body-2 grey--text text--darken-1">
+        No published knowledge yet. The score appears once the bot uses some.
       </div>
 
-      <div class="d-flex flex-wrap counts">
-        <component
-          :is="c.to ? 'router-link' : 'div'"
-          v-for="c in counts"
-          :key="c.label"
-          :to="c.to"
-          :class="['count mr-6 mb-2', { link: !!c.to }]"
-        >
-          <div
-            :class="[
-              'text-h6 font-weight-bold',
-              c.value ? c.color : 'grey--text',
-            ]"
-          >
-            {{ c.value }}
+      <v-row v-else-if="current" dense align="center">
+        <!-- Score -->
+        <v-col cols="12" md="4">
+          <div class="d-flex align-center">
+            <v-progress-circular
+              :value="current.score"
+              :color="current.score >= 90 ? 'success' : current.score >= 70 ? 'amber darken-2' : 'error'"
+              size="76"
+              width="7"
+              class="mr-4 flex-shrink-0"
+            >
+              <span class="text-h6 font-weight-bold" :class="scoreColor">{{ current.score }}</span>
+            </v-progress-circular>
+            <div>
+              <div class="d-flex align-center flex-wrap">
+                <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4 mr-2">out of 100</span>
+                <v-chip
+                  v-if="trend"
+                  x-small
+                  label
+                  :color="`${trend.iconColor} lighten-5`"
+                  :text-color="trend.iconColor"
+                  class="font-weight-bold"
+                  :title="trend.title"
+                >
+                  <v-icon left size="10">{{ trend.icon }}</v-icon>
+                  {{ trend.text }}
+                </v-chip>
+              </div>
+              <div class="text-caption grey--text text--darken-1">
+                {{ current.healthy }} of {{ current.published }} published item{{
+                  current.published === 1 ? " is" : "s are"
+                }}
+                healthy
+              </div>
+            </div>
           </div>
-          <div class="text-caption grey--text text--darken-1">
-            {{ c.label }}
-          </div>
-        </component>
-      </div>
+        </v-col>
+
+        <!-- Counts -->
+        <v-col cols="12" md="8">
+          <v-row dense>
+            <v-col v-for="c in counts" :key="c.label" cols="6" sm="4" lg>
+              <v-card
+                flat
+                rounded="lg"
+                color="grey lighten-5"
+                class="px-4 py-3 fill-height"
+                :to="c.to"
+                :ripple="!!c.to"
+              >
+                <div class="text-h6 font-weight-bold" :class="c.value ? c.color : 'grey--text'">
+                  {{ c.value }}
+                </div>
+                <div class="text-caption grey--text text--darken-1 text-truncate" :title="c.label">
+                  {{ c.label }}
+                </div>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-col>
+      </v-row>
     </div>
   </v-card>
 </template>
@@ -236,17 +244,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.score {
-  font-size: 40px;
-  line-height: 1;
-}
-.count {
-  text-decoration: none;
-  color: inherit;
-}
-.count.link:hover .text-caption {
-  text-decoration: underline;
-}
-</style>

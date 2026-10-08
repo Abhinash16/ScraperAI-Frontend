@@ -251,6 +251,7 @@
 
             <template v-else>
               <v-tabs
+                class="mb-4"
                 :value="apiConfigTab"
                 color="primary"
                 background-color="transparent"
@@ -269,7 +270,6 @@
                   {{ tab.name }}
                 </v-tab>
               </v-tabs>
-              <v-divider class="mb-4" />
 
               <CustomerApiSettings v-if="apiConfigTab === 'customer-api'" />
               <ProductApiSettings v-if="apiConfigTab === 'product-api'" />
@@ -279,6 +279,7 @@
           <!-- ================= WEBHOOKS ================= -->
           <div v-if="section === 'webhooks'">
             <v-tabs
+              class="mb-4"
               :value="webhookTab"
               color="primary"
               background-color="transparent"
@@ -305,7 +306,6 @@
                 </v-icon>
               </v-tab>
             </v-tabs>
-            <v-divider class="mb-4" />
 
             <v-card outlined rounded="lg">
               <div class="d-flex align-center px-5 py-4">

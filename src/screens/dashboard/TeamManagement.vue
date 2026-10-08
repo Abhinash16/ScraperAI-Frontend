@@ -28,6 +28,7 @@
 
     <template v-else>
       <v-tabs
+        class="mb-4"
         :value="tab"
         color="primary"
         background-color="transparent"
@@ -44,7 +45,6 @@
           Roles
         </v-tab>
       </v-tabs>
-      <v-divider class="mb-4" />
 
       <MembersTab
         v-if="tab === 'members'"

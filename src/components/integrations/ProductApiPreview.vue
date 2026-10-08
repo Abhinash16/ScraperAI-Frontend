@@ -117,13 +117,12 @@
         </div>
         <div v-if="result.error" class="text-body-2 error--text mb-2">{{ result.error }}</div>
 
-        <v-tabs v-model="tab" color="primary" background-color="transparent" height="40" slider-size="3" show-arrows>
+        <v-tabs class="mb-3" v-model="tab" color="primary" background-color="transparent" height="40" slider-size="3" show-arrows>
           <v-tab class="text-body-2 font-weight-bold">Request</v-tab>
           <v-tab class="text-body-2 font-weight-bold">Their response</v-tab>
           <v-tab class="text-body-2 font-weight-bold">After mapping</v-tab>
           <v-tab class="text-body-2 font-weight-bold">What the AI sees</v-tab>
         </v-tabs>
-        <v-divider class="mb-3" />
 
         <OutputPanel
           v-if="tab === 0"

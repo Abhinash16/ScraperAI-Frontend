@@ -96,6 +96,7 @@
 
     <!-- TABS -->
     <v-tabs
+      class="mb-4"
       v-model="view"
       color="primary"
       background-color="transparent"
@@ -111,7 +112,6 @@
         Conversations
       </v-tab>
     </v-tabs>
-    <v-divider class="mb-4" />
 
     <ConversationReport v-if="view === 'conversations'" :days="days" />
 

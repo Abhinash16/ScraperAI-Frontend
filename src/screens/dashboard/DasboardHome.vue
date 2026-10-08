@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div>
     <!-- Greeting -->
     <div class="mb-6">
       <h1 class="text-h5 font-weight-bold grey--text text--darken-4 mb-1">
@@ -267,10 +267,6 @@ export default {
 </script>
 
 <style scoped>
-.home {
-  max-width: 1200px;
-}
-
 .min-w-0 {
   min-width: 0;
 }

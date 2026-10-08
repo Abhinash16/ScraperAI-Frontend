@@ -244,6 +244,7 @@
           />
 
           <v-tabs
+            class="mb-4"
             v-model="tab"
             color="primary"
             background-color="transparent"
@@ -263,7 +264,6 @@
               One by one
             </v-tab>
           </v-tabs>
-          <v-divider class="mb-4" />
 
           <v-tabs-items v-model="tab">
             <!-- JSON -->
