@@ -181,14 +181,14 @@
         </v-tabs>
       </div>
 
-      <v-card flat rounded="xl" class="app-card pa-4 pa-sm-6 pa-md-8">
+      <v-card flat rounded="lg" class="app-card pa-4 pa-sm-6 pa-md-8">
         <slot />
       </v-card>
     </div>
 
     <!-- LOGOUT -->
     <v-dialog v-model="logoutDialog" max-width="380">
-      <v-card rounded="xl" class="text-center pa-2">
+      <v-card rounded="lg" class="text-center pa-2">
         <v-card-text class="pt-6">
           <v-avatar color="error lighten-5" size="56" class="mb-4">
             <v-icon color="error" size="28">$log-out</v-icon>

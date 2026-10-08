@@ -6,7 +6,7 @@
 
     <ThingsToKnow feature="call-analysis" />
 
-    <v-card outlined rounded="xl">
+    <v-card outlined rounded="lg">
       <div class="d-flex justify-space-between align-center pa-4">
         <div>
           <div class="text-h6 font-weight-bold">Call Analysis Batches</div>
@@ -68,15 +68,15 @@
     <v-dialog
       v-model="uploadDialog"
       max-width="600"
-      rounded="xl"
+      rounded="lg"
       persistent
       overlay-color="#2c3e50"
       overlay-opacity="0.8"
     >
-      <v-card rounded="xl" :loading="loading" class="overflow-hidden">
+      <v-card rounded="lg" :loading="loading" class="overflow-hidden">
         <!-- Header -->
         <div class="pa-6 pb-0 d-flex align-center">
-          <v-avatar color="#eff2fb" rounded="xl" size="48" class="mr-4">
+          <v-avatar color="#eff2fb" rounded="lg" size="48" class="mr-4">
             <v-icon color="black">$phone-call</v-icon>
           </v-avatar>
 

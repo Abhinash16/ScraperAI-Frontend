@@ -11,7 +11,7 @@
     <v-row>
       <!-- ================= SECTION NAV ================= -->
       <v-col cols="12" md="3">
-        <v-card outlined rounded="xl" class="pa-2 integration-nav">
+        <v-card outlined rounded="lg" class="pa-2 integration-nav">
           <template v-for="group in navGroups">
             <div :key="group.title + '-title'" class="nav-group-title">
               {{ group.title }}
@@ -56,7 +56,7 @@
         <div class="integration-content">
           <!-- Section header -->
           <div class="d-flex align-center mb-6">
-            <v-avatar size="48" rounded="xl" color="#cde6ff" class="mr-4">
+            <v-avatar size="48" rounded="lg" color="#cde6ff" class="mr-4">
               <v-img
                 v-if="activeItem.image"
                 :src="activeItem.image"
@@ -92,7 +92,7 @@
 
           <!-- ================= AI PROVIDER ================= -->
           <div v-if="section === 'ai-provider'">
-            <v-card outlined rounded="xl" class="pa-6 mb-4">
+            <v-card outlined rounded="lg" class="pa-6 mb-4">
               <div class="d-flex align-center flex-wrap">
                 <div class="flex-grow-1 mr-4 mb-2">
                   <div class="d-flex align-center">
@@ -126,7 +126,7 @@
               </div>
             </v-card>
 
-            <v-card outlined rounded="xl" class="pa-6">
+            <v-card outlined rounded="lg" class="pa-6">
               <div class="d-flex align-center">
                 <div class="flex-grow-1 mr-4">
                   <div class="text-subtitle-1 font-weight-bold">
@@ -152,7 +152,7 @@
 
           <!-- ================= API CONFIG ================= -->
           <div v-if="section === 'api-config'">
-            <v-card v-if="!userLoaded" outlined rounded="xl" class="pa-6">
+            <v-card v-if="!userLoaded" outlined rounded="lg" class="pa-6">
               <v-progress-linear indeterminate color="primary" />
             </v-card>
 
@@ -160,7 +160,7 @@
               v-else-if="!canManageSettings"
               type="warning"
               outlined
-              rounded="xl"
+              rounded="lg"
             >
               You need the <code>settings:manage</code> permission to configure
               APIs.
@@ -214,7 +214,7 @@
               </v-tab>
             </v-tabs>
 
-            <v-card outlined rounded="xl" class="pa-6">
+            <v-card outlined rounded="lg" class="pa-6">
               <div class="d-flex align-start mb-4">
                 <div class="flex-grow-1 mr-4">
                   <div class="text-subtitle-1 font-weight-bold">
@@ -321,14 +321,14 @@
               color="warning"
               elevation="0"
               outlined
-              rounded="xl"
+              rounded="lg"
               class="text-body-2 mb-4"
             >
               Your API key is disabled until payment is made or the billing
               cycle lapses. Once we receive payment, the key is reactivated.
             </v-alert>
 
-            <v-card outlined rounded="xl" class="pa-6">
+            <v-card outlined rounded="lg" class="pa-6">
               <div class="code-box mb-4">
                 <div class="d-flex justify-space-between align-center mb-2">
                   <span class="code-label">API KEY</span>
@@ -371,13 +371,13 @@
       v-model="connectChatGptDialog"
       max-width="550"
       persistent
-      rounded="xl"
+      rounded="lg"
       overlay-color="#2c3e50"
       overlay-opacity="0.8"
     >
-      <v-card rounded="xl" :loading="loading">
+      <v-card rounded="lg" :loading="loading">
         <v-card-title class="d-flex align-center pb-0">
-          <v-avatar color="#eff2fb" rounded="xl" size="50" class="mr-4">
+          <v-avatar color="#eff2fb" rounded="lg" size="50" class="mr-4">
             <v-img src="../../assets/images/chatgpt-icon.png"></v-img>
           </v-avatar>
           <div>

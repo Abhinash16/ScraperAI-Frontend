@@ -1,316 +1,792 @@
 <template>
-  <div class="quality-page">
-    <!-- Header -->
-    <div class="d-flex align-center flex-wrap mb-6">
-      <v-avatar size="48" rounded="xl" color="#dcfce7" class="mr-4">
-        <v-icon color="black">$circle-check</v-icon>
-      </v-avatar>
-      <div class="mr-6">
-        <div class="text-h5 font-weight-bold">Quality</div>
+  <div>
+    <!-- HEADER -->
+    <div class="d-flex flex-wrap align-center mb-4">
+      <div class="mr-4 mb-2">
+        <h1 class="text-h6 font-weight-bold grey--text text--darken-4">
+          Test runs
+        </h1>
         <div class="text-body-2 grey--text text--darken-1">
           Test how well your bot answers, before your customers find out.
         </div>
       </div>
-
-      <div v-if="latest" class="d-flex align-center my-1 mr-4">
-        <div class="mr-3">
-          <div class="text-caption grey--text">Latest pass rate</div>
-          <div :class="['text-h5 font-weight-bold', `${passRateColor(latest.passRate)}--text`]">
-            {{ formatRate(latest.passRate) }}
-          </div>
-        </div>
-        <div v-if="latestDelta != null && !latest.isBaseline">
-          <div class="text-caption grey--text">vs baseline</div>
-          <div :class="['font-weight-bold', latestDelta < 0 ? 'error--text' : 'success--text']">
-            {{ formatDelta(latestDelta) }}
-          </div>
-        </div>
-        <v-chip v-if="regression" small color="error" text-color="white" class="ml-3">
-          <v-icon x-small left>$triangle-alert</v-icon> Regression
-        </v-chip>
-      </div>
-
       <v-spacer />
-      <v-btn
-        text
-        rounded
-        class="text-none my-1"
-        :loading="generating"
-        @click="generate"
-      >
-        <v-icon small class="mr-1">$wand-sparkles</v-icon> Generate from FAQs
-      </v-btn>
-      <v-btn
-        color="primary"
-        depressed
-        rounded
-        class="text-none font-weight-bold ml-2 my-1"
-        :disabled="runActive"
-        @click="openRun"
-      >
-        <v-icon small class="mr-1">$play</v-icon> Run tests
-      </v-btn>
+      <div class="d-flex flex-wrap align-center mb-2">
+        <v-btn
+          outlined
+          color="primary"
+          class="my-1"
+          :loading="generating"
+          @click="generate"
+        >
+          <v-icon left size="16">$wand-sparkles</v-icon>
+          Generate from FAQs
+        </v-btn>
+        <v-btn
+          color="success"
+          depressed
+          class="font-weight-bold ml-2 my-1"
+          :disabled="runActive"
+          @click="openRun"
+        >
+          <v-icon left size="16">$play</v-icon>
+          Run tests
+        </v-btn>
+      </div>
     </div>
+
+    <!-- SUMMARY -->
+    <v-row dense class="mb-3">
+      <v-col cols="6" md="3">
+        <v-card
+          outlined
+          rounded="lg"
+          class="d-flex align-center pa-4 fill-height"
+        >
+          <v-progress-circular
+            :value="latest ? latest.passRate || 0 : 0"
+            :color="latest ? passRateColor(latest.passRate) : 'grey lighten-2'"
+            size="44"
+            width="5"
+            class="mr-3 flex-shrink-0"
+          >
+            <v-icon
+              size="16"
+              :color="latest ? passRateColor(latest.passRate) : 'grey'"
+              >$circle-check</v-icon
+            >
+          </v-progress-circular>
+          <div>
+            <div
+              class="text-h6 font-weight-bold"
+              :class="latest ? rateText(latest.passRate) : 'grey--text'"
+            >
+              {{ latest ? formatRate(latest.passRate) : "—" }}
+            </div>
+            <div class="text-caption grey--text text--darken-1">
+              Latest pass rate
+            </div>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="6" md="3">
+        <v-card
+          outlined
+          rounded="lg"
+          class="d-flex align-center pa-4 fill-height"
+        >
+          <v-avatar
+            size="44"
+            tile
+            class="rounded-lg mr-3 flex-shrink-0"
+            :color="regression ? 'red lighten-5' : 'green lighten-5'"
+          >
+            <v-icon size="20" :color="regression ? 'error' : 'success'">
+              {{
+                latestDelta != null && latestDelta < 0
+                  ? "$trending-down"
+                  : "$trending-up"
+              }}
+            </v-icon>
+          </v-avatar>
+          <div>
+            <div
+              class="text-h6 font-weight-bold"
+              :class="
+                latestDelta == null
+                  ? 'grey--text'
+                  : latestDelta < 0
+                  ? 'error--text'
+                  : 'success--text'
+              "
+            >
+              {{
+                latestDelta != null && latest && !latest.isBaseline
+                  ? formatDelta(latestDelta)
+                  : "—"
+              }}
+            </div>
+            <div class="text-caption grey--text text--darken-1">
+              vs baseline
+              <v-chip
+                v-if="regression"
+                x-small
+                label
+                color="error"
+                class="font-weight-bold ml-1"
+              >
+                Regression
+              </v-chip>
+            </div>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="6" md="3">
+        <v-card
+          outlined
+          rounded="lg"
+          class="d-flex align-center pa-4 fill-height"
+        >
+          <v-avatar
+            size="44"
+            tile
+            color="indigo lighten-5"
+            class="rounded-lg mr-3 flex-shrink-0"
+          >
+            <v-icon size="20" color="indigo">$list-checks</v-icon>
+          </v-avatar>
+          <div>
+            <div class="text-h6 font-weight-bold grey--text text--darken-4">
+              {{ activeCaseCount }}
+            </div>
+            <div class="text-caption grey--text text--darken-1">
+              Active questions
+            </div>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="6" md="3">
+        <v-card
+          outlined
+          rounded="lg"
+          class="d-flex align-center pa-4 fill-height"
+        >
+          <v-avatar
+            size="44"
+            tile
+            color="blue-grey lighten-5"
+            class="rounded-lg mr-3 flex-shrink-0"
+          >
+            <v-icon size="20" color="blue-grey">$history</v-icon>
+          </v-avatar>
+          <div>
+            <div class="text-h6 font-weight-bold grey--text text--darken-4">
+              {{ runs.length }}
+            </div>
+            <div class="text-caption grey--text text--darken-1">Runs</div>
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
 
     <ThingsToKnow feature="quality" />
 
-    <!-- Run in progress -->
-    <v-alert v-if="runActive" type="info" outlined rounded="xl" class="text-body-2">
-      <div class="d-flex align-center">
-        <v-progress-circular indeterminate size="18" width="2" color="info" class="mr-3" />
-        Testing {{ newest.totals && newest.totals.cases ? `${newest.totals.cases} questions` : "your questions" }}
-        with the {{ profileLabel(newest.profileMode).toLowerCase() }}. This takes a minute or
-        two; you can leave this page.
-      </div>
+    <!-- Run in progress / failed -->
+    <v-alert
+      v-if="runActive"
+      text
+      dense
+      color="info"
+      rounded="lg"
+      class="text-body-2 py-3"
+    >
+      <template #prepend>
+        <v-progress-circular
+          indeterminate
+          size="18"
+          width="2"
+          color="info"
+          class="mr-3"
+        />
+      </template>
+      <span class="grey--text text--darken-3">
+        Testing {{ runningCount }} with the
+        {{ profileLabel(newest.profileMode).toLowerCase() }}. This takes a
+        minute or two; you can leave this page.
+      </span>
     </v-alert>
     <v-alert
       v-else-if="newest && newest.status === 'failed'"
       type="error"
-      outlined
-      rounded="xl"
-      class="text-body-2"
+      text
+      dense
+      rounded="lg"
+      class="text-body-2 py-3"
     >
       The last run failed: {{ newest.error || "something went wrong." }}
     </v-alert>
 
-    <v-tabs v-model="tab" color="primary" class="quality-tabs mb-6">
-      <v-tab tab-value="runs" class="text-none">
-        <v-icon small class="mr-2">$history</v-icon> Runs
+    <!-- TABS -->
+    <v-tabs
+      v-model="tab"
+      color="primary"
+      background-color="transparent"
+      slider-size="3"
+      height="44"
+    >
+      <v-tab tab-value="runs" class="text-body-2 font-weight-bold">
+        <v-icon size="16" class="mr-2">$history</v-icon>
+        Runs
       </v-tab>
-      <v-tab tab-value="cases" class="text-none">
-        <v-icon small class="mr-2">$list-checks</v-icon> Test questions
-        <span class="grey--text ml-1">({{ activeCaseCount }})</span>
+      <v-tab tab-value="cases" class="text-body-2 font-weight-bold">
+        <v-icon size="16" class="mr-2">$list-checks</v-icon>
+        Test questions
+        <v-chip x-small label class="font-weight-bold ml-2">{{
+          activeCaseCount
+        }}</v-chip>
       </v-tab>
     </v-tabs>
+    <v-divider class="mb-4" />
 
     <!-- ============ RUNS ============ -->
-    <v-card v-show="tab === 'runs'" outlined rounded="xl" class="pa-6">
-      <v-data-table
-        :headers="runHeaders"
+    <div v-show="tab === 'runs'">
+      <v-data-iterator
         :items="runs"
         :loading="runsLoading"
         :items-per-page="20"
+        :footer-props="{ itemsPerPageOptions: [20, 50, 100] }"
         item-key="_id"
-        class="clickable-table"
-        @click:row="openReport"
       >
-        <template #[`item.createdAt`]="{ item }">
-          <span class="text-no-wrap">{{ formatDate(item.createdAt) }}</span>
-          <v-icon v-if="item.isBaseline" small color="amber darken-2" class="ml-1" title="Baseline">
-            $star
-          </v-icon>
-        </template>
-        <template #[`item.note`]="{ item }">
-          <span class="grey--text text--darken-2">{{ item.note || "—" }}</span>
-        </template>
-        <template #[`item.profileMode`]="{ item }">
-          <v-chip x-small outlined>{{ profileLabel(item.profileMode) }}</v-chip>
-          <v-chip v-if="item.knowledgeMode === 'staging'" x-small outlined color="deep-orange" class="ml-1">
-            Staging
-          </v-chip>
-        </template>
-        <template #[`item.passRate`]="{ item }">
-          <template v-if="item.status === 'done'">
-            <span :class="['font-weight-bold', `${passRateColor(item.passRate)}--text`]">
-              {{ formatRate(item.passRate) }}
-            </span>
-            <span class="text-caption grey--text ml-1">
-              {{ item.totals ? `${item.totals.passed}/${item.totals.cases}` : "" }}
-            </span>
-          </template>
-          <v-chip v-else x-small :color="runStatus(item).color" text-color="white">
-            {{ runStatus(item).label }}
-          </v-chip>
-        </template>
-        <template #[`item.delta`]="{ item }">
-          <span
-            v-if="deltaOf(item) != null"
-            :class="deltaOf(item) < -5 ? 'error--text font-weight-bold' : deltaOf(item) < 0 ? 'error--text' : 'success--text'"
+        <template #loading>
+          <v-card
+            v-for="n in 3"
+            :key="n"
+            outlined
+            rounded="lg"
+            class="pa-2 mb-3"
           >
-            {{ formatDelta(deltaOf(item)) }}
-          </span>
-          <span v-else-if="item.isBaseline" class="text-caption grey--text">Baseline</span>
+            <v-skeleton-loader type="list-item-avatar-two-line" />
+          </v-card>
         </template>
-        <template #[`item.actions`]="{ item }">
-          <v-btn
-            v-if="item.status === 'done' && !item.isBaseline"
-            x-small
-            text
-            rounded
-            class="text-none"
-            :loading="baselineBusy === item._id"
-            @click.stop="setBaseline(item)"
-          >
-            Set as baseline
-          </v-btn>
-        </template>
+
         <template #no-data>
-          <div class="py-6 text-body-2 grey--text">
-            No runs yet. Add test questions, then click Run tests.
-          </div>
+          <v-card
+            outlined
+            rounded="lg"
+            class="d-flex flex-column align-center text-center px-6 py-12 mb-3"
+          >
+            <v-avatar color="green lighten-5" size="64" class="mb-4">
+              <v-icon size="28" color="success">$play</v-icon>
+            </v-avatar>
+            <div
+              class="text-subtitle-1 font-weight-bold grey--text text--darken-3 mb-1"
+            >
+              No runs yet
+            </div>
+            <div class="text-body-2 grey--text text--darken-1 mb-4">
+              Add test questions, then run them to see how well your bot
+              answers.
+            </div>
+            <v-btn
+              depressed
+              color="success"
+              :disabled="runActive"
+              @click="openRun"
+            >
+              <v-icon left size="16">$play</v-icon>
+              Run tests
+            </v-btn>
+          </v-card>
         </template>
-      </v-data-table>
-    </v-card>
+
+        <template #default="{ items }">
+          <v-card
+            v-for="run in items"
+            :key="run._id"
+            outlined
+            rounded="lg"
+            class="d-flex flex-wrap align-center pa-4 mb-3"
+            @click="openReport(run)"
+          >
+            <div class="d-flex align-center flex-grow-1 mr-4 overflow-hidden">
+              <v-progress-circular
+                v-if="run.status === 'done'"
+                :value="run.passRate || 0"
+                :color="passRateColor(run.passRate)"
+                size="52"
+                width="5"
+                class="mr-4 flex-shrink-0"
+              >
+                <span
+                  class="text-caption font-weight-bold"
+                  :class="rateText(run.passRate)"
+                >
+                  {{ formatRate(run.passRate) }}
+                </span>
+              </v-progress-circular>
+              <v-avatar
+                v-else
+                size="52"
+                color="grey lighten-4"
+                class="mr-4 flex-shrink-0"
+              >
+                <v-progress-circular
+                  v-if="run.status === 'running' || run.status === 'queued'"
+                  indeterminate
+                  size="20"
+                  width="2"
+                  color="primary"
+                />
+                <v-icon v-else size="20" color="error">$circle-x</v-icon>
+              </v-avatar>
+
+              <div class="overflow-hidden">
+                <div class="d-flex flex-wrap align-center">
+                  <span
+                    class="text-body-2 font-weight-bold grey--text text--darken-4 mr-2"
+                  >
+                    {{ formatDate(run.createdAt) }}
+                  </span>
+                  <v-chip
+                    v-if="run.isBaseline"
+                    x-small
+                    label
+                    color="amber lighten-5"
+                    text-color="amber darken-4"
+                    class="font-weight-bold mr-1"
+                  >
+                    <v-icon left size="10">$star</v-icon>
+                    Baseline
+                  </v-chip>
+                  <v-chip
+                    v-if="run.status !== 'done'"
+                    x-small
+                    label
+                    :color="runStatus(run).color"
+                    text-color="white"
+                    class="font-weight-bold mr-1"
+                  >
+                    {{ runStatus(run).label }}
+                  </v-chip>
+                </div>
+                <div
+                  class="text-caption grey--text text--darken-1 text-truncate"
+                >
+                  {{ run.note || "No note" }}
+                </div>
+                <div class="d-flex flex-wrap align-center mt-1">
+                  <v-chip x-small label outlined class="mr-1">{{
+                    profileLabel(run.profileMode)
+                  }}</v-chip>
+                  <v-chip
+                    v-if="run.knowledgeMode === 'staging'"
+                    x-small
+                    label
+                    outlined
+                    color="deep-orange"
+                    class="mr-1"
+                  >
+                    Staging
+                  </v-chip>
+                  <span
+                    v-if="run.status === 'done' && run.totals"
+                    class="text-caption grey--text text--darken-1"
+                  >
+                    {{ run.totals.passed }}/{{ run.totals.cases }} passed
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex align-center ml-auto mt-3 mt-sm-0" @click.stop>
+              <span
+                v-if="deltaOf(run) != null"
+                class="text-body-2 font-weight-bold mr-3"
+                :class="deltaOf(run) < 0 ? 'error--text' : 'success--text'"
+              >
+                {{ formatDelta(deltaOf(run)) }}
+              </span>
+              <v-btn
+                v-if="run.status === 'done' && !run.isBaseline"
+                small
+                text
+                color="amber darken-3"
+                :loading="baselineBusy === run._id"
+                @click="setBaseline(run)"
+              >
+                <v-icon left size="14">$star</v-icon>
+                Set as baseline
+              </v-btn>
+              <v-icon size="18" color="grey lighten-1" class="ml-1"
+                >$chevron-right</v-icon
+              >
+            </div>
+          </v-card>
+        </template>
+      </v-data-iterator>
+    </div>
 
     <!-- ============ TEST QUESTIONS ============ -->
-    <v-card v-show="tab === 'cases'" outlined rounded="xl" class="pa-6">
-      <div class="d-flex align-center flex-wrap mb-4">
-        <v-btn-toggle v-model="caseFilter" mandatory rounded dense color="primary" class="mr-4 my-1">
-          <v-btn value="active" small class="text-none">Active</v-btn>
-          <v-btn value="inactive" small class="text-none">Turned off</v-btn>
-          <v-btn value="all" small class="text-none">All</v-btn>
-        </v-btn-toggle>
-        <v-text-field
-          v-model="caseSearch"
-          placeholder="Search questions"
-          prepend-inner-icon="$search"
-          outlined
-          dense
-          hide-details
-          clearable
-          class="search-field my-1"
-        />
-        <v-spacer />
-        <v-btn color="primary" depressed rounded class="text-none my-1" @click="editCase(null)">
-          <v-icon small class="mr-1">$plus</v-icon> Add test question
-        </v-btn>
-      </div>
+    <div v-show="tab === 'cases'">
+      <v-card outlined rounded="lg" class="px-3 py-2 mb-4">
+        <v-row dense align="center">
+          <v-col cols="12" md="auto">
+            <v-btn-toggle v-model="caseFilter" mandatory dense color="success">
+              <v-btn value="active" small>Active</v-btn>
+              <v-btn value="inactive" small>Turned off</v-btn>
+              <v-btn value="all" small>All</v-btn>
+            </v-btn-toggle>
+          </v-col>
+          <v-col cols="12" sm="8" md="4">
+            <v-text-field
+              v-model="caseSearch"
+              placeholder="Search questions"
+              prepend-inner-icon="$search"
+              outlined
+              dense
+              hide-details
+              clearable
+            />
+          </v-col>
+          <v-spacer />
+          <v-col cols="12" sm="4" md="auto" class="text-right">
+            <v-btn depressed color="primary" @click="editCase(null)">
+              <v-icon left size="16">$plus</v-icon>
+              Add test question
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card>
 
-      <v-data-table
-        :headers="caseHeaders"
+      <v-data-iterator
         :items="filteredCases"
         :loading="casesLoading"
         :items-per-page="20"
+        :footer-props="{ itemsPerPageOptions: [20, 50, 100] }"
         item-key="_id"
-        class="clickable-table"
-        @click:row="editCase"
       >
-        <template #[`item.question`]="{ item }">
-          <div class="py-2">
-            <div class="font-weight-medium">{{ item.question }}</div>
-            <div class="text-caption grey--text text-truncate expected">{{ item.expected }}</div>
-          </div>
+        <template #loading>
+          <v-card
+            v-for="n in 4"
+            :key="n"
+            outlined
+            rounded="lg"
+            class="pa-2 mb-3"
+          >
+            <v-skeleton-loader type="list-item-two-line" />
+          </v-card>
         </template>
-        <template #[`item.origin`]="{ item }">
-          <v-chip x-small outlined :color="caseOrigin(item.origin).color">
-            {{ caseOrigin(item.origin).label }}
-          </v-chip>
-          <v-chip v-for="tag in item.tags || []" :key="tag" x-small class="ml-1">{{ tag }}</v-chip>
-        </template>
-        <template #[`item.active`]="{ item }">
-          <div @click.stop>
-            <v-switch
-              :input-value="item.active"
-              inset
-              dense
-              hide-details
-              class="mt-0"
-              :loading="caseBusy === item._id"
-              :aria-label="item.active ? 'Turn off' : 'Turn on'"
-              @change="toggleCase(item, $event)"
-            />
-          </div>
-        </template>
-        <template #[`item.actions`]="{ item }">
-          <v-btn icon small aria-label="Delete test question" @click.stop="deletingCase = item">
-            <v-icon small>$trash-2</v-icon>
-          </v-btn>
-        </template>
-        <template #no-data>
-          <div class="py-6 text-body-2 grey--text">
-            No test questions. Click Generate from FAQs, or add your own.
-          </div>
-        </template>
-      </v-data-table>
-    </v-card>
 
-    <!-- Start a run -->
-    <v-dialog v-model="runOpen" max-width="460">
-      <v-card rounded="xl">
-        <v-card-title class="text-h6">Run tests</v-card-title>
+        <template #no-data>
+          <v-card
+            outlined
+            rounded="lg"
+            class="d-flex flex-column align-center text-center px-6 py-12 mb-3"
+          >
+            <v-avatar color="indigo lighten-5" size="64" class="mb-4">
+              <v-icon size="28" color="indigo">$list-checks</v-icon>
+            </v-avatar>
+            <div
+              class="text-subtitle-1 font-weight-bold grey--text text--darken-3 mb-1"
+            >
+              No test questions
+            </div>
+            <div class="text-body-2 grey--text text--darken-1 mb-4">
+              Make them from your FAQs in one click, or add your own.
+            </div>
+            <div class="d-flex flex-wrap justify-center">
+              <v-btn
+                outlined
+                color="primary"
+                class="ma-1"
+                :loading="generating"
+                @click="generate"
+              >
+                <v-icon left size="16">$wand-sparkles</v-icon>
+                Generate from FAQs
+              </v-btn>
+              <v-btn
+                depressed
+                color="primary"
+                class="ma-1"
+                @click="editCase(null)"
+              >
+                <v-icon left size="16">$plus</v-icon>
+                Add test question
+              </v-btn>
+            </div>
+          </v-card>
+        </template>
+
+        <template #default="{ items }">
+          <v-card
+            v-for="item in items"
+            :key="item._id"
+            outlined
+            rounded="lg"
+            class="d-flex align-center pa-4 mb-3"
+            @click="editCase(item)"
+          >
+            <v-avatar
+              size="36"
+              tile
+              class="rounded-lg mr-4 flex-shrink-0"
+              :color="item.active ? 'green lighten-5' : 'grey lighten-4'"
+            >
+              <v-icon size="18" :color="item.active ? 'success' : 'grey'"
+                >$message-circle-question-mark</v-icon
+              >
+            </v-avatar>
+            <div class="flex-grow-1 overflow-hidden mr-3">
+              <div
+                class="text-body-2 font-weight-bold text-break"
+                :class="
+                  item.active ? 'grey--text text--darken-4' : 'grey--text'
+                "
+              >
+                {{ item.question }}
+              </div>
+              <div class="text-caption grey--text text--darken-1 text-truncate">
+                {{ item.expected }}
+              </div>
+              <div class="d-flex flex-wrap align-center mt-1">
+                <v-chip
+                  x-small
+                  label
+                  outlined
+                  :color="caseOrigin(item.origin).color"
+                  class="mr-1"
+                >
+                  {{ caseOrigin(item.origin).label }}
+                </v-chip>
+                <v-chip
+                  v-for="tag in item.tags || []"
+                  :key="tag"
+                  x-small
+                  label
+                  class="mr-1"
+                  >{{ tag }}</v-chip
+                >
+              </div>
+            </div>
+            <div class="d-flex align-center flex-shrink-0" @click.stop>
+              <v-switch
+                :input-value="item.active"
+                inset
+                dense
+                hide-details
+                color="success"
+                class="mt-0 pt-0"
+                :loading="caseBusy === item._id"
+                :aria-label="item.active ? 'Turn off' : 'Turn on'"
+                @change="toggleCase(item, $event)"
+              />
+              <v-btn
+                icon
+                small
+                color="error"
+                aria-label="Delete test question"
+                @click="deletingCase = item"
+              >
+                <v-icon size="16">$trash-2</v-icon>
+              </v-btn>
+            </div>
+          </v-card>
+        </template>
+      </v-data-iterator>
+    </div>
+
+    <!-- START A RUN -->
+    <v-dialog v-model="runOpen" max-width="520">
+      <v-card rounded="lg">
+        <v-card-title class="text-h6 font-weight-bold">Run tests</v-card-title>
+        <v-card-subtitle class="text-body-2">
+          Every active test question goes through your bot in the sandbox.
+          Nothing is sent to customers.
+        </v-card-subtitle>
         <v-card-text>
-          <div class="text-body-2 grey--text text--darken-1 mb-4">
-            Every active test question goes through your bot in the sandbox.
-            Nothing is sent to customers.
+          <div
+            class="text-caption font-weight-bold text-uppercase grey--text mb-2"
+          >
+            Bot Profile
           </div>
-          <v-radio-group v-model="runForm.profileMode" class="mt-0" hide-details>
-            <v-radio value="published">
-              <template #label>
-                <div>
-                  <div class="text-body-2 font-weight-bold black--text">Live profile</div>
-                  <div class="text-caption grey--text">What customers get today.</div>
-                </div>
-              </template>
-            </v-radio>
-            <v-radio value="draft" class="mt-2">
-              <template #label>
-                <div>
-                  <div class="text-body-2 font-weight-bold black--text">Test my draft profile</div>
-                  <div class="text-caption grey--text">
-                    Your saved, unpublished Bot Profile, to check it before publishing.
-                  </div>
-                </div>
-              </template>
-            </v-radio>
-          </v-radio-group>
+          <v-item-group v-model="runForm.profileMode" mandatory class="mb-5">
+            <v-row dense>
+              <v-col
+                v-for="m in PROFILE_OPTIONS"
+                :key="m.value"
+                cols="12"
+                sm="6"
+              >
+                <v-item v-slot="{ active, toggle }" :value="m.value">
+                  <v-card
+                    :outlined="!active"
+                    :color="active ? 'green lighten-5' : undefined"
+                    :elevation="0"
+                    rounded="lg"
+                    class="d-flex align-start pa-3 fill-height"
+                    :aria-pressed="String(active)"
+                    @click="toggle"
+                  >
+                    <v-icon
+                      size="18"
+                      :color="active ? 'green darken-1' : 'grey lighten-1'"
+                      class="mr-2 mt-1 flex-shrink-0"
+                    >
+                      {{ active ? "$circle-check" : "$circle" }}
+                    </v-icon>
+                    <div>
+                      <div
+                        class="text-body-2 font-weight-bold"
+                        :class="
+                          active
+                            ? 'green--text text--darken-2'
+                            : 'grey--text text--darken-4'
+                        "
+                      >
+                        {{ m.title }}
+                      </div>
+                      <div class="text-caption grey--text text--darken-1">
+                        {{ m.text }}
+                      </div>
+                    </div>
+                  </v-card>
+                </v-item>
+              </v-col>
+            </v-row>
+          </v-item-group>
+
           <template v-if="setupRunning">
-            <div class="text-subtitle-2 font-weight-bold mt-5 mb-1">Knowledge</div>
-            <v-btn-toggle v-model="runForm.knowledgeMode" mandatory rounded dense color="primary">
-              <v-btn value="live" small class="text-none">Live knowledge</v-btn>
-              <v-btn value="staging" small class="text-none">New setup (staging)</v-btn>
-            </v-btn-toggle>
-            <div class="text-caption grey--text mt-1">
+            <div
+              class="text-caption font-weight-bold text-uppercase grey--text mb-2"
+            >
+              Knowledge
+            </div>
+            <v-item-group
+              v-model="runForm.knowledgeMode"
+              mandatory
+              class="mb-1"
+            >
+              <v-row dense>
+                <v-col
+                  v-for="k in KNOWLEDGE_OPTIONS"
+                  :key="k.value"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-item v-slot="{ active, toggle }" :value="k.value">
+                    <v-card
+                      :outlined="!active"
+                      :color="active ? 'green lighten-5' : undefined"
+                      :elevation="0"
+                      rounded="lg"
+                      class="d-flex align-center pa-3 fill-height"
+                      :aria-pressed="String(active)"
+                      @click="toggle"
+                    >
+                      <v-icon
+                        size="18"
+                        :color="active ? 'green darken-1' : 'grey lighten-1'"
+                        class="mr-2 flex-shrink-0"
+                      >
+                        {{ active ? "$circle-check" : "$circle" }}
+                      </v-icon>
+                      <span
+                        class="text-body-2 font-weight-bold"
+                        :class="
+                          active
+                            ? 'green--text text--darken-2'
+                            : 'grey--text text--darken-4'
+                        "
+                      >
+                        {{ k.title }}
+                      </span>
+                    </v-card>
+                  </v-item>
+                </v-col>
+              </v-row>
+            </v-item-group>
+            <div class="text-caption grey--text text--darken-1 mb-5">
               The setup checklist counts runs on the new setup (staging).
             </div>
           </template>
+
           <v-text-field
             v-model="runForm.note"
             label="Note (optional)"
             placeholder="e.g. After updating refund FAQs"
+            prepend-inner-icon="$pencil"
             outlined
             dense
             hide-details
-            class="mt-5"
           />
-          <v-alert v-if="runError" type="error" dense outlined rounded="lg" class="mt-4 mb-0 text-body-2">
+          <v-alert
+            v-if="runError"
+            type="error"
+            dense
+            text
+            rounded="lg"
+            class="mt-4 mb-0 text-body-2"
+          >
             {{ runError }}
           </v-alert>
         </v-card-text>
-        <v-card-actions>
+        <v-divider />
+        <v-card-actions class="px-6 py-3">
           <v-spacer />
-          <v-btn text rounded class="text-none" :disabled="starting" @click="runOpen = false">Cancel</v-btn>
-          <v-btn color="primary" depressed rounded class="text-none" :loading="starting" @click="startRun">
+          <v-btn text :disabled="starting" @click="runOpen = false"
+            >Cancel</v-btn
+          >
+          <v-btn
+            color="success"
+            depressed
+            :loading="starting"
+            @click="startRun"
+          >
+            <v-icon left size="16">$play</v-icon>
             Start
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <!-- Delete test question -->
-    <v-dialog :value="!!deletingCase" max-width="440" @input="deletingCase = null">
-      <v-card v-if="deletingCase" rounded="xl">
-        <v-card-title class="text-h6">Delete this test question?</v-card-title>
-        <v-card-text class="text-body-2">
-          "{{ deletingCase.question }}"
-          <template v-if="deletingCase.origin !== 'manual'">
-            <br /><br />
+    <!-- DELETE TEST QUESTION -->
+    <v-dialog
+      :value="!!deletingCase"
+      max-width="440"
+      @input="deletingCase = null"
+    >
+      <v-card v-if="deletingCase" rounded="lg">
+        <v-card-text class="pt-6 text-center">
+          <v-avatar color="error lighten-5" size="56" class="mb-4">
+            <v-icon color="error" size="26">$trash-2</v-icon>
+          </v-avatar>
+          <div class="text-h6 font-weight-bold grey--text text--darken-4 mb-2">
+            Delete this test question?
+          </div>
+          <div
+            class="text-body-2 grey--text text--darken-3 font-italic text-break mb-2"
+          >
+            "{{ deletingCase.question }}"
+          </div>
+          <v-alert
+            v-if="deletingCase.origin !== 'manual'"
+            text
+            dense
+            color="amber darken-3"
+            rounded="lg"
+            class="text-body-2 text-left mb-0"
+          >
             It was made from your FAQs, so Generate from FAQs will add it back.
             To skip it for good, turn it off instead.
-          </template>
+          </v-alert>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text rounded class="text-none" @click="deletingCase = null">Cancel</v-btn>
-          <v-btn color="error" depressed rounded class="text-none" :loading="caseBusy === deletingCase._id" @click="deleteCase">
+        <v-card-actions class="justify-center pb-5">
+          <v-btn text @click="deletingCase = null">Cancel</v-btn>
+          <v-btn
+            color="error"
+            depressed
+            :loading="caseBusy === deletingCase._id"
+            @click="deleteCase"
+          >
             Delete
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <CaseDialog v-model="caseOpen" :test-case="caseEditing" @saved="loadCases" @open-item="openItem" />
+    <CaseDialog
+      v-model="caseOpen"
+      :test-case="caseEditing"
+      @saved="loadCases"
+      @open-item="openItem"
+    />
 
-    <ItemEditorDrawer :item-id="itemId" :permissions="perms" @close="itemId = null" />
+    <ItemEditorDrawer
+      :item-id="itemId"
+      :permissions="perms"
+      @close="itemId = null"
+    />
   </div>
 </template>
 
@@ -334,6 +810,24 @@ import {
 
 const POLL_MS = 5000;
 
+const PROFILE_OPTIONS = [
+  {
+    value: "published",
+    title: "Live profile",
+    text: "What customers get today.",
+  },
+  {
+    value: "draft",
+    title: "Test my draft profile",
+    text: "Your saved, unpublished Bot Profile, to check it before publishing.",
+  },
+];
+
+const KNOWLEDGE_OPTIONS = [
+  { value: "live", title: "Live knowledge" },
+  { value: "staging", title: "New setup (staging)" },
+];
+
 export default {
   name: "QualityPage",
 
@@ -341,6 +835,8 @@ export default {
 
   data() {
     return {
+      PROFILE_OPTIONS,
+      KNOWLEDGE_OPTIONS,
       tab: this.$route.query.tab === "cases" ? "cases" : "runs",
       perms: [],
 
@@ -366,21 +862,6 @@ export default {
       generating: false,
 
       itemId: null,
-
-      runHeaders: [
-        { text: "Date", value: "createdAt", sortable: false },
-        { text: "Note", value: "note", sortable: false },
-        { text: "Profile", value: "profileMode", sortable: false },
-        { text: "Pass rate", value: "passRate", sortable: false },
-        { text: "vs baseline", value: "delta", sortable: false },
-        { text: "", value: "actions", sortable: false, align: "end" },
-      ],
-      caseHeaders: [
-        { text: "Question", value: "question", sortable: false },
-        { text: "From", value: "origin", sortable: false },
-        { text: "Active", value: "active", sortable: false },
-        { text: "", value: "actions", sortable: false, align: "end" },
-      ],
     };
   },
 
@@ -403,6 +884,10 @@ export default {
     regression() {
       return this.latestDelta != null && this.latestDelta < -5;
     },
+    runningCount() {
+      const n = this.newest?.totals?.cases;
+      return n ? `${n} questions` : "your questions";
+    },
     activeCaseCount() {
       return this.cases.filter((c) => c.active).length;
     },
@@ -418,7 +903,9 @@ export default {
 
   watch: {
     tab(tab) {
-      this.$router.replace({ query: tab === "cases" ? { tab } : {} }).catch(() => {});
+      this.$router
+        .replace({ query: tab === "cases" ? { tab } : {} })
+        .catch(() => {});
     },
   },
 
@@ -447,12 +934,23 @@ export default {
     formatDelta,
     passRateColor,
     caseOrigin,
+    // Text classes for a pass-rate colour, e.g. "amber darken-2" → amber text, darkened
+    rateText(rate) {
+      const [name, shade] = passRateColor(rate).split(" ");
+      return shade ? `${name}--text text--${shade}` : `${name}--text`;
+    },
     profileLabel: (mode) => PROFILE_MODES[mode] || PROFILE_MODES.published,
     runStatus: (run) => RUN_STATUS[run.status] || RUN_STATUS.queued,
 
     // Pass-rate change against the current baseline, for finished runs
     deltaOf(run) {
-      if (!this.baseline || run.isBaseline || run.status !== "done" || run.passRate == null) return null;
+      if (
+        !this.baseline ||
+        run.isBaseline ||
+        run.status !== "done" ||
+        run.passRate == null
+      )
+        return null;
       return run.passRate - this.baseline.passRate;
     },
 
@@ -464,14 +962,20 @@ export default {
         const { data } = await apiClient.get(`${EVAL_API}/runs`);
         this.runs = data.data || [];
         if (wasActive && !this.runActive && this.newest?.status === "done") {
-          this.$toast.success(`Run finished: ${formatRate(this.newest.passRate)} passed`);
+          this.$toast.success(
+            `Run finished: ${formatRate(this.newest.passRate)} passed`
+          );
         }
       } catch (err) {
         if (!quiet) this.$toast.error(apiError(err, "Failed to load runs"));
       } finally {
         this.runsLoading = false;
       }
-      if (this.runActive) this.pollTimer = setTimeout(() => this.loadRuns({ quiet: true }), POLL_MS);
+      if (this.runActive)
+        this.pollTimer = setTimeout(
+          () => this.loadRuns({ quiet: true }),
+          POLL_MS
+        );
     },
 
     openReport(run) {
@@ -483,7 +987,9 @@ export default {
       this.baselineBusy = run._id;
       try {
         await apiClient.post(`${EVAL_API}/runs/${run._id}/baseline`);
-        this.$toast.success("Baseline updated. New runs are compared with this one.");
+        this.$toast.success(
+          "Baseline updated. New runs are compared with this one."
+        );
         this.loadRuns({ quiet: true });
       } catch (err) {
         this.$toast.error(apiError(err, "Failed to set the baseline"));
@@ -508,7 +1014,9 @@ export default {
       try {
         await apiClient.post(`${EVAL_API}/runs`, {
           profileMode: this.runForm.profileMode,
-          knowledgeMode: this.setupRunning ? this.runForm.knowledgeMode : undefined,
+          knowledgeMode: this.setupRunning
+            ? this.runForm.knowledgeMode
+            : undefined,
           note: this.runForm.note.trim() || undefined,
         });
         this.runOpen = false;
@@ -558,7 +1066,9 @@ export default {
     async toggleCase(testCase, active) {
       this.caseBusy = testCase._id;
       try {
-        await apiClient.patch(`${EVAL_API}/cases/${testCase._id}`, { active: !!active });
+        await apiClient.patch(`${EVAL_API}/cases/${testCase._id}`, {
+          active: !!active,
+        });
         testCase.active = !!active;
       } catch (err) {
         this.$toast.error(apiError(err, "Failed to update"));
@@ -589,18 +1099,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.quality-tabs {
-  border-bottom: 1px solid #e0e0e0;
-}
-.clickable-table >>> tbody tr {
-  cursor: pointer;
-}
-.search-field {
-  max-width: 280px;
-}
-.expected {
-  max-width: 560px;
-}
-</style>

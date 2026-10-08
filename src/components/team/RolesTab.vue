@@ -17,21 +17,21 @@
       </v-btn>
     </div>
 
-    <v-alert v-if="loadError" type="error" outlined rounded="xl">
+    <v-alert v-if="loadError" type="error" outlined rounded="lg">
       {{ loadError }}
       <v-btn small text color="error" class="ml-2" @click="load">Retry</v-btn>
     </v-alert>
 
     <v-row v-else-if="loading && !roles.length">
       <v-col v-for="i in 4" :key="i" cols="12" sm="6" lg="4">
-        <v-skeleton-loader type="card-heading, list-item-two-line" class="rounded-xl" />
+        <v-skeleton-loader type="card-heading, list-item-two-line" class="rounded-lg" />
       </v-col>
     </v-row>
 
     <template v-else>
       <v-row>
         <v-col v-for="role in sortedRoles" :key="role._id" cols="12" sm="6" lg="4">
-          <v-card outlined rounded="xl" class="role-card pa-5 d-flex flex-column">
+          <v-card outlined rounded="lg" class="role-card pa-5 d-flex flex-column">
             <div class="d-flex align-start">
               <v-avatar size="40" :color="`${color(role)} lighten-5`" class="mr-3">
                 <v-icon :color="color(role)">

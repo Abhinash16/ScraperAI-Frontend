@@ -1,5 +1,5 @@
 <template>
-  <v-card outlined rounded="xl" class="pa-6 mb-4">
+  <v-card outlined rounded="lg" class="pa-6 mb-4">
     <div class="d-flex align-center mb-1">
       <v-icon small class="mr-2">$upload</v-icon>
       <div class="text-subtitle-1 font-weight-bold">Import pages</div>

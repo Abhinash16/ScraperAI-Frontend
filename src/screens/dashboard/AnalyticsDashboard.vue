@@ -13,7 +13,7 @@
     <!-- HEADER -->
     <v-row>
       <v-col cols="12">
-        <v-card elevation="0" class="pa-6 rounded-xl hero-card">
+        <v-card elevation="0" class="pa-6 rounded-lg hero-card">
           <div class="d-flex align-center justify-space-between flex-wrap">
             <div>
               <div class="text-h5 font-weight-bold">Chat Analytics</div>
@@ -32,7 +32,7 @@
     </v-row>
 
     <!-- FILTERS SECTION -->
-    <v-card class="mb-8 mt-4" rounded="xl" outlined>
+    <v-card class="mb-8 mt-4" rounded="lg" outlined>
       <v-card-text>
         <v-row>
           <!-- Platform Select -->
@@ -170,7 +170,7 @@
     <v-row class="mb-8">
       <!-- Active Chats Trend -->
       <v-col cols="12" lg="8">
-        <v-card outlined rounded="xl" elevation="0">
+        <v-card outlined rounded="lg" elevation="0">
           <v-card-title>
             <v-icon left>$chart-line</v-icon>
             Active Chats Trend
@@ -190,7 +190,7 @@
 
       <!-- Platform Distribution -->
       <v-col cols="12" lg="4">
-        <v-card outlined rounded="xl" elevation="0">
+        <v-card outlined rounded="lg" elevation="0">
           <v-card-title>
             <v-icon left>$chart-pie</v-icon>
             Platform Distribution
@@ -212,7 +212,7 @@
     <!-- Messages Per Day -->
     <v-row>
       <v-col cols="12">
-        <v-card outlined rounded="xl" elevation="0">
+        <v-card outlined rounded="lg" elevation="0">
           <v-card-title>
             <v-icon left>$messages-square</v-icon>
             Messages Per Day

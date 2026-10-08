@@ -1,6 +1,6 @@
 <template>
   <v-dialog :value="value" max-width="420" @input="$emit('input', $event)">
-    <v-card rounded="xl" class="pa-2">
+    <v-card rounded="lg" class="pa-2">
       <v-card-title class="d-flex align-center text-h6 font-weight-bold">
         <v-avatar size="36" :color="`${color} lighten-5`" class="mr-3">
           <v-icon small :color="color">{{ icon }}</v-icon>

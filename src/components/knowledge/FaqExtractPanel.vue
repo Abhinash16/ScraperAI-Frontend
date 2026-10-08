@@ -5,7 +5,7 @@
       v-if="showStatus"
       :type="statusType"
       outlined
-      rounded="xl"
+      rounded="lg"
       class="text-body-2"
       :dismissible="extraction.status !== 'running'"
       @input="dismissedAt = extraction.finishedAt || extraction.startedAt"
@@ -40,7 +40,7 @@
 
     <!-- Start -->
     <v-dialog :value="value" max-width="480" @input="$emit('input', $event)">
-      <v-card rounded="xl">
+      <v-card rounded="lg">
         <v-card-title class="text-h6">Suggest FAQs from your website</v-card-title>
         <v-card-text>
           <div class="text-body-2 grey--text text--darken-1 mb-4">

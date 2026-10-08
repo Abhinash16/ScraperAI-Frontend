@@ -1,21 +1,21 @@
 <template>
   <div>
-    <v-card v-if="loading && !info" outlined rounded="xl" class="pa-6">
+    <v-card v-if="loading && !info" outlined rounded="lg" class="pa-6">
       <v-progress-linear indeterminate color="primary" />
     </v-card>
 
-    <v-alert v-else-if="forbidden" type="warning" outlined rounded="xl">
+    <v-alert v-else-if="forbidden" type="warning" outlined rounded="lg">
       You need the <code>settings:manage</code> permission to set up WhatsApp.
     </v-alert>
 
-    <v-alert v-else-if="loadError && !info" type="error" outlined rounded="xl">
+    <v-alert v-else-if="loadError && !info" type="error" outlined rounded="lg">
       {{ loadError }}
       <v-btn small text color="error" class="ml-2" @click="load">Retry</v-btn>
     </v-alert>
 
     <template v-else-if="info">
       <!-- ============ STEP 1: SENDING ============ -->
-      <v-card outlined rounded="xl" class="step pa-6 mb-4">
+      <v-card outlined rounded="lg" class="step pa-6 mb-4">
         <div class="step-header">
           <span :class="['step-badge', { done: info.tellephantConfigured }]">
             <v-icon v-if="info.tellephantConfigured" small color="white">
@@ -91,7 +91,7 @@
       </v-card>
 
       <!-- ============ STEP 2: WEBHOOK ============ -->
-      <v-card outlined rounded="xl" class="step pa-6 mb-4">
+      <v-card outlined rounded="lg" class="step pa-6 mb-4">
         <div class="step-header">
           <span :class="['step-badge', { done: receivedViaKey }]">
             <v-icon v-if="receivedViaKey" small color="white">$check</v-icon>
@@ -141,7 +141,7 @@
       </v-card>
 
       <!-- ============ STEP 3: TEST ============ -->
-      <v-card outlined rounded="xl" class="step pa-6 mb-4">
+      <v-card outlined rounded="lg" class="step pa-6 mb-4">
         <div class="step-header">
           <span :class="['step-badge', { done: receivedViaKey }]">
             <v-icon v-if="receivedViaKey" small color="white">$check</v-icon>
@@ -188,7 +188,7 @@
       <v-card
         v-if="info.legacyWebhookEnabled"
         outlined
-        rounded="xl"
+        rounded="lg"
         class="step pa-6 mb-4"
       >
         <div class="step-header">
@@ -231,7 +231,7 @@
       </v-card>
 
       <!-- ============ HELP ============ -->
-      <v-card outlined rounded="xl" class="pa-6 mb-4">
+      <v-card outlined rounded="lg" class="pa-6 mb-4">
         <div class="d-flex align-center mb-3">
           <v-icon small class="mr-2">$circle-help</v-icon>
           <div class="text-subtitle-1 font-weight-bold">
@@ -264,7 +264,7 @@
       </v-card>
 
       <!-- ============ DANGER ZONE ============ -->
-      <v-card outlined rounded="xl" class="danger-zone pa-6">
+      <v-card outlined rounded="lg" class="danger-zone pa-6">
         <div class="d-flex align-center flex-wrap">
           <div class="flex-grow-1 mr-4 mb-2">
             <div class="text-subtitle-1 font-weight-bold error--text">
@@ -291,7 +291,7 @@
 
     <!-- ============ CONFIRM DIALOG ============ -->
     <v-dialog v-model="confirm.open" max-width="420">
-      <v-card rounded="xl" class="pa-2">
+      <v-card rounded="lg" class="pa-2">
         <v-card-title class="text-h6 font-weight-bold">
           {{ confirm.title }}
         </v-card-title>

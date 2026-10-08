@@ -19,7 +19,7 @@
     </v-row>
 
     <!-- Batch Summary Card -->
-    <v-card outlined rounded="xl" class="mb-8 overflow-hidden">
+    <v-card outlined rounded="lg" class="mb-8 overflow-hidden">
       <v-card-text class="pa-0">
         <v-expansion-panels flat>
           <v-expansion-panel>
@@ -86,7 +86,7 @@
                   v-for="(insight, index) in batchInfo.batchInsights"
                   :key="index"
                 >
-                  <v-card outlined rounded="xl" class="h-100">
+                  <v-card outlined rounded="lg" class="h-100">
                     <v-card-text class="pa-4">
                       <div class="d-flex align-center mb-3">
                         <v-icon small color="primary" class="mr-2">
@@ -102,7 +102,7 @@
                         outlined
                         label
                         color="grey"
-                        class="mb-4 rounded-xl"
+                        class="mb-4 rounded-lg"
                       >
                         <v-icon small left>$repeat</v-icon>
                         {{ insight.frequency }} occurrences
@@ -131,7 +131,7 @@
     <div>
       <h3 class="text-h6 font-weight-bold mb-4">Call Details</h3>
 
-      <v-card outlined rounded="xl" class="overflow-hidden">
+      <v-card outlined rounded="lg" class="overflow-hidden">
         <v-data-table
           :headers="callHeaders"
           :items="calls"
@@ -173,7 +173,7 @@
             <v-chip
               small
               :color="statusColor(item.status)"
-              class="rounded-xl"
+              class="rounded-lg"
               :text-color="statusTextColor(item.status)"
               label
             >

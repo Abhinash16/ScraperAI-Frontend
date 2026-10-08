@@ -2,7 +2,7 @@
   <v-container fluid fill-height>
     <v-row align="center" justify="center">
       <v-col cols="12" md="7" lg="7">
-        <v-card rounded="xl" outlined>
+        <v-card rounded="lg" outlined>
           <v-row no-gutters>
             <!-- LEFT SIDE -->
             <v-col

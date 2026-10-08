@@ -27,7 +27,7 @@
 
     <template v-if="report && !loading">
       <!-- Agent Info -->
-      <v-card outlined rounded="xl" class="mb-6">
+      <v-card outlined rounded="lg" class="mb-6">
         <v-card-text>
           <v-row>
             <v-col cols="12" md="4">
@@ -48,7 +48,7 @@
               <div class="text-caption grey--text">Call Status</div>
 
               <v-chip
-                class="rounded-xl"
+                class="rounded-lg"
                 small
                 :color="statusColor(report.status)"
                 label
@@ -85,7 +85,7 @@
       </v-card>
 
       <!-- Audio Player -->
-      <v-card outlined rounded="xl" class="mb-6">
+      <v-card outlined rounded="lg" class="mb-6">
         <v-card-text>
           <div class="d-flex align-center mb-3">
             <v-icon class="mr-2">$headphones</v-icon>
@@ -102,7 +102,7 @@
       </v-card>
 
       <!-- Summary -->
-      <v-card outlined rounded="xl" class="mb-6">
+      <v-card outlined rounded="lg" class="mb-6">
         <v-card-text>
           <div class="font-weight-bold mb-2">Call Summary</div>
 
@@ -116,7 +116,7 @@
       <v-row class="mb-6">
         <!-- Sentiment -->
         <v-col cols="12" md="6">
-          <v-card outlined rounded="xl" class="text-center pa-6">
+          <v-card outlined rounded="lg" class="text-center pa-6">
             <div class="text-caption grey--text mb-2">Sentiment</div>
 
             <v-chip large :color="sentimentColor(report.sentiment)">
@@ -127,7 +127,7 @@
 
         <!-- Score -->
         <v-col cols="12" md="6">
-          <v-card outlined rounded="xl" class="text-center pa-6">
+          <v-card outlined rounded="lg" class="text-center pa-6">
             <div class="text-caption grey--text mb-2">Quality Score</div>
 
             <div
@@ -161,7 +161,7 @@
               dot-color="red"
               size="small"
             >
-              <v-card rounded="xl">
+              <v-card rounded="lg">
                 <v-card-title class="text-capitalize">
                   {{ issue.issue }}
                 </v-card-title>
@@ -184,7 +184,7 @@
                   <v-btn
                     size="small"
                     color="primary"
-                    rounded="xl"
+                    rounded="lg"
                     class="mt-3"
                     @click="jumpTo(issue.seconds)"
                   >
@@ -198,7 +198,7 @@
       </v-row>
 
       <!-- Transcript -->
-      <v-card outlined rounded="xl">
+      <v-card outlined rounded="lg">
         <v-card-text>
           <div class="font-weight-bold mb-3">Transcript</div>
 

@@ -1,6 +1,6 @@
 <template>
   <v-dialog :value="value" max-width="460" @input="close">
-    <v-card rounded="xl" class="pa-2">
+    <v-card rounded="lg" class="pa-2">
       <v-card-title class="text-h6 font-weight-bold">
         {{ done ? "Password reset" : "Reset password" }}
       </v-card-title>

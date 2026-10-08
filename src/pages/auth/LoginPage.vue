@@ -20,7 +20,7 @@
           </p>
         </div>
 
-        <v-card class="pa-6" rounded="xl" outlined>
+        <v-card class="pa-6" rounded="lg" outlined>
           <h3 class="text-h5 font-weight-bold mb-6">Login</h3>
 
           <v-form ref="form" v-model="valid" lazy-validation>

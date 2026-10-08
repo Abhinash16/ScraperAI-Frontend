@@ -1,22 +1,22 @@
 <template>
   <div>
-    <v-card v-if="loading" outlined rounded="xl" class="pa-6">
+    <v-card v-if="loading" outlined rounded="lg" class="pa-6">
       <v-progress-linear indeterminate color="primary" />
     </v-card>
 
-    <v-alert v-else-if="forbidden" type="warning" outlined rounded="xl">
+    <v-alert v-else-if="forbidden" type="warning" outlined rounded="lg">
       You need the <code>settings:manage</code> permission to view these
       settings.
     </v-alert>
 
-    <v-alert v-else-if="loadError" type="error" outlined rounded="xl">
+    <v-alert v-else-if="loadError" type="error" outlined rounded="lg">
       {{ loadError }}
       <v-btn small text color="error" class="ml-2" @click="load">Retry</v-btn>
     </v-alert>
 
     <template v-else>
       <!-- SETTINGS -->
-      <v-card outlined rounded="xl" class="pa-6 mb-6">
+      <v-card outlined rounded="lg" class="pa-6 mb-6">
         <div class="d-flex align-start mb-4">
           <div class="flex-grow-1 mr-4">
             <div class="text-subtitle-1 font-weight-bold">Customer lookup</div>
@@ -147,7 +147,7 @@
       </v-card>
 
       <!-- TEST PANEL -->
-      <v-card outlined rounded="xl" class="pa-6">
+      <v-card outlined rounded="lg" class="pa-6">
         <div class="d-flex align-center mb-1">
           <v-icon small class="mr-2">$flask-conical</v-icon>
           <div class="text-subtitle-1 font-weight-bold">

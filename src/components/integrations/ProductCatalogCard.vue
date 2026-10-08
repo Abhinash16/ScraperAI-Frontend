@@ -1,5 +1,5 @@
 <template>
-  <v-card outlined rounded="xl" class="pa-6">
+  <v-card outlined rounded="lg" class="pa-6">
     <div class="d-flex align-start flex-wrap">
       <div class="flex-grow-1 mr-4 mb-2">
         <div class="d-flex align-center flex-wrap">

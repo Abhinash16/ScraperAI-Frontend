@@ -17,8 +17,8 @@
     <v-row>
       <!-- Active Chats -->
       <v-col cols="12" md="4">
-        <v-skeleton-loader v-if="loading" type="card" class="rounded-xl" />
-        <v-card v-else elevation="0" class="rounded-xl pa-4 blue lighten-5">
+        <v-skeleton-loader v-if="loading" type="card" class="rounded-lg" />
+        <v-card v-else elevation="0" class="rounded-lg pa-4 blue lighten-5">
           <v-list-item three-line>
             <v-list-item-content>
               <div class="text-overline mb-4 primary--text font-weight-bold">
@@ -41,8 +41,8 @@
 
       <!-- Completed Chats -->
       <v-col cols="12" md="4">
-        <v-skeleton-loader v-if="loading" type="card" class="rounded-xl" />
-        <v-card v-else elevation="0" class="rounded-xl pa-4 green lighten-5">
+        <v-skeleton-loader v-if="loading" type="card" class="rounded-lg" />
+        <v-card v-else elevation="0" class="rounded-lg pa-4 green lighten-5">
           <v-list-item three-line>
             <v-list-item-content>
               <div class="text-overline mb-4 success--text font-weight-bold">
@@ -65,8 +65,8 @@
 
       <!-- Disconnected Chats -->
       <v-col cols="12" md="4">
-        <v-skeleton-loader v-if="loading" type="card" class="rounded-xl" />
-        <v-card v-else elevation="0" class="rounded-xl pa-4 red lighten-5">
+        <v-skeleton-loader v-if="loading" type="card" class="rounded-lg" />
+        <v-card v-else elevation="0" class="rounded-lg pa-4 red lighten-5">
           <v-list-item three-line>
             <v-list-item-content>
               <div class="text-overline mb-4 error--text font-weight-bold">
@@ -93,7 +93,7 @@
       <v-col cols="12">
         <v-card
           outlined
-          class="rounded-xl grey lighten-5"
+          class="rounded-lg grey lighten-5"
           style="border-style: dashed !important"
         >
           <v-card-text class="text-center py-12">

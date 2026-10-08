@@ -13,7 +13,7 @@
     <!-- LOADING -->
     <v-row v-if="loading" class="">
       <v-col cols="12">
-        <v-card class="pa-6 rounded-xl" elevation="0">
+        <v-card class="pa-6 rounded-lg" elevation="0">
           <v-skeleton-loader type="card, list-item, list-item" />
         </v-card>
       </v-col>
@@ -24,7 +24,7 @@
       <!-- TRAINING SCORE HERO -->
       <v-row class="">
         <v-col cols="12">
-          <v-card elevation="0" class="pa-6 rounded-xl purple lighten-5">
+          <v-card elevation="0" class="pa-6 rounded-lg purple lighten-5">
             <div class="text-overline deep-purple--text">
               AI Knowledge Training Score
             </div>
@@ -55,7 +55,7 @@
         <v-col cols="12" md="4">
           <v-card
             elevation="0"
-            class="pa-6 rounded-xl blue lighten-5 metric-card"
+            class="pa-6 rounded-lg blue lighten-5 metric-card"
           >
             <div class="text-overline primary--text">Pages Scraped</div>
 
@@ -73,7 +73,7 @@
         <v-col cols="12" md="4">
           <v-card
             elevation="0"
-            class="pa-6 rounded-xl green lighten-5 metric-card"
+            class="pa-6 rounded-lg green lighten-5 metric-card"
           >
             <div class="text-overline success--text">Knowledge Tokens</div>
 
@@ -99,7 +99,7 @@
         <v-col cols="12" md="4">
           <v-card
             elevation="0"
-            class="pa-6 rounded-xl orange lighten-5 metric-card"
+            class="pa-6 rounded-lg orange lighten-5 metric-card"
           >
             <div class="text-overline orange--text">Training Status</div>
 
@@ -119,7 +119,7 @@
       <!-- AI INSIGHT -->
       <v-row class="mt-4">
         <v-col cols="12">
-          <v-card elevation="0" class="pa-6 rounded-xl">
+          <v-card elevation="0" class="pa-6 rounded-lg">
             <div class="text-h6 font-weight-bold mb-4">
               AI Knowledge Insight
             </div>

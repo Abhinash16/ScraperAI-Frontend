@@ -1,10 +1,10 @@
 <template>
   <div>
-    <v-card v-if="loading && !stats" outlined rounded="xl" class="pa-6">
+    <v-card v-if="loading && !stats" outlined rounded="lg" class="pa-6">
       <v-progress-linear indeterminate color="primary" />
     </v-card>
 
-    <v-alert v-else-if="error" type="error" outlined rounded="xl">
+    <v-alert v-else-if="error" type="error" outlined rounded="lg">
       {{ error }}
       <v-btn small text color="error" class="ml-2" @click="loadStats">Retry</v-btn>
     </v-alert>
@@ -12,7 +12,7 @@
     <v-card
       v-else-if="stats && !stats.closed"
       outlined
-      rounded="xl"
+      rounded="lg"
       class="pa-10 text-center grey--text text--darken-1"
     >
       <v-icon large color="grey lighten-1">$messages-square</v-icon>
@@ -26,7 +26,7 @@
       <!-- Tiles -->
       <v-row class="mb-2">
         <v-col v-for="t in tiles" :key="t.label" cols="6" sm="4" md>
-          <v-card outlined rounded="xl" class="pa-4 fill-height">
+          <v-card outlined rounded="lg" class="pa-4 fill-height">
             <div class="text-caption grey--text text--darken-1">{{ t.label }}</div>
             <div :class="['text-h5 font-weight-bold', t.color]">{{ t.value }}</div>
             <div v-if="t.hint" class="text-caption grey--text">{{ t.hint }}</div>
@@ -36,13 +36,13 @@
 
       <v-row class="mb-2">
         <v-col cols="12" md="7">
-          <v-card outlined rounded="xl" class="pa-4 fill-height">
+          <v-card outlined rounded="lg" class="pa-4 fill-height">
             <div class="text-subtitle-2 font-weight-bold mb-2">How conversations ended, per day</div>
             <apexchart type="bar" height="260" :options="perDayOptions" :series="perDaySeries" />
           </v-card>
         </v-col>
         <v-col cols="12" md="5">
-          <v-card outlined rounded="xl" class="pa-4 fill-height">
+          <v-card outlined rounded="lg" class="pa-4 fill-height">
             <div class="text-subtitle-2 font-weight-bold mb-3">By channel</div>
             <v-simple-table dense class="mb-4">
               <thead>
@@ -75,7 +75,7 @@
     </template>
 
     <!-- Conversations list -->
-    <v-card v-if="stats" outlined rounded="xl" class="pa-6">
+    <v-card v-if="stats" outlined rounded="lg" class="pa-6">
       <div class="d-flex align-center flex-wrap mb-1">
         <div class="text-subtitle-1 font-weight-bold mr-4">Conversations</div>
         <v-btn-toggle v-model="filter" mandatory dense rounded color="primary" class="my-1">

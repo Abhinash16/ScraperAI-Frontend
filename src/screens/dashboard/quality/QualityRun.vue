@@ -4,7 +4,7 @@
       <v-icon small class="mr-1">$arrow-left</v-icon> Quality
     </v-btn>
 
-    <v-card v-if="!run" outlined rounded="xl" class="pa-6">
+    <v-card v-if="!run" outlined rounded="lg" class="pa-6">
       <v-progress-linear v-if="!loadError" indeterminate color="primary" />
       <v-alert v-else type="error" outlined rounded="lg" class="mb-0">
         {{ loadError }}
@@ -43,14 +43,14 @@
         </v-btn>
       </div>
 
-      <v-alert v-if="run.status !== 'done'" :type="run.status === 'failed' ? 'error' : 'info'" outlined rounded="xl">
+      <v-alert v-if="run.status !== 'done'" :type="run.status === 'failed' ? 'error' : 'info'" outlined rounded="lg">
         {{ run.status === "failed" ? `This run failed: ${run.error || "something went wrong."}` : "This run hasn't finished yet." }}
       </v-alert>
 
       <!-- Summary -->
       <v-row class="mb-2">
         <v-col cols="6" md="3">
-          <v-card outlined rounded="xl" class="pa-4 fill-height">
+          <v-card outlined rounded="lg" class="pa-4 fill-height">
             <div class="text-caption grey--text">Pass rate</div>
             <div :class="['text-h4 font-weight-bold', `${passRateColor(run.passRate)}--text`]">
               {{ formatRate(run.passRate) }}
@@ -62,7 +62,7 @@
           </v-card>
         </v-col>
         <v-col cols="6" md="3">
-          <v-card outlined rounded="xl" class="pa-4 fill-height">
+          <v-card outlined rounded="lg" class="pa-4 fill-height">
             <div class="text-caption grey--text">vs baseline</div>
             <template v-if="comparison">
               <div :class="['text-h4 font-weight-bold', comparison.delta < 0 ? 'error--text' : 'success--text']">
@@ -79,7 +79,7 @@
           </v-card>
         </v-col>
         <v-col cols="12" md="6">
-          <v-card outlined rounded="xl" class="pa-4 fill-height">
+          <v-card outlined rounded="lg" class="pa-4 fill-height">
             <div class="text-caption grey--text mb-2">Average scores</div>
             <div class="d-flex flex-wrap">
               <div v-for="s in SCORE_KEYS" :key="s.key" class="mr-6 mb-1">
@@ -118,7 +118,7 @@
         v-for="(r, i) in shown"
         :key="r.case || i"
         outlined
-        rounded="xl"
+        rounded="lg"
         :class="['pa-5 mb-3 result', { failing: !r.pass }]"
       >
         <div class="d-flex align-start flex-wrap mb-3">

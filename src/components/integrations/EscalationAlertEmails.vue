@@ -1,5 +1,5 @@
 <template>
-  <v-card outlined rounded="xl" class="pa-6 mt-4">
+  <v-card outlined rounded="lg" class="pa-6 mt-4">
     <div class="text-subtitle-1 font-weight-bold mb-1">
       Alert emails when escalation fails
     </div>
@@ -18,7 +18,7 @@
       v-else-if="loadError"
       type="error"
       outlined
-      rounded="xl"
+      rounded="lg"
       class="mb-0"
     >
       {{ loadError }}

@@ -2,7 +2,7 @@
   <div class="team-page">
     <!-- Header -->
     <div class="d-flex align-center mb-6">
-      <v-avatar size="48" rounded="xl" color="#cde6ff" class="mr-4">
+      <v-avatar size="48" rounded="lg" color="#cde6ff" class="mr-4">
         <v-icon color="black">$users</v-icon>
       </v-avatar>
       <div>
@@ -15,7 +15,7 @@
 
     <ThingsToKnow feature="team" />
 
-    <v-card v-if="!me" outlined rounded="xl" class="pa-6">
+    <v-card v-if="!me" outlined rounded="lg" class="pa-6">
       <v-progress-linear v-if="!meError" indeterminate color="primary" />
       <v-alert v-else type="error" outlined rounded="lg" class="mb-0">
         {{ meError }}
@@ -45,7 +45,7 @@
         @open-roles="setTab('roles')"
       />
       <RolesTab v-else-if="tab === 'roles'" :me="me" />
-      <v-alert v-else type="warning" outlined rounded="xl">
+      <v-alert v-else type="warning" outlined rounded="lg">
         You need the <code>user:manage</code> or <code>role:manage</code>
         permission to manage your team.
       </v-alert>

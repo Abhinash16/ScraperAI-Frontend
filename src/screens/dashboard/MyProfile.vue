@@ -28,7 +28,7 @@
     <v-row>
       <!-- ================= SECTION NAV ================= -->
       <v-col cols="12" md="3">
-        <v-card outlined rounded="xl" class="pa-2 profile-nav">
+        <v-card outlined rounded="lg" class="pa-2 profile-nav">
           <v-list dense nav class="py-0">
             <v-list-item
               v-for="item in sections"
@@ -59,7 +59,7 @@
             v-if="loadError"
             type="error"
             outlined
-            rounded="xl"
+            rounded="lg"
           >
             {{ loadError }}
             <v-btn small text color="error" class="ml-2" @click="load">
@@ -67,13 +67,13 @@
             </v-btn>
           </v-alert>
 
-          <v-card v-else-if="!account" outlined rounded="xl" class="pa-6">
+          <v-card v-else-if="!account" outlined rounded="lg" class="pa-6">
             <v-progress-linear indeterminate color="primary" />
           </v-card>
 
           <!-- ================= YOUR ACCOUNT ================= -->
           <template v-else-if="section === 'account'">
-            <v-card outlined rounded="xl" class="pa-6">
+            <v-card outlined rounded="lg" class="pa-6">
               <div class="text-subtitle-1 font-weight-bold">Your login</div>
               <div class="text-body-2 grey--text text--darken-1 mb-6">
                 The user you're signed in as. Ask an admin to change these
@@ -107,7 +107,7 @@
           <!-- ================= COMPANY ================= -->
           <template v-else-if="section === 'company'">
             <v-form ref="companyForm" @submit.prevent="saveCompany">
-              <v-card outlined rounded="xl" class="pa-6 mb-4">
+              <v-card outlined rounded="lg" class="pa-6 mb-4">
                 <div class="text-subtitle-1 font-weight-bold">
                   Company details
                 </div>
@@ -157,7 +157,7 @@
                 </v-row>
               </v-card>
 
-              <v-card outlined rounded="xl" class="pa-6">
+              <v-card outlined rounded="lg" class="pa-6">
                 <div class="text-subtitle-1 font-weight-bold">
                   Website and policies
                 </div>
@@ -210,7 +210,7 @@
 
           <!-- ================= SECURITY ================= -->
           <template v-else-if="section === 'security'">
-            <v-card outlined rounded="xl" class="pa-6 mb-4">
+            <v-card outlined rounded="lg" class="pa-6 mb-4">
               <div class="d-flex align-center flex-wrap">
                 <div class="flex-grow-1 mr-4 mb-2">
                   <div class="text-subtitle-1 font-weight-bold">Password</div>
@@ -236,7 +236,7 @@
               </div>
             </v-card>
 
-            <v-card outlined rounded="xl" class="pa-6 mb-4">
+            <v-card outlined rounded="lg" class="pa-6 mb-4">
               <div class="d-flex align-center flex-wrap">
                 <div class="flex-grow-1 mr-4 mb-2">
                   <div class="d-flex align-center">
@@ -258,7 +258,7 @@
               class="mb-4"
             />
 
-            <v-card outlined rounded="xl" class="pa-6">
+            <v-card outlined rounded="lg" class="pa-6">
               <div class="d-flex align-center flex-wrap">
                 <div class="flex-grow-1 mr-4 mb-2">
                   <div class="text-subtitle-1 font-weight-bold">Sign out</div>

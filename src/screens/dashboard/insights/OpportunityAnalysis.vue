@@ -11,7 +11,7 @@
     <!-- LOADING -->
     <v-row v-if="loading" class="">
       <v-col cols="12">
-        <v-card class="pa-6 rounded-xl" elevation="0">
+        <v-card class="pa-6 rounded-lg" elevation="0">
           <v-skeleton-loader
             type="card, list-item, list-item"
           ></v-skeleton-loader>
@@ -24,7 +24,7 @@
       <!-- OPPORTUNITY SCORE -->
       <v-row class="">
         <v-col cols="12">
-          <v-card elevation="0" class="pa-6 rounded-xl blue lighten-5">
+          <v-card elevation="0" class="pa-6 rounded-lg blue lighten-5">
             <div class="text-overline primary--text">AI Opportunity Score</div>
 
             <div class="d-flex align-center">
@@ -50,7 +50,7 @@
       <!-- INSIGHT CARDS -->
       <v-row class="mt-4">
         <v-col cols="12" md="6">
-          <v-card class="pa-6 rounded-xl" elevation="0">
+          <v-card class="pa-6 rounded-lg" elevation="0">
             <div class="text-overline grey--text">Market Gap</div>
 
             <div class="text-h6 font-weight-medium mt-2">
@@ -60,7 +60,7 @@
         </v-col>
 
         <v-col cols="12" md="6">
-          <v-card class="pa-6 rounded-xl green lighten-5" elevation="0">
+          <v-card class="pa-6 rounded-lg green lighten-5" elevation="0">
             <div class="text-overline success--text">Revenue Opportunity</div>
 
             <div class="text-h6 font-weight-medium mt-2">
@@ -73,7 +73,7 @@
       <!-- CONTENT IDEAS -->
       <v-row class="mt-4">
         <v-col cols="12">
-          <v-card class="pa-6 rounded-xl" elevation="0">
+          <v-card class="pa-6 rounded-lg" elevation="0">
             <div class="text-h6 font-weight-bold mb-4">
               AI Content Opportunities
             </div>

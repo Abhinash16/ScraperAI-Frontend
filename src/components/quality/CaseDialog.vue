@@ -1,6 +1,6 @@
 <template>
   <v-dialog :value="value" max-width="640" scrollable @input="$emit('input', $event)">
-    <v-card rounded="xl">
+    <v-card rounded="lg">
       <v-card-title class="text-h6">{{ editing ? "Edit test question" : "Add test question" }}</v-card-title>
       <v-card-text class="pt-2">
         <v-alert

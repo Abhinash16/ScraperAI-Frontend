@@ -377,7 +377,7 @@
 
     <!-- Publish anyway -->
     <v-dialog v-model="overrideOpen" max-width="480">
-      <v-card rounded="xl">
+      <v-card rounded="lg">
         <v-card-title class="text-h6">Publish anyway?</v-card-title>
         <v-card-text>
           <div class="text-body-2 mb-4">
@@ -420,7 +420,7 @@
 
     <!-- Confirmations -->
     <v-dialog :value="!!confirming" max-width="440" @input="confirming = null">
-      <v-card v-if="confirming" rounded="xl">
+      <v-card v-if="confirming" rounded="lg">
         <v-card-title class="text-h6">{{ confirmCopy.title }}</v-card-title>
         <v-card-text class="text-body-2">{{ confirmCopy.text }}</v-card-text>
         <v-card-actions>

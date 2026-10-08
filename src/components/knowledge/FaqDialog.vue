@@ -1,6 +1,6 @@
 <template>
   <v-dialog :value="value" max-width="620" scrollable @input="$emit('input', $event)">
-    <v-card rounded="xl">
+    <v-card rounded="lg">
       <v-card-title class="text-h6">Add FAQ</v-card-title>
       <v-card-text class="pt-2">
         <FaqFields v-model="faq" :categories="categories" />

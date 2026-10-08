@@ -13,7 +13,7 @@
     <!-- HEADER -->
     <v-row>
       <v-col cols="12">
-        <v-card elevation="0" class="pa-6 rounded-xl hero-card">
+        <v-card elevation="0" class="pa-6 rounded-lg hero-card">
           <div class="d-flex align-center justify-space-between flex-wrap">
             <div>
               <div class="text-h5 font-weight-bold">
@@ -39,7 +39,7 @@
       <v-col cols="12" md="4">
         <v-card
           elevation="0"
-          class="pa-6 rounded-xl score-card blue lighten-5"
+          class="pa-6 rounded-lg score-card blue lighten-5"
           to="/dashboard/opportunity-analysis"
           router
         >
@@ -64,7 +64,7 @@
       <v-col cols="12" md="4">
         <v-card
           elevation="0"
-          class="pa-6 rounded-xl score-card green lighten-5"
+          class="pa-6 rounded-lg score-card green lighten-5"
           to="/dashboard/seo-growth-report"
           router
         >
@@ -89,7 +89,7 @@
       <v-col cols="12" md="4">
         <v-card
           elevation="0"
-          class="pa-6 rounded-xl score-card purple lighten-5"
+          class="pa-6 rounded-lg score-card purple lighten-5"
           to="/dashboard/chatbot-knowledge-score"
           router
         >
@@ -113,7 +113,7 @@
     <!-- COMPANY SUMMARY -->
     <v-row class="mt-4">
       <v-col cols="12">
-        <v-card elevation="0" class="pa-6 rounded-xl">
+        <v-card elevation="0" class="pa-6 rounded-lg">
           <div class="text-h6 font-weight-bold mb-3">Company Overview</div>
 
           <div class="grey--text text--darken-2">
@@ -126,7 +126,7 @@
     <!-- TARGET AUDIENCE -->
     <v-row class="mt-4">
       <v-col cols="12">
-        <v-card elevation="0" class="pa-6 rounded-xl">
+        <v-card elevation="0" class="pa-6 rounded-lg">
           <div class="text-h6 font-weight-bold mb-4">
             Target Audience Segments
           </div>
@@ -147,7 +147,7 @@
     <!-- COMPETITORS -->
     <v-row class="mt-4">
       <v-col cols="12">
-        <v-card elevation="0" class="pa-6 rounded-xl">
+        <v-card elevation="0" class="pa-6 rounded-lg">
           <div class="text-h6 font-weight-bold mb-4">Competitor Landscape</div>
 
           <v-row>
@@ -177,7 +177,7 @@
     <!-- QUESTIONS + AI IDEAS -->
     <v-row class="mt-4">
       <v-col cols="12" md="6">
-        <v-card elevation="0" class="pa-6 rounded-xl">
+        <v-card elevation="0" class="pa-6 rounded-lg">
           <div class="text-h6 font-weight-bold mb-4">Customer Questions</div>
 
           <v-list dense>
@@ -195,7 +195,7 @@
       </v-col>
 
       <v-col cols="12" md="6">
-        <v-card elevation="0" class="pa-6 rounded-xl">
+        <v-card elevation="0" class="pa-6 rounded-lg">
           <div class="text-h6 font-weight-bold mb-4">AI Growth Strategies</div>
 
           <v-list dense>
@@ -216,7 +216,7 @@
     <!-- SEO OPPORTUNITIES -->
     <v-row class="mt-4">
       <v-col cols="12">
-        <v-card elevation="0" class="pa-6 rounded-xl">
+        <v-card elevation="0" class="pa-6 rounded-lg">
           <div class="text-h6 font-weight-bold mb-4">
             SEO Growth Opportunities
           </div>
@@ -244,7 +244,7 @@
     <!-- REPORT LINKS -->
     <v-row class="mt-4">
       <v-col cols="12">
-        <v-card elevation="0" class="pa-6 rounded-xl">
+        <v-card elevation="0" class="pa-6 rounded-lg">
           <div class="text-h6 font-weight-bold mb-4">
             AI Intelligence Reports
           </div>

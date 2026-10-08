@@ -1,6 +1,6 @@
 <template>
   <v-dialog :value="value" max-width="520" @input="$emit('input', $event)">
-    <v-card rounded="xl">
+    <v-card rounded="lg">
       <v-card-title class="text-h6">
         {{ sourceId ? "Upload new version" : "Upload document" }}
       </v-card-title>

@@ -1,6 +1,6 @@
 <template>
   <v-dialog :value="value" max-width="720" scrollable @input="close">
-    <v-card rounded="xl">
+    <v-card rounded="lg">
       <v-card-title class="d-flex align-center pb-2">
         <div class="text-h6 font-weight-bold">{{ title }}</div>
         <v-spacer />

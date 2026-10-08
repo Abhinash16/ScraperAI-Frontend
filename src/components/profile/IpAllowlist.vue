@@ -1,5 +1,5 @@
 <template>
-  <v-card outlined rounded="xl" class="pa-6">
+  <v-card outlined rounded="lg" class="pa-6">
     <div class="d-flex align-center mb-1">
       <div class="text-subtitle-1 font-weight-bold mr-2">IP allowlist</div>
       <v-chip v-if="!loading" x-small outlined :color="allowlist.length ? 'success' : 'grey'">

@@ -1,6 +1,6 @@
 <template>
   <v-dialog :value="!!issueId" max-width="1040" scrollable @input="close">
-    <v-card v-if="issueId" rounded="xl">
+    <v-card v-if="issueId" rounded="lg">
       <v-card-title class="d-flex align-center flex-wrap">
         <template v-if="issue">
           <v-chip small :color="severity.color" text-color="white" class="mr-2">

@@ -29,7 +29,7 @@
 
     <!-- ================= GO-LIVE CHECKLIST ================= -->
     <div v-if="tab === 'checklist'">
-      <v-card outlined rounded="xl" class="pa-6 mb-4">
+      <v-card outlined rounded="lg" class="pa-6 mb-4">
         <div class="d-flex align-center flex-wrap">
           <v-progress-circular
             :value="readiness"
@@ -54,7 +54,7 @@
         </div>
       </v-card>
 
-      <v-card outlined rounded="xl">
+      <v-card outlined rounded="lg">
         <template v-for="(item, i) in GO_LIVE_CHECKLIST">
           <v-divider v-if="i" :key="item.id + '-d'" />
           <div :key="item.id" class="d-flex align-start pa-4">
@@ -145,7 +145,7 @@
       </div>
       <v-row>
         <v-col v-for="c in COMING_NEXT" :key="c.title" cols="12" sm="6">
-          <v-card outlined rounded="xl" class="pa-5 fill-height">
+          <v-card outlined rounded="lg" class="pa-5 fill-height">
             <div class="d-flex align-center mb-2">
               <v-icon color="primary" class="mr-2">{{ c.icon }}</v-icon>
               <span class="font-weight-bold">{{ c.title }}</span>
@@ -160,7 +160,7 @@
 
     <!-- ================= INSTALL ================= -->
     <div v-if="tab === 'install'">
-      <v-card outlined rounded="xl" class="pa-6">
+      <v-card outlined rounded="lg" class="pa-6">
         <div class="font-weight-bold mb-2">1. Copy the script</div>
         <div class="code-box d-flex justify-space-between align-start mb-6">
           <pre class="ma-0">{{ scriptCode }}</pre>

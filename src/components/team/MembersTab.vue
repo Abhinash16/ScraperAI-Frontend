@@ -34,12 +34,12 @@
       </v-btn>
     </div>
 
-    <v-alert v-if="loadError" type="error" outlined rounded="xl">
+    <v-alert v-if="loadError" type="error" outlined rounded="lg">
       {{ loadError }}
       <v-btn small text color="error" class="ml-2" @click="load">Retry</v-btn>
     </v-alert>
 
-    <v-card v-else outlined rounded="xl">
+    <v-card v-else outlined rounded="lg">
       <v-skeleton-loader v-if="loading && !users.length" type="table-row@4" class="pa-4" />
 
       <div v-else-if="!filteredUsers.length" class="empty-state text-center pa-10">

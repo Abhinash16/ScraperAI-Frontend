@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- ============ EMBED SCRIPT ============ -->
-    <v-card outlined rounded="xl" class="pa-6 mb-4">
+    <v-card outlined rounded="lg" class="pa-6 mb-4">
       <div class="text-subtitle-1 font-weight-bold mb-1">Embed script</div>
       <div class="text-body-2 grey--text text--darken-1 mb-4">
         Paste this before the closing <code>&lt;/body&gt;</code> tag of your
@@ -32,7 +32,7 @@
     </v-card>
 
     <!-- ============ ALLOWED DOMAINS ============ -->
-    <v-card v-if="canManageSettings" outlined rounded="xl" class="pa-6 mb-4">
+    <v-card v-if="canManageSettings" outlined rounded="lg" class="pa-6 mb-4">
       <div class="text-subtitle-1 font-weight-bold mb-1">Allowed domains</div>
       <div class="text-body-2 grey--text text--darken-1 mb-4">
         The widget only works on these websites. Use <code>example.com</code>
@@ -46,7 +46,7 @@
         v-else-if="loadError"
         type="error"
         outlined
-        rounded="xl"
+        rounded="lg"
         class="mb-0"
       >
         {{ loadError }}
@@ -63,7 +63,7 @@
           color="warning"
           elevation="0"
           outlined
-          rounded="xl"
+          rounded="lg"
           class="text-body-2"
         >
           <strong>Any website can load your widget right now.</strong> Add your
@@ -146,7 +146,7 @@
     </v-card>
 
     <!-- ============ SUPPORT WHATSAPP ============ -->
-    <v-card v-if="canManageSettings" outlined rounded="xl" class="pa-6 mb-4">
+    <v-card v-if="canManageSettings" outlined rounded="lg" class="pa-6 mb-4">
       <div class="text-subtitle-1 font-weight-bold mb-1">
         Support WhatsApp number (for escalations)
       </div>
@@ -201,7 +201,7 @@
     </v-card>
 
     <!-- ============ THINGS TO KNOW ============ -->
-    <v-card outlined rounded="xl" class="pa-6">
+    <v-card outlined rounded="lg" class="pa-6">
       <div class="text-subtitle-1 font-weight-bold mb-3">Things to know</div>
       <div v-for="point in thingsToKnow" :key="point.title" class="d-flex mb-3">
         <v-icon small color="primary" class="mr-3 mt-1">

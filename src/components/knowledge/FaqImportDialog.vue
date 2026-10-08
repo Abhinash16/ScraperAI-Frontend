@@ -1,6 +1,6 @@
 <template>
   <v-dialog :value="value" max-width="560" scrollable @input="$emit('input', $event)">
-    <v-card rounded="xl">
+    <v-card rounded="lg">
       <v-card-title class="text-h6">Import FAQs from CSV</v-card-title>
       <v-card-text class="pt-2">
         <div class="text-body-2 grey--text text--darken-1 mb-4">
