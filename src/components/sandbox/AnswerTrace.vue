@@ -196,6 +196,25 @@
           </v-sheet>
         </template>
 
+        <!-- Notices (closures, special hours, offers) the bot was told -->
+        <template v-if="trace.notices">
+          <div
+            class="text-caption font-weight-bold text-uppercase grey--text mt-4 mb-2"
+          >
+            Notices the bot knew
+          </div>
+          <v-sheet
+            color="grey lighten-5"
+            rounded="lg"
+            max-height="260"
+            class="overflow-y-auto pa-3"
+          >
+            <pre class="text-caption text-pre-wrap text-break">{{
+              trace.notices
+            }}</pre>
+          </v-sheet>
+        </template>
+
         <!-- What the bot remembered from this customer's last conversation -->
         <template v-if="trace.memory">
           <div

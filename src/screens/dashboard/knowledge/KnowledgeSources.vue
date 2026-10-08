@@ -121,6 +121,8 @@
       </div>
     </v-alert>
 
+    <ActiveNoticeStrip />
+
     <KnowledgeHealthCard
       :permissions="perms"
       class="mb-4"
@@ -535,6 +537,7 @@ import apiClient from "@/service/axios";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import DocumentUploadDialog from "@/components/knowledge/DocumentUploadDialog.vue";
 import KnowledgeHealthCard from "@/components/knowledge/KnowledgeHealthCard.vue";
+import ActiveNoticeStrip from "@/components/knowledge/ActiveNoticeStrip.vue";
 import {
   DOCUMENT_KINDS,
   DOCUMENT_STATUS,
@@ -574,7 +577,7 @@ const emptyDraft = () => ({
 export default {
   name: "KnowledgeSources",
 
-  components: { ThingsToKnow, DocumentUploadDialog, KnowledgeHealthCard },
+  components: { ThingsToKnow, DocumentUploadDialog, KnowledgeHealthCard, ActiveNoticeStrip },
 
   data() {
     return {
