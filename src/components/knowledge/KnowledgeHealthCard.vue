@@ -1,5 +1,5 @@
 <template>
-  <v-card outlined rounded="xl" class="pa-6">
+  <v-card outlined rounded="lg" class="pa-6">
     <div class="d-flex align-center mb-3">
       <v-icon small class="mr-2">$shield-check</v-icon>
       <div class="text-subtitle-1 font-weight-bold">Knowledge health</div>
@@ -15,30 +15,53 @@
       >
         <v-icon small class="mr-1">$refresh-cw</v-icon> Check now
       </v-btn>
-      <v-btn v-if="compact" small text rounded color="primary" class="text-none" to="/dashboard/knowledge">
+      <v-btn
+        v-if="compact"
+        small
+        text
+        rounded
+        color="primary"
+        class="text-none"
+        to="/dashboard/knowledge"
+      >
         Open Knowledge
       </v-btn>
     </div>
 
-    <v-progress-linear v-if="loading && !current" indeterminate color="primary" />
+    <v-progress-linear
+      v-if="loading && !current"
+      indeterminate
+      color="primary"
+    />
     <div v-else-if="error" class="text-body-2 error--text">{{ error }}</div>
 
-    <div v-else-if="current && current.score == null" class="text-body-2 grey--text text--darken-1">
+    <div
+      v-else-if="current && current.score == null"
+      class="text-body-2 grey--text text--darken-1"
+    >
       No published knowledge yet. The score appears once the bot uses some.
     </div>
 
     <div v-else-if="current" class="d-flex align-center flex-wrap">
       <div class="mr-8 mb-2">
         <div class="d-flex align-baseline">
-          <span :class="['score font-weight-bold', scoreColor]">{{ current.score }}</span>
+          <span :class="['score font-weight-bold', scoreColor]">{{
+            current.score
+          }}</span>
           <span class="text-body-1 grey--text ml-1">/ 100</span>
-          <span v-if="trend" :class="['text-body-2 font-weight-bold ml-3', trend.color]" :title="trend.title">
+          <span
+            v-if="trend"
+            :class="['text-body-2 font-weight-bold ml-3', trend.color]"
+            :title="trend.title"
+          >
             <v-icon x-small :color="trend.iconColor">{{ trend.icon }}</v-icon>
             {{ trend.text }}
           </span>
         </div>
         <div class="text-body-2 grey--text text--darken-1">
-          {{ current.healthy }} of {{ current.published }} published item{{ current.published === 1 ? " is" : "s are" }}
+          {{ current.healthy }} of {{ current.published }} published item{{
+            current.published === 1 ? " is" : "s are"
+          }}
           healthy
         </div>
       </div>
@@ -51,8 +74,17 @@
           :to="c.to"
           :class="['count mr-6 mb-2', { link: !!c.to }]"
         >
-          <div :class="['text-h6 font-weight-bold', c.value ? c.color : 'grey--text']">{{ c.value }}</div>
-          <div class="text-caption grey--text text--darken-1">{{ c.label }}</div>
+          <div
+            :class="[
+              'text-h6 font-weight-bold',
+              c.value ? c.color : 'grey--text',
+            ]"
+          >
+            {{ c.value }}
+          </div>
+          <div class="text-caption grey--text text--darken-1">
+            {{ c.label }}
+          </div>
         </component>
       </div>
     </div>
@@ -75,7 +107,13 @@ export default {
     compact: { type: Boolean, default: false },
   },
 
-  data: () => ({ current: null, history: [], loading: false, error: "", checking: false }),
+  data: () => ({
+    current: null,
+    history: [],
+    loading: false,
+    error: "",
+    checking: false,
+  }),
 
   computed: {
     canCheck() {
@@ -84,29 +122,77 @@ export default {
 
     scoreColor() {
       const s = this.current?.score;
-      return s >= 90 ? "success--text" : s >= 70 ? "amber--text text--darken-3" : "error--text";
+      return s >= 90
+        ? "success--text"
+        : s >= 70
+        ? "amber--text text--darken-3"
+        : "error--text";
     },
 
     // Current score vs the last weekly snapshot
     trend() {
       const prev = this.history[0];
-      if (!prev || prev.score == null || this.current?.score == null) return null;
+      if (!prev || prev.score == null || this.current?.score == null)
+        return null;
       const d = this.current.score - prev.score;
       const title = `Since ${formatDate(prev.createdAt)}`;
-      if (!d) return { text: "no change", color: "grey--text", icon: "$minus", iconColor: "grey", title };
+      if (!d)
+        return {
+          text: "no change",
+          color: "grey--text",
+          icon: "$minus",
+          iconColor: "grey",
+          title,
+        };
       return d > 0
-        ? { text: `${d}`, color: "success--text", icon: "$trending-up", iconColor: "success", title }
-        : { text: `${-d}`, color: "error--text", icon: "$trending-down", iconColor: "error", title };
+        ? {
+            text: `${d}`,
+            color: "success--text",
+            icon: "$trending-up",
+            iconColor: "success",
+            title,
+          }
+        : {
+            text: `${-d}`,
+            color: "error--text",
+            icon: "$trending-down",
+            iconColor: "error",
+            title,
+          };
     },
 
     counts() {
       const c = this.current || {};
       return [
-        { label: "Blockers", value: c.blockers || 0, color: "error--text", to: `${ISSUES}?severity=blocker` },
-        { label: "Warnings", value: c.warnings || 0, color: "amber--text text--darken-3", to: `${ISSUES}?severity=warning` },
-        { label: "Waiting for review", value: c.needsReview || 0, color: "error--text", to: `${ISSUES}?severity=blocker` },
-        { label: "Unanswered questions", value: c.unanswered || 0, color: "primary--text", to: "/dashboard/knowledge-gap" },
-        { label: "Failed imports", value: c.failedImports || 0, color: "error--text" },
+        {
+          label: "Blockers",
+          value: c.blockers || 0,
+          color: "error--text",
+          to: `${ISSUES}?severity=blocker`,
+        },
+        {
+          label: "Warnings",
+          value: c.warnings || 0,
+          color: "amber--text text--darken-3",
+          to: `${ISSUES}?severity=warning`,
+        },
+        {
+          label: "Waiting for review",
+          value: c.needsReview || 0,
+          color: "error--text",
+          to: `${ISSUES}?severity=blocker`,
+        },
+        {
+          label: "Unanswered questions",
+          value: c.unanswered || 0,
+          color: "primary--text",
+          to: "/dashboard/knowledge-gap",
+        },
+        {
+          label: "Failed imports",
+          value: c.failedImports || 0,
+          color: "error--text",
+        },
       ];
     },
   },

@@ -1,34 +1,65 @@
 <template>
-  <div class="setup-page">
-    <!-- Header -->
-    <div class="d-flex align-center flex-wrap mb-6">
-      <v-avatar size="48" rounded="xl" color="#ffedd5" class="mr-4">
-        <v-icon color="black">$rocket</v-icon>
-      </v-avatar>
-      <div class="mr-4">
-        <div class="text-h5 font-weight-bold">Setup</div>
+  <div>
+    <!-- HEADER -->
+    <div class="d-flex flex-wrap align-center mb-4">
+      <div class="mr-4 mb-2">
+        <h1 class="text-h6 font-weight-bold grey--text text--darken-4">Setup</h1>
         <div class="text-body-2 grey--text text--darken-1">
           Build your bot's knowledge, test it, then go live in one step.
         </div>
       </div>
-      <v-chip v-if="running" small color="deep-orange" text-color="white" class="my-1">
+      <v-spacer />
+      <v-chip
+        v-if="running"
+        small
+        label
+        color="deep-orange lighten-5"
+        text-color="deep-orange darken-2"
+        class="font-weight-bold mb-2"
+      >
+        <v-icon left size="14">$loader-circle</v-icon>
         {{ setup.mode === "replace" ? "Rebuilding knowledge" : "New setup" }} in progress
       </v-chip>
     </div>
 
     <ThingsToKnow feature="setup" />
 
-    <v-card v-if="!state" outlined rounded="xl" class="pa-6">
-      <v-progress-linear v-if="!loadError" indeterminate color="primary" />
-      <v-alert v-else type="error" outlined rounded="lg" class="mb-0">
-        {{ loadError }}
-        <v-btn small text color="error" class="ml-2" @click="load">Retry</v-btn>
-      </v-alert>
-    </v-card>
+    <!-- LOADING / ERROR -->
+    <v-alert v-if="!state && loadError" type="error" text rounded="lg" class="text-body-2">
+      <div class="d-flex align-center flex-wrap">
+        <span class="mr-4">{{ loadError }}</span>
+        <v-spacer />
+        <v-btn small outlined color="error" @click="load">
+          <v-icon left size="14">$refresh-cw</v-icon>
+          Retry
+        </v-btn>
+      </div>
+    </v-alert>
+
+    <v-row v-else-if="!state">
+      <v-col cols="12" md="7" lg="8">
+        <v-card outlined rounded="lg" class="pa-4">
+          <v-skeleton-loader type="heading, paragraph, list-item-two-line, list-item-two-line, actions" />
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="5" lg="4">
+        <v-card outlined rounded="lg" class="pa-4">
+          <v-skeleton-loader type="list-item-avatar-two-line, list-item, list-item, list-item" />
+        </v-card>
+      </v-col>
+    </v-row>
 
     <template v-else>
       <!-- Just switched over -->
-      <v-alert v-if="result" type="success" outlined rounded="xl" class="text-body-2" dismissible @input="result = null">
+      <v-alert
+        v-if="result"
+        type="success"
+        text
+        rounded="lg"
+        dismissible
+        class="text-body-2"
+        @input="result = null"
+      >
         <div class="font-weight-bold mb-1">You're live.</div>
         {{ result.sourcesLive }} source{{ result.sourcesLive === 1 ? "" : "s" }} went live<template
           v-if="result.sourcesDeleted"
@@ -38,211 +69,326 @@
           and your Bot Profile was published</template>.
       </v-alert>
 
-      <!-- ============ NOT RUNNING: start ============ -->
-      <v-card v-if="!running" outlined rounded="xl" class="pa-6 mb-4">
-        <div class="text-subtitle-1 font-weight-bold mb-1">Start a setup</div>
-        <div class="text-body-2 grey--text text--darken-1 mb-4">
-          Everything you build during a setup is staged: you can test it, but
-          customers keep getting your current answers until you switch over.
-        </div>
-        <v-radio-group v-model="startForm.mode" class="mt-0" hide-details>
-          <v-radio value="new">
-            <template #label>
+      <v-row>
+        <!-- ============ LEFT: start or steps ============ -->
+        <v-col cols="12" md="7" lg="8">
+          <!-- Not running: start -->
+          <v-card v-if="!running" outlined rounded="lg">
+            <div class="d-flex align-center pa-5">
+              <v-avatar color="primary lighten-5" size="40" tile class="rounded-lg mr-4 flex-shrink-0">
+                <v-icon color="primary" size="20">$rocket</v-icon>
+              </v-avatar>
               <div>
-                <div class="text-body-2 font-weight-bold black--text">New client</div>
-                <div class="text-caption grey--text">Nothing is live yet. Set up from scratch.</div>
-              </div>
-            </template>
-          </v-radio>
-          <v-radio value="replace" class="mt-2">
-            <template #label>
-              <div>
-                <div class="text-body-2 font-weight-bold black--text">Rebuild my knowledge</div>
-                <div class="text-caption grey--text">
-                  Build new knowledge next to the current one. The current
-                  sources keep answering until you switch over, then they're
-                  deleted.
+                <div class="text-subtitle-1 font-weight-bold grey--text text--darken-4">
+                  Start a setup
                 </div>
-              </div>
-            </template>
-          </v-radio>
-        </v-radio-group>
-        <v-text-field
-          v-model.trim="startForm.websiteUrl"
-          label="Website address (optional)"
-          placeholder="https://example.com"
-          outlined
-          dense
-          hide-details
-          class="mt-5 url-field"
-        />
-        <v-alert v-if="startError" type="error" dense outlined rounded="lg" class="mt-4 mb-0 text-body-2">
-          {{ startError }}
-        </v-alert>
-        <div class="d-flex justify-end mt-4">
-          <v-btn color="primary" depressed rounded class="text-none font-weight-bold" :loading="busy === 'start'" @click="start">
-            Start setup
-          </v-btn>
-        </div>
-      </v-card>
-
-      <!-- ============ RUNNING: steps ============ -->
-      <template v-else>
-        <v-alert
-          v-if="retiring.length"
-          border="left"
-          colored-border
-          color="grey"
-          elevation="0"
-          outlined
-          rounded="xl"
-          class="text-body-2"
-        >
-          Still answering customers until you switch over, then deleted:
-          <strong>{{ retiring.map((s) => s.name).join(", ") }}</strong>.
-        </v-alert>
-
-        <v-stepper v-model="step" vertical non-linear class="setup-stepper elevation-0 mb-4">
-          <template v-for="(s, i) in STEPS">
-            <v-stepper-step
-              :key="`step-${s.id}`"
-              :step="i + 1"
-              :complete="stepDone(s.id)"
-              editable
-              :edit-icon="'$check'"
-              :complete-icon="'$check'"
-            >
-              {{ s.title }}
-              <small>{{ s.subtitle }}</small>
-            </v-stepper-step>
-            <v-stepper-content :key="`content-${s.id}`" :step="i + 1">
-              <WebsiteStep v-if="s.id === 'website'" :state="state" @changed="load({ quiet: true })" />
-              <ProfileStep v-else-if="s.id === 'profile'" :state="state" @changed="load({ quiet: true })" />
-              <FaqStep v-else-if="s.id === 'faqs'" :state="state" @changed="load({ quiet: true })" />
-
-              <div v-else-if="s.id === 'issues'">
-                <div class="text-body-2 grey--text text--darken-1 mb-3">
-                  New knowledge is checked when it's published: contradictions,
-                  duplicates and private details. Blockers must be resolved or
-                  dismissed before you can go live.
-                </div>
-                <div class="d-flex align-center">
-                  <span class="text-body-2 mr-4">{{ itemDetail("no_blockers") || "—" }}</span>
-                  <v-btn depressed rounded class="text-none" to="/dashboard/knowledge/issues">
-                    <v-icon small class="mr-1">$shield-alert</v-icon> Review issues
-                  </v-btn>
-                </div>
-              </div>
-
-              <div v-else-if="s.id === 'test'">
-                <div class="text-body-2 grey--text text--darken-1 mb-3">
-                  Chat with the new knowledge in the sandbox, then run your
-                  answer-quality tests on it. Customers see none of this.
-                </div>
-                <div class="text-body-2 mb-3">
-                  Latest test run on the new setup: <strong>{{ itemDetail("eval") || "not run yet" }}</strong>
-                </div>
-                <v-btn depressed rounded class="text-none mr-2 mb-2" to="/dashboard/sandbox?knowledge=staging">
-                  <v-icon small class="mr-1">$flask-conical</v-icon> Try it in the sandbox
-                </v-btn>
-                <v-btn depressed rounded color="primary" class="text-none mb-2" to="/dashboard/quality?run=staging">
-                  <v-icon small class="mr-1">$play</v-icon> Run tests on the new setup
-                </v-btn>
-              </div>
-
-              <div v-else-if="s.id === 'golive'">
                 <div class="text-body-2 grey--text text--darken-1">
-                  When every required item is done, switch over: the new
-                  knowledge goes live and the old knowledge is deleted, in one
-                  step. See the checklist below.
+                  Everything you build is staged. You can test it, but customers keep getting
+                  your current answers until you switch over.
                 </div>
               </div>
-            </v-stepper-content>
-          </template>
-        </v-stepper>
-      </template>
+            </div>
+            <v-divider />
 
-      <!-- ============ CHECKLIST ============ -->
-      <v-card outlined rounded="xl" class="pa-6">
-        <div class="d-flex align-center flex-wrap mb-4">
-          <v-progress-circular
-            :value="checklist.score || 0"
-            :color="checklist.ready ? 'success' : 'primary'"
-            size="72"
-            width="7"
-            class="mr-5 mb-2"
-          >
-            <span class="font-weight-bold">{{ checklist.score || 0 }}%</span>
-          </v-progress-circular>
-          <div class="mr-4 mb-2">
-            <div class="text-subtitle-1 font-weight-bold">
-              {{ running ? "Ready to go live?" : "Go-live readiness" }}
+            <div class="pa-5">
+              <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">
+                What do you want to do?
+              </div>
+              <v-item-group v-model="startForm.mode" mandatory>
+                <v-row dense>
+                  <v-col v-for="m in MODES" :key="m.value" cols="12" sm="6">
+                    <v-item v-slot="{ active, toggle }" :value="m.value">
+                      <v-card
+                        :outlined="!active"
+                        :color="active ? 'primary lighten-5' : undefined"
+                        :elevation="0"
+                        rounded="lg"
+                        class="d-flex align-start pa-4 fill-height"
+                        :aria-pressed="String(active)"
+                        @click="toggle"
+                      >
+                        <v-icon :color="active ? 'primary' : 'grey'" size="20" class="mr-3 mt-1 flex-shrink-0">
+                          {{ active ? "$circle-dot" : "$circle" }}
+                        </v-icon>
+                        <div>
+                          <div
+                            class="text-body-2 font-weight-bold"
+                            :class="active ? 'primary--text' : 'grey--text text--darken-4'"
+                          >
+                            {{ m.title }}
+                          </div>
+                          <div class="text-caption grey--text text--darken-1">{{ m.text }}</div>
+                        </div>
+                      </v-card>
+                    </v-item>
+                  </v-col>
+                </v-row>
+              </v-item-group>
+
+              <v-row class="mt-3">
+                <v-col cols="12" sm="8">
+                  <v-text-field
+                    v-model.trim="startForm.websiteUrl"
+                    label="Website address (optional)"
+                    placeholder="https://example.com"
+                    prepend-inner-icon="$globe"
+                    outlined
+                    dense
+                    hide-details
+                  />
+                </v-col>
+              </v-row>
+
+              <v-alert v-if="startError" type="error" dense text rounded="lg" class="mt-4 mb-0 text-body-2">
+                {{ startError }}
+              </v-alert>
             </div>
-            <div class="text-body-2 grey--text text--darken-1">
-              <template v-if="checklist.ready">Every required item is done.</template>
-              <template v-else>
-                {{ requiredLeft }} required item{{ requiredLeft === 1 ? "" : "s" }} left.
-              </template>
-              <template v-if="!running"> Checked against your live knowledge.</template>
+
+            <v-divider />
+            <div class="d-flex justify-end px-5 py-3">
+              <v-btn
+                color="primary"
+                depressed
+                class="font-weight-bold"
+                :loading="busy === 'start'"
+                @click="start"
+              >
+                <v-icon left size="16">$rocket</v-icon>
+                Start setup
+              </v-btn>
             </div>
-          </div>
-          <v-spacer />
-          <template v-if="running">
-            <v-btn text rounded class="text-none mb-2" :disabled="!!busy" @click="cancelOpen = true">
-              Cancel setup
-            </v-btn>
-            <v-btn
-              color="primary"
-              depressed
-              rounded
-              class="text-none font-weight-bold ml-2 mb-2"
-              :disabled="!checklist.ready || !!busy"
-              @click="switchOpen = true"
+          </v-card>
+
+          <!-- Running: steps -->
+          <template v-else>
+            <v-alert
+              v-if="retiring.length"
+              text
+              dense
+              color="blue-grey"
+              rounded="lg"
+              class="text-body-2 py-3"
             >
-              <v-icon small class="mr-1">$rocket</v-icon> Switch over
-            </v-btn>
-          </template>
-        </div>
+              <template #prepend>
+                <v-icon color="blue-grey" size="18" class="mr-3">$info</v-icon>
+              </template>
+              <span class="grey--text text--darken-3">
+                Still answering customers until you switch over, then deleted:
+                <strong>{{ retiringNames }}</strong>.
+              </span>
+            </v-alert>
 
-        <div v-for="item in checklist.items || []" :key="item.key" class="check-item d-flex align-start py-2">
-          <v-icon :color="item.done ? 'success' : item.required ? 'warning' : 'grey'" class="mr-3 mt-1" small>
-            {{ item.done ? "$circle-check" : "$circle" }}
-          </v-icon>
-          <div class="flex-grow-1">
-            <div class="text-body-2 font-weight-medium">
-              {{ item.label }}
-              <span v-if="!item.required" class="grey--text font-weight-regular">(optional)</span>
-              <span v-if="item.detail" class="grey--text font-weight-regular"> · {{ item.detail }}</span>
+            <v-card outlined rounded="lg" class="px-4 pt-4 pb-1 mb-4">
+              <div class="d-flex align-center mb-1 px-2">
+                <span class="text-subtitle-1 font-weight-bold grey--text text--darken-4">Steps</span>
+                <v-spacer />
+                <span class="text-caption grey--text text--darken-1">
+                  {{ stepsDone }} of {{ STEPS.length }} done
+                </span>
+              </div>
+              <v-progress-linear
+                :value="(stepsDone / STEPS.length) * 100"
+                color="primary"
+                background-color="grey lighten-3"
+                height="4"
+                rounded
+                class="mx-2 mb-1"
+              />
+
+              <v-stepper v-model="step" vertical non-linear flat class="pb-2">
+                <template v-for="(s, i) in STEPS">
+                  <v-stepper-step
+                    :key="`step-${s.id}`"
+                    :step="i + 1"
+                    :complete="stepDone(s.id)"
+                    editable
+                    edit-icon="$check"
+                    complete-icon="$check"
+                    color="primary"
+                  >
+                    <span class="font-weight-bold">{{ s.title }}</span>
+                    <small class="mt-1">{{ s.subtitle }}</small>
+                  </v-stepper-step>
+
+                  <v-stepper-content :key="`content-${s.id}`" :step="i + 1">
+                    <WebsiteStep v-if="s.id === 'website'" :state="state" @changed="load({ quiet: true })" />
+                    <ProfileStep v-else-if="s.id === 'profile'" :state="state" @changed="load({ quiet: true })" />
+                    <FaqStep v-else-if="s.id === 'faqs'" :state="state" @changed="load({ quiet: true })" />
+
+                    <v-card v-else-if="s.id === 'issues'" outlined rounded="lg" class="pa-4">
+                      <div class="text-body-2 grey--text text--darken-1 mb-4">
+                        New knowledge is checked when it's published: contradictions, duplicates
+                        and private details. Blockers must be resolved or dismissed before you can
+                        go live.
+                      </div>
+                      <div class="d-flex flex-wrap align-center">
+                        <v-chip small label class="font-weight-bold mr-3 my-1">
+                          {{ itemDetail("no_blockers") || "Not checked yet" }}
+                        </v-chip>
+                        <v-btn depressed class="my-1" to="/dashboard/knowledge/issues">
+                          <v-icon left size="16">$shield-alert</v-icon>
+                          Review issues
+                        </v-btn>
+                      </div>
+                    </v-card>
+
+                    <v-card v-else-if="s.id === 'test'" outlined rounded="lg" class="pa-4">
+                      <div class="text-body-2 grey--text text--darken-1 mb-3">
+                        Chat with the new knowledge in the sandbox, then run your answer-quality
+                        tests on it. Customers see none of this.
+                      </div>
+                      <div class="text-body-2 mb-4">
+                        Latest test run on the new setup:
+                        <strong>{{ itemDetail("eval") || "not run yet" }}</strong>
+                      </div>
+                      <div class="d-flex flex-wrap">
+                        <v-btn depressed class="mr-2 my-1" to="/dashboard/sandbox?knowledge=staging">
+                          <v-icon left size="16">$flask-conical</v-icon>
+                          Try it in the sandbox
+                        </v-btn>
+                        <v-btn depressed color="primary" class="my-1" to="/dashboard/quality?run=staging">
+                          <v-icon left size="16">$play</v-icon>
+                          Run tests on the new setup
+                        </v-btn>
+                      </div>
+                    </v-card>
+
+                    <v-card v-else-if="s.id === 'golive'" outlined rounded="lg" class="pa-4">
+                      <div class="text-body-2 grey--text text--darken-1 mb-4">
+                        When every required item is done, switch over: the new knowledge goes live
+                        and the old knowledge is deleted, in one step.
+                      </div>
+                      <v-btn
+                        color="primary"
+                        depressed
+                        class="font-weight-bold"
+                        :disabled="!checklist.ready || !!busy"
+                        @click="switchOpen = true"
+                      >
+                        <v-icon left size="16">$rocket</v-icon>
+                        Switch over
+                      </v-btn>
+                      <div v-if="!checklist.ready" class="text-caption grey--text text--darken-1 mt-2">
+                        Finish the required items in the checklist first.
+                      </div>
+                    </v-card>
+                  </v-stepper-content>
+                </template>
+              </v-stepper>
+            </v-card>
+          </template>
+        </v-col>
+
+        <!-- ============ RIGHT: readiness ============ -->
+        <v-col cols="12" md="5" lg="4">
+          <v-card outlined rounded="lg">
+            <div class="d-flex align-center pa-5">
+              <v-progress-circular
+                :value="checklist.score || 0"
+                :color="checklist.ready ? 'success' : 'primary'"
+                size="64"
+                width="6"
+                class="mr-4 flex-shrink-0"
+              >
+                <span class="text-body-2 font-weight-bold grey--text text--darken-4">
+                  {{ checklist.score || 0 }}%
+                </span>
+              </v-progress-circular>
+              <div>
+                <div class="text-subtitle-1 font-weight-bold grey--text text--darken-4">
+                  {{ running ? "Ready to go live?" : "Go-live readiness" }}
+                </div>
+                <div class="text-body-2 grey--text text--darken-1">
+                  <template v-if="checklist.ready">Every required item is done.</template>
+                  <template v-else>
+                    {{ requiredLeft }} required item{{ requiredLeft === 1 ? "" : "s" }} left.
+                  </template>
+                  <template v-if="!running"> Checked against your live knowledge.</template>
+                </div>
+              </div>
             </div>
-            <div v-if="!item.done && item.hint" class="text-caption grey--text text--darken-1">{{ item.hint }}</div>
-          </div>
-          <v-btn
-            v-if="!item.done && LINKS[item.key]"
-            x-small
-            text
-            rounded
-            color="primary"
-            class="text-none ml-2"
-            :to="LINKS[item.key].to"
-          >
-            {{ LINKS[item.key].label }}
-          </v-btn>
-        </div>
-      </v-card>
+
+            <template v-if="running">
+              <div class="d-flex px-5 pb-4">
+                <v-btn
+                  color="primary"
+                  depressed
+                  class="font-weight-bold flex-grow-1 mr-2"
+                  :disabled="!checklist.ready || !!busy"
+                  @click="switchOpen = true"
+                >
+                  <v-icon left size="16">$rocket</v-icon>
+                  Switch over
+                </v-btn>
+                <v-btn outlined color="grey darken-1" :disabled="!!busy" @click="cancelOpen = true">
+                  Cancel setup
+                </v-btn>
+              </div>
+            </template>
+
+            <v-divider />
+
+            <div class="py-1">
+              <template v-for="(item, i) in checklist.items || []">
+                <v-divider v-if="i > 0" :key="`d-${item.key}`" />
+                <div :key="item.key" class="d-flex align-start px-5 py-3">
+                  <v-icon :color="checkTone(item).color" size="18" class="mr-3 mt-1 flex-shrink-0">
+                    {{ checkTone(item).icon }}
+                  </v-icon>
+                  <div class="flex-grow-1 overflow-hidden">
+                    <div class="text-body-2 font-weight-medium grey--text text--darken-4">
+                      {{ item.label }}
+                      <span v-if="!item.required" class="text-caption grey--text">(optional)</span>
+                    </div>
+                    <div v-if="item.detail" class="text-caption grey--text text--darken-1">
+                      {{ item.detail }}
+                    </div>
+                    <div v-if="!item.done && item.hint" class="text-caption grey--text text--darken-1">
+                      {{ item.hint }}
+                    </div>
+                    <v-btn
+                      v-if="!item.done && LINKS[item.key]"
+                      x-small
+                      text
+                      color="primary"
+                      class="px-0 mt-1"
+                      :to="LINKS[item.key].to"
+                    >
+                      {{ LINKS[item.key].label }}
+                      <v-icon right size="12">$arrow-right</v-icon>
+                    </v-btn>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
     </template>
 
-    <!-- Switch over -->
+    <!-- SWITCH OVER -->
     <v-dialog v-model="switchOpen" max-width="500">
-      <v-card rounded="xl">
-        <v-card-title class="text-h6">Switch over to the new knowledge?</v-card-title>
-        <v-card-text class="text-body-2">
-          <p>
-            <strong>New knowledge goes live</strong> ({{ staging.length }} source{{ staging.length === 1 ? "" : "s" }}).
-            <template v-if="retiring.length">
-              <strong>Old knowledge from {{ retiring.length }} source{{ retiring.length === 1 ? "" : "s" }} will be deleted</strong>
-              ({{ retiring.map((s) => s.name).join(", ") }}). This can't be undone.
-            </template>
-          </p>
+      <v-card rounded="lg">
+        <v-card-text class="pt-6">
+          <div class="d-flex align-center mb-4">
+            <v-avatar color="primary lighten-5" size="44" class="mr-3 flex-shrink-0">
+              <v-icon color="primary" size="22">$rocket</v-icon>
+            </v-avatar>
+            <div class="text-h6 font-weight-bold grey--text text--darken-4">
+              Switch over to the new knowledge?
+            </div>
+          </div>
+          <div class="text-body-2 grey--text text--darken-3 mb-3">
+            <strong>New knowledge goes live</strong>
+            ({{ staging.length }} source{{ staging.length === 1 ? "" : "s" }}).
+          </div>
+          <v-alert v-if="retiring.length" text dense color="error" rounded="lg" class="text-body-2">
+            <strong>
+              Old knowledge from {{ retiring.length }} source{{ retiring.length === 1 ? "" : "s" }}
+              will be deleted
+            </strong>
+            ({{ retiringNames }}). This can't be undone.
+          </v-alert>
           <v-checkbox v-model="switchForm.publishProfile" hide-details dense label="Also publish my Bot Profile draft" />
           <v-checkbox
             v-model="switchForm.dropOldGaps"
@@ -250,26 +396,34 @@
             dense
             label="Clear knowledge gaps from before the setup"
           />
-          <v-alert v-if="switchError" type="error" dense outlined rounded="lg" class="mt-4 mb-0">
+          <v-alert v-if="switchError" type="error" dense text rounded="lg" class="mt-4 mb-0 text-body-2">
             {{ switchError }}
           </v-alert>
         </v-card-text>
-        <v-card-actions>
+        <v-divider />
+        <v-card-actions class="px-6 py-3">
           <v-spacer />
-          <v-btn text rounded class="text-none" :disabled="busy === 'switch'" @click="switchOpen = false">Not yet</v-btn>
-          <v-btn color="primary" depressed rounded class="text-none" :loading="busy === 'switch'" @click="switchOver">
+          <v-btn text :disabled="busy === 'switch'" @click="switchOpen = false">Not yet</v-btn>
+          <v-btn color="primary" depressed :loading="busy === 'switch'" @click="switchOver">
             Switch over
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <!-- Cancel -->
-    <v-dialog v-model="cancelOpen" max-width="460">
-      <v-card rounded="xl">
-        <v-card-title class="text-h6">Cancel this setup?</v-card-title>
-        <v-card-text class="text-body-2">
-          Your live knowledge stays as it is and nothing is replaced.
+    <!-- CANCEL -->
+    <v-dialog v-model="cancelOpen" max-width="440">
+      <v-card rounded="lg">
+        <v-card-text class="pt-6">
+          <div class="d-flex align-center mb-3">
+            <v-avatar color="grey lighten-4" size="44" class="mr-3 flex-shrink-0">
+              <v-icon color="grey darken-2" size="22">$x</v-icon>
+            </v-avatar>
+            <div class="text-h6 font-weight-bold grey--text text--darken-4">Cancel this setup?</div>
+          </div>
+          <div class="text-body-2 grey--text text--darken-1">
+            Your live knowledge stays as it is and nothing is replaced.
+          </div>
           <v-checkbox
             v-model="cancelForm.deleteStaged"
             hide-details
@@ -278,10 +432,11 @@
             label="Delete the knowledge this setup built"
           />
         </v-card-text>
-        <v-card-actions>
+        <v-divider />
+        <v-card-actions class="px-6 py-3">
           <v-spacer />
-          <v-btn text rounded class="text-none" :disabled="busy === 'cancel'" @click="cancelOpen = false">Keep going</v-btn>
-          <v-btn color="error" depressed rounded class="text-none" :loading="busy === 'cancel'" @click="cancel">
+          <v-btn text :disabled="busy === 'cancel'" @click="cancelOpen = false">Keep going</v-btn>
+          <v-btn color="error" depressed :loading="busy === 'cancel'" @click="cancel">
             Cancel setup
           </v-btn>
         </v-card-actions>
@@ -308,6 +463,19 @@ const STEPS = [
   { id: "golive", title: "Go live", subtitle: "Switch over" },
 ];
 
+const MODES = [
+  {
+    value: "new",
+    title: "New client",
+    text: "Nothing is live yet. Set up from scratch.",
+  },
+  {
+    value: "replace",
+    title: "Rebuild my knowledge",
+    text: "Build new knowledge next to the current one. The current sources keep answering until you switch over, then they're deleted.",
+  },
+];
+
 export default {
   name: "SetupPage",
 
@@ -315,6 +483,7 @@ export default {
 
   data: () => ({
     STEPS,
+    MODES,
     LINKS: CHECKLIST_LINKS,
     state: null,
     loadError: "",
@@ -348,6 +517,12 @@ export default {
     },
     checklist() {
       return this.state?.checklist || { items: [], score: 0, ready: false };
+    },
+    retiringNames() {
+      return this.retiring.map((s) => s.name).join(", ");
+    },
+    stepsDone() {
+      return STEPS.filter((s) => this.stepDone(s.id)).length;
     },
     requiredLeft() {
       return (this.checklist.items || []).filter((i) => i.required && !i.done).length;
@@ -408,6 +583,13 @@ export default {
       }
     },
 
+    // Done, required and still to do, or optional
+    checkTone(item) {
+      if (item.done) return { color: "success", icon: "$circle-check" };
+      if (item.required) return { color: "amber darken-2", icon: "$circle-alert" };
+      return { color: "grey", icon: "$circle" };
+    },
+
     firstOpenStep() {
       const i = STEPS.findIndex((s) => !this.stepDone(s.id));
       return i === -1 ? STEPS.length : i + 1;
@@ -464,16 +646,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.url-field {
-  max-width: 420px;
-}
-.setup-stepper {
-  border: 1px solid #e4e8f2;
-  border-radius: 16px !important;
-}
-.check-item {
-  border-top: 1px solid #f1f5f9;
-}
-</style>

@@ -321,8 +321,4 @@ export default {
   cursor: pointer;
   transition: background 0.15s;
 }
-
-.empty-card:hover {
-  background: #f6f8fd;
-}
 </style>

@@ -1,111 +1,160 @@
 <template>
-  <div>
-    <v-alert
+  <div class="home">
+    <!-- Greeting -->
+    <div class="mb-6">
+      <h1 class="text-h5 font-weight-bold grey--text text--darken-4 mb-1">
+        {{ greeting }}<template v-if="firstName">, {{ firstName }}</template>
+      </h1>
+      <div class="text-body-2 grey--text text--darken-1">
+        What needs you first, then everything else in one place.
+      </div>
+    </div>
+
+    <!-- Before go-live the setup checklist comes first -->
+    <v-card
       v-if="setupState && setupState.setup"
-      type="info"
       outlined
-      rounded="xl"
-      class="text-body-2 mb-8"
+      rounded="lg"
+      class="setup-card pa-5 mb-6"
     >
-      <div class="d-flex align-center flex-wrap">
-        <div class="mr-4">
-          <strong>Setup in progress:</strong>
-          {{ setupProgress.done }} of {{ setupProgress.total }} steps done. Customers
-          keep getting your current answers until you switch over.
+      <div class="d-flex flex-column flex-sm-row align-sm-center">
+        <v-avatar color="primary lighten-5" size="44" class="rounded-lg mr-sm-4 mb-3 mb-sm-0">
+          <v-icon color="primary" size="22">$rocket</v-icon>
+        </v-avatar>
+        <div class="flex-grow-1 mr-sm-4 mb-3 mb-sm-0">
+          <div class="text-subtitle-1 font-weight-bold grey--text text--darken-4">
+            Setup in progress
+          </div>
+          <div class="text-body-2 grey--text text--darken-1">
+            {{ setupProgress.done }} of {{ setupProgress.total }} steps done. Customers keep
+            getting your current answers until you switch over.
+          </div>
+          <v-progress-linear
+            :value="setupPercent"
+            color="primary"
+            background-color="primary lighten-4"
+            height="6"
+            rounded
+            class="mt-3"
+            :aria-label="`Setup ${setupPercent}% done`"
+          />
         </div>
-        <v-spacer />
-        <v-btn small depressed rounded color="primary" class="text-none" to="/dashboard/setup">
+        <v-btn depressed rounded color="primary" to="/dashboard/setup">
           Continue setup
+          <v-icon right size="16">$arrow-right</v-icon>
         </v-btn>
       </div>
-    </v-alert>
+    </v-card>
 
     <KnowledgeHealthCard
       v-if="perms && can(perms, 'knowledge:read')"
       :permissions="perms"
       compact
-      class="mb-8"
+      class="mb-6"
     />
 
-    <div v-for="(section, title) in dashboardData" :key="title" class="mb-12">
-      <div class="d-flex align-center mb-6">
-        <h2 class="text-h5 font-weight-bold grey--text text--darken-3">
-          {{ title.replace("(BETA)", "") }}
-        </h2>
-        <v-chip
-          v-if="title.includes('BETA')"
-          small
-          label
-          color="green"
-          class="ml-3 font-weight-bold"
-          outlined
-        >
-          BETA
-        </v-chip>
+    <!-- Needs you -->
+    <v-card v-if="showNeedsYou" outlined rounded="lg" class="mb-8">
+      <div class="d-flex align-center px-5 pt-4 pb-3">
+        <v-icon size="18" color="amber darken-3" class="mr-2">$triangle-alert</v-icon>
+        <span class="section-label">Needs you</span>
+      </div>
+      <v-divider />
+
+      <div v-if="counts === null" class="px-5 py-4">
+        <v-skeleton-loader v-for="n in 2" :key="n" type="list-item" />
       </div>
 
-      <v-row>
-        <v-col
-          v-for="item in visibleItems(section)"
-          :key="item.name"
-          cols="12"
-          sm="6"
-          md="4"
+      <div v-else-if="needsYou.length" role="list">
+        <div
+          v-for="(row, i) in needsYou"
+          :key="row.id"
+          role="listitem"
+          class="needs-row px-5 py-3"
+          :class="{ 'needs-row--border': i > 0 }"
         >
-          <v-card
-            outlined
-            class="pa-6 rounded-lg transition-swing hover-card"
-            @click="navigate(item.link)"
-          >
-            <div class="d-flex align-center">
-              <v-avatar
-                :color="section.color + ' lighten-5'"
-                size="48"
-                class="rounded-lg mr-4"
-              >
-                <v-icon :color="section.color" size="28">
-                  {{ item.icon || "$layout-grid" }}
-                </v-icon>
-              </v-avatar>
+          <span class="needs-dot" :class="`needs-dot--${row.tone}`" aria-hidden="true" />
+          <div class="flex-grow-1 min-w-0 mr-3">
+            <div class="text-body-2 font-weight-bold grey--text text--darken-4">{{ row.title }}</div>
+            <div class="text-caption grey--text text--darken-1">{{ row.hint }}</div>
+          </div>
+          <v-btn small text rounded color="primary" class="flex-shrink-0" :to="row.to">
+            {{ row.action }}
+            <v-icon right size="14">$arrow-right</v-icon>
+          </v-btn>
+        </div>
+      </div>
 
-              <div style="flex: 1">
-                <div
-                  class="text-body-1 font-weight-bold grey--text text--darken-4 mb-1"
-                >
-                  {{ item.name }}
-                </div>
-                <div
-                  class="text-caption grey--text text--darken-1 font-weight-medium"
-                >
-                  {{ item.description || "Manage and configure settings" }}
-                </div>
-              </div>
+      <div v-else class="d-flex align-center px-5 py-5">
+        <v-avatar color="success lighten-5" size="36" class="mr-3">
+          <v-icon color="success" size="18">$circle-check</v-icon>
+        </v-avatar>
+        <div>
+          <div class="text-body-2 font-weight-bold grey--text text--darken-4">All clear</div>
+          <div class="text-caption grey--text text--darken-1">
+            The bot is handling everything. New problems will show up here.
+          </div>
+        </div>
+      </div>
+    </v-card>
 
-              <v-chip
-                v-if="badges[item.link]"
-                small
-                color="error"
-                text-color="white"
-                class="mr-2"
-                :title="`${badges[item.link]} knowledge problems need attention`"
-              >
-                {{ badges[item.link] }}
-              </v-chip>
-              <v-icon color="grey lighten-1">$chevron-right</v-icon>
-            </div>
-          </v-card>
+    <!-- Everything else, grouped like the sidebar -->
+    <div v-if="perms === null">
+      <v-skeleton-loader type="heading" class="mb-4" />
+      <v-row>
+        <v-col v-for="n in 6" :key="n" cols="12" sm="6" lg="4">
+          <v-skeleton-loader type="list-item-avatar-two-line" />
         </v-col>
       </v-row>
-
-      <v-divider class="mt-10 grey lighten-3"></v-divider>
     </div>
+
+    <template v-else>
+      <section v-for="group in groups" :key="group.id" class="mb-8">
+        <h2 class="section-label mb-3">{{ group.label }}</h2>
+        <v-row dense>
+          <v-col v-for="item in group.items" :key="item.id" cols="12" sm="6" lg="4">
+            <v-card outlined rounded="lg" class="pa-4 fill-height" :to="item.to">
+              <div class="d-flex align-center">
+                <v-avatar :color="`${group.color} lighten-5`" size="40" class="rounded-lg mr-3 flex-shrink-0">
+                  <v-icon :color="group.color" size="20">{{ item.icon }}</v-icon>
+                </v-avatar>
+                <div class="flex-grow-1 min-w-0">
+                  <div class="text-body-2 font-weight-bold grey--text text--darken-4">
+                    {{ item.name }}
+                  </div>
+                  <div class="text-caption grey--text text--darken-1 text-truncate">
+                    {{ item.description }}
+                  </div>
+                </div>
+                <span
+                  v-if="badgeFor(item)"
+                  class="shortcut__badge ml-2"
+                  :title="`${badgeFor(item)} ${item.badgeHint}`"
+                >
+                  {{ badgeFor(item) }}
+                </span>
+                <v-icon color="grey lighten-1" size="18" class="ml-1">$chevron-right</v-icon>
+              </div>
+            </v-card>
+          </v-col>
+        </v-row>
+      </section>
+    </template>
   </div>
 </template>
 
 <script>
-import { can, loadIssueSummary, loadMyPermissions } from "@/utils/knowledge";
+import apiClient from "@/service/axios";
+import { can } from "@/utils/knowledge";
+import { BADGE, loadAttentionCounts, visibleGroups } from "@/utils/navigation";
 import { checklistProgress, loadSetup } from "@/utils/setup";
 import KnowledgeHealthCard from "@/components/knowledge/KnowledgeHealthCard.vue";
+
+const GROUP_STYLE = {
+  operate: { label: "Operate", color: "indigo" },
+  improve: { label: "Improve", color: "deep-orange" },
+  connect: { label: "Connect", color: "teal" },
+};
 
 export default {
   name: "DashboardHome",
@@ -114,143 +163,160 @@ export default {
 
   data() {
     return {
-      // Counts shown on tiles, by link
-      badges: {},
-      // Null until loaded; tiles with a `permission` stay hidden until then
+      // Null until loaded; shortcuts with a permission stay hidden until then
       perms: null,
+      user: null,
       setupState: null,
-      dashboardData: {
-        Products: {
-          color: "indigo",
-          items: [
-            {
-              name: "Chat",
-              link: "/dashboard/chat",
-              icon: "$message-square-text",
-              description: "Real-time AI assistance",
-            },
-            {
-              name: "Sandbox",
-              link: "/dashboard/sandbox",
-              icon: "$flask-conical",
-              description: "Test your bot as a customer",
-            },
-            {
-              name: "Bot Health",
-              link: "/dashboard/bot-health",
-              icon: "$activity",
-              description: "Errors, speed and AI cost",
-              permission: "analytics:view",
-            },
-            // {
-            //   name: "WhatsApp Bot",
-            //   link: "/dashboard/whatsapp-bot",
-            //   icon: "$whatsapp",
-            //   description: "Automated messaging",
-            // },
-            {
-              name: "Call Analysis",
-              link: "/dashboard/call-batches",
-              icon: "$phone",
-              description: "Speech-to-text insights",
-            },
-          ],
-        },
-        "AI Configuration": {
-          color: "orange",
-          items: [
-            {
-              name: "Knowledge",
-              link: "/dashboard/knowledge",
-              icon: "$folder-open",
-              description: "Website pages and notes",
-            },
-            {
-              name: "Bot Profile",
-              link: "/dashboard/bot-profile",
-              icon: "$user-cog",
-              description: "Tone, facts and rules",
-            },
-            {
-              name: "Setup",
-              link: "/dashboard/setup",
-              icon: "$rocket",
-              description: "Build, test and go live",
-              permission: "settings:manage",
-            },
-            {
-              name: "Quality",
-              link: "/dashboard/quality",
-              icon: "$circle-check",
-              description: "Test your bot's answers",
-              permission: "settings:manage",
-            },
-            {
-              name: "Knowledge Gap",
-              link: "/dashboard/knowledge-gap/",
-              icon: "$lightbulb",
-              description: "Missing information",
-            },
-          ],
-        },
-        // Settings: {
-        //   color: "blue-grey",
-        //   items: [
-        //     {
-        //       name: "Integration",
-        //       link: "/dashboard/integration",
-        //       icon: "$puzzle",
-        //       description: "API and Webhooks",
-        //     },
-        //     {
-        //       name: "Security",
-        //       link: "/dashboard/security",
-        //       icon: "$shield-check",
-        //       description: "Access and Auth",
-        //     },
-        //   ],
-        // },
-      },
+      // Null while loading
+      counts: null,
     };
   },
 
   computed: {
+    greeting() {
+      const h = new Date().getHours();
+      if (h < 12) return "Good morning";
+      if (h < 17) return "Good afternoon";
+      return "Good evening";
+    },
+
+    firstName() {
+      return (this.user?.name || "").trim().split(/\s+/)[0] || "";
+    },
+
     setupProgress() {
       return checklistProgress(this.setupState?.checklist);
+    },
+
+    setupPercent() {
+      const { done, total } = this.setupProgress;
+      return total ? Math.round((done / total) * 100) : 0;
+    },
+
+    groups() {
+      return visibleGroups(this.perms)
+        .map((g) => ({
+          ...g,
+          ...GROUP_STYLE[g.id],
+          items: g.items.filter((i) => i.id !== "home"),
+        }))
+        .filter((g) => g.items.length);
+    },
+
+    // Only things this user can act on, so hide the block without knowledge access
+    showNeedsYou() {
+      return this.perms !== null && can(this.perms, "knowledge:read");
+    },
+
+    // Sorted by urgency; rows with nothing pending are left out
+    needsYou() {
+      const c = this.counts || {};
+      const rows = [];
+      const blockers = c[BADGE.knowledgeBlockers];
+      if (blockers) {
+        rows.push({
+          id: "blockers",
+          tone: "error",
+          title: `${blockers} knowledge ${blockers === 1 ? "item is" : "items are"} blocked`,
+          hint: "Not live until someone reviews the problem found on publish.",
+          action: "Review",
+          to: "/dashboard/knowledge/issues",
+        });
+      }
+      const gaps = c[BADGE.unanswered];
+      if (gaps) {
+        rows.push({
+          id: "unanswered",
+          tone: "warning",
+          title: `${gaps} ${gaps === 1 ? "question" : "questions"} the bot couldn't answer`,
+          hint: "Answer once and the bot learns it as an FAQ.",
+          action: "Answer",
+          to: "/dashboard/knowledge-gap",
+        });
+      }
+      return rows;
     },
   },
 
   async created() {
     loadSetup().then((s) => (this.setupState = s));
-    loadMyPermissions()
-      .then((p) => (this.perms = p))
-      .catch(() => (this.perms = []));
-    // Open blockers: knowledge that isn't live until someone looks at it
-    const summary = await loadIssueSummary();
-    if (summary && summary.blocker) {
-      this.badges = { ...this.badges, "/dashboard/knowledge": summary.blocker };
+    try {
+      const { data } = await apiClient.get("/clients/currentUser");
+      this.user = data.data?.user || null;
+      this.perms = this.user?.roleId?.permissions || [];
+    } catch {
+      this.perms = [];
     }
+    this.counts = this.showNeedsYou ? await loadAttentionCounts(this.perms) : {};
   },
 
   methods: {
     can,
 
-    visibleItems(section) {
-      return section.items.filter((i) => !i.permission || can(this.perms, i.permission));
-    },
-
-    navigate(link) {
-      this.$router.push(link).catch(() => {});
+    badgeFor(item) {
+      return (item.badge && this.counts && this.counts[item.badge]) || 0;
     },
   },
 };
 </script>
 
 <style scoped>
-.hover-card:hover {
-  transform: translateY(-5px);
-  background-color: #ffffff !important;
-  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08) !important;
-  border-color: rgba(0, 0, 0, 0.05) !important;
+.home {
+  max-width: 1200px;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+.section-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #6b7085;
+}
+
+.setup-card {
+  border-color: #d9dbfb !important;
+  background-color: #fafaff !important;
+}
+
+.needs-row {
+  display: flex;
+  align-items: center;
+}
+
+.needs-row--border {
+  border-top: 1px solid #f0f1f6;
+}
+
+.needs-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-right: 14px;
+  border-radius: 50%;
+}
+
+.needs-dot--error {
+  background-color: var(--v-error-base);
+}
+
+.needs-dot--warning {
+  background-color: #f59e0b;
+}
+
+.shortcut__badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background-color: var(--v-error-base);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
 }
 </style>

@@ -125,14 +125,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.v-card {
-  transition: all 0.25s ease;
-}
-
-.v-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
-}
-</style>

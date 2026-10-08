@@ -1,110 +1,214 @@
 <template>
-  <div class="source-page">
-    <v-btn text rounded small class="text-none mb-4 px-2" to="/dashboard/knowledge">
-      <v-icon small class="mr-1">$arrow-left</v-icon> Knowledge
+  <div>
+    <v-btn
+      text
+      small
+      color="grey darken-2"
+      class="mb-3 px-2"
+      to="/dashboard/knowledge"
+    >
+      <v-icon left size="16">$arrow-left</v-icon>
+      All sources
     </v-btn>
 
-    <v-card v-if="!source" outlined rounded="xl" class="pa-6">
-      <v-progress-linear v-if="!loadError" indeterminate color="primary" />
-      <v-alert v-else type="error" outlined rounded="lg" class="mb-0">
-        {{ loadError }}
-        <v-btn small text color="error" class="ml-2" @click="loadSource">Retry</v-btn>
-      </v-alert>
-    </v-card>
-
-    <template v-else>
-      <!-- Header -->
-      <div class="d-flex align-center flex-wrap mb-6">
-        <v-avatar size="48" rounded="xl" :color="`${type.color} lighten-5`" class="mr-4">
-          <v-icon :color="type.color">{{ type.icon }}</v-icon>
-        </v-avatar>
-        <div class="mr-4 min-w-0">
-          <div class="d-flex align-center">
-            <div class="text-h5 font-weight-bold text-truncate">{{ source.name }}</div>
-            <v-chip v-if="paused" small outlined color="warning" class="ml-3">Paused</v-chip>
-            <v-chip v-if="source.stage === 'staging'" small color="deep-orange" text-color="white" class="ml-3">
-              Staging
-            </v-chip>
-            <v-chip v-if="source.retiring" small outlined class="ml-3">Being replaced</v-chip>
-          </div>
-          <div class="text-body-2 grey--text text--darken-1">
-            {{ type.label }} · {{ stat("itemCount") }} items ·
-            {{ stat("publishedCount") }} published · {{ stat("chunkCount") }} chunks
-          </div>
-        </div>
+    <!-- LOADING / ERROR -->
+    <v-alert
+      v-if="!source && loadError"
+      type="error"
+      text
+      rounded="lg"
+      class="text-body-2"
+    >
+      <div class="d-flex align-center flex-wrap">
+        <span class="mr-4">{{ loadError }}</span>
         <v-spacer />
-        <v-btn
-          v-if="can(perms, 'knowledge:publish')"
-          text
-          rounded
-          class="text-none my-1"
-          :loading="sourceBusy === 'pause'"
-          @click="togglePause"
-        >
-          <v-icon small class="mr-1">{{ paused ? "$play" : "$pause" }}</v-icon>
-          {{ paused ? "Resume" : "Pause" }}
-        </v-btn>
-        <v-btn
-          v-if="can(perms, 'knowledge:write')"
-          text
-          rounded
-          class="text-none my-1"
-          @click="openSettings"
-        >
-          <v-icon small class="mr-1">$pencil</v-icon> Settings
-        </v-btn>
-        <v-btn
-          v-if="can(perms, 'knowledge:delete')"
-          text
-          rounded
-          color="error"
-          class="text-none my-1"
-          @click="confirmDelete = true"
-        >
-          <v-icon small class="mr-1">$trash-2</v-icon> Delete
+        <v-btn small outlined color="error" @click="loadSource">
+          <v-icon left size="14">$refresh-cw</v-icon>
+          Retry
         </v-btn>
       </div>
+    </v-alert>
 
+    <template v-else-if="!source">
+      <v-card outlined rounded="lg" class="pa-4 mb-4">
+        <v-skeleton-loader type="list-item-avatar-two-line" />
+      </v-card>
+      <v-card outlined rounded="lg" class="pa-4">
+        <v-skeleton-loader type="table-heading, table-tbody" />
+      </v-card>
+    </template>
+
+    <template v-else>
+      <!-- HEADER -->
+      <v-card outlined rounded="lg" class="mb-4">
+        <div class="d-flex flex-wrap align-start pa-5">
+          <v-avatar
+            size="48"
+            tile
+            class="rounded-lg mr-4 mb-2 flex-shrink-0"
+            :color="`${type.color} lighten-5`"
+          >
+            <v-icon :color="type.color" size="24">{{ type.icon }}</v-icon>
+          </v-avatar>
+
+          <div class="flex-grow-1 mr-4 mb-2 overflow-hidden">
+            <div class="d-flex flex-wrap align-center">
+              <h1
+                class="text-h6 font-weight-bold grey--text text--darken-4 text-break mr-2"
+              >
+                {{ source.name }}
+              </h1>
+              <v-chip
+                v-for="chip in stateChips"
+                :key="chip.label"
+                x-small
+                label
+                :outlined="chip.outlined"
+                :color="chip.color"
+                :text-color="chip.outlined ? undefined : 'white'"
+                class="font-weight-bold mr-1 my-1"
+              >
+                {{ chip.label }}
+              </v-chip>
+            </div>
+            <div class="text-body-2 grey--text text--darken-1 text-break">
+              {{ type.label }}
+              <template v-if="source.config && source.config.rootUrl">
+                · {{ source.config.rootUrl }}
+              </template>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap align-center mb-2">
+            <v-btn
+              v-if="can(perms, 'knowledge:publish')"
+              small
+              outlined
+              color="grey darken-2"
+              class="mr-2 my-1"
+              :loading="sourceBusy === 'pause'"
+              @click="togglePause"
+            >
+              <v-icon left size="14">{{ paused ? "$play" : "$pause" }}</v-icon>
+              {{ paused ? "Resume" : "Pause" }}
+            </v-btn>
+            <v-btn
+              v-if="can(perms, 'knowledge:write')"
+              small
+              outlined
+              color="grey darken-2"
+              class="mr-2 my-1"
+              @click="openSettings"
+            >
+              <v-icon left size="14">$pencil</v-icon>
+              Settings
+            </v-btn>
+            <v-btn
+              v-if="can(perms, 'knowledge:delete')"
+              small
+              outlined
+              color="error"
+              class="my-1"
+              @click="confirmDelete = true"
+            >
+              <v-icon left size="14">$trash-2</v-icon>
+              Delete
+            </v-btn>
+          </div>
+        </div>
+
+        <v-divider />
+
+        <v-row no-gutters>
+          <v-col v-for="(s, i) in headerStats" :key="s.label" cols="4">
+            <div class="d-flex">
+              <v-divider v-if="i > 0" vertical />
+              <div class="flex-grow-1 px-5 py-3">
+                <div class="text-h6 font-weight-bold grey--text text--darken-4">
+                  {{ s.value }}
+                </div>
+                <div class="text-caption grey--text text--darken-1">
+                  {{ s.label }}
+                </div>
+              </div>
+            </div>
+          </v-col>
+        </v-row>
+        <v-progress-linear
+          :value="publishedPercent"
+          color="success"
+          background-color="grey lighten-3"
+          height="4"
+          :aria-label="`${publishedPercent}% published`"
+        />
+      </v-card>
+
+      <!-- STATE NOTES -->
       <v-alert
         v-if="source.stage === 'staging'"
-        border="left"
-        colored-border
+        text
+        dense
         color="deep-orange"
-        elevation="0"
-        outlined
-        rounded="xl"
-        class="text-body-2"
+        rounded="lg"
+        class="text-body-2 py-3"
       >
-        Part of your new setup: built and tested, but customers can't see it
-        until you switch over in
-        <router-link to="/dashboard/setup">Setup</router-link>.
+        <template #prepend>
+          <v-icon color="deep-orange" size="18" class="mr-3"
+            >$flask-conical</v-icon
+          >
+        </template>
+        <span class="grey--text text--darken-3">
+          Part of your new setup: built and tested, but customers can't see it
+          until you switch over in
+          <router-link to="/dashboard/setup">Setup</router-link>.
+        </span>
       </v-alert>
       <v-alert
         v-else-if="source.retiring"
-        border="left"
-        colored-border
-        color="grey"
-        elevation="0"
-        outlined
-        rounded="xl"
-        class="text-body-2"
+        text
+        dense
+        color="blue-grey"
+        rounded="lg"
+        class="text-body-2 py-3"
       >
-        Still answering customers, but your new setup replaces it: switching
-        over deletes this source.
+        <template #prepend>
+          <v-icon color="blue-grey" size="18" class="mr-3">$info</v-icon>
+        </template>
+        <span class="grey--text text--darken-3">
+          Still answering customers, but your new setup replaces it: switching
+          over deletes this source.
+        </span>
       </v-alert>
-
       <v-alert
         v-if="paused"
-        border="left"
-        colored-border
-        color="warning"
-        elevation="0"
-        outlined
-        rounded="xl"
-        class="text-body-2"
+        text
+        dense
+        color="amber darken-3"
+        rounded="lg"
+        class="text-body-2 py-3"
       >
-        This source is paused, so the bot doesn't use any of it. Nothing has
-        been deleted. Resume it to make it live again.
+        <template #prepend>
+          <v-icon color="amber darken-3" size="18" class="mr-3">$pause</v-icon>
+        </template>
+        <div class="d-flex align-center flex-wrap">
+          <span class="grey--text text--darken-3 mr-4">
+            This source is paused, so the bot doesn't use any of it. Nothing has
+            been deleted.
+          </span>
+          <v-spacer />
+          <v-btn
+            v-if="can(perms, 'knowledge:publish')"
+            small
+            depressed
+            color="amber darken-3"
+            class="white--text my-1"
+            :loading="sourceBusy === 'pause'"
+            @click="togglePause"
+          >
+            <v-icon left size="14">$play</v-icon>
+            Resume
+          </v-btn>
+        </div>
       </v-alert>
 
       <ThingsToKnow v-if="faqSource" feature="faqs" />
@@ -132,120 +236,183 @@
         @finished="refresh()"
       />
 
-      <!-- Items -->
-      <v-card outlined rounded="xl" class="pa-6">
-        <div class="d-flex align-center flex-wrap mb-4">
-          <v-btn-toggle
-            v-model="statusFilter"
-            mandatory
-            rounded
-            dense
-            color="primary"
-            class="mr-4 my-1"
-          >
-            <v-btn v-for="f in FILTERS" :key="f.value" :value="f.value" small class="text-none">
-              {{ f.label }}
-            </v-btn>
-          </v-btn-toggle>
-          <v-text-field
-            v-model="search"
-            :placeholder="faqSource ? 'Search questions and answers' : 'Search titles'"
-            prepend-inner-icon="$search"
-            outlined
-            dense
-            hide-details
-            clearable
-            class="search-field mr-2 my-1"
-          />
-          <v-select
-            v-if="faqSource && knownCategories.length"
-            v-model="categoryFilter"
-            :items="knownCategories"
-            placeholder="All categories"
-            prepend-inner-icon="$tag"
-            outlined
-            dense
-            hide-details
-            clearable
-            class="category-field my-1"
-          />
+      <!-- ITEMS -->
+      <v-card outlined rounded="lg">
+        <div class="d-flex flex-wrap align-center px-5 pt-4 pb-2">
+          <div class="mr-4 my-1">
+            <span
+              class="text-subtitle-1 font-weight-bold grey--text text--darken-4"
+            >
+              {{ itemNoun }}
+            </span>
+            <span class="text-body-2 grey--text text--darken-1 ml-1"
+              >({{ total }})</span
+            >
+          </div>
           <v-spacer />
           <template v-if="can(perms, 'knowledge:write')">
             <template v-if="source.type === 'faq'">
-              <v-btn text rounded class="text-none my-1" @click="extractOpen = true">
-                <v-icon small class="mr-1">$wand-sparkles</v-icon> Suggest from website
+              <v-btn
+                small
+                text
+                color="grey darken-2"
+                class="my-1"
+                @click="extractOpen = true"
+              >
+                <v-icon left size="14">$wand-sparkles</v-icon>
+                Suggest from website
               </v-btn>
-              <v-btn text rounded class="text-none my-1" @click="faqImportOpen = true">
-                <v-icon small class="mr-1">$file-spreadsheet</v-icon> Import CSV
+              <v-btn
+                small
+                text
+                color="grey darken-2"
+                class="my-1"
+                @click="faqImportOpen = true"
+              >
+                <v-icon left size="14">$file-spreadsheet</v-icon>
+                Import CSV
               </v-btn>
             </template>
             <v-btn
               v-if="faqSource"
-              color="primary"
+              small
               depressed
-              rounded
-              class="text-none ml-2 my-1"
+              color="primary"
+              class="ml-2 my-1"
               @click="faqOpen = true"
             >
-              <v-icon small class="mr-1">$plus</v-icon> Add FAQ
+              <v-icon left size="14">$plus</v-icon>
+              Add FAQ
             </v-btn>
             <v-btn
               v-else-if="source.type !== 'website'"
-              color="primary"
+              small
               depressed
-              rounded
-              class="text-none my-1"
+              color="primary"
+              class="ml-2 my-1"
               @click="openNote()"
             >
-              <v-icon small class="mr-1">$plus</v-icon> Add note
+              <v-icon left size="14">$plus</v-icon>
+              Add note
             </v-btn>
           </template>
         </div>
 
-        <!-- Bulk actions -->
-        <div v-if="selected.length" class="bulk-bar d-flex align-center flex-wrap px-4 py-2 mb-3">
-          <span class="text-body-2 font-weight-bold mr-4">{{ selected.length }} selected</span>
-          <template v-if="can(perms, 'knowledge:publish')">
-            <v-btn small text rounded class="text-none" :loading="bulkBusy === 'publish'" @click="bulk('publish')">
-              {{ allSuggested ? "Approve" : "Publish" }}
-            </v-btn>
-            <v-btn
-              v-if="!allSuggested"
-              small
-              text
-              rounded
-              class="text-none"
-              :loading="bulkBusy === 'unpublish'"
-              @click="bulk('unpublish')"
+        <!-- Filters -->
+        <v-row dense align="center" class="px-4 pb-3">
+          <v-col cols="12" lg="auto" class="overflow-x-auto">
+            <v-btn-toggle
+              v-model="statusFilter"
+              mandatory
+              dense
+              color="primary"
             >
-              Unpublish
-            </v-btn>
-            <v-btn
-              v-if="!allSuggested"
-              small
-              text
-              rounded
-              class="text-none"
-              :loading="bulkBusy === 'archive'"
-              @click="bulk('archive')"
-            >
-              Archive
-            </v-btn>
-          </template>
-          <v-btn
-            v-if="can(perms, 'knowledge:delete')"
-            small
-            text
-            rounded
-            color="error"
-            class="text-none"
-            @click="confirmBulkDelete = true"
-          >
-            {{ allSuggested ? "Reject" : "Delete" }}
-          </v-btn>
+              <v-btn v-for="f in FILTERS" :key="f.value" :value="f.value" small>
+                {{ f.label }}
+              </v-btn>
+            </v-btn-toggle>
+          </v-col>
           <v-spacer />
-          <v-btn small text rounded class="text-none" @click="selected = []">Clear</v-btn>
-        </div>
+          <v-col
+            cols="12"
+            :sm="faqSource && knownCategories.length ? 6 : 12"
+            lg="3"
+          >
+            <v-text-field
+              v-model="search"
+              :placeholder="
+                faqSource ? 'Search questions and answers' : 'Search titles'
+              "
+              prepend-inner-icon="$search"
+              outlined
+              dense
+              hide-details
+              clearable
+            />
+          </v-col>
+          <v-col
+            v-if="faqSource && knownCategories.length"
+            cols="12"
+            sm="6"
+            lg="3"
+          >
+            <v-select
+              v-model="categoryFilter"
+              :items="knownCategories"
+              placeholder="All categories"
+              prepend-inner-icon="$tag"
+              outlined
+              dense
+              hide-details
+              clearable
+            />
+          </v-col>
+        </v-row>
+
+        <!-- Bulk actions -->
+        <v-expand-transition>
+          <v-sheet
+            v-if="selected.length"
+            color="primary lighten-5"
+            rounded="lg"
+            class="d-flex align-center flex-wrap mx-4 mb-3 px-3 py-1"
+          >
+            <v-icon size="16" color="primary" class="mr-2">$check-check</v-icon>
+            <span class="text-body-2 font-weight-bold primary--text mr-3">
+              {{ selected.length }} selected
+            </span>
+            <template v-if="can(perms, 'knowledge:publish')">
+              <v-btn
+                small
+                text
+                color="primary"
+                :loading="bulkBusy === 'publish'"
+                @click="bulk('publish')"
+              >
+                <v-icon left size="14">$circle-check</v-icon>
+                {{ allSuggested ? "Approve" : "Publish" }}
+              </v-btn>
+              <v-btn
+                v-if="!allSuggested"
+                small
+                text
+                color="grey darken-2"
+                :loading="bulkBusy === 'unpublish'"
+                @click="bulk('unpublish')"
+              >
+                <v-icon left size="14">$eye-off</v-icon>
+                Unpublish
+              </v-btn>
+              <v-btn
+                v-if="!allSuggested"
+                small
+                text
+                color="grey darken-2"
+                :loading="bulkBusy === 'archive'"
+                @click="bulk('archive')"
+              >
+                <v-icon left size="14">$archive</v-icon>
+                Archive
+              </v-btn>
+            </template>
+            <v-btn
+              v-if="can(perms, 'knowledge:delete')"
+              small
+              text
+              color="error"
+              @click="confirmBulkDelete = true"
+            >
+              <v-icon left size="14">$trash-2</v-icon>
+              {{ allSuggested ? "Reject" : "Delete" }}
+            </v-btn>
+            <v-spacer />
+            <v-btn small text color="grey darken-2" @click="selected = []"
+              >Clear</v-btn
+            >
+          </v-sheet>
+        </v-expand-transition>
+
+        <v-divider />
 
         <v-data-table
           v-model="selected"
@@ -257,87 +424,149 @@
           :show-select="canBulk"
           :footer-props="{ itemsPerPageOptions: [20, 50, 100] }"
           item-key="_id"
-          class="items-table"
+          loading-text="Loading…"
           @click:row="(item) => (openItemId = item._id)"
         >
           <template #[`item.title`]="{ item }">
-            <div class="py-2">
-              <div class="font-weight-medium">
-                <v-icon v-if="item.locked" x-small class="mr-1" title="Edited by hand">$lock</v-icon>
+            <div class="py-3">
+              <a
+                href="#"
+                class="d-inline-flex align-center text-body-2 font-weight-bold grey--text text--darken-4 text-decoration-none text-break"
+                @click.prevent
+              >
+                <v-icon
+                  v-if="item.locked"
+                  size="12"
+                  class="mr-1"
+                  title="Edited by hand"
+                  >$lock</v-icon
+                >
                 {{ item.title || "Untitled" }}
-              </div>
-              <div v-if="item.data && item.data.url" class="text-caption grey--text text-truncate url">
+              </a>
+              <div
+                v-if="item.data && item.data.url"
+                class="text-caption grey--text text--darken-1 text-break"
+              >
                 {{ item.data.url }}
               </div>
               <div
-                v-else-if="item.type === 'faq' && item.data && item.data.alternates && item.data.alternates.length"
-                class="text-caption grey--text"
+                v-else-if="alternatesOf(item)"
+                class="text-caption grey--text text--darken-1"
               >
-                +{{ item.data.alternates.length }} other way{{ item.data.alternates.length === 1 ? "" : "s" }} to ask
+                +{{ alternatesOf(item) }} other way{{
+                  alternatesOf(item) === 1 ? "" : "s"
+                }}
+                to ask
               </div>
             </div>
           </template>
           <template #[`item.category`]="{ item }">
-            <v-chip v-if="item.data && item.data.category" x-small outlined>
+            <v-chip
+              v-if="item.data && item.data.category"
+              x-small
+              label
+              outlined
+            >
               {{ item.data.category }}
             </v-chip>
           </template>
           <template #[`item.status`]="{ item }">
-            <v-chip v-if="isSuggested(item)" x-small outlined color="deep-purple">
-              <v-icon x-small left>$sparkles</v-icon> Suggested
-            </v-chip>
-            <v-chip v-else x-small :color="statusOf(item).color" text-color="white">
-              {{ statusOf(item).label }}
-            </v-chip>
-            <v-chip
-              v-if="healthOf(item)"
-              x-small
-              outlined
-              :color="healthOf(item).color"
-              class="ml-1"
-              :title="item.openIssueCount ? `${item.openIssueCount} open issue(s)` : ''"
-            >
-              <v-icon x-small left>{{ healthOf(item).icon }}</v-icon>
-              {{ healthOf(item).label }}
-            </v-chip>
-            <v-chip
-              v-if="validityOf(item)"
-              x-small
-              outlined
-              :color="validityOf(item).color"
-              class="ml-1"
-              :title="validityOf(item).expired ? 'Hidden from the bot: its valid-until date has passed' : ''"
-            >
-              <v-icon x-small left>$calendar</v-icon>
-              {{ validityOf(item).label }}
-            </v-chip>
-            <v-tooltip v-if="workOf(item)" bottom :disabled="!workOf(item).error">
-              <template #activator="{ on, attrs }">
-                <v-chip
-                  x-small
-                  outlined
-                  :color="workOf(item).color"
-                  class="ml-1"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon v-if="workOf(item).busy" x-small left class="icon-spin">$loader-circle</v-icon>
-                  {{ workOf(item).label }}
-                </v-chip>
-              </template>
-              {{ workOf(item).error }}
-            </v-tooltip>
+            <div class="d-flex flex-wrap py-1">
+              <v-chip
+                v-if="isSuggested(item)"
+                x-small
+                label
+                outlined
+                color="deep-purple"
+                class="font-weight-bold mr-1 my-1"
+              >
+                <v-icon size="10" left>$sparkles</v-icon>
+                Suggested
+              </v-chip>
+              <v-chip
+                v-else
+                x-small
+                label
+                :color="statusOf(item).color"
+                text-color="white"
+                class="font-weight-bold mr-1 my-1"
+              >
+                {{ statusOf(item).label }}
+              </v-chip>
+              <v-chip
+                v-if="healthOf(item)"
+                x-small
+                label
+                outlined
+                :color="healthOf(item).color"
+                class="font-weight-bold mr-1 my-1"
+                :title="
+                  item.openIssueCount
+                    ? `${item.openIssueCount} open issue(s)`
+                    : ''
+                "
+              >
+                <v-icon size="10" left>{{ healthOf(item).icon }}</v-icon>
+                {{ healthOf(item).label }}
+              </v-chip>
+              <v-chip
+                v-if="validityOf(item)"
+                x-small
+                label
+                outlined
+                :color="validityOf(item).color"
+                class="font-weight-bold mr-1 my-1"
+                :title="validityTitle(item)"
+              >
+                <v-icon size="10" left>$calendar</v-icon>
+                {{ validityOf(item).label }}
+              </v-chip>
+              <v-tooltip
+                v-if="workOf(item)"
+                bottom
+                :disabled="!workOf(item).error"
+              >
+                <template #activator="{ on, attrs }">
+                  <v-chip
+                    x-small
+                    label
+                    outlined
+                    :color="workOf(item).color"
+                    class="font-weight-bold my-1"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon
+                      v-if="workOf(item).busy"
+                      size="10"
+                      left
+                      class="icon-spin"
+                      >$loader-circle</v-icon
+                    >
+                    {{ workOf(item).label }}
+                  </v-chip>
+                </template>
+                {{ workOf(item).error }}
+              </v-tooltip>
+            </div>
           </template>
-          <template #[`item.chunkCount`]="{ item }">{{ item.chunkCount || 0 }}</template>
+          <template #[`item.chunkCount`]="{ item }">
+            <span class="text-body-2 grey--text text--darken-2">{{
+              item.chunkCount || 0
+            }}</span>
+          </template>
           <template #[`item.review`]="{ item }">
-            <div v-if="isSuggested(item)" class="text-no-wrap" @click.stop>
+            <div
+              v-if="isSuggested(item)"
+              class="d-flex justify-end text-no-wrap"
+              @click.stop
+            >
               <v-btn
                 v-if="can(perms, 'knowledge:publish')"
                 x-small
                 depressed
-                rounded
                 color="primary"
-                class="text-none mr-1"
+                class="mr-1"
                 :loading="rowBusy === item._id + 'publish'"
                 @click="review(item, 'publish')"
               >
@@ -347,9 +576,7 @@
                 v-if="can(perms, 'knowledge:delete')"
                 x-small
                 text
-                rounded
                 color="error"
-                class="text-none"
                 :loading="rowBusy === item._id + 'delete'"
                 @click="review(item, 'delete')"
               >
@@ -358,21 +585,22 @@
             </div>
           </template>
           <template #[`item.updatedAt`]="{ item }">
-            <span class="text-no-wrap">{{ formatDate(item.updatedAt) }}</span>
+            <span class="text-caption grey--text text--darken-1 text-no-wrap">
+              {{ formatDate(item.updatedAt) }}
+            </span>
           </template>
           <template #no-data>
-            <div class="py-6 text-body-2 grey--text">
-              {{
-                search || statusFilter || categoryFilter
-                  ? "No items match."
-                  : source.type === "website"
-                  ? "No pages yet. Import some above."
-                  : source.type === "document"
-                  ? "No sections yet. They appear once the document has been read."
-                  : faqSource
-                  ? "No FAQs yet."
-                  : "No notes yet."
-              }}
+            <div class="d-flex flex-column align-center text-center py-10">
+              <v-avatar color="grey lighten-4" size="56" class="mb-3">
+                <v-icon size="24" color="grey">{{
+                  filtering ? "$search" : type.icon
+                }}</v-icon>
+              </v-avatar>
+              <div
+                class="text-body-2 font-weight-bold grey--text text--darken-3"
+              >
+                {{ emptyText }}
+              </div>
             </div>
           </template>
         </v-data-table>
@@ -386,7 +614,13 @@
       @close="openItemId = null"
       @changed="refresh"
       @add-note="addAsNote"
-      @open-issue="(id) => $router.push({ path: '/dashboard/knowledge/issues', query: { issue: id } })"
+      @open-issue="
+        (id) =>
+          $router.push({
+            path: '/dashboard/knowledge/issues',
+            query: { issue: id },
+          })
+      "
     />
 
     <template v-if="source && faqSource">
@@ -405,12 +639,22 @@
       />
     </template>
 
-    <!-- Add note -->
-    <v-dialog v-model="noteOpen" max-width="600">
-      <v-card rounded="xl">
-        <v-card-title class="text-h6">Add note</v-card-title>
+    <!-- ADD NOTE -->
+    <v-dialog v-model="noteOpen" max-width="600" scrollable>
+      <v-card rounded="lg">
+        <v-card-title class="text-h6 font-weight-bold">Add note</v-card-title>
+        <v-card-subtitle class="text-body-2">
+          Facts that aren't on your website, written the way the bot should
+          answer.
+        </v-card-subtitle>
         <v-card-text>
-          <v-text-field v-model="note.title" label="Title" outlined dense counter="300" />
+          <v-text-field
+            v-model="note.title"
+            label="Title"
+            outlined
+            dense
+            counter="300"
+          />
           <v-textarea
             v-model="note.body"
             label="Text"
@@ -432,18 +676,26 @@
             hide-details
             label="Also delete the page that failed"
           />
-          <v-alert v-if="noteError" type="error" dense outlined rounded="lg" class="mt-4 mb-0 text-body-2">
+          <v-alert
+            v-if="noteError"
+            type="error"
+            dense
+            text
+            rounded="lg"
+            class="mt-4 mb-0 text-body-2"
+          >
             {{ noteError }}
           </v-alert>
         </v-card-text>
-        <v-card-actions>
+        <v-divider />
+        <v-card-actions class="px-6 py-3">
           <v-spacer />
-          <v-btn text rounded class="text-none" :disabled="noteSaving" @click="noteOpen = false">Cancel</v-btn>
+          <v-btn text :disabled="noteSaving" @click="noteOpen = false"
+            >Cancel</v-btn
+          >
           <v-btn
             color="primary"
             depressed
-            rounded
-            class="text-none"
             :disabled="note.body.trim().length < 10"
             :loading="noteSaving"
             @click="saveNote"
@@ -454,17 +706,26 @@
       </v-card>
     </v-dialog>
 
-    <!-- Source settings -->
+    <!-- SOURCE SETTINGS -->
     <v-dialog v-model="settingsOpen" max-width="480">
-      <v-card v-if="source" rounded="xl">
-        <v-card-title class="text-h6">Source settings</v-card-title>
-        <v-card-text>
-          <v-text-field v-model="settings.name" label="Name" outlined dense counter="100" />
+      <v-card v-if="source" rounded="lg">
+        <v-card-title class="text-h6 font-weight-bold"
+          >Source settings</v-card-title
+        >
+        <v-card-text class="pt-2">
+          <v-text-field
+            v-model="settings.name"
+            label="Name"
+            outlined
+            dense
+            counter="100"
+          />
           <template v-if="source.type === 'website'">
             <v-text-field
               v-model="settings.rootUrl"
               label="Website address"
               placeholder="https://example.com"
+              prepend-inner-icon="$globe"
               outlined
               dense
             />
@@ -476,20 +737,29 @@
               label="Publish pages as soon as they're imported"
             />
           </template>
-          <v-alert v-if="settingsError" type="error" dense outlined rounded="lg" class="mt-4 mb-0 text-body-2">
+          <v-alert
+            v-if="settingsError"
+            type="error"
+            dense
+            text
+            rounded="lg"
+            class="mt-4 mb-0 text-body-2"
+          >
             {{ settingsError }}
           </v-alert>
         </v-card-text>
-        <v-card-actions>
+        <v-divider />
+        <v-card-actions class="px-6 py-3">
           <v-spacer />
-          <v-btn text rounded class="text-none" :disabled="sourceBusy === 'settings'" @click="settingsOpen = false">
-            Cancel
-          </v-btn>
+          <v-btn
+            text
+            :disabled="sourceBusy === 'settings'"
+            @click="settingsOpen = false"
+            >Cancel</v-btn
+          >
           <v-btn
             color="primary"
             depressed
-            rounded
-            class="text-none"
             :disabled="!settings.name.trim()"
             :loading="sourceBusy === 'settings'"
             @click="saveSettings"
@@ -500,54 +770,78 @@
       </v-card>
     </v-dialog>
 
-    <!-- Delete source -->
-    <v-dialog v-model="confirmDelete" max-width="460">
-      <v-card v-if="source" rounded="xl">
-        <v-card-title class="text-h6">Delete "{{ source.name }}"?</v-card-title>
-        <v-card-text class="text-body-2">
-          <template v-if="source.type === 'document'">
-            Deletes the document and its {{ stat("itemCount") }} sections from
-            the bot immediately. This can't be undone.
-          </template>
-          <template v-else>
-            This permanently deletes the source and all {{ stat("itemCount") }}
-            of its items. The bot stops using them right away, and this can't be
-            undone.
-          </template>
-          To hide it from the bot for now, pause it instead.
+    <!-- DELETE SOURCE -->
+    <v-dialog v-model="confirmDelete" max-width="440">
+      <v-card v-if="source" rounded="lg">
+        <v-card-text class="pt-6 text-center">
+          <v-avatar color="error lighten-5" size="56" class="mb-4">
+            <v-icon color="error" size="26">$trash-2</v-icon>
+          </v-avatar>
+          <div class="text-h6 font-weight-bold grey--text text--darken-4 mb-2">
+            Delete "{{ source.name }}"?
+          </div>
+          <div class="text-body-2 grey--text text--darken-1">
+            <template v-if="source.type === 'document'">
+              Deletes the document and its
+              <strong>{{ stat("itemCount") }}</strong> sections from the bot
+              immediately. This can't be undone.
+            </template>
+            <template v-else>
+              This permanently deletes the source and all
+              <strong>{{ stat("itemCount") }}</strong>
+              of its items. The bot stops using them right away, and this can't
+              be undone.
+            </template>
+            To hide it from the bot for now, pause it instead.
+          </div>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text rounded class="text-none" :disabled="sourceBusy === 'delete'" @click="confirmDelete = false">
-            Cancel
-          </v-btn>
-          <v-btn color="error" depressed rounded class="text-none" :loading="sourceBusy === 'delete'" @click="deleteSource">
+        <v-card-actions class="justify-center pb-5">
+          <v-btn
+            text
+            :disabled="sourceBusy === 'delete'"
+            @click="confirmDelete = false"
+            >Cancel</v-btn
+          >
+          <v-btn
+            color="error"
+            depressed
+            :loading="sourceBusy === 'delete'"
+            @click="deleteSource"
+          >
             Delete source
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <!-- Bulk delete -->
+    <!-- BULK DELETE -->
     <v-dialog v-model="confirmBulkDelete" max-width="440">
-      <v-card rounded="xl">
-        <v-card-title class="text-h6">
-          {{ allSuggested ? `Reject ${selected.length} suggestions?` : `Delete ${selected.length} items?` }}
-        </v-card-title>
-        <v-card-text class="text-body-2">
-          {{
-            allSuggested
-              ? "The suggested FAQs are deleted. The bot never used them."
-              : "The bot stops using them right away. This can't be undone."
-          }}
+      <v-card rounded="lg">
+        <v-card-text class="pt-6 text-center">
+          <v-avatar color="error lighten-5" size="56" class="mb-4">
+            <v-icon color="error" size="26">$trash-2</v-icon>
+          </v-avatar>
+          <div class="text-h6 font-weight-bold grey--text text--darken-4 mb-2">
+            {{ bulkDeleteTitle }}
+          </div>
+          <div class="text-body-2 grey--text text--darken-1">
+            {{ bulkDeleteText }}
+          </div>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn text rounded class="text-none" :disabled="bulkBusy === 'delete'" @click="confirmBulkDelete = false">
-            Cancel
-          </v-btn>
-          <v-btn color="error" depressed rounded class="text-none" :loading="bulkBusy === 'delete'" @click="bulk('delete')">
-            Delete
+        <v-card-actions class="justify-center pb-5">
+          <v-btn
+            text
+            :disabled="bulkBusy === 'delete'"
+            @click="confirmBulkDelete = false"
+            >Cancel</v-btn
+          >
+          <v-btn
+            color="error"
+            depressed
+            :loading="bulkBusy === 'delete'"
+            @click="bulk('delete')"
+          >
+            {{ allSuggested ? "Reject" : "Delete" }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -675,17 +969,78 @@ export default {
     faqSource() {
       return isFaqSource(this.source);
     },
-    allSuggested() {
-      return this.selected.length > 0 && this.selected.every(isSuggested);
-    },
     // Document sections in document order (within the page)
     displayItems() {
       if (this.source?.type !== "document") return this.items;
-      const order = (i) => (typeof i.data?.order === "number" ? i.data.order : Infinity);
+      const order = (i) =>
+        typeof i.data?.order === "number" ? i.data.order : Infinity;
       return [...this.items].sort((a, b) => order(a) - order(b));
     },
+    allSuggested() {
+      return this.selected.length > 0 && this.selected.every(isSuggested);
+    },
+    itemNoun() {
+      if (this.source?.type === "website") return "Pages";
+      if (this.source?.type === "document") return "Sections";
+      return this.faqSource ? "FAQs" : "Notes";
+    },
+    filtering() {
+      return !!(this.search || this.statusFilter || this.categoryFilter);
+    },
+    emptyText() {
+      if (this.filtering) return "No items match these filters.";
+      if (this.source?.type === "website")
+        return "No pages yet. Import some above.";
+      if (this.source?.type === "document") {
+        return "No sections yet. They appear once the document has been read.";
+      }
+      return this.faqSource ? "No FAQs yet." : "No notes yet.";
+    },
+    headerStats() {
+      return [
+        { label: "Items", value: this.stat("itemCount") },
+        { label: "Published", value: this.stat("publishedCount") },
+        { label: "Chunks", value: this.stat("chunkCount") },
+      ];
+    },
+    publishedPercent() {
+      const total = this.stat("itemCount");
+      return total
+        ? Math.round((this.stat("publishedCount") / total) * 100)
+        : 0;
+    },
+    // Live / paused / staging / being replaced
+    stateChips() {
+      const chips = [];
+      if (this.paused) chips.push({ label: "Paused", color: "amber darken-3" });
+      if (this.source?.stage === "staging")
+        chips.push({ label: "Staging", color: "deep-orange" });
+      if (!chips.length) chips.push({ label: "Live", color: "success" });
+      if (this.source?.retiring) {
+        chips.push({
+          label: "Being replaced",
+          color: "grey darken-1",
+          outlined: true,
+        });
+      }
+      return chips;
+    },
+    bulkDeleteTitle() {
+      const n = this.selected.length;
+      return this.allSuggested
+        ? `Reject ${n} suggestions?`
+        : `Delete ${n} items?`;
+    },
+    bulkDeleteText() {
+      return this.allSuggested
+        ? "The suggested FAQs are deleted. The bot never used them."
+        : "The bot stops using them right away. This can't be undone.";
+    },
     canBulk() {
-      return can(this.perms, "knowledge:publish") || can(this.perms, "knowledge:delete");
+      return (
+        can(this.perms, "knowledge:publish") ||
+        can(this.perms, "knowledge:delete")
+      );
     },
     headers() {
       if (this.faqSource) {
@@ -698,7 +1053,11 @@ export default {
         ];
       }
       return [
-        { text: this.source?.type === "document" ? "Section" : "Title", value: "title", sortable: false },
+        {
+          text: this.source?.type === "document" ? "Section" : "Title",
+          value: "title",
+          sortable: false,
+        },
         { text: "Status", value: "status", sortable: false },
         { text: "Chunks", value: "chunkCount", sortable: false, align: "end" },
         { text: "Updated", value: "updatedAt", sortable: false },
@@ -752,11 +1111,19 @@ export default {
   },
 
   methods: {
+    alternatesOf(item) {
+      return (item.type === "faq" && item.data?.alternates?.length) || 0;
+    },
+
     can,
     formatDate,
     isSuggested,
     healthOf,
     validityOf,
+    validityTitle: (item) =>
+      validityOf(item)?.expired
+        ? "Hidden from the bot: its valid-until date has passed"
+        : "",
     statusOf: (item) => ITEM_STATUS[item.status] || ITEM_STATUS.draft,
     workOf: (item) => workState(item),
 
@@ -767,13 +1134,16 @@ export default {
     async loadSource() {
       this.loadError = "";
       try {
-        const { data } = await apiClient.get(`${KNOWLEDGE_API}/sources/${this.sourceId}`);
+        const { data } = await apiClient.get(
+          `${KNOWLEDGE_API}/sources/${this.sourceId}`,
+        );
         this.source = data.data;
         // Arrived from "Add as note instead" on a failed page
         const { note, failed } = this.$route.query;
         if (note !== undefined) {
           this.$router.replace({ query: {} }).catch(() => {});
-          if (this.source.type !== "website") this.openNote(String(note), failed || null);
+          if (this.source.type !== "website")
+            this.openNote(String(note), failed || null);
         }
       } catch (err) {
         this.loadError = apiError(err, "Failed to load this source");
@@ -791,21 +1161,25 @@ export default {
       if (!quiet) this.itemsLoading = true;
       const { page, itemsPerPage } = this.options;
       try {
-        const { data } = await apiClient.get(`${KNOWLEDGE_API}/sources/${this.sourceId}/items`, {
-          params: {
-            status: this.statusFilter || undefined,
-            search: this.search || undefined,
-            category: this.categoryFilter || undefined,
-            limit: itemsPerPage,
-            offset: (page - 1) * itemsPerPage,
+        const { data } = await apiClient.get(
+          `${KNOWLEDGE_API}/sources/${this.sourceId}/items`,
+          {
+            params: {
+              status: this.statusFilter || undefined,
+              search: this.search || undefined,
+              category: this.categoryFilter || undefined,
+              limit: itemsPerPage,
+              offset: (page - 1) * itemsPerPage,
+            },
           },
-        });
+        );
         this.items = data.data.items || [];
-
         this.total = data.data.total || 0;
         // Categories seen so far feed the filter and the FAQ editors
         const seen = new Set(this.knownCategories);
-        this.items.forEach((i) => i.data?.category && seen.add(i.data.category));
+        this.items.forEach(
+          (i) => i.data?.category && seen.add(i.data.category),
+        );
         this.knownCategories = [...seen].sort((a, b) => a.localeCompare(b));
         // Keep selections that are still on the page, with fresh data
         const ids = new Set(this.selected.map((s) => s._id));
@@ -817,7 +1191,10 @@ export default {
       }
       // Imports and indexing finish in the background
       if (this.items.some(isBusy)) {
-        this.pollTimer = setTimeout(() => this.refresh({ quiet: true }), POLL_MS);
+        this.pollTimer = setTimeout(
+          () => this.refresh({ quiet: true }),
+          POLL_MS,
+        );
       }
     },
 
@@ -835,9 +1212,15 @@ export default {
       const pause = !this.paused;
       this.sourceBusy = "pause";
       try {
-        await apiClient.post(`${KNOWLEDGE_API}/sources/${this.sourceId}/${pause ? "pause" : "resume"}`);
+        await apiClient.post(
+          `${KNOWLEDGE_API}/sources/${this.sourceId}/${
+            pause ? "pause" : "resume"
+          }`,
+        );
         this.source.status = pause ? "paused" : "active";
-        this.$toast.success(pause ? "Paused. The bot no longer uses this source." : "Resumed");
+        this.$toast.success(
+          pause ? "Paused. The bot no longer uses this source." : "Resumed",
+        );
       } catch (err) {
         this.$toast.error(apiError(err, "Failed to update the source"));
       } finally {
@@ -860,10 +1243,16 @@ export default {
       this.settingsError = "";
       const body = { name: this.settings.name.trim() };
       if (this.source.type === "website") {
-        body.config = { rootUrl: this.settings.rootUrl.trim(), autoPublish: this.settings.autoPublish };
+        body.config = {
+          rootUrl: this.settings.rootUrl.trim(),
+          autoPublish: this.settings.autoPublish,
+        };
       }
       try {
-        const { data } = await apiClient.patch(`${KNOWLEDGE_API}/sources/${this.sourceId}`, body);
+        const { data } = await apiClient.patch(
+          `${KNOWLEDGE_API}/sources/${this.sourceId}`,
+          body,
+        );
         this.source = { ...this.source, ...data.data };
         this.settingsOpen = false;
         this.$toast.success("Saved");
@@ -877,8 +1266,12 @@ export default {
     async deleteSource() {
       this.sourceBusy = "delete";
       try {
-        const { data } = await apiClient.delete(`${KNOWLEDGE_API}/sources/${this.sourceId}`);
-        this.$toast.success(`Deleted "${this.source.name}" and ${data.data?.items ?? 0} items`);
+        const { data } = await apiClient.delete(
+          `${KNOWLEDGE_API}/sources/${this.sourceId}`,
+        );
+        this.$toast.success(
+          `Deleted "${this.source.name}" and ${data.data?.items ?? 0} items`,
+        );
         this.$router.push("/dashboard/knowledge");
       } catch (err) {
         this.$toast.error(apiError(err, "Failed to delete the source"));
@@ -888,7 +1281,12 @@ export default {
 
     // failedItemId: the page this note replaces ("Add as note instead")
     openNote(title = "", failedItemId = null) {
-      this.note = { ...emptyNote(), title, failedItemId, deleteFailed: !!failedItemId };
+      this.note = {
+        ...emptyNote(),
+        title,
+        failedItemId,
+        deleteFailed: !!failedItemId,
+      };
       this.note.publish = can(this.perms, "knowledge:publish");
       this.noteError = "";
       this.noteOpen = true;
@@ -925,20 +1323,38 @@ export default {
       this.noteSaving = true;
       this.noteError = "";
       try {
-        await apiClient.post(`${KNOWLEDGE_API}/sources/${this.sourceId}/items`, {
-          title: this.note.title.trim() || undefined,
-          body: this.note.body.trim(),
-          publish: this.note.publish,
-        });
+        await apiClient.post(
+          `${KNOWLEDGE_API}/sources/${this.sourceId}/items`,
+          {
+            title: this.note.title.trim() || undefined,
+            body: this.note.body.trim(),
+            publish: this.note.publish,
+          },
+        );
         this.noteOpen = false;
-        this.$toast.success(this.note.publish ? "Note added and publishing" : "Note added as a draft");
+        this.$toast.success(
+          this.note.publish
+            ? "Note added and publishing"
+            : "Note added as a draft",
+        );
         // Only once the note is saved; if this fails the page simply stays
-        if (this.note.failedItemId && this.note.deleteFailed && can(this.perms, "knowledge:delete")) {
+        if (
+          this.note.failedItemId &&
+          this.note.deleteFailed &&
+          can(this.perms, "knowledge:delete")
+        ) {
           try {
-            await apiClient.delete(`${KNOWLEDGE_API}/items/${this.note.failedItemId}`);
+            await apiClient.delete(
+              `${KNOWLEDGE_API}/items/${this.note.failedItemId}`,
+            );
             this.$toast.success("Deleted the page that failed");
           } catch (err) {
-            this.$toast.error(apiError(err, "The note was added, but the failed page couldn't be deleted"));
+            this.$toast.error(
+              apiError(
+                err,
+                "The note was added, but the failed page couldn't be deleted",
+              ),
+            );
           }
         }
         this.refresh();
@@ -953,12 +1369,20 @@ export default {
     async review(item, action) {
       this.rowBusy = item._id + action;
       try {
-        if (action === "delete") await apiClient.delete(`${KNOWLEDGE_API}/items/${item._id}`);
+        if (action === "delete")
+          await apiClient.delete(`${KNOWLEDGE_API}/items/${item._id}`);
         else await apiClient.post(`${KNOWLEDGE_API}/items/${item._id}/publish`);
-        this.$toast.success(action === "delete" ? "Suggestion rejected" : "Approved");
+        this.$toast.success(
+          action === "delete" ? "Suggestion rejected" : "Approved",
+        );
         this.refresh({ quiet: true });
       } catch (err) {
-        this.$toast.error(apiError(err, action === "delete" ? "Failed to reject" : "Failed to approve"));
+        this.$toast.error(
+          apiError(
+            err,
+            action === "delete" ? "Failed to reject" : "Failed to approve",
+          ),
+        );
       } finally {
         this.rowBusy = null;
       }
@@ -974,10 +1398,12 @@ export default {
         const { done = 0, failed = [] } = data.data || {};
         if (failed.length) {
           this.$toast.warning(
-            `${done} ${BULK_DONE[action]}, ${failed.length} failed: ${failed[0].error}`
+            `${done} ${BULK_DONE[action]}, ${failed.length} failed: ${failed[0].error}`,
           );
         } else {
-          this.$toast.success(`${done} item${done === 1 ? "" : "s"} ${BULK_DONE[action]}`);
+          this.$toast.success(
+            `${done} item${done === 1 ? "" : "s"} ${BULK_DONE[action]}`,
+          );
         }
         this.confirmBulkDelete = false;
         this.selected = [];
@@ -991,25 +1417,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.search-field {
-  max-width: 280px;
-}
-.category-field {
-  max-width: 220px;
-}
-.bulk-bar {
-  background: #eef0ff;
-  border-radius: 12px;
-}
-.items-table >>> tbody tr {
-  cursor: pointer;
-}
-.url {
-  max-width: 420px;
-}
-.min-w-0 {
-  min-width: 0;
-}
-</style>

@@ -488,14 +488,7 @@ export default {
 
 .stat-card {
   border-radius: 12px;
-  transition: all 0.3s ease;
   border: 1px solid #e0e0e0 !important;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  border-color: #bdbdbd !important;
 }
 
 .stat-active {

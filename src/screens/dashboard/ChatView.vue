@@ -2,11 +2,11 @@
   <div>
     <v-row justify="center">
       <v-col cols="12">
-        <v-card class="rounded-xl" outlined elevation="0">
+        <v-card class="rounded-lg" outlined elevation="0">
           <!-- HEADER -->
           <v-toolbar flat>
-            <v-avatar color="#cde6ff" size="44" rounded="xl">
-              <v-icon color="black">$circle-user</v-icon>
+            <v-avatar color="#cde6ff" size="44" rounded="lg">
+              <v-icon color="black" size="28">$circle-user</v-icon>
             </v-avatar>
 
             <div class="ml-3">
@@ -28,9 +28,7 @@
 
                 <v-divider vertical class="mx-2"></v-divider>
 
-                <v-icon size="16" class="mr-1" color="primary"
-                  >$bot</v-icon
-                >
+                <v-icon size="16" class="mr-1" color="primary">$bot</v-icon>
 
                 <span class="mr-2">
                   {{ aiEnabledLocal ? "AI Active" : "AI Disabled" }}
@@ -186,7 +184,7 @@
                 <v-card
                   :color="message.sender === 'user' ? 'white' : 'primary'"
                   :dark="message.sender === 'client'"
-                  class="pa-3 rounded-xl"
+                  class="pa-3 rounded-lg"
                   elevation="0"
                 >
                   <div>
@@ -279,9 +277,7 @@
                       v-else-if="message.type === 'audio'"
                       class="d-flex align-center"
                     >
-                      <v-icon small class="mr-2 primary--text">
-                        $mic
-                      </v-icon>
+                      <v-icon small class="mr-2 primary--text"> $mic </v-icon>
 
                       <audio controls>
                         <source :src="message.mediaUrl" type="audio/ogg" />
@@ -322,7 +318,7 @@
                   :color="typingSender === 'user' ? 'white' : 'primary'"
                   :dark="typingSender !== 'user'"
                   outlined
-                  class="pa-3 rounded-xl"
+                  class="pa-3 rounded-lg"
                 >
                   <div class="typing muted-text">
                     <v-icon color="white" size="10" v-if="typingSender === 'ai'"
@@ -374,7 +370,7 @@
       max-width="700"
       :fullscreen="$vuetify.breakpoint.xs"
     >
-      <v-card class="rounded-xl d-flex flex-column">
+      <v-card class="rounded-lg d-flex flex-column">
         <!-- HEADER -->
         <div class="pa-4 d-flex align-center">
           <div class="text-subtitle-1 font-weight-bold">

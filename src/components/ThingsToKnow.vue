@@ -1,16 +1,28 @@
 <template>
-  <v-card v-if="guide" outlined rounded="xl" class="things-to-know mb-4">
-    <div class="d-flex align-center px-4 py-2" @click="toggle">
-      <v-icon small color="primary" class="mr-2">$info</v-icon>
-      <span class="text-subtitle-2 font-weight-bold">Things to know</span>
+  <v-card v-if="guide" outlined rounded="lg" class="things-to-know mb-4">
+    <div
+      class="d-flex align-center px-4 py-2"
+      role="button"
+      tabindex="0"
+      :aria-expanded="String(open)"
+      @click="toggle"
+      @keydown.enter.prevent="toggle"
+      @keydown.space.prevent="toggle"
+    >
+      <v-icon small color="primary" class="mr-2 flex-shrink-0">$info</v-icon>
+      <span class="text-subtitle-2 font-weight-bold text-no-wrap flex-shrink-0">
+        Things to know
+      </span>
       <span
         v-if="!open"
-        class="text-body-2 grey--text text--darken-1 ml-2 text-truncate"
+        class="text-body-2 grey--text text--darken-1 ml-2 text-truncate hidden-xs-only"
       >
         {{ guide.summary }}
       </span>
       <v-spacer />
-      <v-icon small>{{ open ? "$chevron-up" : "$chevron-down" }}</v-icon>
+      <v-icon small class="ml-2 flex-shrink-0">
+        {{ open ? "$chevron-up" : "$chevron-down" }}
+      </v-icon>
     </div>
 
     <v-expand-transition>

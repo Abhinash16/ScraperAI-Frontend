@@ -149,6 +149,9 @@ import {
   Scale,
   GitCompare,
   CheckCheck,
+  House,
+  Inbox,
+  LogOut,
 } from "lucide";
 import * as brands from "@/icons/brands";
 
@@ -186,6 +189,9 @@ const LucideIcon = {
 };
 
 const APP_ICONS = {
+  "house": House,
+  "inbox": Inbox,
+  "log-out": LogOut,
   "star": Star,
   "check-check": CheckCheck,
   "git-compare": GitCompare,

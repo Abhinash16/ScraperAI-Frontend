@@ -375,21 +375,10 @@ export default {
 
 .score-card {
   cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.score-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
 .competitor-card {
   background: #fafafa;
-  transition: 0.2s;
-}
-
-.competitor-card:hover {
-  background: #f2f2f2;
 }
 
 .seo-card {

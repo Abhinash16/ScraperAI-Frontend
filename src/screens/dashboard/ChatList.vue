@@ -1,166 +1,290 @@
 <template>
   <div>
+    <!-- HEADER -->
+    <div class="d-flex flex-wrap align-center mb-4">
+      <div class="mr-4 mb-2">
+        <h1 class="text-h6 font-weight-bold grey--text text--darken-4">
+          Conversations
+        </h1>
+        <div class="text-body-2 grey--text text--darken-1">
+          <template v-if="total">
+            Showing {{ chats.length }} of {{ total }} conversations
+          </template>
+          <template v-else
+            >Chats from your website widget and WhatsApp</template
+          >
+        </div>
+      </div>
+      <v-spacer />
+      <v-btn
+        outlined
+        rounded
+        small
+        color="primary"
+        class="mb-2"
+        :loading="loading"
+        @click="fetchChats(false)"
+      >
+        <v-icon left size="16">$refresh-cw</v-icon>
+        Refresh
+      </v-btn>
+    </div>
+
     <ThingsToKnow feature="chats" />
 
-    <v-chip color="primary" outlined small class="mb-4">
-      {{ chats.length }}/{{ total }} Chats Loaded
-    </v-chip>
-
-    <v-row>
-      <!-- Status Filter -->
-      <v-col cols="12" md="3">
-        <v-card
-          outlined
-          rounded="xl"
-          class="px-2 pa-1 h-100 d-flex flex-column"
-        >
-          <div class="text-caption grey--text mb-1">Status</div>
-
-          <v-chip-group
+    <!-- FILTERS -->
+    <v-card outlined rounded="lg" class="pa-3 mb-4">
+      <div class="d-flex flex-wrap align-center">
+        <div class="d-flex align-center mr-6 my-1">
+          <span
+            class="text-caption font-weight-bold text-uppercase grey--text mr-3"
+          >
+            Status
+          </span>
+          <v-btn-toggle
             v-model="selectedTicketStatus"
-            active-class="primary--text"
+            mandatory
+            dense
+            rounded
+            color="primary"
             @change="fetchChats(false)"
-            row
           >
-            <v-chip small outlined value="">All</v-chip>
-            <v-chip small outlined color="orange" value="open">Open</v-chip>
-            <v-chip small outlined color="green" value="resolved">
+            <v-btn small value="">All</v-btn>
+            <v-btn small value="open">
+              <v-icon left size="14" color="orange">$circle-dot</v-icon>
+              Open
+            </v-btn>
+            <v-btn small value="resolved">
+              <v-icon left size="14" color="success">$circle-check</v-icon>
               Resolved
-            </v-chip>
-          </v-chip-group>
-        </v-card>
-      </v-col>
+            </v-btn>
+          </v-btn-toggle>
+        </div>
 
-      <!-- Platform Filter -->
-      <v-col cols="12" md="3">
-        <v-card
-          outlined
-          rounded="xl"
-          class="px-2 pa-1 h-100 d-flex flex-column"
-        >
-          <div class="text-caption grey--text mb-1">Platform</div>
-
-          <v-chip-group
-            v-model="selectedPlatform"
-            active-class="primary--text"
-            @change="fetchChats(false)"
-            row
+        <div class="d-flex align-center my-1">
+          <span
+            class="text-caption font-weight-bold text-uppercase grey--text mr-3"
           >
-            <v-chip small outlined value="">All</v-chip>
-
-            <v-chip small outlined color="green" value="whatsapp">
-              <v-icon x-small left>$whatsapp</v-icon>
+            Channel
+          </span>
+          <v-btn-toggle
+            v-model="selectedPlatform"
+            mandatory
+            dense
+            rounded
+            color="primary"
+            @change="fetchChats(false)"
+          >
+            <v-btn small value="">All</v-btn>
+            <v-btn small value="whatsapp">
+              <v-icon left size="14" color="green">$whatsapp</v-icon>
               WhatsApp
-            </v-chip>
+            </v-btn>
+            <v-btn small value="webchat">
+              <v-icon left size="14" color="blue">$globe</v-icon>
+              Website
+            </v-btn>
+          </v-btn-toggle>
+        </div>
 
-            <v-chip small outlined color="blue" value="webchat">
-              <v-icon x-small left>$globe</v-icon>
-              Other
-            </v-chip>
-          </v-chip-group>
-        </v-card>
-      </v-col>
-    </v-row>
+        <v-spacer />
+
+        <v-btn
+          v-if="filtersActive"
+          text
+          small
+          rounded
+          color="error"
+          class="my-1"
+          @click="clearFilters"
+        >
+          <v-icon left size="14">$x</v-icon>
+          Clear filters
+        </v-btn>
+      </div>
+    </v-card>
 
     <v-row>
-      <!-- Chat List -->
-      <v-col cols="12" md="6" class="mt-0">
+      <!-- CHAT LIST -->
+      <v-col cols="12" md="5" lg="4">
         <v-card
           ref="chatScroll"
-          elevation="0"
           outlined
-          class="rounded-xl px-4"
-          style="max-height: 70vh; overflow-y: auto"
+          rounded="lg"
+          class="overflow-y-auto"
+          max-height="525"
         >
-          <div v-if="!loading">
+          <v-subheader class="text-caption font-weight-bold text-uppercase">
+            {{ listTitle }}
+          </v-subheader>
+          <v-divider />
+
+          <!-- Loading -->
+          <div v-if="loading" class="pa-2">
+            <v-skeleton-loader
+              v-for="n in 6"
+              :key="n"
+              type="list-item-avatar-two-line"
+            />
+          </div>
+
+          <!-- Empty -->
+          <div
+            v-else-if="chats.length === 0"
+            class="d-flex flex-column align-center text-center px-6 py-12"
+          >
+            <v-avatar color="grey lighten-4" size="64" class="mb-4">
+              <v-icon size="28" color="grey">$message-circle-x</v-icon>
+            </v-avatar>
             <div
+              class="text-subtitle-1 font-weight-bold grey--text text--darken-3"
+            >
+              No conversations found
+            </div>
+            <div class="text-body-2 grey--text text--darken-1 mb-4">
+              <template v-if="filtersActive">
+                Nothing matches these filters. Try a different status or
+                channel.
+              </template>
+              <template v-else>
+                When customers message your bot, their chats show up here.
+              </template>
+            </div>
+            <v-btn
+              v-if="filtersActive"
+              outlined
+              rounded
+              small
+              color="primary"
+              @click="clearFilters"
+            >
+              Clear filters
+            </v-btn>
+          </div>
+
+          <!-- List -->
+          <v-list v-else two-line nav class="py-1">
+            <v-list-item
               v-for="chat in chats"
               :key="chat.chatId"
+              :input-value="selectedChatId === chat.chatId"
+              color="green darken-2"
+              class="rounded-lg mb-1"
+              :class="{ 'green lighten-5': selectedChatId === chat.chatId }"
               @click="viewChat(chat)"
             >
-              <v-card
-                class="my-2 rounded-lg transition-swing"
-                :color="selectedChatId === chat.chatId ? '#eff2fb' : 'white'"
-                elevation="0"
-                hover
-              >
-                <v-row align="center" class="pa-4" no-gutters>
-                  <v-col cols="auto" class="mr-3">
-                    <div style="position: relative; display: inline-block">
-                      <!-- Main Avatar -->
-                      <v-avatar
-                        size="44"
-                        rounded="xl"
-                        :color="
-                          selectedChatId === chat.chatId
-                            ? '#cde6ff'
-                            : 'grey lighten-3'
-                        "
-                      >
-                        <v-icon color="black">$circle-user</v-icon>
-                      </v-avatar>
+              <v-list-item-avatar class="overflow-visible">
+                <v-badge
+                  bottom
+                  right
+                  overlap
+                  bordered
+                  :color="platformInfo(chat.platform).color"
+                  offset-x="14"
+                  offset-y="14"
+                >
+                  <template #badge>
+                    <v-icon size="9" color="white">
+                      {{ platformInfo(chat.platform).icon }}
+                    </v-icon>
+                  </template>
+                  <v-avatar
+                    size="40"
+                    :color="
+                      selectedChatId === chat.chatId
+                        ? 'green lighten-4'
+                        : 'grey lighten-3'
+                    "
+                  >
+                    <v-icon
+                      size="20"
+                      :color="
+                        selectedChatId === chat.chatId
+                          ? 'green darken-2'
+                          : 'grey darken-2'
+                      "
+                    >
+                      $circle-user
+                    </v-icon>
+                  </v-avatar>
+                </v-badge>
+              </v-list-item-avatar>
 
-                      <!-- Platform Badge -->
-                      <v-avatar
-                        size="16"
-                        :color="chat.platform === 'whatsapp' ? 'green' : 'blue'"
-                        style="
-                          position: absolute;
-                          bottom: -2px;
-                          right: -2px;
-                          border: 2px solid white;
-                        "
-                      >
-                        <v-icon size="10" color="white">
-                          {{
-                            chat.platform === "whatsapp"
-                              ? "$whatsapp"
-                              : "$globe"
-                          }}
-                        </v-icon>
-                      </v-avatar>
-                    </div>
-                  </v-col>
+              <v-list-item-content>
+                <v-list-item-title
+                  class="font-weight-bold grey--text text--darken-4"
+                >
+                  {{ chat.chatId }}
+                </v-list-item-title>
+                <v-list-item-subtitle class="d-flex align-center">
+                  <v-icon
+                    size="8"
+                    :color="getStatusColor(chat.status)"
+                    class="mr-1"
+                  >
+                    $circle
+                  </v-icon>
+                  <span class="text-capitalize mr-2">{{
+                    chat.status || "unknown"
+                  }}</span>
+                  <span class="grey--text">·</span>
+                  <v-icon
+                    size="12"
+                    class="mx-1"
+                    :color="chat.aiEnabled ? 'primary' : 'grey'"
+                  >
+                    $bot
+                  </v-icon>
+                  <span>{{ chat.aiEnabled ? "AI on" : "AI off" }}</span>
+                </v-list-item-subtitle>
+              </v-list-item-content>
 
-                  <v-col>
-                    <div class="font-weight-bold text-truncate">
-                      {{ chat.chatId }}
-                    </div>
+              <v-list-item-action class="align-end">
+                <v-list-item-action-text
+                  v-if="lastActivity(chat)"
+                  :title="exactTime(lastActivity(chat))"
+                >
+                  {{ relativeTime(lastActivity(chat)) }}
+                </v-list-item-action-text>
+                <v-chip
+                  v-if="chat.ticketStatus"
+                  x-small
+                  label
+                  class="text-capitalize font-weight-bold mt-1"
+                  :color="
+                    chat.ticketStatus === 'resolved' ? 'success' : 'orange'
+                  "
+                  text-color="white"
+                >
+                  {{ chat.ticketStatus }}
+                </v-chip>
+                <v-icon v-else size="16" color="grey lighten-1"
+                  >$chevron-right</v-icon
+                >
+              </v-list-item-action>
+            </v-list-item>
+          </v-list>
 
-                    <div class="grey--text text-caption">
-                      Status:
-                      <span :class="getStatusColor(chat.status) + '--text'">
-                        {{ chat.status }}
-                      </span>
-                    </div>
-                  </v-col>
-
-                  <v-col cols="auto">
-                    <v-icon small color="grey"> $chevron-right </v-icon>
-                  </v-col>
-                </v-row>
-              </v-card>
-            </div>
-
-            <div v-if="chats.length === 0" class="text-center py-10">
-              <v-icon large color="grey lighten-1"> $message-circle-x </v-icon>
-              <div class="grey--text mt-2">No conversations found</div>
-            </div>
-          </div>
-          <div v-if="loadingMore" class="text-center py-2">
-            <v-progress-circular indeterminate size="20" color="primary" />
+          <!-- Paging -->
+          <div v-if="loadingMore" class="d-flex justify-center py-3">
+            <v-progress-circular
+              indeterminate
+              size="20"
+              width="2"
+              color="primary"
+            />
           </div>
           <div
-            v-if="!hasMore && chats.length"
-            class="text-center grey--text py-2"
+            v-else-if="!loading && !hasMore && chats.length"
+            class="text-center text-caption grey--text py-3"
           >
-            No more chats
+            You've reached the end of the list
           </div>
         </v-card>
       </v-col>
 
-      <!-- Right Side (Empty for now) -->
-      <v-col cols="12" md="6" class="hidden-sm-and-down">
+      <!-- CHAT VIEW (desktop) -->
+      <v-col cols="12" md="7" lg="8" class="hidden-sm-and-down">
         <chat-view
           v-if="selectedChatId"
           :chatId="selectedChatId"
@@ -168,28 +292,53 @@
           :aiEnabled="aiEnabled"
           @statusUpdated="fetchChats"
         />
-        <div v-else class="text-center grey--text mt-10">
-          <v-icon large color="grey lighten-1"> $message-circle </v-icon>
-          <div class="mt-2">Select a chat to view the conversation</div>
-        </div>
+        <v-card
+          v-else
+          outlined
+          rounded="lg"
+          min-height="320"
+          class="d-flex flex-column align-center justify-center text-center pa-8 fill-height"
+        >
+          <v-avatar color="primary lighten-5" size="72" class="mb-4">
+            <v-icon size="32" color="primary">$messages-square</v-icon>
+          </v-avatar>
+          <div
+            class="text-subtitle-1 font-weight-bold grey--text text--darken-3"
+          >
+            Select a conversation
+          </div>
+          <div class="text-body-2 grey--text text--darken-1">
+            Pick a chat on the left to read the messages, reply or switch the AI
+            off.
+          </div>
+        </v-card>
       </v-col>
     </v-row>
 
-    <!-- Mobile Bottom Sheet -->
-    <v-bottom-sheet v-model="chatViewBottomSheet" inset class="p-0 m-0">
-      <chat-view
-        v-if="selectedChatId"
-        :chatId="selectedChatId"
-        :key="'mobile-' + selectedChatId"
-        :aiEnabled="aiEnabled"
-        @statusUpdated="fetchChats"
-      />
+    <!-- CHAT VIEW (mobile) -->
+    <v-bottom-sheet v-model="chatViewBottomSheet" scrollable>
+      <v-card rounded="t-lg">
+        <div class="d-flex align-center pl-4 pr-2 py-2">
+          <span class="text-subtitle-2 font-weight-bold text-truncate">
+            {{ selectedChatId }}
+          </span>
+          <v-spacer />
+          <v-btn icon aria-label="Close" @click="chatViewBottomSheet = false">
+            <v-icon>$x</v-icon>
+          </v-btn>
+        </div>
+        <v-divider />
+        <v-card-text class="pa-2">
+          <chat-view
+            v-if="selectedChatId"
+            :chatId="selectedChatId"
+            :key="'mobile-' + selectedChatId"
+            :aiEnabled="aiEnabled"
+            @statusUpdated="fetchChats"
+          />
+        </v-card-text>
+      </v-card>
     </v-bottom-sheet>
-
-    <!-- Loader -->
-    <v-overlay :value="loading" opacity="0.3">
-      <v-progress-circular indeterminate size="64" color="primary" />
-    </v-overlay>
 
     <!-- Error Snackbar -->
     <v-snackbar v-model="snackbar" color="error" top right>
@@ -227,6 +376,23 @@ export default {
     selectedPlatform: "",
     loadingMore: false,
   }),
+
+  computed: {
+    filtersActive() {
+      return !!(this.selectedTicketStatus || this.selectedPlatform);
+    },
+
+    listTitle() {
+      const status =
+        { open: "Open", resolved: "Resolved" }[this.selectedTicketStatus] ||
+        "All";
+      const channel =
+        { whatsapp: " · WhatsApp", webchat: " · Website" }[
+          this.selectedPlatform
+        ] || "";
+      return `${status} conversations${channel}`;
+    },
+  },
 
   created() {
     this.fetchChats();
@@ -342,6 +508,48 @@ export default {
         disconnected: "error",
       };
       return colors[status] || "grey";
+    },
+
+    platformInfo(platform) {
+      return platform === "whatsapp"
+        ? { icon: "$whatsapp", color: "green" }
+        : { icon: "$globe", color: "blue" };
+    },
+
+    clearFilters() {
+      this.selectedTicketStatus = "";
+      this.selectedPlatform = "";
+      this.fetchChats(false);
+    },
+
+    lastActivity(chat) {
+      return chat.updatedAt || chat.lastMessageAt || chat.createdAt || null;
+    },
+
+    relativeTime(value) {
+      const diff = Date.now() - new Date(value).getTime();
+      if (Number.isNaN(diff)) return "";
+      const min = Math.floor(diff / 60000);
+      if (min < 1) return "Just now";
+      if (min < 60) return `${min}m ago`;
+      const hrs = Math.floor(min / 60);
+      if (hrs < 24) return `${hrs}h ago`;
+      const days = Math.floor(hrs / 24);
+      if (days < 7) return `${days}d ago`;
+      return new Date(value).toLocaleDateString(undefined, {
+        day: "numeric",
+        month: "short",
+      });
+    },
+
+    exactTime(value) {
+      return (
+        new Date(value).toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          dateStyle: "medium",
+          timeStyle: "short",
+        }) + " IST"
+      );
     },
   },
 };

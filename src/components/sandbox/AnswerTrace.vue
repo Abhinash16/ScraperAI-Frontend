@@ -1,38 +1,44 @@
 <template>
-  <div class="answer-trace">
-    <button v-if="!embedded" type="button" class="trace-toggle" @click="open = !open">
-      <v-icon x-small class="mr-1">
-        {{ open ? "$chevron-up" : "$chevron-down" }}
-      </v-icon>
+  <div>
+    <v-btn
+      v-if="!embedded"
+      x-small
+      text
+      color="primary"
+      class="px-1"
+      :aria-expanded="String(open)"
+      @click="open = !open"
+    >
+      <v-icon left size="12">{{
+        open ? "$chevron-up" : "$chevron-down"
+      }}</v-icon>
       Why this answer
-    </button>
+    </v-btn>
 
     <v-expand-transition>
-      <div v-if="open" :class="embedded ? '' : 'trace-body mt-2'">
-        <!-- Intent -->
-        <div class="trace-row">
-          <span class="trace-label">Intent</span>
-          <span>{{ trace.intent || "—" }}</span>
-          <template v-if="trace.confidence !== undefined">
-            <span class="trace-label ml-4">Confidence</span>
-            <span>{{ formatConfidence(trace.confidence) }}</span>
-          </template>
-        </div>
-
-        <div v-if="tokens !== undefined || trace.model" class="trace-row">
-          <template v-if="tokens !== undefined">
-            <span class="trace-label">Tokens</span>
-            <span class="mr-4">
-              {{ tokens }}
-              <span v-if="tokensFirstCall !== undefined" class="grey--text">
-                (+{{ tokensFirstCall }} before the tool call)
-              </span>
-            </span>
-          </template>
-          <template v-if="trace.model">
-            <span class="trace-label">Model</span>
-            <span>{{ trace.model }}</span>
-          </template>
+      <v-sheet
+        v-if="open"
+        :outlined="!embedded"
+        :rounded="embedded ? false : 'lg'"
+        :class="embedded ? '' : 'pa-4 mt-2'"
+        class="text-body-2"
+      >
+        <!-- Overview -->
+        <v-row dense>
+          <v-col v-for="f in overview" :key="f.label" cols="6" sm="3">
+            <div class="text-caption grey--text">{{ f.label }}</div>
+            <div
+              class="text-body-2 font-weight-bold grey--text text--darken-4 text-break"
+            >
+              {{ f.value }}
+            </div>
+          </v-col>
+        </v-row>
+        <div
+          v-if="tokensFirstCall !== undefined"
+          class="text-caption grey--text mt-1"
+        >
+          +{{ tokensFirstCall }} tokens before the tool call
         </div>
 
         <v-alert
@@ -41,7 +47,7 @@
           text
           dense
           rounded="lg"
-          class="text-caption my-2"
+          class="text-caption mt-3 mb-0"
         >
           {{ trace.error }}
         </v-alert>
@@ -52,7 +58,7 @@
           text
           dense
           rounded="lg"
-          class="text-caption my-2"
+          class="text-caption mt-3 mb-0"
         >
           In production this would have triggered the '{{ webhookIntent }}'
           webhook.
@@ -60,29 +66,51 @@
 
         <!-- Product lookup -->
         <template v-if="product">
-          <div class="trace-heading">Product lookup</div>
-          <div class="trace-row">
-            <v-chip x-small dark :color="modeInfo.color" class="mr-2">
+          <div
+            class="text-caption font-weight-bold text-uppercase grey--text mt-4 mb-2"
+          >
+            Product lookup
+          </div>
+          <div class="d-flex flex-wrap align-center mb-1">
+            <v-chip
+              x-small
+              label
+              dark
+              :color="modeInfo.color"
+              class="font-weight-bold mr-2"
+            >
               {{ modeInfo.label }}
             </v-chip>
-            <span class="trace-label">
-              {{ queries.length > 1 ? "Searches" : "Query" }}
-            </span>
+            <span class="grey--text mr-2">{{
+              queries.length > 1 ? "Searches" : "Query"
+            }}</span>
             <template v-if="queries.length">
-              <code v-for="(q, i) in queries" :key="i" class="mr-1">{{ q }}</code>
+              <v-chip
+                v-for="(q, i) in queries"
+                :key="i"
+                x-small
+                label
+                color="grey lighten-4"
+                class="mr-1 my-1"
+              >
+                {{ q }}
+              </v-chip>
             </template>
             <span v-else>—</span>
           </div>
-          <div v-if="stockLabel(product)" class="trace-row">
-            <span class="trace-label">Stock</span>
-            <span>{{ stockLabel(product) }}</span>
+          <div v-if="stockLabel(product)" class="mb-1">
+            <span class="grey--text mr-2">Stock</span>{{ stockLabel(product) }}
           </div>
-          <div v-if="catalogMatches.length" class="trace-row">
-            <span class="trace-label">Catalog</span>
+          <div
+            v-if="catalogMatches.length"
+            class="d-flex flex-wrap align-center mb-1"
+          >
+            <span class="grey--text mr-2">Catalog</span>
             <v-chip
               v-for="(m, i) in catalogMatches"
               :key="m.sku || i"
               x-small
+              label
               outlined
               color="primary"
               class="mr-1 my-1"
@@ -90,71 +118,140 @@
               {{ matchLabel(m) }}
             </v-chip>
           </div>
-          <pre
+          <v-sheet
             v-if="product.products !== undefined"
-            class="trace-pre"
-          >{{ formatJson(product.products) }}</pre>
+            color="grey darken-4"
+            dark
+            rounded="lg"
+            max-height="260"
+            class="overflow-y-auto pa-3 mt-1"
+          >
+            <pre class="text-caption text-pre-wrap text-break">{{
+              formatJson(product.products)
+            }}</pre>
+          </v-sheet>
         </template>
 
         <!-- AI tool calls -->
         <template v-if="toolCalls.length">
-          <div class="trace-heading">AI tool calls</div>
-          <div v-for="(call, i) in toolCalls" :key="i" class="tool-call">
-            <button
-              type="button"
-              class="tool-toggle"
+          <div
+            class="text-caption font-weight-bold text-uppercase grey--text mt-4 mb-2"
+          >
+            AI tool calls
+          </div>
+          <v-sheet
+            v-for="(call, i) in toolCalls"
+            :key="i"
+            outlined
+            rounded="lg"
+            class="mb-2"
+          >
+            <div
+              class="d-flex flex-wrap align-center px-3 py-2"
+              role="button"
+              tabindex="0"
+              :aria-expanded="String(openTools.includes(i))"
               @click="toggleTool(i)"
+              @keydown.enter.prevent="toggleTool(i)"
             >
-              <v-icon x-small class="mr-1">
+              <v-icon size="14" class="mr-2">
                 {{ openTools.includes(i) ? "$chevron-down" : "$chevron-right" }}
               </v-icon>
-              🔧 AI searched: '{{ call.query }}' →
-              <span :class="['ml-1', toolModeClass(call.mode)]">
+              <v-icon size="14" color="grey darken-1" class="mr-1"
+                >$search</v-icon
+              >
+              <span class="mr-1">AI searched</span>
+              <span class="font-weight-bold mr-1">'{{ call.query }}'</span>
+              <v-icon size="12" class="mr-1">$arrow-right</v-icon>
+              <span
+                class="font-weight-bold mr-1"
+                :class="toolModeClass(call.mode)"
+              >
                 {{ call.mode === "catalog" ? "In-stock list" : call.mode }}
               </span>
-              <span v-if="stockLabel(call)" class="ml-1">
-                · {{ stockLabel(call) }}
-              </span>
-              <span class="grey--text ml-1">
+              <span v-if="stockLabel(call)" class="mr-1"
+                >· {{ stockLabel(call) }}</span
+              >
+              <span class="grey--text">
                 ({{ (call.products || []).length }}
-                {{ (call.products || []).length === 1 ? "product" : "products" }})
+                {{
+                  (call.products || []).length === 1 ? "product" : "products"
+                }})
               </span>
-            </button>
-            <div v-if="call.error" class="text-caption error--text ml-4">
+            </div>
+            <div v-if="call.error" class="text-caption error--text px-3 pb-2">
               {{ call.error }}
             </div>
-            <pre
+            <v-sheet
               v-if="openTools.includes(i)"
-              class="trace-pre"
-            >{{ formatJson(call.products || []) }}</pre>
-          </div>
+              color="grey darken-4"
+              dark
+              max-height="260"
+              class="overflow-y-auto pa-3 rounded-b-lg"
+            >
+              <pre class="text-caption text-pre-wrap text-break">{{
+                formatJson(call.products || [])
+              }}</pre>
+            </v-sheet>
+          </v-sheet>
         </template>
 
         <!-- What the bot remembered from this customer's last conversation -->
         <template v-if="trace.memory">
-          <div class="trace-heading">Remembered from the last conversation</div>
-          <pre class="trace-pre">{{ trace.memory }}</pre>
+          <div
+            class="text-caption font-weight-bold text-uppercase grey--text mt-4 mb-2"
+          >
+            Remembered from the last conversation
+          </div>
+          <v-sheet
+            color="grey lighten-5"
+            rounded="lg"
+            max-height="260"
+            class="overflow-y-auto pa-3"
+          >
+            <pre class="text-caption text-pre-wrap text-break">{{
+              trace.memory
+            }}</pre>
+          </v-sheet>
         </template>
 
         <!-- Customer -->
         <template v-if="customer">
-          <div class="trace-heading">Customer</div>
-          <div v-if="customer.apiConfigured === false" class="trace-row">
-            <span class="grey--text">Customer API not configured</span>
+          <div
+            class="text-caption font-weight-bold text-uppercase grey--text mt-4 mb-2"
+          >
+            Customer
           </div>
-          <div v-else class="trace-row">
-            <span class="trace-label">Found</span>
-            <span :class="customer.found ? 'success--text' : 'grey--text'">
+          <div v-if="customer.apiConfigured === false" class="grey--text">
+            Customer API not configured
+          </div>
+          <div v-else class="d-flex flex-wrap align-center mb-1">
+            <span class="grey--text mr-2">Found</span>
+            <v-chip
+              x-small
+              label
+              :color="customer.found ? 'success' : 'grey'"
+              text-color="white"
+              class="font-weight-bold mr-4"
+            >
               {{ customer.found ? "Yes" : "No" }}
-            </span>
+            </v-chip>
             <template v-if="customer.phone">
-              <span class="trace-label ml-4">Phone</span>
+              <span class="grey--text mr-2">Phone</span>
               <span>{{ customer.phone }}</span>
             </template>
           </div>
-          <pre v-if="customer.aiContext" class="trace-pre">{{
-            formatText(customer.aiContext)
-          }}</pre>
+          <v-sheet
+            v-if="customer.aiContext"
+            color="grey lighten-5"
+            rounded="lg"
+            max-height="260"
+            class="overflow-y-auto pa-3 mt-1"
+          >
+            <pre class="text-caption text-pre-wrap text-break">{{
+              formatText(customer.aiContext)
+            }}</pre>
+          </v-sheet>
         </template>
 
         <v-alert
@@ -163,7 +260,7 @@
           text
           dense
           rounded="lg"
-          class="text-caption my-2"
+          class="text-caption mt-3 mb-0"
         >
           The bot said it couldn't answer this from your knowledge, so it was
           logged as a knowledge gap.
@@ -171,13 +268,21 @@
 
         <!-- Retrieval: what was searched and which blocks came back -->
         <template v-if="retrieval">
-          <div class="trace-heading">Search</div>
-          <div v-if="retrieval.query" class="trace-row">
-            <span class="trace-label">Searched for</span>
-            <span class="mr-2">"{{ retrieval.query }}"</span>
+          <div
+            class="text-caption font-weight-bold text-uppercase grey--text mt-4 mb-2"
+          >
+            Search
+          </div>
+          <div
+            v-if="retrieval.query"
+            class="d-flex flex-wrap align-center mb-1"
+          >
+            <span class="grey--text mr-2">Searched for</span>
+            <span class="font-weight-bold mr-2">"{{ retrieval.query }}"</span>
             <v-chip
               v-if="retrieval.rewritten"
               x-small
+              label
               outlined
               color="primary"
               title="A follow-up question, rewritten so it makes sense on its own"
@@ -185,61 +290,113 @@
               rewritten
             </v-chip>
           </div>
-          <div v-if="retrieval.mode" class="trace-row">
-            <span class="trace-label">Knowledge</span>
-            <span>{{ retrieval.mode === "staging" ? "New setup (staging)" : "Live" }}</span>
+          <div v-if="retrieval.mode" class="mb-1">
+            <span class="grey--text mr-2">Knowledge</span>
+            {{ retrieval.mode === "staging" ? "New setup (staging)" : "Live" }}
           </div>
-          <div v-if="pricingLabel" class="trace-row">
-            <span class="trace-label">Prices from</span>
-            <span>{{ pricingLabel }}</span>
+          <div v-if="pricingLabel" class="mb-1">
+            <span class="grey--text mr-2">Prices from</span>{{ pricingLabel }}
           </div>
-          <div v-if="blocks.length" class="blocks mt-1">
-            <div
-              v-for="b in blocks"
-              :key="b.key"
-              :class="['block-row', { cited: isCited(b) }]"
-            >
-              <span class="block-key">{{ b.key }}</span>
-              <span class="mr-2">{{ blockType(b) }}</span>
-              <span class="grey--text mr-2">
-                {{ b.vectorScore != null ? `meaning ${b.vectorScore.toFixed(2)}` : "keyword only" }}
-                · {{ b.keywordRank != null ? `keyword #${b.keywordRank}` : "meaning only" }}
-              </span>
-              <v-chip v-if="isCited(b)" x-small color="success" text-color="white">
-                Used in the answer
-              </v-chip>
-            </div>
-          </div>
+          <v-sheet v-if="blocks.length" outlined rounded="lg" class="mt-2">
+            <template v-for="(b, i) in blocks">
+              <v-divider v-if="i > 0" :key="`d-${b.key}`" />
+              <div
+                :key="b.key"
+                class="d-flex flex-wrap align-center text-caption px-3 py-2"
+                :class="isCited(b) ? 'green lighten-5' : ''"
+              >
+                <v-chip
+                  x-small
+                  label
+                  color="primary lighten-5"
+                  text-color="primary"
+                  class="font-weight-bold mr-2"
+                >
+                  {{ b.key }}
+                </v-chip>
+                <span
+                  class="mr-2"
+                  :class="
+                    isCited(b)
+                      ? 'font-weight-bold grey--text text--darken-4'
+                      : ''
+                  "
+                >
+                  {{ blockType(b) }}
+                </span>
+                <span class="grey--text mr-2">{{ blockScores(b) }}</span>
+                <v-spacer />
+                <v-chip
+                  v-if="isCited(b)"
+                  x-small
+                  label
+                  color="success"
+                  text-color="white"
+                  class="font-weight-bold"
+                >
+                  <v-icon left size="10">$check</v-icon>
+                  Used in the answer
+                </v-chip>
+              </div>
+            </template>
+          </v-sheet>
         </template>
-        <div v-else-if="citations.length" class="trace-row mt-2">
-          <span class="trace-label">Used in the answer</span>
-          <span>{{ citations.join(", ") }}</span>
+        <div v-else-if="citations.length" class="mt-3">
+          <span class="grey--text mr-2">Used in the answer</span
+          >{{ citations.join(", ") }}
         </div>
 
         <!-- Matched FAQs (curated answers, used ahead of website text) -->
         <template v-if="curated">
-          <div class="trace-heading">
+          <div
+            class="text-caption font-weight-bold text-uppercase grey--text mt-4 mb-2"
+          >
             Matched FAQs
-            <span v-if="curatedScores.length" class="grey--text">
+            <span
+              v-if="curatedScores.length"
+              class="text-none font-weight-regular"
+            >
               (match {{ curatedScores.map((s) => s.toFixed(2)).join(", ") }})
             </span>
           </div>
-          <pre v-if="curated.text" class="trace-pre">{{ curated.text }}</pre>
+          <v-sheet
+            v-if="curated.text"
+            color="grey lighten-5"
+            rounded="lg"
+            max-height="260"
+            class="overflow-y-auto pa-3"
+          >
+            <pre class="text-caption text-pre-wrap text-break">{{
+              curated.text
+            }}</pre>
+          </v-sheet>
           <div v-else class="text-caption grey--text">No FAQ matched.</div>
         </template>
 
         <!-- Website knowledge -->
         <template v-if="knowledge">
-          <div class="trace-heading">
+          <div
+            class="text-caption font-weight-bold text-uppercase grey--text mt-4 mb-2"
+          >
             Website knowledge
-            <span class="grey--text">
+            <span class="text-none font-weight-regular">
               ({{ chunkCount }} {{ chunkCount === 1 ? "chunk" : "chunks" }})
             </span>
           </div>
-          <pre v-if="knowledge.text" class="trace-pre">{{ knowledge.text }}</pre>
+          <v-sheet
+            v-if="knowledge.text"
+            color="grey lighten-5"
+            rounded="lg"
+            max-height="260"
+            class="overflow-y-auto pa-3"
+          >
+            <pre class="text-caption text-pre-wrap text-break">{{
+              knowledge.text
+            }}</pre>
+          </v-sheet>
           <div v-else class="text-caption grey--text">No knowledge used.</div>
         </template>
-      </div>
+      </v-sheet>
     </v-expand-transition>
   </div>
 </template>
@@ -284,10 +441,12 @@ export default {
       return Array.isArray(this.trace.citations) ? this.trace.citations : [];
     },
     pricingLabel() {
-      return {
-        knowledge: "Knowledge (FAQs, notes and pages)",
-        live_only: "Live product data only",
-      }[this.trace.pricing] || "";
+      return (
+        {
+          knowledge: "Knowledge (FAQs, notes and pages)",
+          live_only: "Live product data only",
+        }[this.trace.pricing] || ""
+      );
     },
     // null when no FAQ matched; missing on older traces
     curated() {
@@ -295,7 +454,9 @@ export default {
     },
     curatedScores() {
       const scores = this.curated?.scores;
-      return Array.isArray(scores) ? scores.filter((s) => typeof s === "number") : [];
+      return Array.isArray(scores)
+        ? scores.filter((s) => typeof s === "number")
+        : [];
     },
     modeInfo() {
       return productModeInfo(this.product?.mode);
@@ -321,6 +482,21 @@ export default {
     tokens() {
       return this.trace.tokens?.total_tokens;
     },
+    // Intent, confidence, tokens and model, shown as a small grid
+    overview() {
+      const list = [{ label: "Intent", value: this.trace.intent || "—" }];
+      if (this.trace.confidence !== undefined) {
+        list.push({
+          label: "Confidence",
+          value: this.formatConfidence(this.trace.confidence),
+        });
+      }
+      if (this.tokens !== undefined)
+        list.push({ label: "Tokens", value: this.tokens });
+      if (this.trace.model)
+        list.push({ label: "Model", value: this.trace.model });
+      return list;
+    },
     webhookIntent() {
       const skipped = this.trace.webhookSkipped;
       if (!skipped) return "";
@@ -335,8 +511,22 @@ export default {
     },
 
     blockType(block) {
-      const label = { faq: "FAQ", note: "Note", page: "Website page" }[block.type] || block.type;
-      return block.curated && block.type !== "faq" ? `${label} (curated)` : label;
+      const label =
+        { faq: "FAQ", note: "Note", page: "Website page" }[block.type] ||
+        block.type;
+      return block.curated && block.type !== "faq"
+        ? `${label} (curated)`
+        : label;
+    },
+
+    blockScores(b) {
+      const meaning =
+        b.vectorScore != null
+          ? `meaning ${b.vectorScore.toFixed(2)}`
+          : "keyword only";
+      const keyword =
+        b.keywordRank != null ? `keyword #${b.keywordRank}` : "meaning only";
+      return `${meaning} · ${keyword}`;
     },
 
     matchLabel(match) {
@@ -374,93 +564,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.trace-toggle {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--v-primary-base);
-  display: inline-flex;
-  align-items: center;
-}
-
-.trace-body {
-  background: #fff;
-  border: 1px solid #e4e8f2;
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-size: 13px;
-}
-
-.blocks {
-  border: 1px solid #eef1f7;
-  border-radius: 8px;
-  padding: 4px 8px;
-}
-
-.block-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  padding: 3px 0;
-  font-size: 12px;
-}
-
-.block-row.cited {
-  font-weight: 600;
-}
-
-.block-key {
-  font-family: monospace;
-  background: #eef0ff;
-  border-radius: 4px;
-  padding: 0 5px;
-  margin-right: 8px;
-}
-
-.trace-heading {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #757575;
-  margin: 12px 0 6px;
-}
-
-.trace-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
-}
-
-.trace-label {
-  color: #757575;
-  margin-right: 6px;
-}
-
-.tool-call {
-  margin-bottom: 6px;
-}
-
-.tool-toggle {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  text-align: left;
-  font-size: 13px;
-}
-
-.trace-pre {
-  background: #0f172a;
-  color: #e2e8f0;
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-size: 12px;
-  white-space: pre-wrap;
-  word-break: break-word;
-  max-height: 260px;
-  overflow: auto;
-  margin: 4px 0 0;
-}
-</style>

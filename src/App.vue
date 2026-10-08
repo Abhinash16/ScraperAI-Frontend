@@ -30,4 +30,31 @@ export default {};
   text-transform: capitalize !important;
   letter-spacing: normal !important;
 }
+
+/* One corner radius (8px, Vuetify's rounded-lg) for buttons, toggles and
+   inputs everywhere, including those set to `rounded` (pill). Icon and fab
+   buttons stay circular. */
+.v-application .v-btn:not(.v-btn--icon):not(.v-btn--fab) {
+  border-radius: 8px !important;
+}
+.v-application .v-btn-toggle {
+  border-radius: 8px !important;
+}
+.v-application .v-btn-toggle > .v-btn.v-btn.v-btn {
+  border-radius: 0 !important;
+}
+.v-application .v-btn-toggle > .v-btn.v-btn.v-btn:first-child {
+  border-top-left-radius: 8px !important;
+  border-bottom-left-radius: 8px !important;
+}
+.v-application .v-btn-toggle > .v-btn.v-btn.v-btn:last-child {
+  border-top-right-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+}
+.v-application .v-text-field--outlined fieldset,
+.v-application .v-text-field--outlined > .v-input__control > .v-input__slot,
+.v-application .v-text-field--rounded > .v-input__control > .v-input__slot,
+.v-application .v-text-field--solo > .v-input__control > .v-input__slot {
+  border-radius: 8px !important;
+}
 </style>

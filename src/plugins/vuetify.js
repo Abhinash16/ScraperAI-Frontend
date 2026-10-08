@@ -10,6 +10,8 @@ export default new Vuetify({
   },
   theme: {
     dark: false,
+    // Defines --v-primary-base, --v-error-base etc. for component styles
+    options: { customProperties: true },
     themes: {
       light: {
         primary: "#6c6ef6",

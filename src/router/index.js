@@ -144,6 +144,20 @@ const routes = [
         },
       },
       { path: "user-list", redirect: "/dashboard/team" },
+
+      // Section names from the sidebar (utils/navigation.js); the screens
+      // keep their existing paths.
+      { path: "inbox", redirect: "/dashboard/chat" },
+      { path: "unanswered", redirect: "/dashboard/knowledge-gap" },
+      { path: "bot-behaviour", redirect: "/dashboard/bot-profile" },
+      { path: "test", redirect: "/dashboard/sandbox" },
+      { path: "insights", redirect: "/dashboard/bot-health" },
+      { path: "channels", redirect: "/dashboard/integration?section=widget" },
+      {
+        path: "data",
+        redirect: "/dashboard/integration?section=api-config&tab=product-api",
+      },
+      { path: "account", redirect: "/dashboard/profile" },
     ],
     meta: { requiresAuth: true }, // Indicate that this route requires authentication
   },

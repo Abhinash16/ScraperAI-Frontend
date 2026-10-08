@@ -194,14 +194,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.metric-card {
-  transition: all 0.25s ease;
-}
-
-.metric-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-}
-</style>
