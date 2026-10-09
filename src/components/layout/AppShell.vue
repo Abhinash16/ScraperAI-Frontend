@@ -95,7 +95,7 @@
 
       <router-link
         to="/dashboard"
-        class="d-flex align-center text-decoration-none mr-4"
+        class="d-flex align-center text-decoration-none app-bar__brand"
         aria-label="scraperAI home"
       >
         <AppLogo size="34" class="mr-3" />
@@ -116,7 +116,7 @@
 
       <div
         v-if="$vuetify.breakpoint.mdAndUp"
-        class="flex-grow-1 ml-4 app-bar__search"
+        class="flex-grow-1 app-bar__search"
       >
         <GlobalSearch :items="searchItems" @navigate="go" />
       </div>
@@ -498,7 +498,7 @@ export default {
         const { data } = await apiClient.get("/clients/currentUser");
         const account = data.data || {};
         this.user = account.user || null;
-        this.companyName = account.company_name || "";
+        this.companyName = account.user?.name || "";
         this.perms = account.user?.roleId?.permissions || [];
       } catch {
         this.perms = [];
@@ -600,8 +600,20 @@ export default {
   border-bottom: 1px solid #e6e8f0 !important;
 }
 
+.app-bar__brand {
+  margin-right: 32px;
+}
+
 .app-bar__search {
   max-width: 560px;
+}
+
+/* With the sidebar shown, the brand fills its width so the search starts on
+   the content's left edge (256px sidebar - 16px bar padding, then 32px) */
+@media (min-width: 1264px) {
+  .app-bar__brand {
+    flex: 0 0 240px;
+  }
 }
 
 /* Content */
