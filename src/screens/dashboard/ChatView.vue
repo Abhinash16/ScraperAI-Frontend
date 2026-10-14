@@ -27,7 +27,26 @@
                     {{ ticketStatus }}
                   </v-chip>
                 </div>
-                <div class="text-caption grey--text text--darken-1">Chat room</div>
+                <div v-if="identity" class="d-flex flex-wrap align-center text-caption">
+                  <span class="d-inline-flex align-center green--text text--darken-2 font-weight-bold mr-2">
+                    <v-icon size="14" color="green darken-1" class="mr-1">$circle-check</v-icon>
+                    Verified · {{ formatPhone(identity.phone) }}
+                  </span>
+                  <a
+                    v-if="identity.whatsappChatId"
+                    href="#"
+                    class="d-inline-flex align-center mr-2"
+                    :title="`Open ${formatPhone(identity.phone)}'s WhatsApp chat`"
+                    @click.prevent="openWhatsappChat"
+                  >
+                    <v-icon size="12" color="green" class="mr-1">$whatsapp</v-icon>
+                    WhatsApp chat
+                  </a>
+                  <span v-if="identity.whatsappConsent" class="grey--text text--darken-1">
+                    · OK to contact on WhatsApp
+                  </span>
+                </div>
+                <div v-else class="text-caption grey--text text--darken-1">Chat room</div>
               </div>
 
               <v-btn
@@ -185,6 +204,9 @@
             <div v-else-if="footer" :key="key" class="conv-footer text-caption mb-4">
               {{ endedLabel(footer) }}
               <div v-if="footer.summary" class="conv-summary mt-1">{{ footer.summary }}</div>
+            </div>
+            <div v-else-if="message.sender === 'system'" :key="key" class="conv-system text-caption mb-3">
+              {{ message.text }}
             </div>
             <v-row
               v-else
@@ -457,6 +479,7 @@ import {
   groupMessages,
   isOpen,
 } from "@/utils/conversations";
+import { formatPhone, verifiedIdentity } from "@/utils/identity";
 
 export default {
   components: { LiveTrace, ChatConversations },
@@ -486,6 +509,7 @@ export default {
       socket: null,
 
       ticketStatus: "",
+      identity: null,
 
       chatMongoId: null,
 
@@ -539,6 +563,7 @@ export default {
   watch: {
     chatId(newVal, oldVal) {
       if (newVal !== oldVal) {
+        this.identity = null;
         this.initializeChat();
       }
     },
@@ -593,6 +618,16 @@ export default {
     },
   },
   methods: {
+    formatPhone,
+
+    // In the inbox, switch to the customer's WhatsApp chat; on its own page, go there
+    openWhatsappChat() {
+      const id = this.identity?.whatsappChatId;
+      if (!id) return;
+      if (this.$listeners["open-chat"]) this.$emit("open-chat", id);
+      else this.$router.push(`/dashboard/chat/${encodeURIComponent(id)}`).catch(() => {});
+    },
+
     handleTyping() {
       if (!this.socket) return;
 
@@ -687,6 +722,8 @@ export default {
             }
 
             this.messages.push(message);
+            // e.g. "Phone number verified on WhatsApp": pick up the new identity
+            if (message.sender === "system") this.fetchChatInfo();
             // A new conversation started, or a known one changed state
             if (message.conversationId) this.loadConversations({ quiet: true });
           }
@@ -738,6 +775,7 @@ export default {
         this.ticketStatus = chat.ticketStatus || "open";
         this.aiEnabledLocal = chat.aiEnabled || false;
         this.platform = chat.platform || "unknown";
+        this.identity = verifiedIdentity(chat);
 
         // important
         this.chatMongoId = chat._id;
@@ -959,6 +997,10 @@ export default {
 .conv-divider span {
   padding: 0 10px;
   white-space: nowrap;
+}
+.conv-system {
+  text-align: center;
+  color: #6b7280;
 }
 .conv-footer {
   text-align: center;

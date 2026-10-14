@@ -228,6 +228,18 @@
                   >
                     Test
                   </v-chip>
+                  <v-chip
+                    v-if="isVerified(chat)"
+                    x-small
+                    label
+                    color="green lighten-5"
+                    text-color="green darken-3"
+                    class="font-weight-bold ml-1"
+                    title="Phone number verified on WhatsApp"
+                  >
+                    <v-icon left size="10">$check</v-icon>
+                    Verified
+                  </v-chip>
                 </v-list-item-title>
                 <v-list-item-subtitle class="d-flex align-center">
                   <v-icon
@@ -304,6 +316,7 @@
           :key="selectedChatId"
           :aiEnabled="aiEnabled"
           @statusUpdated="fetchChats"
+          @open-chat="openChatById"
         />
         <v-card
           v-else
@@ -357,6 +370,7 @@
             :key="'mobile-' + selectedChatId"
             :aiEnabled="aiEnabled"
             @statusUpdated="fetchChats"
+            @open-chat="openChatById"
           />
         </v-card-text>
       </v-card>
@@ -376,6 +390,7 @@
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 import ChatView from "../../screens/dashboard/ChatView.vue";
+import { verifiedIdentity } from "@/utils/identity";
 
 export default {
   components: {
@@ -512,6 +527,17 @@ export default {
         this.fetchChats(true);
       }
     },
+    isVerified(chat) {
+      return !!verifiedIdentity(chat);
+    },
+
+    // From a chat's "WhatsApp chat" link (the verified customer's WhatsApp chat)
+    openChatById(chatId) {
+      const chat = this.chats.find((c) => c.chatId === chatId);
+      this.selectedChatId = chatId;
+      this.aiEnabled = chat ? chat.aiEnabled : false;
+    },
+
     viewChat(chat) {
       // this.$router.push("/dashboard/chat/" + chat.chatId);
       this.selectedChatId = chat.chatId;

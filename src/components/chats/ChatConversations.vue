@@ -15,6 +15,14 @@
           <v-list-item-title class="text-body-2 font-weight-medium">
             {{ formatStart(c.startedAt) }}
             <span class="text-caption grey--text ml-1">{{ formatDuration(c) }}</span>
+            <span
+              v-if="verified(c)"
+              class="text-caption green--text text--darken-2 font-weight-bold ml-1"
+              :title="`Phone verified on WhatsApp: ${formatPhone(verified(c).phone)}`"
+            >
+              <v-icon size="12" color="green darken-1">$circle-check</v-icon>
+              Verified
+            </span>
           </v-list-item-title>
           <v-list-item-subtitle class="text-caption">
             {{ stat(c, "userMessages") }} from the customer · {{ stat(c, "botMessages") }} bot
@@ -46,6 +54,7 @@ import {
   formatStart,
   isOpen,
 } from "@/utils/conversations";
+import { formatPhone, verifiedIdentity } from "@/utils/identity";
 
 // A chat's conversations, newest first. Emits "select" with a conversation id.
 export default {
@@ -59,6 +68,8 @@ export default {
   methods: {
     formatStart,
     formatDuration,
+    formatPhone,
+    verified: verifiedIdentity,
     stat: (c, key) => c.stats?.[key] || 0,
     statusOf: (c) => (isOpen(c) ? OPEN_STATUS[c.status] || OPEN_STATUS.open : null),
     outcomeOf: (c) => OUTCOMES[c.outcome] || null,
