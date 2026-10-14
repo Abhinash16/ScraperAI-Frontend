@@ -150,48 +150,14 @@
         </v-alert>
 
         <template v-else>
-          <div v-if="origins.length" class="d-flex flex-wrap mb-3">
-            <v-chip
-              v-for="origin in origins"
-              :key="origin"
-              close
-              label
-              color="green lighten-5"
-              text-color="green darken-3"
-              class="font-weight-bold mr-2 mb-2"
-              @click:close="removeOrigin(origin)"
-            >
-              <v-icon left size="14">$globe</v-icon>
-              {{ origin }}
-            </v-chip>
-          </div>
-          <div v-else class="text-body-2 grey--text mb-3">
-            No domains added yet.
-          </div>
-
-          <v-form class="d-flex align-start" @submit.prevent="addOrigin">
-            <v-text-field
-              v-model.trim="draft"
-              placeholder="example.com or *.example.com"
-              outlined
-              dense
-              hide-details="auto"
-              :error-messages="draftError"
-              :disabled="origins.length >= MAX_ORIGINS"
-              class="mr-2"
-              @input="draftError = ''"
-            />
-            <v-btn
-              type="submit"
-              depressed
-              color="success"
-              height="40"
-              :disabled="!draft || origins.length >= MAX_ORIGINS"
-            >
-              <v-icon left size="16">$plus</v-icon>
-              Add
-            </v-btn>
-          </v-form>
+          <AllowListInput
+            ref="origins"
+            v-model="origins"
+            rule="domain"
+            :max="MAX_ORIGINS"
+            empty-text="No domains added yet."
+            @input="saveError = ''"
+          />
 
           <v-alert
             v-if="saveError"
@@ -350,12 +316,10 @@
 
 <script>
 import apiClient from "@/service/axios";
+import AllowListInput from "@/components/AllowListInput.vue";
 
 const ENDPOINT = "/clients/widget-settings";
 const MAX_ORIGINS = 20;
-// Mirrors the backend rule: a hostname, optionally prefixed with "*.".
-const ORIGIN_RE =
-  /^(\*\.)?([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/;
 // Mirrors the backend rule: strip spaces, dashes, brackets and a leading "+",
 // then 10–15 digits.
 const stripPhone = (input) => input.replace(/[\s\-()]/g, "").replace(/^\+/, "");
@@ -389,17 +353,10 @@ const THINGS_TO_KNOW = [
   },
 ];
 
-// Normalises what people paste ("https://www.Example.com/path") to a hostname.
-function normalise(input) {
-  return input
-    .trim()
-    .toLowerCase()
-    .replace(/^[a-z]+:\/\//, "")
-    .replace(/[/?#:].*$/, "");
-}
-
 export default {
   name: "WidgetSettings",
+
+  components: { AllowListInput },
 
   props: {
     apiKey: { type: String, default: "" },
@@ -413,8 +370,6 @@ export default {
 
       saved: [],
       origins: [],
-      draft: "",
-      draftError: "",
 
       loading: false,
       loadError: "",
@@ -483,34 +438,9 @@ export default {
       }
     },
 
-    addOrigin() {
-      const origin = normalise(this.draft);
-      if (!ORIGIN_RE.test(origin)) {
-        this.draftError = "Enter a domain like example.com or *.example.com";
-        return;
-      }
-      if (this.origins.includes(origin)) {
-        this.draftError = "Already in the list";
-        return;
-      }
-      if (this.origins.length >= MAX_ORIGINS) {
-        this.draftError = `You can add up to ${MAX_ORIGINS} domains`;
-        return;
-      }
-      this.origins.push(origin);
-      this.draft = "";
-      this.saveError = "";
-    },
-
-    removeOrigin(origin) {
-      this.origins = this.origins.filter((o) => o !== origin);
-      this.saveError = "";
-    },
-
     reset() {
       this.origins = [...this.saved];
-      this.draft = "";
-      this.draftError = "";
+      this.$refs.origins?.reset();
       this.saveError = "";
     },
 
