@@ -224,15 +224,14 @@
                 >
                   <div>
                     <!-- TEXT MESSAGE -->
-                    <div
+                    <ChatText
                       v-if="message.type === 'text'"
+                      :text="message.text"
                       :class="[
                         'text-body-2',
                         message.sender === 'user' ? '' : 'white--text',
                       ]"
-                    >
-                      {{ message.text }}
-                    </div>
+                    />
 
                     <!-- IMAGE MESSAGE -->
                     <div v-else-if="message.type === 'image'">
@@ -471,6 +470,7 @@ import { io } from "socket.io-client";
 import apiClient from "@/service/axios";
 import LiveTrace from "@/components/traces/LiveTrace.vue";
 import ChatConversations from "@/components/chats/ChatConversations.vue";
+import ChatText from "@/components/chats/ChatText.vue";
 import {
   OPEN_STATUS,
   endedLabel,
@@ -482,7 +482,7 @@ import {
 import { formatPhone, verifiedIdentity } from "@/utils/identity";
 
 export default {
-  components: { LiveTrace, ChatConversations },
+  components: { LiveTrace, ChatConversations, ChatText },
 
   props: {
     chatId: {

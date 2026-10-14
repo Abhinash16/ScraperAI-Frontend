@@ -416,16 +416,15 @@
                   rounded="lg"
                   class="px-3 py-2"
                 >
-                  <div
-                    class="text-body-2 text-pre-wrap text-break"
+                  <ChatText
+                    :text="m.text"
+                    class="text-body-2"
                     :class="
                       m.sender === 'user'
                         ? look.userText
                         : 'grey--text text--darken-4'
                     "
-                  >
-                    {{ m.text }}
-                  </div>
+                  />
                   <div
                     v-if="m.at"
                     class="text-caption text-right mt-1"
@@ -692,6 +691,7 @@
 import { isSetupRunning, loadSetup } from "@/utils/setup";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import AnswerTrace from "@/components/sandbox/AnswerTrace.vue";
+import ChatText from "@/components/chats/ChatText.vue";
 import {
   createSandboxSession,
   getSandboxSession,
@@ -751,7 +751,7 @@ const TIPS = [
 export default {
   name: "TryChat",
 
-  components: { ThingsToKnow, AnswerTrace },
+  components: { ThingsToKnow, AnswerTrace, ChatText },
 
   data() {
     return {
