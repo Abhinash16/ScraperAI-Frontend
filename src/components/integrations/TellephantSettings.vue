@@ -228,6 +228,50 @@
         </div>
       </v-card>
 
+      <!-- ============ BUSINESS NUMBER (phone verification) ============ -->
+      <v-card outlined rounded="lg" class="mb-4">
+        <div class="d-flex align-start px-5 py-4">
+          <v-avatar size="28" tile color="green lighten-5" class="rounded-lg mr-3 mt-1 flex-shrink-0">
+            <v-icon size="14" color="green darken-1">$circle-check</v-icon>
+          </v-avatar>
+          <div>
+            <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
+              WhatsApp business number
+            </div>
+            <div class="text-body-2 grey--text text--darken-1">
+              The number customers message. It's used for phone verification in website and app chats:
+              customers prove their number by sending a ready-made message to it, with no code to type.
+            </div>
+          </div>
+        </div>
+        <v-divider />
+        <div class="pa-5">
+          <v-form class="d-flex align-start" @submit.prevent="saveNumber">
+            <v-text-field
+              v-model.trim="number"
+              placeholder="919876543210"
+              hint="With the country code, e.g. 919876543210. Leave empty to turn verification off."
+              persistent-hint
+              outlined
+              dense
+              class="mr-2"
+              :error-messages="numberError"
+              @input="numberError = ''"
+            />
+            <v-btn
+              color="primary"
+              depressed
+              height="40"
+              type="submit"
+              :loading="savingNumber"
+              :disabled="!numberDirty"
+            >
+              Save number
+            </v-btn>
+          </v-form>
+        </div>
+      </v-card>
+
       <!-- ============ STEP 4: OLD URL ============ -->
       <v-card v-if="info.legacyWebhookEnabled" outlined rounded="lg" class="mb-4">
         <div class="d-flex align-start px-5 py-4">
@@ -380,6 +424,10 @@ export default {
       savingKey: false,
       toggling: false,
 
+      number: "",
+      numberError: "",
+      savingNumber: false,
+
       showUrl: false,
       disablingLegacy: false,
       regenerating: false,
@@ -389,6 +437,10 @@ export default {
   },
 
   computed: {
+    numberDirty() {
+      return this.number !== (this.info?.whatsappNumber || "");
+    },
+
     receivedViaKey() {
       return this.info?.lastInbound?.via === "key";
     },
@@ -409,8 +461,11 @@ export default {
   },
 
   methods: {
+    // Keeps a number that's being typed (e.g. across a Refresh)
     apply(data) {
+      const editing = this.info && this.numberDirty;
       this.info = data || {};
+      if (!editing) this.number = this.info.whatsappNumber || "";
     },
 
     errorMessage(err, fallback) {
@@ -450,6 +505,23 @@ export default {
         this.keyError = this.errorMessage(err, "Failed to save the API key");
       } finally {
         this.savingKey = false;
+      }
+    },
+
+    // Sends only the number ("" clears it); the backend strips spaces, + and -
+    async saveNumber() {
+      if (!this.numberDirty) return;
+      this.savingNumber = true;
+      this.numberError = "";
+      try {
+        const { data } = await apiClient.put(ENDPOINT, { whatsappNumber: this.number });
+        this.apply(data.data);
+        this.number = this.info.whatsappNumber || "";
+        this.$toast.success(this.info.whatsappNumber ? "WhatsApp number saved" : "WhatsApp number removed");
+      } catch (err) {
+        this.numberError = this.errorMessage(err, "Failed to save the number");
+      } finally {
+        this.savingNumber = false;
       }
     },
 

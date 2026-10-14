@@ -237,10 +237,12 @@ export const FEATURE_GUIDES = [
       "Save your Tellephant API key. We check it with Tellephant when you save.",
       "Paste the webhook URL into your Tellephant account.",
       "Turn on automatic replies.",
+      "Add your WhatsApp business number to turn on phone verification for website and app chats.",
     ],
     thingsToKnow: [
       "Treat the webhook URL as a password. If it leaks, regenerate it.",
       "WhatsApp chats show up in Chats next to website chats.",
+      "Customers chatting on your website or app can prove their phone number by sending a ready-made message to your WhatsApp number, with no code to type. Add your WhatsApp business number here to turn it on. Verified chats show a ✓ with the number, and the verification lasts for that conversation.",
     ],
   },
   {
