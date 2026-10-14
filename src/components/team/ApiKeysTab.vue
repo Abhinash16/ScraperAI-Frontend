@@ -12,35 +12,37 @@
     </v-alert>
 
     <template v-else>
-      <!-- ============ LEGACY WIDGET KEY ============ -->
+      <ApiKeysExplainer v-if="loaded" :force-open="!keys.length" />
+
+      <!-- ============ WIDGET KEY ============ -->
       <v-card v-if="legacyKey && legacyKey.key" outlined rounded="lg" class="mb-4">
         <div class="d-flex align-center flex-wrap px-5 py-4">
-          <v-avatar size="32" tile color="primary lighten-5" class="rounded-lg mr-3 flex-shrink-0">
-            <v-icon size="16" color="primary">$code</v-icon>
+          <v-avatar size="32" tile color="green lighten-5" class="rounded-lg mr-3 flex-shrink-0">
+            <v-icon size="16" color="green darken-1">$code</v-icon>
           </v-avatar>
-          <div class="flex-grow-1 overflow-hidden mr-3">
-            <div class="d-flex align-center">
+          <div class="flex-grow-1 overflow-hidden mr-3 my-1">
+            <div class="d-flex align-center flex-wrap">
               <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4 mr-2">
-                Widget snippet key (live)
+                Your website widget's key
               </span>
-              <ApiKeyModeChip mode="live" />
+              <v-chip x-small label color="grey lighten-4" class="font-weight-bold">Already set up</v-chip>
+            </div>
+            <div class="text-caption grey--text text--darken-1">
+              It's in the chat script on your website, so there's nothing to do here.
+              {{
+                legacyKey.allowedOrigins.length
+                  ? `It works on ${legacyKey.allowedOrigins.join(", ")}.`
+                  : "It works on any website until you add your domains in Widget settings."
+              }}
             </div>
             <div class="d-flex align-center">
-              <code class="key-text text-caption text-truncate mr-1">{{ legacyKey.key }}</code>
-              <v-btn icon x-small aria-label="Copy widget key" @click="copy(legacyKey.key)">
+              <code class="key-text text-caption text-truncate grey--text text--darken-2">{{ legacyKey.key }}</code>
+              <v-btn icon x-small class="ml-1" aria-label="Copy widget key" @click="copy(legacyKey.key)">
                 <v-icon size="14">$copy</v-icon>
               </v-btn>
             </div>
-            <div class="text-caption grey--text text--darken-1">
-              The key in your website's script tag.
-              {{
-                legacyKey.allowedOrigins.length
-                  ? `Allowed on ${legacyKey.allowedOrigins.join(", ")}.`
-                  : "Works on any website."
-              }}
-            </div>
           </div>
-          <v-btn small text color="primary" class="px-2" :to="WIDGET_ROUTE">
+          <v-btn small outlined color="primary" class="my-1" :to="WIDGET_ROUTE">
             Widget settings
             <v-icon right size="14">$arrow-right</v-icon>
           </v-btn>
@@ -50,10 +52,15 @@
       <!-- ============ KEYS ============ -->
       <v-card outlined rounded="lg" class="overflow-hidden">
         <div class="d-flex align-center flex-wrap px-5 py-3">
-          <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4">API keys</span>
-          <v-chip v-if="keys.length" x-small label class="font-weight-bold ml-2">
-            {{ activeCount }} active
-          </v-chip>
+          <div class="mr-3 my-1">
+            <div class="d-flex align-center">
+              <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4">Keys for your own website, app or server</span>
+              <v-chip v-if="keys.length" x-small label class="font-weight-bold ml-2">
+                {{ activeCount }} active
+              </v-chip>
+            </div>
+            <div class="text-caption grey--text text--darken-1">For developers using our SDKs or the Chat API.</div>
+          </div>
           <v-spacer />
           <span v-if="atLimit" class="text-caption grey--text text--darken-1 mr-3">
             At most {{ MAX_ACTIVE_KEYS }} active keys; revoke one first.
@@ -72,9 +79,9 @@
             <v-icon size="28" color="grey">$key-round</v-icon>
           </v-avatar>
           <div class="text-subtitle-1 font-weight-bold grey--text text--darken-3 mb-1">No API keys yet</div>
-          <div class="text-body-2 grey--text text--darken-1 mb-4" style="max-width: 440px">
-            API keys let your own website or app use chat through our SDKs. Create a publishable key for your
-            site or app, or a secret key for your servers.
+          <div class="text-body-2 grey--text text--darken-1 mb-4" style="max-width: 460px">
+            You only need one when a developer is adding chat to your own website, app or server. Not sure
+            which kind? Start with a publishable test key: it's safe to try things with.
           </div>
           <v-btn small depressed color="primary" @click="openDialog(null)">
             <v-icon left size="14">$plus</v-icon>
@@ -104,9 +111,9 @@
           <template v-slot:item.kind="{ item }">
             <span class="d-inline-flex align-center text-body-2 text-no-wrap">
               <v-icon size="14" class="mr-1" color="grey darken-1">
-                {{ item.kind === "secret" ? "$lock" : "$globe" }}
+                {{ item.kind === "secret" ? "$server" : "$globe" }}
               </v-icon>
-              {{ item.kind === "secret" ? "Secret" : "Publishable" }}
+              {{ item.kind === "secret" ? "Server (secret)" : "Website or app" }}
             </span>
           </template>
 
@@ -135,7 +142,7 @@
 
           <!-- eslint-disable-next-line vue/valid-v-slot -->
           <template v-slot:item.allowed="{ item }">
-            <span v-if="item.kind === 'secret'" class="text-caption grey--text">Servers only</span>
+            <span v-if="item.kind === 'secret'" class="text-caption grey--text">Your server only</span>
             <span
               v-else-if="!item.allowedOrigins.length && !item.allowedApps.length"
               class="text-caption amber--text text--darken-4 font-weight-bold"
@@ -234,6 +241,7 @@ import ApiKeyDialog from "@/components/team/ApiKeyDialog.vue";
 import SecretKeyDialog from "@/components/team/SecretKeyDialog.vue";
 import ConfirmDialog from "@/components/team/ConfirmDialog.vue";
 import ApiKeyModeChip from "@/components/team/ApiKeyModeChip.vue";
+import ApiKeysExplainer from "@/components/team/ApiKeysExplainer.vue";
 import { apiError } from "@/utils/team";
 import { API_KEYS_ENDPOINT, MAX_ACTIVE_KEYS, OPEN_KEY_HINT } from "@/utils/apiKeys";
 
@@ -241,10 +249,10 @@ const WIDGET_ROUTE = { path: "/dashboard/integration", query: { section: "widget
 
 const HEADERS = [
   { text: "Name", value: "name" },
-  { text: "Type", value: "kind" },
+  { text: "Used in", value: "kind" },
   { text: "Mode", value: "mode" },
   { text: "Key", value: "key", width: 260 },
-  { text: "Allowed websites / apps", value: "allowed" },
+  { text: "Who can use it", value: "allowed" },
   { text: "Last used", value: "lastUsedAt" },
   { text: "Status", value: "status" },
   { text: "", value: "actions", align: "end", width: 48 },
@@ -254,7 +262,7 @@ const HEADERS = [
 export default {
   name: "ApiKeysTab",
 
-  components: { ApiKeyDialog, SecretKeyDialog, ConfirmDialog, ApiKeyModeChip },
+  components: { ApiKeyDialog, SecretKeyDialog, ConfirmDialog, ApiKeyModeChip, ApiKeysExplainer },
 
   data() {
     return {

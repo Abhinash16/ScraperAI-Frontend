@@ -20,7 +20,7 @@
 
       <v-card-text class="pa-5">
         <template v-if="!editing">
-          <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">Type</div>
+          <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-2">Where will this key be used?</div>
           <v-item-group v-model="form.kind" mandatory class="mb-5">
             <v-row dense>
               <v-col v-for="kind in KINDS" :key="kind.id" cols="12" sm="6">
@@ -39,6 +39,7 @@
                       </v-icon>
                       <span class="text-body-2 font-weight-bold grey--text text--darken-4">{{ kind.name }}</span>
                     </div>
+                    <div class="text-caption font-weight-bold grey--text text--darken-2 mb-1">{{ kind.label }}</div>
                     <div class="text-caption grey--text text--darken-1">{{ kind.text }}</div>
                   </v-card>
                 </v-item>
@@ -46,7 +47,7 @@
             </v-row>
           </v-item-group>
 
-          <div class="text-caption font-weight-bold text-uppercase grey--text mb-2">Mode</div>
+          <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-2">Real customers or testing?</div>
           <v-item-group v-model="form.mode" mandatory class="mb-5">
             <v-row dense>
               <v-col v-for="mode in MODES" :key="mode.id" cols="12" sm="6">
@@ -69,6 +70,7 @@
                       >
                         {{ mode.name }}
                       </v-chip>
+                      <span class="text-body-2 font-weight-bold grey--text text--darken-4">{{ mode.label }}</span>
                     </div>
                     <div class="text-caption grey--text text--darken-1">{{ mode.text }}</div>
                   </v-card>
@@ -81,7 +83,9 @@
         <v-text-field
           v-model="form.name"
           label="Name"
-          placeholder="e.g. iOS app, Marketing site"
+          placeholder="e.g. iPhone app, Marketing site"
+          persistent-hint
+          hint="So you can tell your keys apart. Only you see it."
           outlined
           dense
           counter="80"
@@ -91,15 +95,16 @@
         />
 
         <template v-if="isPublishable">
-          <div class="text-caption font-weight-bold text-uppercase grey--text mb-1">Allowed websites</div>
+          <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-1">Which websites can use it?</div>
           <div class="text-caption grey--text text--darken-1 mb-2">
-            Use <code>example.com</code> for one site or <code>*.example.com</code> for all its subdomains.
+            Type <code>example.com</code> for one site, or <code>*.example.com</code> for all its subdomains.
           </div>
           <AllowListInput ref="origins" v-model="form.allowedOrigins" rule="domain" dense class="mb-5" />
 
-          <div class="text-caption font-weight-bold text-uppercase grey--text mb-1">Allowed apps</div>
+          <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-1">Which mobile apps can use it?</div>
           <div class="text-caption grey--text text--darken-1 mb-2">
-            The iOS bundle ID or Android package name, e.g. <code>com.example.app</code>.
+            Your app's ID, e.g. <code>com.example.app</code>. Your developer will know it (the iOS bundle ID or
+            Android package name).
           </div>
           <AllowListInput ref="apps" v-model="form.allowedApps" rule="app" dense class="mb-4" />
 
@@ -117,7 +122,8 @@
 
         <v-alert v-else-if="!editing" text dense color="primary" rounded="lg" class="text-body-2 mb-0">
           <span class="grey--text text--darken-3">
-            You'll see the full secret key once, right after you create it.
+            You'll see the full secret key only once, right after you create it. Have somewhere safe ready to
+            store it, like your server's settings or a password manager.
           </span>
         </v-alert>
 
@@ -147,15 +153,17 @@ import { API_KEYS_ENDPOINT, OPEN_KEY_HINT } from "@/utils/apiKeys";
 const KINDS = [
   {
     id: "publishable",
-    name: "Publishable",
+    name: "In a website or mobile app",
+    label: "Publishable key",
     icon: "$globe",
-    text: "Goes in your website or app. You choose where it may be used.",
+    text: "Visitors can see it, so you choose which websites and apps may use it.",
   },
   {
     id: "secret",
-    name: "Secret",
-    icon: "$lock",
-    text: "For your servers only. Never put it in a website or app.",
+    name: "On my server",
+    label: "Secret key",
+    icon: "$server",
+    text: "For your developers' backend code. Keep it private, like a password.",
   },
 ];
 
@@ -163,16 +171,18 @@ const MODES = [
   {
     id: "live",
     name: "Live",
+    label: "Real customers",
     chipColor: "green lighten-5",
     chipText: "green darken-3",
-    text: "Real chats with your customers.",
+    text: "Chats work fully: webhooks are sent and they count in your reports.",
   },
   {
     id: "test",
     name: "Test",
+    label: "Testing only",
     chipColor: "amber lighten-4",
     chipText: "amber darken-4",
-    text: "For trying things out: no webhooks, and the chats stay out of your reports.",
+    text: "The bot answers normally, but no webhooks are sent and chats stay out of your reports.",
   },
 ];
 
