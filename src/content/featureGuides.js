@@ -206,6 +206,27 @@ export const FEATURE_GUIDES = [
     ],
   },
   {
+    id: "api-keys",
+    name: "API keys",
+    icon: "$key-round",
+    route: "/dashboard/team?tab=api-keys",
+    summary:
+      "API keys let your own website or app use ScraperAI chat through our SDKs. Publishable keys go in your site or app, and you choose which domains and app IDs may use them. Secret keys stay on your servers. Test keys let you try everything without sending webhooks or affecting your reports. Revoking a key stops it immediately.",
+    steps: [
+      "Open Team & security → API keys and create a key.",
+      "For a website or app, create a publishable key and add your domains and app IDs.",
+      "For your servers, create a secret key and store it right away: you'll only see it once.",
+      "Try things with a test key first, then switch to a live key.",
+    ],
+    thingsToKnow: [
+      "A publishable key with no domains or app IDs works from any website or app. Add yours to stop others from using it.",
+      "Never put a secret key in a website or app. If one leaks, revoke it and create a new one.",
+      "Chats opened with a test key show a Test chip in the inbox. The bot answers normally, but no webhooks fire, nothing is learned and they don't count in reports.",
+      "Revoking a key stops it immediately: apps and websites using it can't chat any more. Revoked keys can't be edited or turned back on.",
+      "Your website widget's script tag keeps its own key. Manage its domains in Widget settings.",
+    ],
+  },
+  {
     id: "whatsapp",
     name: "WhatsApp",
     icon: "$whatsapp",

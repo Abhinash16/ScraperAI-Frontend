@@ -146,7 +146,8 @@ const routes = [
         name: "Team",
         component: () => import("../screens/dashboard/TeamManagement.vue"),
         meta: {
-          permission: ["user:manage", "role:manage"],
+          // settings:manage for the API keys tab
+          permission: ["user:manage", "role:manage", "settings:manage"],
         },
       },
       { path: "user-list", redirect: "/dashboard/team" },

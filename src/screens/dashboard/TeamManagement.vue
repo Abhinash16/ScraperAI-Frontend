@@ -8,7 +8,7 @@
       </div>
     </div>
 
-    <ThingsToKnow feature="team" />
+    <ThingsToKnow :feature="tab === 'api-keys' ? 'api-keys' : 'team'" />
 
     <template v-if="!me">
       <v-alert v-if="meError" type="error" text rounded="lg" class="text-body-2">
@@ -44,6 +44,10 @@
           <v-icon size="16" class="mr-2">$shield-user</v-icon>
           Roles
         </v-tab>
+        <v-tab v-if="canManageKeys" tab-value="api-keys" class="text-body-2 font-weight-bold">
+          <v-icon size="16" class="mr-2">$key-round</v-icon>
+          API keys
+        </v-tab>
       </v-tabs>
 
       <MembersTab
@@ -53,9 +57,10 @@
         @open-roles="setTab('roles')"
       />
       <RolesTab v-else-if="tab === 'roles'" :me="me" />
+      <ApiKeysTab v-else-if="tab === 'api-keys'" />
       <v-alert v-else type="warning" text rounded="lg" class="text-body-2">
-        You need the <code>user:manage</code> or <code>role:manage</code> permission to manage your
-        team.
+        You need the <code>user:manage</code>, <code>role:manage</code> or <code>settings:manage</code>
+        permission to open this page.
       </v-alert>
     </template>
   </div>
@@ -66,12 +71,13 @@ import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import apiClient from "@/service/axios";
 import MembersTab from "@/components/team/MembersTab.vue";
 import RolesTab from "@/components/team/RolesTab.vue";
+import ApiKeysTab from "@/components/team/ApiKeysTab.vue";
 import { apiError, FULL_ACCESS } from "@/utils/team";
 
 export default {
   name: "TeamManagement",
 
-  components: { ThingsToKnow, MembersTab, RolesTab },
+  components: { ThingsToKnow, MembersTab, RolesTab, ApiKeysTab },
 
   data() {
     return { me: null, meError: "" };
@@ -86,11 +92,16 @@ export default {
       return this.hasPermission("role:manage");
     },
 
+    canManageKeys() {
+      return this.hasPermission("settings:manage");
+    },
+
     // The requested tab if allowed, otherwise the first tab this user can see.
     tab() {
       const allowed = [
         this.canManageUsers && "members",
         this.canManageRoles && "roles",
+        this.canManageKeys && "api-keys",
       ].filter(Boolean);
       return allowed.includes(this.$route.query.tab) ? this.$route.query.tab : allowed[0];
     },

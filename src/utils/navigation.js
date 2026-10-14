@@ -244,18 +244,24 @@ export const NAV_GROUPS = [
         id: "team",
         name: "Team & security",
         icon: "$shield-user",
-        description: "Users, roles and IP allowlist",
+        description: "Users, roles, IP allowlist and API keys",
         tabs: [
           {
             name: "Users & roles",
             to: link("/dashboard/team"),
             permission: ["user:manage", "role:manage"],
-            match: startsWith("/dashboard/team"),
+            match: (r) => startsWith("/dashboard/team")(r) && r.query.tab !== "api-keys",
           },
           {
             name: "Security",
             to: link("/dashboard/profile", { section: "security" }),
             match: queryIs("/dashboard/profile", "section", "security"),
+          },
+          {
+            name: "API keys",
+            to: link("/dashboard/team", { tab: "api-keys" }),
+            permission: "settings:manage",
+            match: queryIs("/dashboard/team", "tab", "api-keys"),
           },
         ],
       },
