@@ -25,6 +25,18 @@
       </div>
       <v-spacer />
       <v-btn
+        v-if="countFor('completed')"
+        small
+        depressed
+        color="primary"
+        class="mb-2 mr-2"
+        :loading="summarizing"
+        @click="summarizeNow"
+      >
+        <v-icon left size="14">$sparkles</v-icon>
+        Summarise now
+      </v-btn>
+      <v-btn
         small
         outlined
         color="primary"
@@ -36,6 +48,16 @@
         Refresh
       </v-btn>
     </div>
+
+    <v-alert
+      v-if="summaryMessage"
+      dense
+      text
+      :type="summaryMessageType"
+      class="mb-4"
+    >
+      {{ summaryMessage }}
+    </v-alert>
 
     <!-- LOADING -->
     <template v-if="loading && !calls.length">
@@ -142,6 +164,12 @@
             </div>
             <div class="text-body-2 grey--text text--darken-3 text-break">
               {{ batchInfo.batchSummary }}
+            </div>
+            <div
+              v-if="summaryCoverage"
+              class="text-caption grey--text text--darken-1 mt-2"
+            >
+              {{ summaryCoverage }}
             </div>
           </div>
         </div>
@@ -388,6 +416,9 @@ export default {
       },
       loading: false,
       retryingId: null,
+      requestingSummary: false,
+      summaryRequestError: "",
+      pollTimer: null,
       STATUS_FILTERS,
       statusFilter: "all",
       search: "",
@@ -399,6 +430,32 @@ export default {
       return Array.isArray(this.batchInfo.batchInsights)
         ? this.batchInfo.batchInsights
         : [];
+    },
+    summarizing() {
+      return (
+        this.requestingSummary || this.batchInfo.status === "summarizing"
+      );
+    },
+    summaryMessage() {
+      if (this.summaryRequestError) return this.summaryRequestError;
+      if (this.batchInfo.status === "summarizing")
+        return "Writing the summary of the finished calls. This takes about a minute.";
+      return this.batchInfo.summaryError || "";
+    },
+    summaryMessageType() {
+      return this.batchInfo.status === "summarizing" && !this.summaryRequestError
+        ? "info"
+        : "warning";
+    },
+    // A day batch can be summarised before the day ends: say how much it covers
+    summaryCoverage() {
+      const covered = this.batchInfo.summarizedCalls;
+      if (!covered || !this.batchInfo.summarizedAt) return "";
+      const when = new Date(this.batchInfo.summarizedAt).toLocaleString();
+      const total = this.batchInfo.processedCalls || covered;
+      return covered < total
+        ? `Covers ${covered} of ${total} finished calls (summarised ${when}). Summarise again to include the rest.`
+        : `Covers ${covered} finished call${covered === 1 ? "" : "s"} (summarised ${when}).`;
     },
     scoreValue() {
       const s = this.batchInfo.averageQualityScore;
@@ -445,6 +502,10 @@ export default {
 
   mounted() {
     this.fetchBatch();
+  },
+
+  beforeDestroy() {
+    clearTimeout(this.pollTimer);
   },
 
   methods: {
@@ -500,10 +561,51 @@ export default {
           batchInsights: [],
         };
         this.calls = data.calls || [];
+        this.pollWhileSummarizing();
       } catch (error) {
         console.error("Failed to fetch batch:", error);
       } finally {
         this.loading = false;
+      }
+    },
+
+    // The summary is written in the background: check back until it's done
+    pollWhileSummarizing() {
+      clearTimeout(this.pollTimer);
+      if (this.batchInfo.status !== "summarizing") return;
+      this.pollTimer = setTimeout(async () => {
+        try {
+          const { data } = await apiClient.get(
+            `/call-analysis/batch/${this.$route.params.id}`
+          );
+          if (data.batch) this.batchInfo = data.batch;
+        } catch (error) {
+          console.error("Failed to check the summary:", error);
+        }
+        this.pollWhileSummarizing();
+      }, 4000);
+    },
+
+    async summarizeNow() {
+      this.summaryRequestError = "";
+      try {
+        this.requestingSummary = true;
+        const { data } = await apiClient.post(
+          `/call-analysis/batch/${this.$route.params.id}/summarize`
+        );
+        if (data.batch) this.batchInfo = { ...this.batchInfo, ...data.batch };
+        this.pollWhileSummarizing();
+      } catch (error) {
+        const code = error.response?.data?.code;
+        if (code === "summary_in_progress") {
+          await this.fetchBatch();
+        } else {
+          this.summaryRequestError =
+            error.response?.data?.error ||
+            "Couldn't start the summary. Try again in a moment.";
+        }
+      } finally {
+        this.requestingSummary = false;
       }
     },
 

@@ -430,6 +430,7 @@ export const FEATURE_GUIDES = [
     thingsToKnow: [
       "Recording URLs must be reachable by our servers. Private or expiring links will fail.",
       "Click an issue's timestamp to jump to that moment in the recording.",
+      "Calls sent from your system are grouped by day. A day's batch closes and gets its summary after midnight (India time), once every call is analysed. Use Summarise now to see a summary before then.",
     ],
   },
   {

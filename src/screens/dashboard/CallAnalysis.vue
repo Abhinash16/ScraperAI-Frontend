@@ -159,7 +159,7 @@
                   text-color="white"
                   class="font-weight-bold text-capitalize"
                 >
-                  {{ item.status }}
+                  {{ item.status === "summarizing" ? "Summarising" : item.status }}
                 </v-chip>
               </div>
               <div
@@ -527,6 +527,7 @@ export default {
       if (status === "completed") return "success";
       if (status === "failed") return "error";
       if (status === "processing") return "warning";
+      if (status === "summarizing") return "info";
 
       return "grey";
     },
