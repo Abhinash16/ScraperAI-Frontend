@@ -1,11 +1,9 @@
 <template>
   <div>
-    <!-- HEADER -->
+    <!-- HEADER (the section's tab strip above switches tabs) -->
     <div class="mb-4">
-      <h1 class="text-h6 font-weight-bold grey--text text--darken-4">Team</h1>
-      <div class="text-body-2 grey--text text--darken-1">
-        Invite people, decide what they can do, and keep access tidy.
-      </div>
+      <h1 class="text-h6 font-weight-bold grey--text text--darken-4">{{ heading.title }}</h1>
+      <div class="text-body-2 grey--text text--darken-1">{{ heading.text }}</div>
     </div>
 
     <ThingsToKnow :feature="tab === 'api-keys' ? 'api-keys' : 'team'" />
@@ -27,29 +25,6 @@
     </template>
 
     <template v-else>
-      <v-tabs
-        class="mb-4"
-        :value="tab"
-        color="primary"
-        background-color="transparent"
-        height="44"
-        slider-size="3"
-        @change="setTab"
-      >
-        <v-tab v-if="canManageUsers" tab-value="members" class="text-body-2 font-weight-bold">
-          <v-icon size="16" class="mr-2">$users</v-icon>
-          Members
-        </v-tab>
-        <v-tab v-if="canManageRoles" tab-value="roles" class="text-body-2 font-weight-bold">
-          <v-icon size="16" class="mr-2">$shield-user</v-icon>
-          Roles
-        </v-tab>
-        <v-tab v-if="canManageKeys" tab-value="api-keys" class="text-body-2 font-weight-bold">
-          <v-icon size="16" class="mr-2">$key-round</v-icon>
-          API keys
-        </v-tab>
-      </v-tabs>
-
       <MembersTab
         v-if="tab === 'members'"
         :me="me"
@@ -74,6 +49,15 @@ import RolesTab from "@/components/team/RolesTab.vue";
 import ApiKeysTab from "@/components/team/ApiKeysTab.vue";
 import { apiError, FULL_ACCESS } from "@/utils/team";
 
+const HEADINGS = {
+  members: { title: "Members", text: "Invite people, give each one a role, and remove access when someone leaves." },
+  roles: { title: "Roles", text: "Decide what each kind of team member can see and do." },
+  "api-keys": {
+    title: "API keys",
+    text: "Connect your own website, app or server to your chatbot.",
+  },
+};
+
 export default {
   name: "TeamManagement",
 
@@ -96,6 +80,10 @@ export default {
       return this.hasPermission("settings:manage");
     },
 
+    heading() {
+      return HEADINGS[this.tab || this.$route.query.tab] || { title: "Team & security", text: "" };
+    },
+
     // The requested tab if allowed, otherwise the first tab this user can see.
     tab() {
       const allowed = [
@@ -104,6 +92,15 @@ export default {
         this.canManageKeys && "api-keys",
       ].filter(Boolean);
       return allowed.includes(this.$route.query.tab) ? this.$route.query.tab : allowed[0];
+    },
+  },
+
+  watch: {
+    // Put the tab in the URL, so the section's tab strip highlights it
+    tab(tab) {
+      if (tab && this.$route.query.tab !== tab) {
+        this.$router.replace({ query: { ...this.$route.query, tab } }).catch(() => {});
+      }
     },
   },
 

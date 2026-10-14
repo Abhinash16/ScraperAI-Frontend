@@ -414,70 +414,6 @@
 
             <EscalationAlertEmails v-if="webhookTab === 'escalate' && canManageSettings" />
           </div>
-
-          <!-- ================= API KEYS ================= -->
-          <div v-if="section === 'api-keys'">
-            <v-alert text dense color="amber darken-3" rounded="lg" class="text-body-2 py-3 mb-4">
-              <template #prepend>
-                <v-icon color="amber darken-3" size="18" class="mr-3">$triangle-alert</v-icon>
-              </template>
-              <span class="grey--text text--darken-3">
-                Your API key is disabled until payment is made or the billing cycle lapses. Once we
-                receive payment, the key is reactivated.
-              </span>
-            </v-alert>
-
-            <v-card outlined rounded="lg">
-              <div class="d-flex align-center px-5 py-4">
-                <v-avatar size="40" tile color="primary lighten-5" class="rounded-lg mr-3 flex-shrink-0">
-                  <v-icon size="20" color="primary">$key</v-icon>
-                </v-avatar>
-                <div>
-                  <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">Your API key</div>
-                  <div class="text-caption grey--text text--darken-1">
-                    The website widget uses it to find your chatbot.
-                  </div>
-                </div>
-              </div>
-              <v-divider />
-
-              <div class="pa-5">
-                <v-sheet color="grey darken-4" dark rounded="lg" class="pa-4 mb-4">
-                  <div class="d-flex align-center mb-2">
-                    <span class="text-caption font-weight-bold text-uppercase grey--text">API key</span>
-                    <v-spacer />
-                    <v-btn
-                      x-small
-                      depressed
-                      color="success"
-                      :disabled="!currentLoggedInUser.apiKey"
-                      @click="copyApiKey"
-                    >
-                      <v-icon left size="12">$copy</v-icon>
-                      Copy
-                    </v-btn>
-                  </div>
-                  <div class="text-body-2 text-break grey--text text--lighten-3">
-                    {{ currentLoggedInUser.apiKey || "N/A" }}
-                  </div>
-                </v-sheet>
-
-                <v-sheet color="green lighten-5" rounded="lg" class="d-flex align-start flex-wrap pa-4">
-                  <v-icon size="18" color="success" class="mr-3 mt-1 flex-shrink-0">$shield-check</v-icon>
-                  <div class="flex-grow-1 text-body-2 grey--text text--darken-3 mr-3 mb-2">
-                    <strong class="grey--text text--darken-4">This key is public by design.</strong>
-                    It's in the widget script on your website, so anyone can see it. What protects it is
-                    your list of allowed domains: once you add domains, the widget only works on those
-                    sites.
-                  </div>
-                  <v-btn small outlined color="success" @click="setSection('widget')">
-                    <v-icon left size="14">$globe-lock</v-icon>
-                    Manage allowed domains
-                  </v-btn>
-                </v-sheet>
-              </div>
-            </v-card>
-          </div>
         </div>
       </v-col>
     </v-row>
@@ -726,15 +662,6 @@ export default {
           title: "Developer",
           items: [
             {
-              id: "api-keys",
-              name: "API Keys",
-              icon: "$key",
-              title: "API Key",
-              description:
-                "Your account key. The website widget uses it to find your chatbot.",
-              badge: { text: "Legacy", color: "warning" },
-            },
-            {
               id: "database",
               name: "Database",
               icon: "$database",
@@ -812,6 +739,13 @@ export default {
     webhookTab() {
       this.loadWebhookData();
     },
+  },
+
+  created() {
+    // The old "API Keys" section moved to Team & security → API keys
+    if (this.$route.query.section === "api-keys") {
+      this.$router.replace({ path: "/dashboard/team", query: { tab: "api-keys" } }).catch(() => {});
+    }
   },
 
   mounted() {
@@ -934,11 +868,6 @@ export default {
       } finally {
         this.webhookSaving = false;
       }
-    },
-
-    copyApiKey() {
-      navigator.clipboard.writeText(this.currentLoggedInUser.apiKey);
-      this.$toast.success("API key copied");
     },
   },
 };

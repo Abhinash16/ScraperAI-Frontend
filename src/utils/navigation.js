@@ -233,10 +233,10 @@ export const NAV_GROUPS = [
             match: queryIs("/dashboard/integration", "section", "webhooks"),
           },
           {
-            name: "AI & keys",
+            name: "AI provider",
             to: link("/dashboard/integration", { section: "ai-provider" }),
             permission: "settings:manage",
-            match: queryIs("/dashboard/integration", "section", ["ai-provider", "api-keys"]),
+            match: queryIs("/dashboard/integration", "section", "ai-provider"),
           },
         ],
       },
@@ -244,13 +244,19 @@ export const NAV_GROUPS = [
         id: "team",
         name: "Team & security",
         icon: "$shield-user",
-        description: "Users, roles, IP allowlist and API keys",
+        description: "Members, roles, sign-in security and API keys",
         tabs: [
           {
-            name: "Users & roles",
-            to: link("/dashboard/team"),
-            permission: ["user:manage", "role:manage"],
-            match: (r) => startsWith("/dashboard/team")(r) && r.query.tab !== "api-keys",
+            name: "Members",
+            to: link("/dashboard/team", { tab: "members" }),
+            permission: "user:manage",
+            match: queryIs("/dashboard/team", "tab", "members"),
+          },
+          {
+            name: "Roles",
+            to: link("/dashboard/team", { tab: "roles" }),
+            permission: "role:manage",
+            match: queryIs("/dashboard/team", "tab", "roles"),
           },
           {
             name: "Security",
