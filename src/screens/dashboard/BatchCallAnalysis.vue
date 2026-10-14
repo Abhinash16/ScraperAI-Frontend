@@ -134,6 +134,7 @@
               </div>
               <div class="text-caption grey--text text--darken-1">
                 {{ t.label }}
+                <template v-if="t.note"> · {{ t.note }}</template>
               </div>
             </div>
           </v-card>
@@ -373,6 +374,17 @@
             Report
           </v-btn>
           <v-btn
+            v-else-if="item.status === 'skipped' && canAnalyse"
+            small
+            outlined
+            color="primary"
+            :loading="analysingId === item._id"
+            @click="analyseCall(item._id)"
+          >
+            <v-icon left size="14">$sparkles</v-icon>
+            Analyse
+          </v-btn>
+          <v-btn
             v-else-if="item.status === 'processing'"
             small
             text
@@ -389,12 +401,14 @@
 
 <script>
 import apiClient from "@/service/axios";
+import { can, loadMyPermissions } from "@/utils/knowledge";
 
 const STATUS_FILTERS = [
   { value: "all", label: "All" },
   { value: "completed", label: "Completed" },
   { value: "processing", label: "Processing" },
   { value: "failed", label: "Failed" },
+  { value: "skipped", label: "Skipped" },
 ];
 
 export default {
@@ -416,6 +430,8 @@ export default {
       },
       loading: false,
       retryingId: null,
+      analysingId: null,
+      perms: [],
       requestingSummary: false,
       summaryRequestError: "",
       pollTimer: null,
@@ -457,15 +473,26 @@ export default {
         ? `Covers ${covered} of ${total} finished calls (summarised ${when}). Summarise again to include the rest.`
         : `Covers ${covered} finished call${covered === 1 ? "" : "s"} (summarised ${when}).`;
     },
+    canAnalyse() {
+      return can(this.perms, "call:reply");
+    },
+    // The batch's own counters cover every call; the loaded list may not
+    batchCount() {
+      const b = this.batchInfo;
+      return (field, status) =>
+        typeof b[field] === "number" ? b[field] : this.countFor(status);
+    },
     scoreValue() {
       const s = this.batchInfo.averageQualityScore;
       return typeof s === "number" ? s : 0;
     },
     tiles() {
+      const skipped = this.batchCount("skippedCalls", "skipped");
       return [
         {
           label: "Calls",
-          value: this.calls.length,
+          value: this.batchCount("totalCalls", "all"),
+          note: skipped ? `${skipped} skipped` : "",
           icon: "$phone",
           tone: "blue",
         },
@@ -477,7 +504,7 @@ export default {
         },
         {
           label: "Failed",
-          value: this.countFor("failed"),
+          value: this.batchCount("failedCalls", "failed"),
           icon: "$circle-alert",
           tone: "red",
         },
@@ -491,17 +518,22 @@ export default {
           (!q || (c.agentName || "").toLowerCase().includes(q))
       );
     },
+    // Of the calls that were (or are being) analysed; skipped calls don't count
     successRate() {
-      if (this.calls.length === 0) return 0;
-      const completed = this.calls.filter(
-        (call) => call.status === "completed"
-      ).length;
-      return Math.round((completed / this.calls.length) * 100);
+      const analysed =
+        this.batchCount("totalCalls", "all") -
+        this.batchCount("skippedCalls", "skipped");
+      if (analysed <= 0) return 0;
+      const completed = this.batchCount("processedCalls", "completed");
+      return Math.round((completed / analysed) * 100);
     },
   },
 
   mounted() {
     this.fetchBatch();
+    loadMyPermissions()
+      .then((perms) => (this.perms = perms))
+      .catch(() => {});
   },
 
   beforeDestroy() {
@@ -535,6 +567,7 @@ export default {
         completed: "success",
         failed: "error",
         processing: "warning",
+        skipped: "grey",
       };
       return colorMap[status] || "grey";
     },
@@ -544,6 +577,7 @@ export default {
         completed: "$circle-check",
         failed: "$circle-alert",
         processing: "$clock",
+        skipped: "$minus",
       };
       return iconMap[status] || "$circle-help";
     },
@@ -618,6 +652,23 @@ export default {
         console.error("Failed to retry call:", error);
       } finally {
         this.retryingId = null;
+      }
+    },
+
+    // Skipped calls (over the daily per-agent limit) are only analysed on request
+    async analyseCall(callId) {
+      try {
+        this.analysingId = callId;
+        await apiClient.post(`/call-analysis/analyze/${callId}`);
+        this.$toast.success("Analysing the call. Refresh in a minute to see it.");
+        await this.fetchBatch();
+      } catch (error) {
+        this.$toast.error(
+          error.response?.data?.error || "Couldn't start analysing this call."
+        );
+        if (error.response?.data?.code === "not_skipped") await this.fetchBatch();
+      } finally {
+        this.analysingId = null;
       }
     },
 

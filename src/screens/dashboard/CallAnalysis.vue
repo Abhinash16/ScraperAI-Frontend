@@ -180,6 +180,13 @@
                     item.totalCalls === 1 ? "" : "s"
                   }}
                 </span>
+                <span
+                  v-if="item.skippedCalls"
+                  class="d-inline-flex align-center mr-4"
+                >
+                  <v-icon size="12" class="mr-1">$minus</v-icon>
+                  {{ item.skippedCalls }} skipped
+                </span>
                 <span class="d-inline-flex align-center">
                   <v-icon size="12" class="mr-1">$clock</v-icon>
                   {{ formatDate(item.createdAt) }}

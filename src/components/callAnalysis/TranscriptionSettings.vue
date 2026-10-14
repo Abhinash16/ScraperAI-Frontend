@@ -96,10 +96,46 @@
             >
             <span>
               Applies to new calls. To re-transcribe an old call, retry it.
-              <template v-if="!canManage">
-                Only people who can manage settings can change this.
-              </template>
             </span>
+          </div>
+
+          <v-divider class="my-5" />
+
+          <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
+            Calls analysed automatically per agent per day
+          </div>
+          <div class="text-body-2 grey--text text--darken-1 mb-3">
+            Extra calls are saved as Skipped. Open the batch and press Analyse
+            to analyse one.
+          </div>
+          <v-checkbox
+            v-model="limitDefault"
+            :label="`Use default (${defaultLimitText})`"
+            class="mt-0"
+            hide-details
+            :disabled="!canManage || saving"
+          />
+          <v-text-field
+            v-if="!limitDefault"
+            v-model.number="limit"
+            type="number"
+            min="0"
+            max="1000"
+            label="Calls per agent per day"
+            hint="0 means no limit."
+            persistent-hint
+            outlined
+            dense
+            class="mt-3"
+            :rules="[validLimit || 'Enter a whole number from 0 to 1000.']"
+            :disabled="!canManage || saving"
+          />
+
+          <div
+            v-if="!canManage"
+            class="text-caption grey--text text--darken-1 mt-4"
+          >
+            Only people who can manage settings can change these.
           </div>
         </template>
       </v-card-text>
@@ -114,7 +150,7 @@
           v-if="canManage"
           color="primary"
           depressed
-          :disabled="loading || !!loadError || !changed"
+          :disabled="loading || !!loadError || !changed || !validLimit"
           :loading="saving"
           @click="save"
         >
@@ -144,6 +180,8 @@ export default {
       loadError: "",
       settings: null,
       choice: DEFAULT,
+      limitDefault: true,
+      limit: null,
       perms: [],
     };
   },
@@ -170,8 +208,27 @@ export default {
     saved() {
       return this.settings?.transcriptionModel || DEFAULT;
     },
-    changed() {
+    modelChanged() {
       return this.choice !== this.saved;
+    },
+    // null = the platform default
+    limitValue() {
+      return this.limitDefault ? null : this.limit;
+    },
+    limitChanged() {
+      return this.limitValue !== (this.settings?.maxCallsPerAgentPerDay ?? null);
+    },
+    validLimit() {
+      const n = this.limitValue;
+      return n === null || (Number.isInteger(n) && n >= 0 && n <= 1000);
+    },
+    changed() {
+      return this.modelChanged || this.limitChanged;
+    },
+    defaultLimitText() {
+      const n = this.settings?.defaultMaxCallsPerAgentPerDay;
+      if (n == null) return "recommended";
+      return n === 0 ? "no limit" : String(n);
     },
   },
 
@@ -188,6 +245,10 @@ export default {
     apply(settings) {
       this.settings = settings;
       this.choice = this.saved;
+      const own = settings?.maxCallsPerAgentPerDay;
+      this.limitDefault = own == null;
+      this.limit =
+        own == null ? settings?.effectiveMaxCallsPerAgentPerDay ?? null : own;
     },
 
     async load() {
@@ -211,9 +272,12 @@ export default {
     async save() {
       this.saving = true;
       try {
-        const { data } = await apiClient.put("/call-analysis/settings", {
-          transcriptionModel: this.choice === DEFAULT ? null : this.choice,
-        });
+        // Only the fields sent are changed
+        const body = {};
+        if (this.modelChanged)
+          body.transcriptionModel = this.choice === DEFAULT ? null : this.choice;
+        if (this.limitChanged) body.maxCallsPerAgentPerDay = this.limitValue;
+        const { data } = await apiClient.put("/call-analysis/settings", body);
         this.apply(data.data);
         this.$toast.success("Call settings saved");
         this.$emit("input", false);
