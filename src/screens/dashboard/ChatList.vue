@@ -215,6 +215,19 @@
                   class="font-weight-bold grey--text text--darken-4"
                 >
                   {{ chat.chatId }}
+                  <!-- Opened with a pk_test_ key: no webhooks, not learned
+                       from, not in reports -->
+                  <v-chip
+                    v-if="chat.test"
+                    x-small
+                    label
+                    color="amber lighten-4"
+                    text-color="amber darken-4"
+                    class="font-weight-bold ml-1"
+                    title="Opened with a test key: no webhooks, nothing learned, not in reports"
+                  >
+                    Test
+                  </v-chip>
                 </v-list-item-title>
                 <v-list-item-subtitle class="d-flex align-center">
                   <v-icon
