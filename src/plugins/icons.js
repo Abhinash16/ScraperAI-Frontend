@@ -157,6 +157,7 @@ import {
   SunMoon,
   Inbox,
   LogOut,
+  Settings,
 } from "lucide";
 import * as brands from "@/icons/brands";
 
@@ -200,6 +201,7 @@ const APP_ICONS = {
   "sun-moon": SunMoon,
   "inbox": Inbox,
   "log-out": LogOut,
+  "settings": Settings,
   "star": Star,
   "check-check": CheckCheck,
   "git-compare": GitCompare,

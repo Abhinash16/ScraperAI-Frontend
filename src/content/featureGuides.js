@@ -431,6 +431,7 @@ export const FEATURE_GUIDES = [
       "Recording URLs must be reachable by our servers. Private or expiring links will fail.",
       "Click an issue's timestamp to jump to that moment in the recording.",
       "Calls sent from your system are grouped by day. A day's batch closes and gets its summary after midnight (India time), once every call is analysed. Use Summarise now to see a summary before then.",
+      "Settings on the Calls page chooses how recordings are turned into text. Some options tell the agent and the customer apart; with others, speaker labels are estimated. A change applies to new calls; retry an old call to transcribe it again.",
     ],
   },
   {

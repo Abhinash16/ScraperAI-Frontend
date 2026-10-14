@@ -13,6 +13,15 @@
       </div>
       <v-spacer />
       <v-btn
+        outlined
+        color="primary"
+        class="mb-2 mr-2"
+        @click="settingsDialog = true"
+      >
+        <v-icon left size="16">$settings</v-icon>
+        Settings
+      </v-btn>
+      <v-btn
         depressed
         color="primary"
         class="font-weight-bold mb-2"
@@ -202,6 +211,8 @@
         </v-card>
       </template>
     </v-data-iterator>
+
+    <TranscriptionSettings v-model="settingsDialog" />
 
     <!-- UPLOAD BATCH -->
     <v-dialog v-model="uploadDialog" max-width="640" persistent scrollable>
@@ -418,10 +429,11 @@
 
 <script>
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
+import TranscriptionSettings from "@/components/callAnalysis/TranscriptionSettings.vue";
 import apiClient from "@/service/axios";
 
 export default {
-  components: { ThingsToKnow },
+  components: { ThingsToKnow, TranscriptionSettings },
 
   data() {
     return {
@@ -434,6 +446,7 @@ export default {
 
       batchDialog: false,
       uploadDialog: false,
+      settingsDialog: false,
 
       tab: 0,
 

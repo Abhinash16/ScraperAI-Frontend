@@ -252,15 +252,52 @@
               >
             </div>
             <v-divider />
+            <div
+              v-if="speakerHint"
+              class="d-flex align-start text-caption grey--text text--darken-1 px-5 pt-3"
+            >
+              <v-icon size="14" color="grey darken-1" class="mr-2 mt-1"
+                >$info</v-icon
+              >
+              <span>{{ speakerHint }}</span>
+            </div>
             <v-sheet
               color="grey lighten-5"
               max-height="480"
-              class="overflow-y-auto px-5 py-4 rounded-b-lg"
+              class="overflow-y-auto px-5 py-4 mt-3 rounded-b-lg"
             >
               <div
-                class="text-body-2 grey--text text--darken-3 text-pre-wrap text-break"
+                v-if="!turns.length"
+                class="text-body-2 grey--text text--darken-3"
               >
-                {{ report.transcript || "No transcript available." }}
+                No transcript available.
+              </div>
+              <div
+                v-for="(t, i) in turns"
+                :key="i"
+                class="d-flex align-start mb-2"
+              >
+                <button
+                  v-if="t.time"
+                  type="button"
+                  class="transcript-time text-caption primary--text mr-2 mt-1 flex-shrink-0"
+                  :title="`Play from ${t.time}`"
+                  @click="jumpTo(t.seconds)"
+                >
+                  {{ t.time }}
+                </button>
+                <div class="overflow-hidden">
+                  <span
+                    v-if="t.speaker"
+                    class="text-caption font-weight-bold mr-1"
+                    :class="speakerClass(t.speaker)"
+                    >{{ speakerName(t.speaker) }}</span
+                  >
+                  <span
+                    class="text-body-2 grey--text text--darken-3 text-pre-wrap text-break"
+                    >{{ t.text }}</span
+                  >
+                </div>
               </div>
             </v-sheet>
           </v-card>
@@ -384,6 +421,38 @@ export default {
       if (s === "negative") return "$circle-alert";
       return "$minus";
     },
+    // "[mm:ss] AGENT: text", one line per turn. Lines that don't match are
+    // shown as plain text.
+    turns() {
+      const text = this.report?.transcript || "";
+      return text
+        .split("\n")
+        .filter((line) => line.trim())
+        .map((line) => {
+          const m = line.match(
+            /^\s*\[((?:\d+:)?\d+:\d{2})\]\s*(AGENT|CUSTOMER|SPEAKER [A-Z0-9]+)\s*:\s*(.*)$/i
+          );
+          if (!m) return { text: line };
+          const seconds = m[1]
+            .split(":")
+            .reduce((total, part) => total * 60 + Number(part), 0);
+          return {
+            time: m[1],
+            seconds,
+            speaker: m[2].toUpperCase(),
+            text: m[3],
+          };
+        });
+    },
+    speakerHint() {
+      const r = this.report || {};
+      if (!r.transcript) return "";
+      if (r.speakers?.confidence === "low")
+        return "We couldn't tell which speaker is the agent on this call, so they're shown as Speaker A and Speaker B.";
+      if (!r.transcriptionModel || r.transcriptionModel === "whisper-1")
+        return "Speaker labels are estimated from the conversation, so some lines may be marked with the wrong person.";
+      return "";
+    },
     details() {
       const r = this.report || {};
       return [
@@ -422,6 +491,18 @@ export default {
       return "warning";
     },
 
+    speakerName(speaker) {
+      if (speaker === "AGENT") return "Agent";
+      if (speaker === "CUSTOMER") return "Customer";
+      return speaker.replace("SPEAKER", "Speaker");
+    },
+
+    speakerClass(speaker) {
+      if (speaker === "AGENT") return "primary--text";
+      if (speaker === "CUSTOMER") return "deep-orange--text text--darken-2";
+      return "grey--text text--darken-2";
+    },
+
     jumpTo(seconds) {
       const audio = this.$refs.audio;
       if (!audio) return;
@@ -433,3 +514,14 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.transcript-time {
+  min-width: 40px;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.transcript-time:hover {
+  text-decoration: underline;
+}
+</style>
