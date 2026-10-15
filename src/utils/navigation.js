@@ -143,7 +143,7 @@ export const NAV_GROUPS = [
         id: "insights",
         name: "Insights",
         icon: "$chart-line",
-        description: "Bot health, conversation analytics and calls",
+        description: "Bot health and conversation analytics",
         tabs: [
           {
             name: "Bot health",
@@ -168,15 +168,6 @@ export const NAV_GROUPS = [
             to: link("/dashboard/opportunity-analysis"),
             permission: "insight:read",
             match: startsWith("/dashboard/opportunity-analysis"),
-          },
-          {
-            name: "Calls",
-            to: link("/dashboard/call-batches"),
-            permission: "call:read",
-            match: (r) =>
-              ["/dashboard/call-batches", "/call-analysis/report", "/batch-analysis"].some((p) =>
-                startsWith(p)(r),
-              ),
           },
         ],
       },

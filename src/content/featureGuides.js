@@ -416,26 +416,6 @@ export const FEATURE_GUIDES = [
     ],
   },
   {
-    id: "call-analysis",
-    name: "Call analysis",
-    icon: "$phone",
-    route: "/dashboard/call-batches",
-    summary:
-      "Upload call recordings in batches and get an AI report on each call, with issues marked by timestamp.",
-    steps: [
-      "Create a batch with each agent's name, the recording URL, and an email.",
-      "Open the batch report, then drill into single calls.",
-      "Retry any call that failed to process.",
-    ],
-    thingsToKnow: [
-      "Recording URLs must be reachable by our servers. Private or expiring links will fail.",
-      "Click an issue's timestamp to jump to that moment in the recording.",
-      "Calls sent from your system are grouped by day. A day's batch closes and gets its summary after midnight (India time), once every call is analysed. Use Summarise now to see a summary before then.",
-      "Settings on the Calls page chooses how recordings are turned into text. Some options tell the agent and the customer apart; with others, speaker labels are estimated. A change applies to new calls; retry an old call to transcribe it again.",
-      "Calls sent from your system are analysed automatically up to a daily limit per agent (India time), set in Settings. Calls over the limit are saved as Skipped: open the batch and press Analyse on any of them to analyse it.",
-    ],
-  },
-  {
     id: "team",
     name: "Team & roles",
     icon: "$users",

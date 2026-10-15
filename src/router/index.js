@@ -201,29 +201,10 @@ const routes = [
   // The forms module was removed; send old links to the dashboard
   { path: "/dashboard/forms*", redirect: "/dashboard" },
 
-  // call analysis dashboard
-  {
-    path: "/dashboard",
-    component: () => import("../layouts/CallAnalysisLayout.vue"),
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: "call-batches",
-        component: () => import("../screens/dashboard/CallAnalysis.vue"),
-        meta: { tab: 1 },
-      },
-      {
-        path: "/call-analysis/report/:id",
-        name: "CallAnalysisReport",
-        component: () => import("../screens/dashboard/CallAnalysisReport.vue"),
-      },
-      {
-        path: "/batch-analysis/:id",
-        name: "BatchAnalysis",
-        component: () => import("../screens/dashboard/BatchCallAnalysis.vue"),
-      },
-    ],
-  },
+  // Call analysis was removed; send old links to the dashboard
+  { path: "/dashboard/call-batches", redirect: "/dashboard" },
+  { path: "/call-analysis/report/:id", redirect: "/dashboard" },
+  { path: "/batch-analysis/:id", redirect: "/dashboard" },
 ];
 
 const router = new VueRouter({

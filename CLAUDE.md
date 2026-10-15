@@ -38,11 +38,10 @@ The app is organized as multiple **parallel dashboard sections**, each with its 
 
 - `DashboardLayout.vue` — main dashboard: home, profile, Knowledge (sources, items, issues), knowledge gaps, Bot Profile, sandbox, Quality, Setup, integrations, the Guide (`DocumentationPage.vue`), insights, chat analytics and Team. Its `sideNavs` data is not rendered; navigation is the tiles on the dashboard home (`DasboardHome.vue`).
 - `ChatLayout.vue` — `/dashboard/chat/*` (chat list, chat view, chat insights)
-- `CallAnalysisLayout.vue` — call batch analysis and reports
 
 Screens live under `src/screens/dashboard/**`, with subfolders per section (`knowledge/`, `knowledgeGap/`, `quality/`, `setup/`, `insights/`, `Chats/`). Their building blocks live in matching `src/components/` folders (`knowledge/`, `quality/`, `setup/`, `integrations/`, `team/`, `profile/`, `sandbox/`), and per-feature helpers in `src/utils/` (`knowledge.js`, `quality.js`, `setup.js`, `team.js`, …). Top-level marketing/auth pages (landing, login, signup) live in `src/pages/`.
 
-Dashboard routes are lazy-loaded via dynamic `import()`. Old URLs of removed screens (`page-list`, `scraped-pages`, `sitemap`, `content-chunks`, `forms`) redirect to their replacements.
+Dashboard routes are lazy-loaded via dynamic `import()`. Old URLs of removed screens (`page-list`, `scraped-pages`, `sitemap`, `content-chunks`, `forms`, call analysis) redirect to their replacements.
 
 ### Feature areas (backend contract)
 
