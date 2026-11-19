@@ -194,8 +194,10 @@
                 label="Time limit"
                 type="number"
                 min="1"
-                max="15"
+                max="30"
                 suffix="seconds"
+                hint="How long to wait for your API. Payment-link calls may need 20 s."
+                persistent-hint
                 outlined
                 dense
                 @input="set('timeout', Math.round(Number($event) * 1000))"

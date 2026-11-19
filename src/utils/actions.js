@@ -46,7 +46,7 @@ export const RUN_STATUS = {
 export const runStatus = (s) => RUN_STATUS[s] || { label: s, color: "grey", icon: "$circle" };
 
 export const KEY_PATTERN = /^[a-z][a-z0-9_]{2,40}$/;
-export const LIMITS = { timeoutMin: 1000, timeoutMax: 15000, timeoutDefault: 8000, perDayMax: 50 };
+export const LIMITS = { timeoutMin: 1000, timeoutMax: 30000, timeoutDefault: 8000, perDayMax: 50 };
 
 // What the backend says when a template is left empty (services/actions)
 export const DEFAULT_TEMPLATES = {
@@ -181,7 +181,7 @@ function stepFromForm(f, label, { needsUrl }) {
   }
   const timeout = Number(f.timeout) || LIMITS.timeoutDefault;
   if (timeout < LIMITS.timeoutMin || timeout > LIMITS.timeoutMax) {
-    return err("the time limit must be between 1 and 15 seconds.");
+    return err("the time limit must be between 1 and 30 seconds.");
   }
   return {
     step: {
