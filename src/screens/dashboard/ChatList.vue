@@ -84,6 +84,10 @@
               <v-icon left size="14" color="blue">$globe</v-icon>
               Website
             </v-btn>
+            <v-btn small value="voice">
+              <v-icon left size="14" color="deep-purple">$phone</v-icon>
+              Calls
+            </v-btn>
           </v-btn-toggle>
         </div>
 
@@ -424,7 +428,7 @@ export default {
         { open: "Open", resolved: "Resolved" }[this.selectedTicketStatus] ||
         "All";
       const channel =
-        { whatsapp: " · WhatsApp", webchat: " · Website" }[
+        { whatsapp: " · WhatsApp", webchat: " · Website", voice: " · Calls" }[
           this.selectedPlatform
         ] || "";
       return `${status} conversations${channel}`;
@@ -559,6 +563,8 @@ export default {
     },
 
     platformInfo(platform) {
+      // "voice" chats are stored phone calls (chatId call_<number>), read only
+      if (platform === "voice") return { icon: "$phone", color: "deep-purple" };
       return platform === "whatsapp"
         ? { icon: "$whatsapp", color: "green" }
         : { icon: "$globe", color: "blue" };
