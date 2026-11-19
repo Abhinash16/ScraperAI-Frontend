@@ -85,7 +85,7 @@
         </div>
         {{ result.error.message }}
         <div v-if="result.error.kind === 'refused'" class="text-caption mt-1">
-          The bot passes this reason on to the customer.
+          The bot shows this message to the customer word for word.
         </div>
       </v-alert>
 

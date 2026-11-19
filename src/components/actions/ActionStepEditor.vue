@@ -165,7 +165,7 @@
           <div class="text-caption grey--text text--darken-1 mb-3">
             An HTTP 4xx with a message always counts as a refusal. If your API answers 200 with a
             success flag instead (like <code>"status": 0</code>), tell us where the flag and the reason are.
-            The bot passes the reason on to the customer.
+            The bot shows the reason to the customer word for word, so write it for customers.
           </div>
           <v-row dense>
             <v-col cols="12" sm="4">
