@@ -89,6 +89,22 @@ const routes = [
       },
       { path: "try-chat", redirect: "/dashboard/sandbox" },
       {
+        path: "actions",
+        component: () => import("../screens/dashboard/actions/ActionsPage.vue"),
+        meta: { permission: "settings:manage" },
+      },
+      {
+        path: "actions/runs",
+        component: () => import("../screens/dashboard/actions/ActionRuns.vue"),
+        meta: { permission: "chat:read" },
+      },
+      {
+        // "new" (optionally ?preset=extend|booking) or an action id
+        path: "actions/:id",
+        component: () => import("../screens/dashboard/actions/ActionEditor.vue"),
+        meta: { permission: "settings:manage" },
+      },
+      {
         path: "bot-profile",
         component: () => import("../screens/dashboard/BotProfile.vue"),
         meta: { permission: "settings:manage" },

@@ -232,6 +232,27 @@ export const NAV_GROUPS = [
         ],
       },
       {
+        id: "actions",
+        name: "Actions",
+        icon: "$credit-card",
+        description: "Payment links the bot can send",
+        tabs: [
+          {
+            name: "Actions",
+            to: link("/dashboard/actions"),
+            permission: "settings:manage",
+            match: (r) =>
+              startsWith("/dashboard/actions")(r) && !startsWith("/dashboard/actions/runs")(r),
+          },
+          {
+            name: "What the bot did",
+            to: link("/dashboard/actions/runs"),
+            permission: "chat:read",
+            match: startsWith("/dashboard/actions/runs"),
+          },
+        ],
+      },
+      {
         id: "team",
         name: "Team & security",
         icon: "$shield-user",

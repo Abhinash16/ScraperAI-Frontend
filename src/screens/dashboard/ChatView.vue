@@ -6,8 +6,16 @@
           <!-- HEADER -->
           <div class="px-4 pt-3 pb-2">
             <div class="d-flex align-center">
-              <v-avatar color="blue lighten-4" size="40" rounded="lg" class="flex-shrink-0">
-                <v-icon color="blue darken-2" size="22">$circle-user</v-icon>
+              <v-avatar
+                :color="isCall ? 'deep-purple lighten-5' : 'blue lighten-4'"
+                size="40"
+                rounded="lg"
+                class="flex-shrink-0"
+                :title="isCall ? 'Phone call' : ''"
+              >
+                <v-icon :color="isCall ? 'deep-purple' : 'blue darken-2'" size="22">
+                  {{ isCall ? "$phone" : "$circle-user" }}
+                </v-icon>
               </v-avatar>
 
               <div class="flex-grow-1 overflow-hidden mx-3">
@@ -371,10 +379,10 @@
           <v-card-actions class="pa-4">
             <v-text-field
               v-model="newMessage"
-              :disabled="ticketStatus === 'resolved' || platform === 'whatsapp'"
+              :disabled="ticketStatus === 'resolved' || platform === 'whatsapp' || isCall"
               @keyup.enter="sendMessage"
               @input="handleTyping"
-              placeholder="Type your message..."
+              :placeholder="isCall ? 'This is a phone call. You can read it but not reply here.' : 'Type your message...'"
               outlined
               dense
               hide-details
@@ -389,7 +397,7 @@
               depressed
               rounded
               @click="sendMessage"
-              :disabled="!newMessage.trim() || ticketStatus === 'resolved'"
+              :disabled="!newMessage.trim() || ticketStatus === 'resolved' || isCall"
             >
               <v-icon left>$send</v-icon>
               Send
@@ -587,6 +595,11 @@ export default {
     },
     openConversation() {
       return this.conversations.find(isOpen) || null;
+    },
+    // Stored phone calls (chatId call_<number>) are read only: the backend
+    // refuses replies with 409 read_only.
+    isCall() {
+      return this.platform === "voice";
     },
     // WhatsApp's 24 h free-form reply window, for the newest conversation
     replyWindow() {
@@ -833,7 +846,7 @@ export default {
 
     sendMessage() {
       if (!this.newMessage.trim()) return;
-      if (!this.socket) return;
+      if (!this.socket || this.isCall) return;
 
       this.socket.emit("stopTyping");
       this.isTyping = false;
