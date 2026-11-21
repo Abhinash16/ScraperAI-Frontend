@@ -161,6 +161,7 @@ export const FEATURE_GUIDES = [
     ],
     thingsToKnow: [
       "For WhatsApp photos, voice notes and location pins, the chat shows what the bot read: the photo's description, the voice note's transcript or the pin's place. It appears shortly after the message arrives, so reopen the chat if it isn't there yet.",
+      "With the Customer API set up, the Customer button on WhatsApp chats, phone calls and verified website chats shows what your API says about that customer: their service requests, payments and refunds, what's coming up, bookings and dues. It's what the bot sees. Notes marked Internal are for your team; the bot never quotes them. Use Refresh to ask your API again.",
       "Replying needs the chat:reply permission. Reading needs chat:read. Set these in Team.",
       "Your replies are sent as your business, not as the AI.",
       "Turn AI off before you reply, so the bot doesn't answer at the same time as you.",
@@ -337,6 +338,7 @@ export const FEATURE_GUIDES = [
       "Real chats look up customers on WhatsApp only, by the sender's number.",
       "Besides bookings and dues, your API can send the customer's service requests (open ones and those closed in the last 30 days), recent payments and refunds, and what's coming up (renewals, overdue rentals, km bills). Send only the sections you have: a section you leave out is unknown to the bot, not \"none\".",
       "A service request's title and resolution are internal notes: the bot uses them to understand the request but never quotes them. It never promises when a request will be done.",
+      "Your team sees the same data in Chats: open a chat and click Customer.",
       "When an upcoming amount isn't known yet, send it as null: the bot says it isn't known yet and never guesses.",
       "Sign-in: headers (as before), a bearer token, a username and password (Basic), or an API key in the URL (e.g. ?api_key=…). Tokens, passwords and keys are encrypted and never shown again.",
       "Extra parameters are sent with every call. Values and the URL can use {{phone}}.",

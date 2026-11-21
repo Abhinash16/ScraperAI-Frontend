@@ -72,6 +72,21 @@
                 </template>
               </v-btn>
 
+              <v-btn
+                v-if="canLookUpCustomer"
+                small
+                text
+                :color="showCustomer ? 'primary' : 'grey darken-2'"
+                class="flex-shrink-0"
+                :icon="$vuetify.breakpoint.xsOnly"
+                aria-label="Customer"
+                title="What your customer API says about this customer"
+                @click="showCustomer = !showCustomer"
+              >
+                <v-icon size="16" :left="!$vuetify.breakpoint.xsOnly">$user-search</v-icon>
+                <template v-if="!$vuetify.breakpoint.xsOnly">Customer</template>
+              </v-btn>
+
               <!-- Status Update Menu -->
               <v-menu offset-y left :disabled="statusUpdating">
                 <template v-slot:activator="{ on, attrs }">
@@ -171,6 +186,13 @@
                 :loading="conversationsLoading"
                 @select="scrollToConversation"
               />
+              <v-divider></v-divider>
+            </div>
+          </v-expand-transition>
+
+          <v-expand-transition>
+            <div v-if="showCustomer && canLookUpCustomer">
+              <CustomerPanel :chat-id="chatId" />
               <v-divider></v-divider>
             </div>
           </v-expand-transition>
@@ -495,6 +517,7 @@ import { io } from "socket.io-client";
 import apiClient from "@/service/axios";
 import LiveTrace from "@/components/traces/LiveTrace.vue";
 import ChatConversations from "@/components/chats/ChatConversations.vue";
+import CustomerPanel from "@/components/chats/CustomerPanel.vue";
 import ChatText from "@/components/chats/ChatText.vue";
 import {
   OPEN_STATUS,
@@ -507,7 +530,7 @@ import {
 import { formatPhone, verifiedIdentity } from "@/utils/identity";
 
 export default {
-  components: { LiveTrace, ChatConversations, ChatText },
+  components: { LiveTrace, ChatConversations, ChatText, CustomerPanel },
 
   props: {
     chatId: {
@@ -526,6 +549,7 @@ export default {
       conversations: [],
       conversationsLoading: false,
       showConversations: false,
+      showCustomer: false,
       summaryRetries: 0,
       summaryTimer: null,
       now: Date.now(),
@@ -615,6 +639,11 @@ export default {
     },
     // Stored phone calls (chatId call_<number>) are read only: the backend
     // refuses replies with 409 read_only.
+    // The bot looks customers up by WhatsApp number, caller ID, or a website
+    // chat's verified phone; other chats have no customer to show
+    canLookUpCustomer() {
+      return this.platform === "whatsapp" || this.isCall || !!this.identity?.phone;
+    },
     isCall() {
       return this.platform === "voice";
     },
