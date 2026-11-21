@@ -34,7 +34,7 @@
           <template #label>
             <span class="text-body-2">
               <span class="font-weight-medium grey--text text--darken-4">{{ c.label }}</span>
-              <span v-if="c.value === standard" class="grey--text"> · default</span>
+              <span v-if="c.default" class="grey--text"> · default</span>
             </span>
           </template>
         </v-radio>
@@ -79,14 +79,10 @@ import { apiError } from "@/utils/knowledge";
 
 const API = "/clients/reply-model";
 
-// The model the backend falls back to; picking it resets to the default
-const STANDARD = "gpt-4o-mini";
-
 export default {
   name: "ReplyModelCard",
 
   data: () => ({
-    standard: STANDARD,
     choices: [],
     saved: null, // { model, when }
     model: "",
@@ -98,8 +94,10 @@ export default {
   }),
 
   computed: {
+    // The backend marks its default model; picking it resets to the default
     isStandard() {
-      return this.model === STANDARD;
+      const standard = this.choices.find((c) => c.default);
+      return standard ? this.model === standard.value : false;
     },
     dirty() {
       if (!this.saved) return false;
