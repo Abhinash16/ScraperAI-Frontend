@@ -1,5 +1,6 @@
-// Helpers for the Actions screens: payment links the bot sends by calling the
-// client's own API (backend: /api/actions, documentation/api/actions.md).
+// Helpers for the Actions screens: payment links the bot sends, and requests it
+// raises (service requests, callbacks), by calling the client's own API
+// (backend: /api/actions, documentation/api/actions.md).
 // Stored secrets come back as MASKED_VALUE; sending it back keeps them.
 import apiClient from "@/service/axios";
 import { authFromForm, authToForm, newRow, rowsToPairs } from "@/utils/integrationApi";
@@ -21,6 +22,21 @@ export const channelInfo = (value) =>
     icon: "$message-circle",
     color: "grey",
   };
+
+export const ACTION_TYPES = {
+  payment_link: {
+    label: "Payment link",
+    blurb: "The bot sends a payment link your API makes.",
+    icon: "$credit-card",
+  },
+  request: {
+    label: "Request",
+    blurb: "The bot raises a service request, callback or complaint in your system and gives the customer its ID.",
+    icon: "$clipboard-list",
+  },
+};
+
+export const isRequest = (a) => a?.type === "request";
 
 export const DELIVERY = {
   in_chat: { label: "Bot sends the link", short: "Bot sends", icon: "$message-circle" },
@@ -46,7 +62,14 @@ export const RUN_STATUS = {
 export const runStatus = (s) => RUN_STATUS[s] || { label: s, color: "grey", icon: "$circle" };
 
 export const KEY_PATTERN = /^[a-z][a-z0-9_]{2,40}$/;
-export const LIMITS = { timeoutMin: 1000, timeoutMax: 30000, timeoutDefault: 8000, perDayMax: 50 };
+export const LIMITS = {
+  timeoutMin: 1000,
+  timeoutMax: 30000,
+  timeoutDefault: 8000,
+  perDayMax: 50,
+  maxLengthMax: 1000,
+  maxLengthDefault: 100,
+};
 
 // What the backend says when a template is left empty (services/actions)
 export const DEFAULT_TEMPLATES = {
@@ -55,14 +78,25 @@ export const DEFAULT_TEMPLATES = {
   clientSent: "Done, I've sent the payment link for ₹2,400 to your phone. Please check your messages.",
 };
 
+export const DEFAULT_REQUEST_TEMPLATES = {
+  confirm: "<Action name>: shall I go ahead? Please reply yes or no.",
+  sent: "Done, it's raised. Your reference number is <ID>. Our team will get back to you.",
+};
+
+// Results of the create step go into messages as {{link.x}} for payment
+// links and {{result.x}} for requests (the backend takes both for either)
+export const resultPrefix = (type) => (type === "request" ? "result" : "link");
+
 // Placeholders that can go into a step's URL and parameters
 export function stepPlaceholders(form, stepName) {
   const base = [
     { value: "{{phone}}", hint: "The customer's phone" },
     { value: "{{runId}}", hint: "Unique per request: use it as the idempotency key" },
     { value: "{{channel}}", hint: "whatsapp, web or voice" },
-    { value: "{{clientSends}}", hint: "true when your system sends the link" },
   ];
+  if (form.type !== "request") {
+    base.push({ value: "{{clientSends}}", hint: "true when your system sends the link" });
+  }
   const inputs = form.inputs
     .filter((i) => i.name.trim())
     .map((i) => ({ value: `{{${i.name.trim()}}}`, hint: i.description || "What the bot collected" }));
@@ -84,7 +118,9 @@ export function templatePlaceholders(form, template) {
   const link =
     template === "confirm"
       ? []
-      : form.create.outputs.filter((o) => o.name.trim()).map((o) => `{{link.${o.name.trim()}}}`);
+      : form.create.outputs
+          .filter((o) => o.name.trim())
+          .map((o) => `{{${resultPrefix(form.type)}.${o.name.trim()}}}`);
   return [...inputs, ...quote, ...link];
 }
 
@@ -127,13 +163,22 @@ const inputToForm = (i = {}) =>
     required: i.required !== false,
     min: i.min ?? "",
     max: i.max ?? "",
+    maxLength: i.maxLength ?? "",
     enumText: (i.enum || []).join(", "),
   });
 
+// The create step's starting results for each type
+export const CREATE_DEFAULTS = {
+  payment_link: [["url", ""], ["amount", ""]],
+  request: [["id", ""]],
+};
+
 export function actionToForm(action) {
   const a = action || {};
+  const type = a.type === "request" ? "request" : "payment_link";
   return {
     id: a.id || null,
+    type,
     key: a.key || "",
     name: a.name || "",
     description: a.description || "",
@@ -141,7 +186,7 @@ export function actionToForm(action) {
     inputs: (a.inputs || []).map(inputToForm),
     quoteOn: !!a.quote,
     quote: stepToForm(a.quote, [["amount", ""]]),
-    create: stepToForm(a.create, [["url", ""], ["amount", ""]]),
+    create: stepToForm(a.create, CREATE_DEFAULTS[type]),
     confirm: a.confirm !== false,
     allowedLinkDomains: [...(a.allowedLinkDomains || [])],
     channels: [...(a.channels || ["whatsapp", "web"])],
@@ -160,7 +205,7 @@ export function actionToForm(action) {
 }
 
 // Returns { step } or { error }
-function stepFromForm(f, label, { needsUrl }) {
+function stepFromForm(f, label, { needsUrl, needsId }) {
   const err = (m) => ({ error: `${label}: ${m}` });
   const url = f.url.trim();
   if (!url) return err("enter your API's URL.");
@@ -178,6 +223,9 @@ function stepFromForm(f, label, { needsUrl }) {
   }
   if (needsUrl && !outputs.value?.url) {
     return err("add a result named \"url\": where the payment link is in your API's response.");
+  }
+  if (needsId && !outputs.value?.id) {
+    return err("add a result named \"id\": where the new request's ID is in your API's response.");
   }
   const timeout = Number(f.timeout) || LIMITS.timeoutDefault;
   if (timeout < LIMITS.timeoutMin || timeout > LIMITS.timeoutMax) {
@@ -198,8 +246,9 @@ function stepFromForm(f, label, { needsUrl }) {
   };
 }
 
+// Only payment links are sent in the chat; a request has no link
 const anyInChat = (f) =>
-  f.channels.some((c) => c !== "voice" && f.delivery[c] === "in_chat");
+  f.type !== "request" && f.channels.some((c) => c !== "voice" && f.delivery[c] === "in_chat");
 
 // Returns { body } (the action to POST/PUT) or { error }
 export function actionFromForm(f) {
@@ -225,6 +274,13 @@ export function actionFromForm(f) {
     if (seen.has(name)) return { error: `Input "${name}" is listed twice.` };
     seen.add(name);
     const input = { name, type: row.type, description: row.description.trim(), required: row.required };
+    if (row.type === "string" && row.maxLength !== "" && row.maxLength != null) {
+      const n = Number(row.maxLength);
+      if (!Number.isInteger(n) || n < 1 || n > LIMITS.maxLengthMax) {
+        return { error: `Input "${name}": the longest answer must be between 1 and ${LIMITS.maxLengthMax} characters.` };
+      }
+      input.maxLength = n;
+    }
     if (row.type === "integer") {
       if (row.min !== "" && row.min != null) input.min = Number(row.min);
       if (row.max !== "" && row.max != null) input.max = Number(row.max);
@@ -244,7 +300,11 @@ export function actionFromForm(f) {
     if (q.error) return q;
     quote = q.step;
   }
-  const c = stepFromForm(f.create, "Create link", { needsUrl: inChat });
+  const request = f.type === "request";
+  const c = stepFromForm(f.create, request ? "Raise the request" : "Create link", {
+    needsUrl: inChat,
+    needsId: request,
+  });
   if (c.error) return c;
 
   const domains = f.allowedLinkDomains.map((d) => d.trim().toLowerCase()).filter(Boolean);
@@ -253,37 +313,45 @@ export function actionFromForm(f) {
   }
 
   const templates = {};
-  ["confirm", "sent", "clientSent"].forEach((k) => {
+  (request ? ["confirm", "sent"] : ["confirm", "sent", "clientSent"]).forEach((k) => {
     const v = f.templates[k].trim();
     if (v) templates[k] = v;
   });
-  if (templates.sent && !templates.sent.includes("{{link.url}}")) {
+  if (request) {
+    if (templates.sent && !/\{\{(link|result)\.id\}\}/.test(templates.sent)) {
+      return { error: "The \"request raised\" message must contain {{result.id}}: the customer needs the ID." };
+    }
+  } else if (templates.sent && !/\{\{(link|result)\.url\}\}/.test(templates.sent)) {
     return { error: "The \"link sent\" message must contain {{link.url}}." };
   }
 
   const perDay = Number(f.maxPerChatPerDay);
   if (!Number.isInteger(perDay) || perDay < 1 || perDay > LIMITS.perDayMax) {
-    return { error: `Links per chat per day must be between 1 and ${LIMITS.perDayMax}.` };
+    return {
+      error: `${request ? "Requests" : "Links"} per chat per day must be between 1 and ${LIMITS.perDayMax}.`,
+    };
   }
 
-  return {
-    body: {
-      key,
-      name: f.name.trim(),
-      type: "payment_link",
-      enabled: f.enabled,
-      description: f.description.trim(),
-      inputs,
-      quote,
-      create: c.step,
-      confirm: f.confirm,
-      allowedLinkDomains: domains,
-      channels: f.channels,
-      delivery: { whatsapp: f.delivery.whatsapp, web: f.delivery.web, voice: "client_sends" },
-      templates,
-      maxPerChatPerDay: perDay,
-    },
+  const body = {
+    key,
+    name: f.name.trim(),
+    type: f.type,
+    enabled: f.enabled,
+    description: f.description.trim(),
+    inputs,
+    quote,
+    create: c.step,
+    confirm: f.confirm,
+    channels: f.channels,
+    templates,
+    maxPerChatPerDay: perDay,
   };
+  // Link domains and delivery don't apply to requests, so they aren't sent
+  if (!request) {
+    body.allowedLinkDomains = domains;
+    body.delivery = { whatsapp: f.delivery.whatsapp, web: f.delivery.web, voice: "client_sends" };
+  }
+  return { body };
 }
 
 export const needsLinkDomains = anyInChat;
@@ -346,6 +414,38 @@ export const PRESETS = {
       templates: { confirm: "Shall I send the payment link for booking {{bookingId}}?" },
     },
   },
+  service_request: {
+    title: "Raise a service request",
+    blurb: "The customer reports a problem. The bot raises a request in your system and gives them its ID.",
+    icon: "$wrench",
+    action: {
+      type: "request",
+      key: "raise_service_request",
+      name: "Raise a service request",
+      description:
+        "The customer reports a problem with their vehicle or booking that our team needs to look at, and no matching request is already open.",
+      inputs: [
+        { name: "bookingId", type: "string", description: "The booking it's about, from the customer's data", required: true },
+        {
+          name: "problem",
+          type: "string",
+          maxLength: 500,
+          description: "The problem in the customer's own words",
+          required: true,
+        },
+      ],
+      quote: null,
+      create: presetStep(
+        { phone: "{{phone}}", bookingId: "{{bookingId}}", problem: "{{problem}}", idempotencyKey: "{{runId}}" },
+        { id: "" },
+      ),
+      channels: ["whatsapp", "web", "voice"],
+      templates: {
+        confirm: "I'm sorry about this. Shall I raise a service request for our team? {{problem}} Please reply yes or no.",
+        sent: "Done, I've raised service request {{result.id}}. Our team will get back to you soon.",
+      },
+    },
+  },
 };
 
 /* ---------------- API ---------------- */
@@ -369,3 +469,16 @@ export function formatAmount(v) {
 }
 
 export const runAmount = (run) => run?.result?.amount ?? run?.quote?.amount;
+
+// Runs don't store the action's type: go by the action, else by the result
+export const runIsRequest = (run, actions = []) => {
+  const action = actions.find((a) => a.key === run?.actionKey);
+  if (action) return action.type === "request";
+  return run?.result?.id != null && !run?.result?.url;
+};
+
+// A finished request was raised, not sent
+export const runStatusFor = (run, request) =>
+  request && run?.status === "succeeded"
+    ? { ...RUN_STATUS.succeeded, label: "Raised" }
+    : runStatus(run?.status);

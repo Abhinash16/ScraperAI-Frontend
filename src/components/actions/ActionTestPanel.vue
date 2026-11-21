@@ -5,7 +5,13 @@
       <span class="text-subtitle-1 font-weight-bold grey--text text--darken-4">Try it</span>
     </div>
     <div class="text-body-2 grey--text text--darken-1 mb-3">
-      Calls your API with sample values, like the bot would. Checking the price creates nothing.
+      <template v-if="request">
+        Shows what the bot would say, with sample values. Nothing is raised until you press
+        "Raise it for real".
+      </template>
+      <template v-else>
+        Calls your API with sample values, like the bot would. Checking the price creates nothing.
+      </template>
     </div>
 
     <v-alert v-if="unsaved" type="warning" text dense rounded="lg" class="text-body-2">
@@ -32,6 +38,8 @@
           :type="i.type === 'integer' ? 'number' : i.type === 'date' ? 'date' : 'text'"
           :min="i.min"
           :max="i.max"
+          :maxlength="i.type === 'string' ? i.maxLength || 100 : undefined"
+          :counter="i.type === 'string' && i.maxLength > 100 ? i.maxLength : undefined"
           :hint="i.description"
           outlined
           dense
@@ -62,8 +70,8 @@
         {{ action.quote ? "Check price" : "Show the reply" }}
       </v-btn>
       <v-btn outlined color="error" class="mb-2" :loading="busy === 'create'" :disabled="!!busy" @click="confirmOpen = true">
-        <v-icon left size="16">$credit-card</v-icon>
-        Create a real link
+        <v-icon left size="16">{{ request ? "$clipboard-list" : "$credit-card" }}</v-icon>
+        {{ request ? "Raise it for real" : "Create a real link" }}
       </v-btn>
     </div>
 
@@ -99,13 +107,19 @@
         <div class="bubble">{{ result.confirmReply }}</div>
       </div>
 
+      <v-alert v-if="result.problem" type="error" text dense rounded="lg" class="text-body-2">
+        {{ result.problem }}
+      </v-alert>
+
       <template v-if="result.link">
-        <div class="text-caption font-weight-bold text-uppercase grey--text mb-1">Link created</div>
+        <div class="text-caption font-weight-bold text-uppercase grey--text mb-1">
+          {{ request ? "Result" : "Link created" }}
+        </div>
         <ResultValues :values="result.link" class="mb-2" />
         <v-alert v-if="result.linkAllowed === false" type="error" text dense rounded="lg" class="text-body-2">
           This link isn't on one of your allowed link domains, so the bot wouldn't send it.
         </v-alert>
-        <v-alert v-else-if="result.delivery === 'client_sends'" type="info" text dense rounded="lg" class="text-body-2">
+        <v-alert v-else-if="!request && result.delivery === 'client_sends'" type="info" text dense rounded="lg" class="text-body-2">
           Your system was asked to send the link to {{ phone }}.
         </v-alert>
         <div v-if="result.sentReply" class="mb-4">
@@ -123,6 +137,20 @@
     </template>
 
     <ConfirmDialog
+      v-if="request"
+      v-model="confirmOpen"
+      title="Raise a real request?"
+      confirm-label="Raise it"
+      icon="$clipboard-list"
+      :loading="busy === 'create'"
+      @confirm="run(true)"
+    >
+      This calls your API for real and creates a real request in your system for the values you
+      entered{{ phone ? ` and ${phone}` : "" }}. Your team will see it like any other. It is logged under
+      What the bot did.
+    </ConfirmDialog>
+    <ConfirmDialog
+      v-else
       v-model="confirmOpen"
       title="Create a real payment link?"
       confirm-label="Create link"
@@ -196,6 +224,9 @@ export default {
   }),
 
   computed: {
+    request() {
+      return this.action.type === "request";
+    },
     channelItems() {
       return CHANNELS.filter((c) => (this.action.channels || []).includes(c.value)).map((c) => ({
         ...c,

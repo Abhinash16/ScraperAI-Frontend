@@ -13,7 +13,7 @@
           {{ isNew ? "New action" : form.name || "Action" }}
         </h1>
         <div class="text-body-2 grey--text text--darken-1">
-          The bot sends a payment link by calling your API.
+          {{ request ? "The bot raises a request in your system by calling your API." : "The bot sends a payment link by calling your API." }}
         </div>
       </div>
       <v-spacer />
@@ -42,12 +42,27 @@
         <!-- BASICS -->
         <v-card outlined rounded="lg" class="pa-4 mb-4">
           <SectionTitle icon="$info" title="Basics" />
+          <div class="text-body-2 font-weight-medium mb-1">What it does</div>
+          <v-btn-toggle
+            :value="form.type"
+            mandatory
+            dense
+            color="primary"
+            class="mb-1 flex-wrap"
+            @change="setType"
+          >
+            <v-btn v-for="(t, value) in ACTION_TYPES" :key="value" small :value="value">
+              <v-icon left size="14">{{ t.icon }}</v-icon>
+              {{ t.label }}
+            </v-btn>
+          </v-btn-toggle>
+          <div class="text-caption grey--text text--darken-1 mb-4">{{ ACTION_TYPES[form.type].blurb }}</div>
           <v-row dense>
             <v-col cols="12" sm="6">
               <v-text-field
                 v-model="form.name"
                 label="Name"
-                placeholder="Extend a rental"
+                :placeholder="request ? 'Raise a service request' : 'Extend a rental'"
                 outlined
                 dense
                 @input="suggestKey"
@@ -57,7 +72,7 @@
               <v-text-field
                 v-model="form.key"
                 label="Key"
-                placeholder="extension_payment_link"
+                :placeholder="request ? 'raise_service_request' : 'extension_payment_link'"
                 :readonly="!isNew"
                 :hint="isNew ? 'Lowercase letters, numbers and _. Can\'t be changed later.' : 'Can\'t be changed: the bot knows the action by it.'"
                 persistent-hint
@@ -70,7 +85,7 @@
               <v-textarea
                 v-model="form.description"
                 label="When should the bot use this?"
-                placeholder="The customer wants to extend an active rental and pay for it"
+                :placeholder="request ? 'The customer reports a problem with their vehicle that our team needs to look at' : 'The customer wants to extend an active rental and pay for it'"
                 hint="Tell the bot when to use this, in one or two sentences. It decides from this alone."
                 persistent-hint
                 rows="2"
@@ -152,7 +167,21 @@
                   <v-text-field v-model="row.max" label="Largest" type="number" outlined dense hide-details />
                 </v-col>
               </template>
-              <v-col cols="12" :sm="row.type === 'integer' ? 6 : 12">
+              <v-col v-if="row.type === 'string'" cols="12" sm="4">
+                <v-text-field
+                  v-model="row.maxLength"
+                  label="Longest answer (optional)"
+                  type="number"
+                  min="1"
+                  :max="LIMITS.maxLengthMax"
+                  :placeholder="String(LIMITS.maxLengthDefault)"
+                  :title="`Characters, up to ${LIMITS.maxLengthMax}. ${LIMITS.maxLengthDefault} if empty. Use 500 for a problem in the customer's words.`"
+                  outlined
+                  dense
+                  hide-details
+                />
+              </v-col>
+              <v-col cols="12" :sm="row.type === 'integer' ? 6 : row.type === 'string' ? 8 : 12">
                 <v-text-field
                   v-model="row.enumText"
                   label="Allowed values (optional)"
@@ -171,7 +200,7 @@
           <SectionTitle
             icon="$tag"
             title="Price check"
-            text="Optional. Asks your API for the price so the bot can tell the customer before sending the link. It must not change anything."
+:text="request ? 'Optional. Asks your API for a price (e.g. a repair estimate) so the bot can tell the customer before raising the request. It must not change anything.' : 'Optional. Asks your API for the price so the bot can tell the customer before sending the link. It must not change anything.'"
           >
             <v-switch v-model="form.quoteOn" inset hide-details color="primary" class="mt-0" />
           </SectionTitle>
@@ -189,13 +218,14 @@
         <!-- CREATE -->
         <v-card outlined rounded="lg" class="pa-4 mb-4">
           <SectionTitle
-            icon="$credit-card"
-            title="Create the link"
+            :icon="request ? '$clipboard-list' : '$credit-card'"
+            :title="request ? 'Raise the request' : 'Create the link'"
             :text="createHelp"
           />
           <ActionStepEditor
             v-model="form.create"
             step-name="create"
+            :action-type="form.type"
             :placeholders="stepPlaceholders(form, 'create')"
           />
         </v-card>
@@ -204,8 +234,8 @@
         <v-card outlined rounded="lg" class="pa-4 mb-4">
           <SectionTitle
             icon="$send"
-            title="Where and how the link is sent"
-            text="Pick the channels the bot can use this on, and who sends the link on each."
+:title="request ? 'Where the bot can use it' : 'Where and how the link is sent'"
+            :text="request ? 'Pick the channels the bot can raise this on. It always tells the customer the request\'s ID, on calls too.' : 'Pick the channels the bot can use this on, and who sends the link on each.'"
           />
           <div v-for="c in CHANNELS" :key="c.value" class="d-flex flex-wrap align-center py-2 channel-row">
             <v-checkbox
@@ -221,7 +251,7 @@
               </template>
             </v-checkbox>
             <v-spacer />
-            <template v-if="form.channels.includes(c.value)">
+            <template v-if="!request && form.channels.includes(c.value)">
               <span v-if="c.value === 'voice'" class="text-body-2 grey--text text--darken-1">
                 Your system sends it (a link can't be read out on a call)
               </span>
@@ -231,7 +261,7 @@
               </v-btn-toggle>
             </template>
           </div>
-          <div class="text-caption grey--text text--darken-1 mt-1">
+          <div v-if="!request" class="text-caption grey--text text--darken-1 mt-1">
             Your API gets <code v-text="'{{clientSends}}'" /> (true or false) and
             <code v-text="'{{channel}}'" />, so one endpoint can do both. With "Your system sends it",
             send the link to the customer's phone yourself and the bot only says it's on its way.
@@ -258,7 +288,7 @@
           <SectionTitle
             icon="$message-square-text"
             title="What the bot says"
-            text="Leave a message empty to use the default. Amounts are shown as 2,400."
+:text="request ? 'Leave a message empty to use the default. Every result from your API can go in as {{result.<name>}}.' : 'Leave a message empty to use the default. Amounts are shown as 2,400.'"
           />
           <div v-for="t in templateFields" :key="t.key" class="mb-3">
             <v-textarea
@@ -300,22 +330,18 @@
             color="success"
             hide-details
             class="mt-0"
-            label="Ask before sending"
+            :label="request ? 'Ask before raising it' : 'Ask before sending'"
           />
           <div class="text-caption grey--text text--darken-1 mb-4 ml-1">
-            {{
-              form.confirm
-                ? "The link is created only after a clear \"yes\". Our code checks the yes, not the AI."
-                : "The link is created as soon as the bot has what it needs, without asking."
-            }}
+            {{ confirmHelp }}
           </div>
           <v-text-field
             v-model.number="form.maxPerChatPerDay"
-            label="Links per chat per day"
+            :label="request ? 'Requests per chat per day' : 'Links per chat per day'"
             type="number"
             min="1"
             :max="LIMITS.perDayMax"
-            hint="The most links one customer can get in a day (1–50)"
+            :hint="request ? 'The most requests one customer can raise in a day (1–50)' : 'The most links one customer can get in a day (1–50)'"
             persistent-hint
             outlined
             dense
@@ -360,7 +386,10 @@ import SectionTitle from "@/components/actions/SectionTitle.vue";
 import { apiError } from "@/utils/knowledge";
 import { newRow } from "@/utils/integrationApi";
 import {
+  ACTION_TYPES,
   CHANNELS,
+  CREATE_DEFAULTS,
+  DEFAULT_REQUEST_TEMPLATES,
   DEFAULT_TEMPLATES,
   INPUT_TYPES,
   LIMITS,
@@ -390,6 +419,7 @@ export default {
   components: { ActionStepEditor, ActionTestPanel, AllowListInput, ConfirmDialog, SectionTitle, ThingsToKnow },
 
   data: () => ({
+    ACTION_TYPES,
     CHANNELS,
     INPUT_TYPES,
     LIMITS,
@@ -412,8 +442,19 @@ export default {
     isNew() {
       return !this.id || this.id === "new";
     },
+    request() {
+      return this.form.type === "request";
+    },
     createHelp() {
-      return "Called only after the customer says yes. Send {{runId}} as the idempotency key: the same key must give back the same link.";
+      return this.request
+        ? "Called once, only after the customer says yes, and never retried. Send {{runId}} as the idempotency key: the same key must give back the same request, not a second one."
+        : "Called only after the customer says yes. Send {{runId}} as the idempotency key: the same key must give back the same link.";
+    },
+    confirmHelp() {
+      const what = this.request ? "request is raised" : "link is created";
+      return this.form.confirm
+        ? `The ${what} only after a clear "yes". Our code checks the yes, not the AI.`
+        : `The ${what} as soon as the bot has what it needs, without asking.`;
     },
     linkDomainsNeeded() {
       return needsLinkDomains(this.form);
@@ -422,6 +463,22 @@ export default {
       return !!this.saved && JSON.stringify(this.form) !== this.savedSnapshot;
     },
     templateFields() {
+      if (this.request) {
+        return [
+          {
+            key: "confirm",
+            label: "Asking for a yes",
+            placeholder: DEFAULT_REQUEST_TEMPLATES.confirm,
+            hint: "Sent before the request is raised. Repeat what the customer asked for, so they know what they're saying yes to.",
+          },
+          {
+            key: "sent",
+            label: "Request raised",
+            placeholder: DEFAULT_REQUEST_TEMPLATES.sent,
+            hint: "Must contain {{result.id}}: the customer needs the ID. Said on calls too.",
+          },
+        ];
+      }
       return [
         {
           key: "confirm",
@@ -488,12 +545,35 @@ export default {
 
     addInput() {
       this.form.inputs.push(
-        newRow({ name: "", type: "string", description: "", required: true, min: "", max: "", enumText: "" }),
+        newRow({
+          name: "",
+          type: "string",
+          description: "",
+          required: true,
+          min: "",
+          max: "",
+          maxLength: "",
+          enumText: "",
+        }),
       );
     },
 
     removeInput(row) {
       this.form.inputs = this.form.inputs.filter((r) => r.id !== row.id);
+    },
+
+    // Swap the create step's starting results when they are still the
+    // untouched defaults; otherwise just make sure the needed one is there
+    setType(type) {
+      if (!type || type === this.form.type) return;
+      const outputs = this.form.create.outputs;
+      const untouched = outputs.every((o) => !o.path.trim());
+      if (untouched) {
+        this.form.create.outputs = CREATE_DEFAULTS[type].map(([name, path]) => newRow({ name, path }));
+      } else if (type === "request" && !outputs.some((o) => o.name.trim() === "id")) {
+        this.form.create.outputs.unshift(newRow({ name: "id", path: "" }));
+      }
+      this.form.type = type;
     },
 
     toggleChannel(value, on) {

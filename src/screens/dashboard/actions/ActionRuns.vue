@@ -7,7 +7,7 @@
       <div class="mr-4 mb-2">
         <h1 class="text-h6 font-weight-bold grey--text text--darken-4">What the bot did</h1>
         <div class="text-body-2 grey--text text--darken-1">
-          Every time the bot started an action: the price it showed, the link it sent, or why not.
+          Every time the bot started an action: the price it showed, the link it sent, the request it raised, or why not.
         </div>
       </div>
       <v-spacer />
@@ -102,10 +102,10 @@
         </template>
 
         <template #[`item.status`]="{ item }">
-          <v-chip x-small label :color="runStatus(item.status).color" text-color="white" class="text-no-wrap">
-            {{ runStatus(item.status).label }}
+          <v-chip x-small label :color="statusOf(item).color" text-color="white" class="text-no-wrap">
+            {{ statusOf(item).label }}
           </v-chip>
-          <v-chip v-if="item.dryRun" x-small label outlined class="ml-1" title="From the sandbox: no link was created">
+          <v-chip v-if="item.dryRun" x-small label outlined class="ml-1" title="From the sandbox: nothing was created">
             Sandbox
           </v-chip>
         </template>
@@ -115,7 +115,10 @@
         </template>
 
         <template #[`item.link`]="{ item }">
-          <a v-if="item.result && item.result.url" :href="item.result.url" target="_blank" rel="noopener" class="text-no-wrap">
+          <span v-if="isRequestRun(item) && item.result && item.result.id != null" class="text-no-wrap" title="The request's reference">
+            <code>{{ item.result.id }}</code>
+          </span>
+          <a v-else-if="item.result && item.result.url" :href="item.result.url" target="_blank" rel="noopener" class="text-no-wrap">
             Open <v-icon size="12" color="primary">$external-link</v-icon>
           </a>
           <span v-else class="grey--text">—</span>
@@ -142,7 +145,9 @@
                   </table>
                 </template>
                 <template v-if="item.result && Object.keys(item.result).length">
-                  <div class="text-caption font-weight-bold text-uppercase grey--text mb-1">Link</div>
+                  <div class="text-caption font-weight-bold text-uppercase grey--text mb-1">
+                    {{ isRequestRun(item) ? "Request raised" : "Link" }}
+                  </div>
                   <table class="kv mb-3">
                     <tr v-for="(v, k) in item.result" :key="k">
                       <td class="grey--text pr-3">{{ k }}</td>
@@ -181,7 +186,8 @@ import {
   listActions,
   listRuns,
   runAmount,
-  runStatus,
+  runIsRequest,
+  runStatusFor,
 } from "@/utils/actions";
 
 const fromQuery = (q) => ({
@@ -212,7 +218,7 @@ export default {
         { text: "Channel", value: "platform" },
         { text: "Status", value: "status" },
         { text: "Amount", value: "amount", align: "end" },
-        { text: "Link", value: "link" },
+        { text: "Link / reference", value: "link" },
         { text: "", value: "data-table-expand" },
       ],
     };
@@ -251,11 +257,16 @@ export default {
 
   methods: {
     channelInfo,
-    runStatus,
     runAmount,
     formatAmount,
     formatDate,
 
+    isRequestRun(run) {
+      return runIsRequest(run, this.actions);
+    },
+    statusOf(run) {
+      return runStatusFor(run, this.isRequestRun(run));
+    },
     actionName(key) {
       return this.actions.find((a) => a.key === key)?.name || key;
     },

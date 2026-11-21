@@ -99,7 +99,11 @@
           <div class="text-caption grey--text text--darken-1">
             Give each value a name and say where it is in your API's response, as a dot path
             (<code>data.totalAmount</code>).
-            <template v-if="stepName === 'create'">
+            <template v-if="stepName === 'create' && actionType === 'request'">
+              <b>id</b> (required) is the new request's ID, e.g. <code>sr_id</code>; the bot gives it to the
+              customer. Add others, like <b>stage</b>, to use them in the message.
+            </template>
+            <template v-else-if="stepName === 'create'">
               <b>url</b> is the payment link; <b>amount</b> is shown in the message.
             </template>
             <template v-else>
@@ -129,7 +133,7 @@
           <v-text-field
             :value="row.path"
             label="Where it is in the response"
-            :placeholder="stepName === 'create' && row.name === 'url' ? 'data.paymentLink' : 'data.totalAmount'"
+            :placeholder="pathPlaceholder(row)"
             outlined
             dense
             hide-details
@@ -225,6 +229,7 @@ export default {
   props: {
     value: { type: Object, required: true },
     stepName: { type: String, required: true }, // quote | create
+    actionType: { type: String, default: "payment_link" }, // payment_link | request
     placeholders: { type: Array, default: () => [] },
   },
 
@@ -232,6 +237,8 @@ export default {
     urlPlaceholder() {
       return this.stepName === "quote"
         ? "https://api.yoursite.com/bot/extension-quote"
+        : this.actionType === "request"
+        ? "https://api.yoursite.com/bot/service-request"
         : "https://api.yoursite.com/bot/payment-link";
     },
     authSummary() {
@@ -247,6 +254,12 @@ export default {
   },
 
   methods: {
+    pathPlaceholder(row) {
+      if (this.stepName === "create" && row.name === "url") return "data.paymentLink";
+      if (this.stepName === "create" && row.name === "id") return "sr_id";
+      if (this.stepName === "create" && this.actionType === "request") return "data.stage";
+      return "data.totalAmount";
+    },
     set(key, val) {
       this.$emit("input", { ...this.value, [key]: val });
     },
