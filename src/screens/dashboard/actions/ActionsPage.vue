@@ -7,7 +7,7 @@
       <div class="mr-4 mb-2">
         <h1 class="text-h6 font-weight-bold grey--text text--darken-4">Actions</h1>
         <div class="text-body-2 grey--text text--darken-1">
-          Let the bot send customers a payment link, by calling your own API.
+          Let the bot send customers a payment link or raise a request for them, by calling your own API.
         </div>
       </div>
       <v-spacer />
@@ -49,16 +49,20 @@
         <v-avatar color="primary lighten-5" size="44" class="mr-3">
           <v-icon color="primary">$credit-card</v-icon>
         </v-avatar>
-        <div class="text-subtitle-1 font-weight-bold">Payment links from the bot</div>
+        <div class="text-subtitle-1 font-weight-bold">Let the bot do things for customers</div>
       </div>
       <div class="text-body-2 grey--text text--darken-2 mb-2">
         A customer says "I want to extend my booking by a week". The bot gets the price from your
         API, asks "That's ₹2,400. Shall I send the payment link?", and on a yes sends the link your
         API makes, on WhatsApp, the website chat or a phone call.
       </div>
+      <div class="text-body-2 grey--text text--darken-2 mb-2">
+        Or a customer says "the brakes are making a noise". The bot asks "Shall I raise a service
+        request for our team?", and on a yes your API raises it and the bot gives them its ID.
+      </div>
       <div class="text-body-2 grey--text text--darken-2 mb-4">
-        Prices and links always come from your API; the bot never makes them up. You need an API
-        that can give a price (optional) and create a payment link.
+        Prices, links and IDs always come from your API; the bot never makes them up. You need an
+        API that can create a payment link or a request.
       </div>
       <div class="d-flex flex-wrap">
         <v-btn
@@ -93,6 +97,10 @@
             <td class="py-2">
               <div class="font-weight-medium">{{ a.name }}</div>
               <code class="text-caption">{{ a.key }}</code>
+              <v-chip x-small label outlined class="ml-1">
+                <v-icon left size="12">{{ typeInfo(a).icon }}</v-icon>
+                {{ typeInfo(a).label }}
+              </v-chip>
             </td>
             <td @click.stop>
               <v-switch
@@ -115,17 +123,17 @@
                   x-small
                   label
                   class="mr-1 my-1"
-                  :title="deliveryLabel(a, c)"
+                  :title="isRequest(a) ? '' : deliveryLabel(a, c)"
                 >
                   <v-icon left size="12" :color="channelInfo(c).color">{{ channelInfo(c).icon }}</v-icon>
-                  {{ channelInfo(c).label }} · {{ deliveryShort(a, c) }}
+                  {{ channelInfo(c).label }}<template v-if="!isRequest(a)"> · {{ deliveryShort(a, c) }}</template>
                 </v-chip>
               </div>
             </td>
             <td v-if="canSeeRuns">
               <template v-if="lastRuns[a.key]">
-                <v-chip x-small label :color="runStatus(lastRuns[a.key].status).color" text-color="white">
-                  {{ runStatus(lastRuns[a.key].status).label }}
+                <v-chip x-small label :color="runStatusFor(lastRuns[a.key], isRequest(a)).color" text-color="white">
+                  {{ runStatusFor(lastRuns[a.key], isRequest(a)).label }}
                 </v-chip>
                 <div class="text-caption grey--text">{{ formatDate(lastRuns[a.key].createdAt) }}</div>
               </template>
@@ -145,12 +153,14 @@
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import { apiError, can, formatDate, loadMyPermissions } from "@/utils/knowledge";
 import {
+  ACTION_TYPES,
   DELIVERY,
   PRESETS,
   channelInfo,
   listActions,
   listRuns,
-  runStatus,
+  isRequest,
+  runStatusFor,
   updateAction,
 } from "@/utils/actions";
 
@@ -183,8 +193,13 @@ export default {
 
   methods: {
     channelInfo,
-    runStatus,
+    isRequest,
+    runStatusFor,
     formatDate,
+
+    typeInfo(a) {
+      return ACTION_TYPES[a.type] || ACTION_TYPES.payment_link;
+    },
 
     async load() {
       this.loading = true;

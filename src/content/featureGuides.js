@@ -160,6 +160,7 @@ export const FEATURE_GUIDES = [
       "Set the ticket status so your team knows what's handled.",
     ],
     thingsToKnow: [
+      "For WhatsApp photos, voice notes and location pins, the chat shows what the bot read: the photo's description, the voice note's transcript or the pin's place. It appears shortly after the message arrives, so reopen the chat if it isn't there yet.",
       "Replying needs the chat:reply permission. Reading needs chat:read. Set these in Team.",
       "Your replies are sent as your business, not as the AI.",
       "Turn AI off before you reply, so the bot doesn't answer at the same time as you.",
@@ -242,6 +243,8 @@ export const FEATURE_GUIDES = [
     thingsToKnow: [
       "Treat the webhook URL as a password. If it leaks, regenerate it.",
       "WhatsApp chats show up in Chats next to website chats.",
+      "The bot reads photos, voice notes and location pins. It describes a photo, writes out a voice note and reads a pin's place, then replies to that. In Chats, you see what it read under the message. If it can't read one, it sends a standard acknowledgement and the chat says so.",
+      "With the Customer API set up, the bot checks what customers send against their data: if they report a problem that already has an open service request, it gives that request's ID and stage instead of starting again. A payment screenshot is matched against their recent payments by amount and date, and is never taken as proof of payment on its own.",
       "Customers chatting on your website or app can prove their phone number by sending a ready-made message to your WhatsApp number, with no code to type. Add your WhatsApp business number here to turn it on. Verified chats show a ✓ with the number, and the verification lasts for that conversation.",
     ],
   },
@@ -332,6 +335,9 @@ export const FEATURE_GUIDES = [
     ],
     thingsToKnow: [
       "Real chats look up customers on WhatsApp only, by the sender's number.",
+      "Besides bookings and dues, your API can send the customer's service requests (open ones and those closed in the last 30 days), recent payments and refunds, and what's coming up (renewals, overdue rentals, km bills). Send only the sections you have: a section you leave out is unknown to the bot, not \"none\".",
+      "A service request's title and resolution are internal notes: the bot uses them to understand the request but never quotes them. It never promises when a request will be done.",
+      "When an upcoming amount isn't known yet, send it as null: the bot says it isn't known yet and never guesses.",
       "Sign-in: headers (as before), a bearer token, a username and password (Basic), or an API key in the URL (e.g. ?api_key=…). Tokens, passwords and keys are encrypted and never shown again.",
       "Extra parameters are sent with every call. Values and the URL can use {{phone}}.",
       "Reliability: we retry once on connection errors, never wait longer than your timeout, and pause calls for 60 seconds after 5 failures in a minute, so customers aren't kept waiting. Recent calls on the settings page shows every call from the last 7 days.",
@@ -417,17 +423,18 @@ export const FEATURE_GUIDES = [
   },
   {
     id: "actions",
-    name: "Actions (payment links)",
+    name: "Actions (payment links and requests)",
     icon: "$credit-card",
     route: "/dashboard/actions",
     summary:
-      "Let the bot send a customer a payment link, for example to pay for a booking or extend a rental, on WhatsApp, the website chat or a phone call. It works by calling your own API.",
+      "Let the bot do things for a customer by calling your own API: send a payment link (to pay for a booking or extend a rental), or raise a request in your system (a service request, a callback, a complaint) and give the customer its ID. Works on WhatsApp, the website chat and phone calls.",
     steps: [
-      "Click New action and pick Extend a rental, Pay for a booking, or start from scratch.",
-      "Describe when the bot should use it, and list what it must collect (like the booking ID).",
-      "Enter your API's addresses: an optional price check, and the call that creates the link.",
-      "Choose, for each channel, whether the bot sends the link in the chat or your system sends it.",
-      "Save, then use Try it to check the price and the bot's reply. Turn the action on when it works.",
+      "Click New action and pick Extend a rental, Pay for a booking, Raise a service request, or start from scratch.",
+      "Pick what it does: Payment link or Request.",
+      "Describe when the bot should use it, and list what it must collect (like the booking ID, or the problem in the customer's words).",
+      "Enter your API's addresses: an optional price check, and the call that creates the link or raises the request.",
+      "For payment links, choose for each channel whether the bot sends the link in the chat or your system sends it.",
+      "Save, then use Try it to see the bot's reply. Turn the action on when it works.",
     ],
     thingsToKnow: [
       "How it goes: the bot collects what it needs, asks your API for the price, asks the customer \"₹2,400, shall I send the payment link?\", and on a yes sends the link your API creates.",
@@ -441,7 +448,14 @@ export const FEATURE_GUIDES = [
       "\"Bot sends it in the chat\": your API returns the link and the bot posts it. It must be https and on one of your allowed link domains, like rzp.io.",
       "\"Your system sends it\": we send {{clientSends}} = true and your system sends the link itself (WhatsApp, SMS or email); the bot only says it's on its way. Calls always work this way, because a link can't be read out.",
       "The sandbox never creates links: it shows what the bot would do and marks the run as Sandbox. Try it on this page checks the price for real; \"Create a real link\" makes one real link, and on calls or \"Your system sends it\", really messages the customer.",
-      "What the bot did lists every run with the price, the link, and the requests we sent, with secrets hidden.",
+      "What the bot did lists every run with the price, the link or the request's reference, and the calls we made to your API, with secrets hidden.",
+      "Requests: for things your team handles, like \"the brakes are making a noise\". The bot first checks the customer's data: if a matching request is already open, it gives that ID and its stage instead of raising another. Otherwise it repeats what it will raise and asks \"Shall I go ahead? Please reply yes or no.\"",
+      "On a yes, we call your API once, never retried. Your API returns the new request's ID (tell us where it is, as the result named id) and the bot gives it to the customer: \"Done, it's raised. Your reference number is SR000819.\" On calls it says the ID too.",
+      "Every result from your API can go into a request's messages as {{result.<name>}}. The \"request raised\" message must contain {{result.id}}. In payment link messages, {{link.<name>}} works as before.",
+      "Choices from your API: a text input can get its list of choices from your API, like your current service request types. Your API's list always wins over the choices you typed; it's refreshed every 6 hours (you can set 1 to 48), and if your API is down, the last good list is used. The choices you type are only a fallback until your API has answered once.",
+      "Your API's 4xx error messages are shown to the customer as they are. If yours aren't written for customers, untick \"Show the API's 4xx error message to the customer\" under the step's Sign-in, headers and errors: the customer then gets the standard \"couldn't do it right now\" reply.",
+      "Text the bot collects is up to 100 characters unless you set a longer limit (up to 1,000), for example 500 for a problem described in the customer's words.",
+      "Try it on a request shows the bot's reply without raising anything. \"Raise it for real\" creates a real request in your system, which your team will see. The sandbox never raises requests: it shows SANDBOX-0001.",
     ],
   },
   {

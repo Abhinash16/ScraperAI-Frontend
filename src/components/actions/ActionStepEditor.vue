@@ -24,7 +24,11 @@
           @input="set('url', $event)"
         >
           <template #append>
-            <PlaceholderMenu :placeholders="placeholders" @pick="set('url', insert(value.url, $event))" />
+            <PlaceholderMenu
+              v-if="placeholders.length"
+              :placeholders="placeholders"
+              @pick="set('url', insert(value.url, $event))"
+            />
           </template>
         </v-text-field>
       </v-col>
@@ -74,6 +78,7 @@
           >
             <template #append>
               <PlaceholderMenu
+                v-if="placeholders.length"
                 :placeholders="placeholders"
                 @pick="updateRow('params', row, { value: insert(row.value, $event) })"
               />
@@ -89,7 +94,7 @@
     </div>
 
     <!-- RESULTS -->
-    <div class="mt-5">
+    <div v-if="stepName !== 'options'" class="mt-5">
       <div class="d-flex align-center mb-2">
         <div>
           <div class="d-flex align-center">
@@ -99,7 +104,11 @@
           <div class="text-caption grey--text text--darken-1">
             Give each value a name and say where it is in your API's response, as a dot path
             (<code>data.totalAmount</code>).
-            <template v-if="stepName === 'create'">
+            <template v-if="stepName === 'create' && actionType === 'request'">
+              <b>id</b> (required) is the new request's ID, e.g. <code>sr_id</code>; the bot gives it to the
+              customer. Add others, like <b>stage</b>, to use them in the message.
+            </template>
+            <template v-else-if="stepName === 'create'">
               <b>url</b> is the payment link; <b>amount</b> is shown in the message.
             </template>
             <template v-else>
@@ -129,7 +138,7 @@
           <v-text-field
             :value="row.path"
             label="Where it is in the response"
-            :placeholder="stepName === 'create' && row.name === 'url' ? 'data.paymentLink' : 'data.totalAmount'"
+            :placeholder="pathPlaceholder(row)"
             outlined
             dense
             hide-details
@@ -158,17 +167,34 @@
           <ApiAuthEditor :value="value.auth" @input="set('auth', $event)" />
           <HeadersEditor class="mt-4" :value="value.headers" @input="set('headers', $event)" />
 
+          <template v-if="stepName !== 'options'">
           <div class="d-flex align-center mt-5 mb-1">
             <v-icon size="16" color="grey darken-1" class="mr-2">$circle-alert</v-icon>
             <span class="text-caption font-weight-bold text-uppercase grey--text">When your API says no</span>
           </div>
+          <v-checkbox
+            :input-value="value.refuseOn4xx"
+            label="Show the API's 4xx error message to the customer"
+            dense
+            hide-details
+            class="mt-0 mb-1"
+            @change="set('refuseOn4xx', !!$event)"
+          />
           <div class="text-caption grey--text text--darken-1 mb-3">
-            An HTTP 4xx with a message always counts as a refusal. If your API answers 200 with a
-            success flag instead (like <code>"status": 0</code>), tell us where the flag and the reason are.
-            The bot shows the reason to the customer word for word, so write it for customers.
+            <template v-if="value.refuseOn4xx">
+              An HTTP 4xx with a message counts as a refusal, and the bot shows the message to the
+              customer word for word, so write it for customers.
+            </template>
+            <template v-else>
+              An HTTP 4xx counts as a failure: the customer gets the standard "couldn't do it right now"
+              reply, never your API's message.
+            </template>
+            If your API answers 200 with a success flag instead (like <code>"status": 0</code>), tell us
+            where the flag and the reason are; that reason is always shown to the customer.
           </div>
+          </template>
           <v-row dense>
-            <v-col cols="12" sm="4">
+            <v-col v-if="stepName !== 'options'" cols="12" sm="4">
               <v-text-field
                 :value="value.okPath"
                 label="Success flag"
@@ -178,7 +204,7 @@
                 @input="set('okPath', $event)"
               />
             </v-col>
-            <v-col cols="12" sm="4">
+            <v-col v-if="stepName !== 'options'" cols="12" sm="4">
               <v-text-field
                 :value="value.errorPath"
                 label="Reason it said no"
@@ -224,14 +250,18 @@ export default {
 
   props: {
     value: { type: Object, required: true },
-    stepName: { type: String, required: true }, // quote | create
+    stepName: { type: String, required: true }, // quote | create | options (an input's choices)
+    actionType: { type: String, default: "payment_link" }, // payment_link | request
     placeholders: { type: Array, default: () => [] },
   },
 
   computed: {
     urlPlaceholder() {
+      if (this.stepName === "options") return "https://api.yoursite.com/bot/service-request-types";
       return this.stepName === "quote"
         ? "https://api.yoursite.com/bot/extension-quote"
+        : this.actionType === "request"
+        ? "https://api.yoursite.com/bot/service-request"
         : "https://api.yoursite.com/bot/payment-link";
     },
     authSummary() {
@@ -247,6 +277,12 @@ export default {
   },
 
   methods: {
+    pathPlaceholder(row) {
+      if (this.stepName === "create" && row.name === "url") return "data.paymentLink";
+      if (this.stepName === "create" && row.name === "id") return "sr_id";
+      if (this.stepName === "create" && this.actionType === "request") return "data.stage";
+      return "data.totalAmount";
+    },
     set(key, val) {
       this.$emit("input", { ...this.value, [key]: val });
     },

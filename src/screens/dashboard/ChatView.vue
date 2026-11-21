@@ -302,7 +302,9 @@
                       <div
                         class="d-flex justify-space-between align-center mt-1"
                       >
-                        <span class="caption grey--text"> Location </span>
+                        <span class="caption grey--text text-truncate">
+                          {{ message.location ? `${message.location.latitude}, ${message.location.longitude}` : "Location" }}
+                        </span>
 
                         <v-btn
                           x-small
@@ -321,7 +323,7 @@
                     >
                       <v-icon small class="mr-2 primary--text"> $mic </v-icon>
 
-                      <audio controls>
+                      <audio v-if="message.mediaUrl" controls>
                         <source :src="message.mediaUrl" type="audio/ogg" />
                         Your browser does not support audio
                       </audio>
@@ -331,6 +333,21 @@
                     <div v-else class="text-caption grey--text">
                       Unsupported message type
                     </div>
+
+                    <!-- WHAT THE BOT READ (photo description, voice note transcript, pin text) -->
+                    <template v-if="readableMedia(message)">
+                      <div v-if="message.mediaText" class="media-read text-caption mt-2">
+                        <span class="font-weight-bold">{{ mediaReadLabel(message.type) }}</span>
+                        {{ message.mediaText }}
+                      </div>
+                      <div
+                        v-else-if="message.mediaRead && message.mediaRead.ok === false"
+                        class="media-read media-read--failed text-caption mt-2"
+                        :title="message.mediaRead.error || ''"
+                      >
+                        The bot couldn't read this (it sent the standard acknowledgement)
+                      </div>
+                    </template>
                   </div>
                 </v-card>
                 <div class="d-flex justify-end">
@@ -957,6 +974,14 @@ export default {
       });
     },
 
+    // Customer photos, voice notes and pins that the bot reads
+    readableMedia(message) {
+      return message.sender === "user" && ["image", "audio", "location"].includes(message.type);
+    },
+    mediaReadLabel(type) {
+      return { image: "Bot read:", audio: "Transcript:", location: "Pin:" }[type] || "Bot read:";
+    },
+
     getMapPreview(location) {
       if (!location) return "";
 
@@ -967,7 +992,7 @@ export default {
     openMap(location) {
       const { latitude, longitude } = location;
 
-      const url = `https://www.google.com/maps?q=${latitude},${longitude}`;
+      const url = `https://maps.google.com/?q=${latitude},${longitude}`;
 
       window.open(url, "_blank");
     },
@@ -995,6 +1020,19 @@ export default {
 </script>
 
 <style scoped>
+.media-read {
+  max-width: 260px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.7);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.media-read--failed {
+  color: rgba(0, 0, 0, 0.5);
+  font-style: italic;
+}
 .conv-divider {
   display: flex;
   align-items: center;

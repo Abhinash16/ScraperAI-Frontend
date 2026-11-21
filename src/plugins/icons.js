@@ -140,6 +140,12 @@ import {
   X,
   Zap,
   Activity,
+  ClipboardList,
+  Wrench,
+  Image,
+  ImageOff,
+  Wallet,
+  CalendarClock,
   Folder,
   FolderOpen,
   NotebookPen,
@@ -343,6 +349,12 @@ const APP_ICONS = {
   "x": X,
   "zap": Zap,
   "activity": Activity,
+  "clipboard-list": ClipboardList,
+  "wrench": Wrench,
+  "image": Image,
+  "image-off": ImageOff,
+  "wallet": Wallet,
+  "calendar-clock": CalendarClock,
 };
 
 const VUETIFY_ICONS = {
