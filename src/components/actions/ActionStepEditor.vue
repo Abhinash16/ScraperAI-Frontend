@@ -42,10 +42,16 @@
             <v-icon size="16" color="grey darken-1" class="mr-2">$braces</v-icon>
             <span class="text-caption font-weight-bold text-uppercase grey--text">What we send</span>
           </div>
-          <div class="text-caption grey--text text--darken-1">
-            {{ value.method === "GET" ? "Sent in the URL" : "Sent as JSON" }}. Use
-            <v-icon size="12">$braces</v-icon> to fill in what the bot collected. A value that is exactly
-            one placeholder keeps its type, so numbers stay numbers.
+          <div v-if="stepName === 'options'" class="text-caption grey--text text--darken-1">
+            Fixed values only ({{ value.method === "GET" ? "sent as query parameters" : "sent as JSON" }}), no
+            placeholders: the list is fetched before any conversation, so there's no customer or
+            collected value to fill in.
+          </div>
+          <div v-else class="text-caption grey--text text--darken-1">
+            {{ value.method === "GET" ? "Sent in the URL" : "Sent as JSON" }}. To fill in what the bot
+            collected, type a placeholder like <code v-pre>{{bookingId}}</code> or pick one with the
+            <v-icon size="12">$braces</v-icon> button in the field. A value that is exactly one placeholder
+            keeps its type, so numbers stay numbers.
           </div>
         </div>
         <v-spacer />
@@ -70,7 +76,7 @@
           <v-text-field
             :value="row.value"
             label="Value"
-            :placeholder="'{{bookingId}}'"
+:placeholder="stepName === 'options' ? 'service' : '{{bookingId}}'"
             outlined
             dense
             hide-details

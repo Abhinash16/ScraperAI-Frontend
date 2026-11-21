@@ -470,7 +470,12 @@
           </div>
           <div v-if="form.channels.includes('voice')" class="text-caption grey--text text--darken-1">
             <v-icon size="14" class="mr-1">$phone</v-icon>
-            On calls these are spoken: keep them short, and avoid raw dates and IDs that sound odd read out.
+            <template v-if="request">
+              On calls these are spoken: keep them short. The ID is read out, so keep it as the only code in the message.
+            </template>
+            <template v-else>
+              On calls these are spoken: keep them short, and avoid raw dates and IDs that sound odd read out.
+            </template>
           </div>
         </v-card>
 
