@@ -22,9 +22,9 @@
     <v-row dense>
       <v-col v-for="i in action.inputs" :key="i.name" cols="12" sm="6">
         <v-select
-          v-if="i.enum && i.enum.length"
+          v-if="choiceItems(i).length"
           v-model="inputs[i.name]"
-          :items="i.enum"
+          :items="choiceItems(i)"
           :label="i.name"
           :hint="i.description"
           outlined
@@ -211,6 +211,8 @@ export default {
   props: {
     action: { type: Object, required: true },
     unsaved: { type: Boolean, default: false },
+    // { [inputName]: { options: [{ value, label }] } } from GET /actions/:id/options
+    choices: { type: Object, default: () => ({}) },
   },
 
   data: () => ({
@@ -256,6 +258,15 @@ export default {
   },
 
   methods: {
+    // The API's list wins over the typed choices
+    choiceItems(i) {
+      const live = this.choices[i.name]?.options;
+      if (live && live.length) {
+        return live.map((o) => ({ value: o.value, text: o.label && o.label !== o.value ? `${o.label} (${o.value})` : o.value }));
+      }
+      return i.enum || [];
+    },
+
     payload(createLink) {
       const inputs = {};
       for (const i of this.action.inputs || []) {

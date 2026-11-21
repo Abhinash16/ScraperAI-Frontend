@@ -69,6 +69,18 @@ export const LIMITS = {
   perDayMax: 50,
   maxLengthMax: 1000,
   maxLengthDefault: 100,
+  cacheHoursMin: 1,
+  cacheHoursMax: 48,
+  cacheHoursDefault: 6,
+};
+
+// Where an input's current choices came from (GET /actions/:id/options)
+export const CHOICE_SOURCES = {
+  api: "from your API",
+  cache: "from your API · cached",
+  last_good: "last known: your API didn't answer",
+  custom: "fallback choices",
+  none: "none yet",
 };
 
 // What the backend says when a template is left empty (services/actions)
@@ -135,6 +147,7 @@ const blankStep = (outputs = []) => ({
   outputs: outputs.map(([name, path]) => newRow({ name, path })),
   okPath: "",
   errorPath: "",
+  refuseOn4xx: true,
   timeout: LIMITS.timeoutDefault,
 });
 
@@ -151,9 +164,21 @@ const stepToForm = (step, defaults) => {
     outputs: Object.entries(step.outputs || {}).map(([name, path]) => newRow({ name, path })),
     okPath: step.okPath || "",
     errorPath: step.errorPath || "",
+    refuseOn4xx: step.refuseOn4xx !== false,
     timeout: step.timeout || LIMITS.timeoutDefault,
   };
 };
+
+const OPTION_PATHS = ["listPath", "valuePath", "labelPath", "descriptionPath", "activePath"];
+
+// An input's "choices from your API": a step without results, plus where the
+// list and each choice's fields are, and how long the list is kept
+const optionsToForm = (o) => ({
+  ...stepToForm(o, []),
+  method: o?.method || "GET",
+  ...Object.fromEntries(OPTION_PATHS.map((k) => [k, o?.[k] || ""])),
+  cacheHours: o?.cacheHours ?? LIMITS.cacheHoursDefault,
+});
 
 const inputToForm = (i = {}) =>
   newRow({
@@ -165,7 +190,11 @@ const inputToForm = (i = {}) =>
     max: i.max ?? "",
     maxLength: i.maxLength ?? "",
     enumText: (i.enum || []).join(", "),
+    optionsOn: !!i.options,
+    options: optionsToForm(i.options),
   });
+
+export const blankInput = () => inputToForm();
 
 // The create step's starting results for each type
 export const CREATE_DEFAULTS = {
@@ -241,9 +270,35 @@ function stepFromForm(f, label, { needsUrl, needsId }) {
       outputs: outputs.value || {},
       okPath: f.okPath.trim() || undefined,
       errorPath: f.errorPath.trim() || undefined,
+      ...(f.refuseOn4xx === false ? { refuseOn4xx: false } : {}),
       timeout,
     },
   };
+}
+
+// Same rule as the backend (services/actions/settings.js PATH_RE)
+const DOT_PATH = /^[\w.[\]-]{1,100}$/;
+
+// Returns { options } or { error }
+function optionsFromForm(f, label) {
+  const s = stepFromForm({ ...f, outputs: [], okPath: "", errorPath: "", refuseOn4xx: true }, label, {});
+  if (s.error) return s;
+  const { outputs, okPath, errorPath, ...options } = s.step; // eslint-disable-line no-unused-vars
+  for (const k of OPTION_PATHS) {
+    const v = f[k].trim();
+    if (!v) continue;
+    if (!DOT_PATH.test(v)) return { error: `${label}: "${v}" must be a dot path, like data.types.` };
+    options[k] = v;
+  }
+  if (!options.valuePath) {
+    return { error: `${label}: say where each choice's value is (for example type).` };
+  }
+  const hours = f.cacheHours === "" || f.cacheHours == null ? LIMITS.cacheHoursDefault : Number(f.cacheHours);
+  if (!Number.isFinite(hours) || hours < LIMITS.cacheHoursMin || hours > LIMITS.cacheHoursMax) {
+    return { error: `${label}: keep the list for ${LIMITS.cacheHoursMin} to ${LIMITS.cacheHoursMax} hours.` };
+  }
+  options.cacheHours = hours;
+  return { options };
 }
 
 // Only payment links are sent in the chat; a request has no link
@@ -290,6 +345,11 @@ export function actionFromForm(f) {
     }
     const options = row.enumText.split(",").map((s) => s.trim()).filter(Boolean);
     if (options.length) input.enum = options;
+    if (row.type === "string" && row.optionsOn) {
+      const o = optionsFromForm(row.options, `Input "${name}" choices`);
+      if (o.error) return o;
+      input.options = o.options;
+    }
     inputs.push(input);
   }
 
@@ -458,6 +518,10 @@ export const updateAction = (id, body) =>
 export const deleteAction = (id) => apiClient.delete(`${ACTIONS_API}/${id}`);
 export const testAction = (id, body) =>
   apiClient.post(`${ACTIONS_API}/${id}/test`, body).then(({ data }) => data.data);
+export const getInputOptions = (id, refresh = false) =>
+  apiClient
+    .get(`${ACTIONS_API}/${id}/options`, { params: refresh ? { refresh: 1 } : {} })
+    .then(({ data }) => data.data?.inputs || []);
 export const listRuns = (params) =>
   apiClient.get(`${ACTIONS_API}/runs`, { params }).then(({ data }) => data.data || { runs: [], total: 0 });
 

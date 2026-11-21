@@ -184,12 +184,165 @@
               <v-col cols="12" :sm="row.type === 'integer' ? 6 : row.type === 'string' ? 8 : 12">
                 <v-text-field
                   v-model="row.enumText"
-                  label="Allowed values (optional)"
+                  :label="row.type === 'string' && row.optionsOn ? 'Fallback choices (used only until your API has answered once)' : 'Allowed values (optional)'"
                   placeholder="Comma separated, e.g. gold, silver"
                   outlined
                   dense
                   hide-details
                 />
+              </v-col>
+
+              <!-- CHOICES FROM THE CLIENT'S API -->
+              <v-col v-if="row.type === 'string'" cols="12">
+                <v-expansion-panels flat class="choices-panel">
+                  <v-expansion-panel>
+                    <v-expansion-panel-header class="px-0 py-1">
+                      <span class="text-body-2 font-weight-medium">
+                        <v-icon size="16" class="mr-2">$list</v-icon>
+                        Choices from your API
+                        <v-chip x-small label class="ml-2" :color="row.optionsOn ? 'success' : ''" :text-color="row.optionsOn ? 'white' : ''">
+                          {{ row.optionsOn ? "On" : "Off" }}
+                        </v-chip>
+                      </span>
+                    </v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <v-switch
+                        v-model="row.optionsOn"
+                        inset
+                        hide-details
+                        color="primary"
+                        class="mt-0 mb-2"
+                        label="Get the list of choices from your API"
+                      />
+                      <div class="text-caption grey--text text--darken-1 mb-3">
+                        For lists that change, like your service request types. Your API's list always
+                        wins over the fallback choices. We keep it for the hours you set, and use the
+                        last good list if your API is down.
+                      </div>
+                      <template v-if="row.optionsOn">
+                        <ActionStepEditor v-model="row.options" step-name="options" />
+                        <div class="text-caption font-weight-bold text-uppercase grey--text mt-5 mb-1">
+                          Where the choices are in the response
+                        </div>
+                        <v-row dense>
+                          <v-col cols="12" sm="6">
+                            <v-text-field
+                              v-model="row.options.listPath"
+                              label="The list"
+                              placeholder="data.types"
+                              hint="Empty if the response is the list itself"
+                              persistent-hint
+                              outlined
+                              dense
+                            />
+                          </v-col>
+                          <v-col cols="12" sm="6">
+                            <v-text-field
+                              v-model="row.options.valuePath"
+                              label="Each choice's value (required)"
+                              placeholder="type"
+                              hint="What the bot sends to your API"
+                              persistent-hint
+                              outlined
+                              dense
+                            />
+                          </v-col>
+                          <v-col cols="12" sm="4">
+                            <v-text-field
+                              v-model="row.options.labelPath"
+                              label="Name (optional)"
+                              placeholder="name"
+                              outlined
+                              dense
+                            />
+                          </v-col>
+                          <v-col cols="12" sm="4">
+                            <v-text-field
+                              v-model="row.options.descriptionPath"
+                              label="Description (optional)"
+                              placeholder="description"
+                              hint="Helps the bot pick the right one"
+                              persistent-hint
+                              outlined
+                              dense
+                            />
+                          </v-col>
+                          <v-col cols="12" sm="4">
+                            <v-text-field
+                              v-model="row.options.activePath"
+                              label="In use (optional)"
+                              placeholder="active"
+                              hint="Choices where this is false are left out"
+                              persistent-hint
+                              outlined
+                              dense
+                            />
+                          </v-col>
+                          <v-col cols="12" sm="4">
+                            <v-text-field
+                              v-model.number="row.options.cacheHours"
+                              label="Keep the list for"
+                              type="number"
+                              :min="LIMITS.cacheHoursMin"
+                              :max="LIMITS.cacheHoursMax"
+                              suffix="hours"
+                              :hint="`${LIMITS.cacheHoursMin}–${LIMITS.cacheHoursMax}`"
+                              persistent-hint
+                              outlined
+                              dense
+                            />
+                          </v-col>
+                        </v-row>
+                      </template>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                </v-expansion-panels>
+              </v-col>
+
+              <!-- CURRENT CHOICES (saved actions only) -->
+              <v-col v-if="choices[row.name]" cols="12">
+                <v-sheet color="grey lighten-5" rounded="lg" class="pa-2">
+                  <div class="d-flex align-center flex-wrap">
+                    <span class="text-caption font-weight-bold text-uppercase grey--text mr-1">Current choices</span>
+                    <span class="text-caption grey--text">({{ choiceSource(choices[row.name].source) }})</span>
+                    <v-spacer />
+                    <v-btn
+                      v-if="savedHasOptions(row.name)"
+                      x-small
+                      text
+                      color="primary"
+                      :loading="choicesLoading === 'refresh'"
+                      :disabled="!!choicesLoading"
+                      title="Ask your API for the list now"
+                      @click="loadChoices(true)"
+                    >
+                      <v-icon left size="12">$refresh-cw</v-icon>
+                      Refresh
+                    </v-btn>
+                  </div>
+                  <div class="d-flex flex-wrap mt-1">
+                    <v-chip
+                      v-for="o in (choices[row.name].options || []).slice(0, 30)"
+                      :key="o.value"
+                      x-small
+                      label
+                      class="mr-1 mb-1"
+                      :title="o.description || ''"
+                    >
+                      {{ o.label && o.label !== o.value ? `${o.label} (${o.value})` : o.value }}
+                    </v-chip>
+                    <span v-if="(choices[row.name].options || []).length > 30" class="text-caption grey--text">
+                      and {{ choices[row.name].options.length - 30 }} more
+                    </span>
+                    <span v-if="!(choices[row.name].options || []).length" class="text-caption grey--text">
+                      No choices yet.
+                    </span>
+                  </div>
+                  <div v-if="choices[row.name].error" class="text-caption grey--text mt-1">
+                    {{ choices[row.name].error }}
+                  </div>
+                  <div v-if="dirty" class="text-caption grey--text mt-1">Shows the saved version.</div>
+                </v-sheet>
               </v-col>
             </v-row>
           </v-sheet>
@@ -359,7 +512,7 @@
 
       <v-col v-if="!isNew" cols="12" md="5">
         <div class="test-column">
-          <ActionTestPanel :action="saved" :unsaved="dirty" />
+          <ActionTestPanel :action="saved" :unsaved="dirty" :choices="choices" />
         </div>
       </v-col>
     </v-row>
@@ -392,9 +545,12 @@ import {
   DEFAULT_REQUEST_TEMPLATES,
   DEFAULT_TEMPLATES,
   INPUT_TYPES,
+  CHOICE_SOURCES,
   LIMITS,
   PRESETS,
   actionFromForm,
+  blankInput,
+  getInputOptions,
   actionToForm,
   createAction,
   deleteAction,
@@ -433,6 +589,8 @@ export default {
     error: "",
     deleteOpen: false,
     deleting: false,
+    choices: {},
+    choicesLoading: "",
   }),
 
   computed: {
@@ -537,6 +695,31 @@ export default {
       this.saved = action;
       this.form = actionToForm(action);
       this.savedSnapshot = JSON.stringify(this.form);
+      this.choices = {};
+      if ((action.inputs || []).some((i) => i.options || (i.enum && i.enum.length))) this.loadChoices(false);
+    },
+
+    // The choices each input has now, and where they came from
+    async loadChoices(refresh) {
+      if (!this.saved) return;
+      this.choicesLoading = refresh ? "refresh" : "load";
+      try {
+        const inputs = await getInputOptions(this.saved.id, refresh);
+        this.choices = Object.fromEntries(inputs.map((i) => [i.name, i]));
+        if (refresh) this.$toast.success("Choices refreshed");
+      } catch (err) {
+        if (refresh) this.$toast.error(apiError(err, "Couldn't refresh the choices."));
+      } finally {
+        this.choicesLoading = "";
+      }
+    },
+
+    savedHasOptions(name) {
+      return !!(this.saved?.inputs || []).find((i) => i.name === name)?.options;
+    },
+
+    choiceSource(source) {
+      return CHOICE_SOURCES[source] || source;
     },
 
     suggestKey() {
@@ -544,18 +727,7 @@ export default {
     },
 
     addInput() {
-      this.form.inputs.push(
-        newRow({
-          name: "",
-          type: "string",
-          description: "",
-          required: true,
-          min: "",
-          max: "",
-          maxLength: "",
-          enumText: "",
-        }),
-      );
+      this.form.inputs.push(blankInput());
     },
 
     removeInput(row) {
@@ -640,6 +812,12 @@ export default {
 }
 .channel-row + .channel-row {
   border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+.choices-panel >>> .v-expansion-panel-content__wrap {
+  padding: 0 0 8px;
+}
+.choices-panel >>> .v-expansion-panel-header {
+  min-height: 36px;
 }
 .channel-check {
   min-width: 180px;
