@@ -5,8 +5,8 @@
       <v-icon size="16" color="primary" class="mr-2">$user-search</v-icon>
       <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4">Customer</span>
       <span v-if="data && data.available" class="text-caption grey--text ml-2 text-truncate">
-        Looked up by {{ sourceLabel }}<template v-if="data.fetchedAt">
-          · {{ data.cached ? "saved" : "fetched" }} at {{ time(data.fetchedAt) }}</template>
+        Looked up by {{ sourceLabel }} · {{ data.cached ? "saved" : "fetched" }} at
+        {{ time(data.fetchedAt) || "—" }}
       </span>
       <v-spacer />
       <v-btn
