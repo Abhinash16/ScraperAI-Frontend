@@ -24,6 +24,7 @@ export const FEATURE_GUIDES = [
       "Under Conversation you can also set how many AI replies one chat gets in 24 hours (website and WhatsApp separately), and the handoff message sent when the limit is reached.",
       "The holding and handoff messages can be Auto (the bot writes them for each customer, in their language and your tone) or Fixed text. Auto falls back to the fixed text if it fails.",
       "You can restore any of your last 20 published versions from History.",
+      "Under Advanced → Reply model you can pick a smarter model. It answers everything the customer sent in one reply, uses their bookings, requests and payments without being asked, and explains photos and location pins. It costs more per reply and can take a few seconds longer. Use it for customers with account data and messages with photos, voice notes or pins (recommended), or for every reply. It's saved straight away, not with the draft; changing it clears saved answers so new replies use it, and only your account changes.",
     ],
   },
   {

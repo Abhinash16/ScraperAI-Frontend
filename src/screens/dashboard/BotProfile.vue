@@ -727,6 +727,7 @@
       </v-card>
 
       <!-- ============ ADVANCED ============ -->
+      <ReplyModelCard v-if="tab === 'advanced'" />
       <v-card v-show="tab === 'advanced'" outlined rounded="lg">
         <div class="px-5 py-4">
           <div class="text-subtitle-1 font-weight-bold grey--text text--darken-4">Custom instructions</div>
@@ -874,6 +875,7 @@
 <script>
 import apiClient from "@/service/axios";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
+import ReplyModelCard from "@/components/bot/ReplyModelCard.vue";
 
 const ENDPOINT = "/clients/bot-profile";
 
@@ -1186,7 +1188,7 @@ function supportedTimezones() {
 export default {
   name: "BotProfile",
 
-  components: { ThingsToKnow },
+  components: { ReplyModelCard, ThingsToKnow },
 
   data() {
     return {
