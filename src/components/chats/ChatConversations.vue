@@ -28,6 +28,9 @@
             {{ stat(c, "userMessages") }} from the customer · {{ stat(c, "botMessages") }} bot
             <template v-if="stat(c, 'agentMessages')"> · {{ stat(c, "agentMessages") }} team</template>
           </v-list-item-subtitle>
+          <div v-if="c.lead && c.lead.stage" class="mt-1">
+            <LeadBadge :lead="c.lead" />
+          </div>
           <div v-if="c.summary" class="text-caption summary mt-1">{{ c.summary }}</div>
           <div v-if="c.topics && c.topics.length" class="mt-1">
             <v-chip v-for="t in c.topics" :key="t" x-small class="mr-1">{{ t }}</v-chip>
@@ -55,10 +58,13 @@ import {
   isOpen,
 } from "@/utils/conversations";
 import { formatPhone, verifiedIdentity } from "@/utils/identity";
+import LeadBadge from "@/components/leads/LeadBadge.vue";
 
 // A chat's conversations, newest first. Emits "select" with a conversation id.
 export default {
   name: "ChatConversations",
+
+  components: { LeadBadge },
 
   props: {
     conversations: { type: Array, default: () => [] },

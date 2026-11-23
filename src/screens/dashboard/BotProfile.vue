@@ -554,6 +554,164 @@
         </div>
       </v-card>
 
+      <!-- ============ SALES ============ -->
+      <v-card v-show="tab === 'sales'" outlined rounded="lg">
+        <div class="px-5 py-4">
+          <div class="text-subtitle-1 font-weight-bold grey--text text--darken-4">Sales</div>
+          <div class="text-body-2 grey--text text--darken-1">
+            Help interested customers choose and book, and see who is ready to buy.
+          </div>
+        </div>
+        <v-divider />
+        <div class="pa-5">
+          <v-sheet outlined rounded="lg" class="pa-4 mb-5">
+            <div class="d-flex align-start">
+              <div class="flex-grow-1 mr-4">
+                <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">Sales mode</div>
+                <div class="text-body-2 grey--text text--darken-1">
+                  The bot helps interested customers choose and book, asks for one missing detail at
+                  a time, offers the payment link when it can, and scores every conversation as a
+                  lead. It never invents offers or urgency, and it stops after a no.
+                </div>
+              </div>
+              <v-switch
+                v-model="form.sales.enabled"
+                color="primary"
+                inset
+                hide-details
+                class="mt-0 pt-0 flex-shrink-0"
+                :disabled="!salesRoleOk && !form.sales.enabled"
+                :label="form.sales.enabled ? 'On' : 'Off'"
+                aria-label="Sales mode"
+              />
+            </div>
+            <v-alert
+              v-if="!salesRoleOk"
+              text
+              dense
+              color="amber darken-3"
+              rounded="lg"
+              class="text-body-2 mt-4 mb-0"
+            >
+              <div class="d-flex align-center flex-wrap">
+                <span class="mr-4">
+                  Sales mode needs "What the bot does" set to "Support and sales" (on the Identity
+                  tab).
+                  <template v-if="form.sales.enabled">Turn it off, or change the role, to save.</template>
+                </span>
+                <v-spacer />
+                <v-btn small text color="amber darken-3" @click="tab = 'identity'">Go to Identity</v-btn>
+              </div>
+            </v-alert>
+          </v-sheet>
+
+          <div :class="{ 'sales-off': !form.sales.enabled }">
+            <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
+              Details a booking needs
+            </div>
+            <div class="text-body-2 grey--text text--darken-1 mb-3">
+              What the bot needs to know before it can book. It asks for these one at a time, only
+              the ones the customer hasn't given yet. Up to {{ SALES.detailsMax }}.
+            </div>
+            <v-combobox
+              v-model="form.sales.bookingDetails"
+              label="Details"
+              placeholder='e.g. "model", "pickup hub", "start date"'
+              hint="Type a detail and press Enter."
+              persistent-hint
+              multiple
+              small-chips
+              deletable-chips
+              outlined
+              dense
+              :rules="[listRule(SALES.detailsMax, SALES.detailMax)]"
+              class="mb-5"
+            />
+
+            <div class="d-flex align-center">
+              <div class="mr-4">
+                <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
+                  Suggestions the bot may make
+                </div>
+                <div class="text-body-2 grey--text text--darken-1 mb-3">
+                  Other products or options the bot may suggest, one per line. It suggests nothing
+                  that isn't on this list. Up to {{ SALES.crossSellMax }}.
+                </div>
+              </div>
+            </div>
+            <v-textarea
+              v-model="form.sales.crossSell"
+              label="Suggestions"
+              placeholder="Longer rentals cost less per month"
+              outlined
+              rows="3"
+              auto-grow
+              :rules="[linesRule(SALES.crossSellMax, SALES.crossSellLineMax)]"
+              class="mb-2"
+            />
+
+            <v-row dense>
+              <v-col cols="12" md="8">
+                <div class="d-flex align-center mb-1">
+                  <span class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
+                    When a lead counts as hot
+                  </span>
+                  <v-spacer />
+                  <v-chip small label color="primary lighten-5" text-color="primary" class="font-weight-bold">
+                    {{ form.sales.hotLeadScore }} / 100
+                  </v-chip>
+                </div>
+                <div class="text-body-2 grey--text text--darken-1 mb-2">
+                  Every conversation gets a lead score from 0 to 100, based on how far the customer
+                  got and the details they gave. At this score the lead is marked hot. The default is
+                  {{ SALES.hotDefault }}.
+                </div>
+                <v-slider
+                  v-model="form.sales.hotLeadScore"
+                  :min="SALES.hotMin"
+                  max="100"
+                  step="5"
+                  thumb-label
+                  hide-details
+                  color="primary"
+                />
+              </v-col>
+            </v-row>
+
+            <v-sheet outlined rounded="lg" class="d-flex align-center px-4 py-2 mt-5">
+              <div class="flex-grow-1 mr-4">
+                <div class="text-body-2 font-weight-bold grey--text text--darken-4">
+                  Email my team when a lead turns hot
+                </div>
+                <div class="text-caption grey--text text--darken-1">
+                  Sent to the escalation alert addresses. You can also send hot leads to your own
+                  system with a webhook.
+                </div>
+              </div>
+              <v-switch
+                v-model="form.sales.emailHotLeads"
+                inset
+                hide-details
+                color="primary"
+                class="mt-0 pt-0"
+                aria-label="Email my team when a lead turns hot"
+              />
+            </v-sheet>
+
+            <div class="d-flex flex-wrap mt-5">
+              <v-btn small outlined color="primary" class="mr-2 mb-2" to="/dashboard/integration?section=webhooks">
+                <v-icon left size="14">$webhook</v-icon>
+                Alert addresses and webhooks
+              </v-btn>
+              <v-btn small text color="primary" class="mb-2" to="/dashboard/leads">
+                <v-icon left size="14">$flame</v-icon>
+                See leads
+              </v-btn>
+            </div>
+          </div>
+        </div>
+      </v-card>
+
       <!-- ============ CONVERSATION ============ -->
       <v-card v-show="tab === 'conversation'" outlined rounded="lg">
         <div class="px-5 py-4">
@@ -922,9 +1080,20 @@ const TABS = [
   { id: "rules", label: "Rules", icon: "$list-checks" },
   { id: "escalation", label: "Escalation", icon: "$headset" },
   { id: "conversation", label: "Conversation", icon: "$message-square-text" },
+  { id: "sales", label: "Sales", icon: "$shopping-bag" },
   { id: "advanced", label: "Advanced", icon: "$braces" },
   { id: "history", label: "History", icon: "$history" },
 ];
+
+// Backend limits for profile.sales
+const SALES = {
+  detailsMax: 8,
+  detailMax: 100,
+  crossSellMax: 10,
+  crossSellLineMax: 300,
+  hotMin: 40,
+  hotDefault: 70,
+};
 
 const ROLES = [
   { value: "support_sales", text: "Support and sales" },
@@ -1023,6 +1192,7 @@ function toForm(profile = {}, defaults = CONVERSATION_DEFAULTS) {
   const rules = profile.rules || {};
   const escalation = rules.escalation || {};
   const conversation = profile.conversation || {};
+  const sales = profile.sales || {};
   const holding = conversation.holdingMessage || {};
   const limit = conversation.aiReplyLimit || {};
   const idle = conversation.idleMinutes || {};
@@ -1097,6 +1267,13 @@ function toForm(profile = {}, defaults = CONVERSATION_DEFAULTS) {
       handoffMode: mode(conversation.handoffMode, defaults.handoffMode),
       handoffMessage: str(conversation.handoffMessage) || str(dHandoff.web),
     },
+    sales: {
+      enabled: !!sales.enabled,
+      bookingDetails: arr(sales.bookingDetails),
+      crossSell: arr(sales.crossSell).join("\n"),
+      hotLeadScore: typeof sales.hotLeadScore === "number" ? sales.hotLeadScore : SALES.hotDefault,
+      emailHotLeads: !!sales.emailHotLeads,
+    },
     customInstructions: str(profile.customInstructions),
   };
 }
@@ -1160,6 +1337,13 @@ function toProfile(form) {
         whatsapp: hoursToMinutes(form.conversation.idleWhatsappHours),
       },
     },
+    sales: {
+      enabled: form.sales.enabled,
+      bookingDetails: clean(form.sales.bookingDetails),
+      crossSell: lines(form.sales.crossSell),
+      hotLeadScore: form.sales.hotLeadScore,
+      emailHotLeads: form.sales.emailHotLeads,
+    },
     customInstructions: form.customInstructions.trim(),
   };
 }
@@ -1204,6 +1388,7 @@ export default {
       CUSTOM_MAX,
       DEFAULT_THRESHOLD,
       MESSAGE_MODES,
+      SALES,
       defaults: CONVERSATION_DEFAULTS,
       timezones: supportedTimezones(),
 
@@ -1238,6 +1423,10 @@ export default {
       return JSON.stringify(toProfile(this.form)) !== this.savedJson;
     },
 
+    salesRoleOk() {
+      return this.form.identity.role === "support_sales";
+    },
+
     defaultHandoff() {
       return this.defaults.handoffMessage || CONVERSATION_DEFAULTS.handoffMessage;
     },
@@ -1265,6 +1454,7 @@ export default {
   },
 
   created() {
+    if (TABS.some((t) => t.id === this.$route.query.tab)) this.tab = this.$route.query.tab;
     this.load();
     window.addEventListener("beforeunload", this.onBeforeUnload);
   },
@@ -1288,6 +1478,24 @@ export default {
         if (s === "") return true;
         const n = Number(s);
         return (Number.isInteger(n) && n >= min && n <= max) || `A whole number from ${min} to ${max}`;
+      };
+    },
+
+    // A chip list: at most `max` entries of at most `len` characters
+    listRule(max, len) {
+      return (v) => {
+        const list = clean(v);
+        if (list.length > max) return `Up to ${max}`;
+        return list.every((s) => s.length <= len) || `Each up to ${len} characters`;
+      };
+    },
+
+    // One entry per line
+    linesRule(max, len) {
+      return (v) => {
+        const list = lines(v || "");
+        if (list.length > max) return `Up to ${max} lines`;
+        return list.every((s) => s.length <= len) || `Each line up to ${len} characters`;
       };
     },
 
@@ -1421,6 +1629,10 @@ export default {
 
 <style scoped>
 /* Keeps Save and Publish in reach while scrolling (64px top bar + gap) */
+.sales-off {
+  opacity: 0.7;
+}
+
 .draft-bar {
   position: sticky;
   top: 72px;

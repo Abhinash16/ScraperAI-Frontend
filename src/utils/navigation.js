@@ -46,6 +46,26 @@ export const NAV_GROUPS = [
           },
         ],
       },
+      {
+        id: "sales",
+        name: "Sales",
+        icon: "$handshake",
+        description: "Leads the bot found and the payments that followed",
+        tabs: [
+          {
+            name: "Leads",
+            to: link("/dashboard/leads"),
+            permission: "chat:read",
+            match: startsWith("/dashboard/leads"),
+          },
+          {
+            name: "Deals",
+            to: link("/dashboard/deals"),
+            permission: "analytics:view",
+            match: startsWith("/dashboard/deals"),
+          },
+        ],
+      },
     ],
   },
   {
@@ -150,6 +170,12 @@ export const NAV_GROUPS = [
             to: link("/dashboard/bot-health"),
             permission: "analytics:view",
             match: startsWith("/dashboard/bot-health"),
+          },
+          {
+            name: "Agents",
+            to: link("/dashboard/agents"),
+            permission: "analytics:view",
+            match: startsWith("/dashboard/agents"),
           },
           {
             name: "Conversations",

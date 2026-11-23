@@ -153,6 +153,21 @@ const routes = [
         meta: { permission: "analytics:view" },
       },
       {
+        path: "leads",
+        component: () => import("../screens/dashboard/sales/LeadsPage.vue"),
+        meta: { permission: "chat:read" },
+      },
+      {
+        path: "deals",
+        component: () => import("../screens/dashboard/sales/DealsPage.vue"),
+        meta: { permission: "analytics:view" },
+      },
+      {
+        path: "agents",
+        component: () => import("../screens/dashboard/insights/AgentReports.vue"),
+        meta: { permission: "analytics:view" },
+      },
+      {
         path: "chat-analytics",
         name: "Chat Analytics",
         component: () => import("../screens/dashboard/AnalyticsDashboard.vue"),

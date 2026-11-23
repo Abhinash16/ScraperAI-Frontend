@@ -11,7 +11,7 @@ export const FEATURE_GUIDES = [
     summary:
       "Your bot's name, tone, business facts, and rules, all set by you.",
     steps: [
-      "Fill in Identity, Business facts, Rules, Escalation, and Conversation, then save the draft.",
+      "Fill in Identity, Business facts, Rules, Escalation, Conversation and (if you sell) Sales, then save the draft.",
       "Click Test in sandbox and ask the questions your customers ask.",
       "When the answers look right, click Publish.",
     ],
@@ -23,6 +23,7 @@ export const FEATURE_GUIDES = [
       "When an answer takes more than a few seconds (6 by default), the customer first gets a short holding message. You can turn it off or change the timing under Conversation. The sandbox doesn't send it.",
       "Under Conversation you can also set how many AI replies one chat gets in 24 hours (website and WhatsApp separately), and the handoff message sent when the limit is reached.",
       "The holding and handoff messages can be Auto (the bot writes them for each customer, in their language and your tone) or Fixed text. Auto falls back to the fixed text if it fails.",
+      "Sales turns on sales mode: the bot helps interested customers book and scores every chat as a lead. It needs \"What the bot does\" set to Support and sales. See the Sales mode and leads guide.",
       "You can restore any of your last 20 published versions from History.",
       "Under Advanced → Reply model you can pick a smarter model. It answers everything the customer sent in one reply, uses their bookings, requests and payments without being asked, and explains photos and location pins. It costs more per reply and can take a few seconds longer. Use it for customers with account data and messages with photos, voice notes or pins (recommended), or for every reply. It's saved straight away, not with the draft; changing it clears saved answers so new replies use it, and only your account changes.",
     ],
@@ -290,12 +291,14 @@ export const FEATURE_GUIDES = [
     summary:
       "Tell your systems when a chat needs a person, shows buying interest, or needs a follow-up. Connect product and customer APIs for live answers.",
     steps: [
-      "Add a URL for Escalate, Upsell, or Follow-up events.",
+      "Add a URL for Escalate, Upsell, Follow-up, or Hot lead events.",
       "Connect your product or customer API under API Config so the bot can answer with live data.",
     ],
     thingsToKnow: [
       "Set up Escalate before going live, so \"I want to talk to a person\" reaches your team.",
       "Your endpoint should respond quickly. Slow endpoints can time out.",
+      "Only Escalate hands the chat to your team. Upsell, Follow-up and Hot lead just tell your system; the bot keeps chatting.",
+      "Hot lead is sent once per conversation, when the lead score reaches the hot-lead score you set under Bot behaviour → Sales. It includes the customer's phone, the stage, the score and what they want (product, location, start date, how long) and the next step.",
       "If we can't send an escalation to your system (the call fails, or the webhook was switched off after 3 failures), we email your alert addresses with the customer's phone, channel and message so someone can contact them. Set them under Escalate; empty means your account email. A webhook you turned off yourself sends no alerts.",
     ],
   },
@@ -459,6 +462,49 @@ export const FEATURE_GUIDES = [
       "Your API's 4xx error messages are shown to the customer as they are. If yours aren't written for customers, untick \"Show the API's 4xx error message to the customer\" under the step's Sign-in, headers and errors: the customer then gets the standard \"couldn't do it right now\" reply.",
       "Text the bot collects is up to 100 characters unless you set a longer limit (up to 1,000), for example 500 for a problem described in the customer's words.",
       "Try it on a request shows the bot's reply without raising anything. \"Raise it for real\" creates a real request in your system, which your team will see. The sandbox never raises requests: it shows SANDBOX-0001.",
+    ],
+  },
+  {
+    id: "leads",
+    name: "Sales mode and leads",
+    icon: "$handshake",
+    route: "/dashboard/leads",
+    summary:
+      "With sales mode on, the bot helps interested customers choose and book, and scores every conversation as a lead, so you can see who is ready to buy and what the bot sold.",
+    steps: [
+      "Under Bot behaviour, set \"What the bot does\" to Support and sales.",
+      "Open the Sales tab, switch on sales mode, and list the details a booking needs (like model, pickup hub, start date).",
+      "Add the suggestions the bot may make, if any, and choose when a lead counts as hot.",
+      "Save, test in the sandbox, then publish.",
+      "Optional: turn on a payment link action so the bot can take customers to payment, and add a Hot lead webhook or email alerts so your team hears about hot leads.",
+    ],
+    thingsToKnow: [
+      "The bot asks for one missing detail at a time, and offers the payment link once it has what it needs. It never invents offers or urgency, suggests only what's on your list, and stops selling after a no.",
+      "Every lead has a stage: Browsing, Interested, Ready to book, Checkout, Paid (or Lost). A stage only moves forward; it never goes back.",
+      "The score (0 to 100) comes from the stage and how many booking details the customer gave. At your hot-lead score (70 by default) the lead is marked hot, once per conversation.",
+      "\"Paid\" only comes from a payment your own system reports to us. The bot saying \"done\" doesn't count.",
+      "A payment is credited to the bot only when it's made within 30 days of the bot's payment link, or of a chat with the bot. Deals shows every reported payment and whether the bot helped.",
+      "Leads lists conversations from the last 30 days by last activity, hottest first. Open chat takes you to the conversation in the Inbox, where the lead's stage and score show in the header.",
+      "Only chats customers start are counted. Follow-up messages the bot sends first aren't part of this yet.",
+    ],
+  },
+  {
+    id: "agents",
+    name: "Agent reports",
+    icon: "$chart-column",
+    route: "/dashboard/agents",
+    summary:
+      "What the bot achieved in each of its jobs: the Sales Agent (leads, payment links, payments) and the SR Agent (service chats, answers, service requests raised).",
+    steps: [
+      "Pick 7, 30 or 90 days.",
+      "Check the Sales Agent's funnel to see where leads stop, and the SR Agent's breakdown to see which requests come up most.",
+    ],
+    thingsToKnow: [
+      "The Sales Agent shows \"Not switched on\" until sales mode is on in Bot behaviour → Sales. The SR Agent needs a request action switched on under Actions.",
+      "The funnel counts leads that got at least that far, so a lead that paid is counted in every step.",
+      "\"Revenue with the bot\" is payments made within 30 days of the bot's payment link or a chat with the bot. \"Paid\" only comes from payments your system reports.",
+      "A conversation is sorted into sales or service when it ends, so the SR Agent's numbers lag chats that are still going on.",
+      "Only chats customers start are counted. Follow-up messages the bot sends first aren't part of this yet.",
     ],
   },
   {
@@ -679,8 +725,8 @@ export const COMING_NEXT = [
   },
   {
     icon: "$flame",
-    title: "Lead scoring and follow-ups",
-    text: "Hot leads are flagged automatically, and follow-up messages go out on rules you set.",
+    title: "Follow-ups",
+    text: "Follow-up messages to leads go out on rules you set.",
   },
   {
     icon: "$smartphone",
