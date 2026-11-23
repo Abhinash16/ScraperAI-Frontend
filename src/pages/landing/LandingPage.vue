@@ -611,7 +611,7 @@ const NAV = [
 const HERO_POINTS = [
   "Live on WhatsApp and your website",
   "Prices, links and IDs only from your system",
-  "Replies in your customer's language",
+  "Can reply in your customer's language",
 ];
 
 // The sandbox booking flow; plays in a loop in the hero
@@ -650,7 +650,7 @@ const CHANNELS = [
   {
     icon: "$whatsapp",
     title: "WhatsApp",
-    text: "Answers on your WhatsApp Business number around the clock, in the customer's language, including Hindi and Hinglish. All actions work here.",
+    text: "Answers on your WhatsApp Business number around the clock, and can reply in the customer's language, including Hindi and Hinglish. All actions work here.",
   },
   {
     icon: "$message-circle",
@@ -872,12 +872,12 @@ const REPORT_MORE = [
   {
     icon: "$shield-check",
     title: "Knowledge health checks",
-    text: "Expired or contradicting knowledge is held back automatically. Daily checks flag old offers and pages that left your site, with a weekly email of what to fix first.",
+    text: "Expired or contradicting knowledge is held back automatically. Daily and weekly checks flag expired offers and pages that left your site, with a weekly email of what to fix first.",
   },
   {
     icon: "$flask-conical",
     title: "Answer-quality tests",
-    text: "Test questions with the facts the answer must contain, graded on every run and compared with your last good run.",
+    text: "Test questions with the facts the answer must contain, graded on every run and compared with your baseline run.",
   },
   {
     icon: "$message-circle-question-mark",
@@ -989,7 +989,7 @@ const FAQS = [
   },
   {
     q: "Do I need a developer?",
-    a: "Not for answers: import your website and add the widget or connect WhatsApp. Customer data and actions need your systems to have an API, and we help you connect them.",
+    a: "Not to get started: importing your knowledge, setting up the bot's profile and connecting WhatsApp or the website widget are done from the dashboard. Connecting your product and customer systems and setting up actions needs your developer (or us), because it uses your systems' APIs.",
   },
   {
     q: "Can customers talk to a person?",
@@ -997,7 +997,7 @@ const FAQS = [
   },
   {
     q: "Which languages does it support?",
-    a: "It replies in the customer's language, including Hindi and Hinglish, and you can list the languages you want it to use.",
+    a: "In chat, it follows your language setting: you choose its languages, and you can let it reply in whatever language the customer writes in, including Hindi and Hinglish. Phone calls (coming soon) will be in English, Hindi and Kannada.",
   },
 ];
 
@@ -1283,6 +1283,13 @@ export default {
 .nav-btn {
   letter-spacing: 0;
   text-transform: none;
+}
+
+/* App.vue capitalises button labels; keep the landing page's text as written
+   (e.g. the lowercase email address) */
+.landing >>> .v-btn {
+  text-transform: none !important;
+  letter-spacing: 0;
 }
 
 .brand-btn {
