@@ -469,7 +469,11 @@ export default {
       const r = this.service?.requests || {};
       return [
         { label: "Raised", value: n(r.raised) },
-        { label: "Sorted out without an SR", value: n(r.resolvedByBot), help: "The bot answered, so no request was needed" },
+        {
+          label: "SR chats finished by the bot",
+          value: `${n(r.resolvedByBot)} of ${n(r.conversationsWithRequest)}`,
+          help: "Of the chats where the bot raised an SR, how many it finished without a person",
+        },
         { label: "Customer said no", value: n(r.declinedByCustomer) },
         { label: "Expired before they confirmed", value: n(r.expired) },
         { label: "Your system refused", value: n(r.refused) },
