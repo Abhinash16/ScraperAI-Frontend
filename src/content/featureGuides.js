@@ -484,6 +484,7 @@ export const FEATURE_GUIDES = [
       "The score (0 to 100) comes from the stage and how many booking details the customer gave. At your hot-lead score (70 by default) the lead is marked hot, once per conversation.",
       "\"Paid\" only comes from a payment your own system reports to us. The bot saying \"done\" doesn't count.",
       "A payment is credited to the bot only when it's made within 30 days of the bot's payment link, or of a chat with the bot. Deals shows every reported payment and whether the bot helped.",
+      "In the sandbox, \"Why this answer\" shows what sales mode recorded for each reply: the stage, score, what the customer wants and the next step.",
       "Leads lists conversations from the last 30 days by last activity, hottest first. Open chat takes you to the conversation in the Inbox, where the lead's stage and score show in the header.",
       "Only chats customers start are counted. Follow-up messages the bot sends first aren't part of this yet.",
     ],

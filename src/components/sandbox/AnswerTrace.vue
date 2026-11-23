@@ -64,6 +64,34 @@
           webhook.
         </v-alert>
 
+        <v-alert
+          v-if="intentCorrected"
+          text
+          dense
+          color="amber darken-3"
+          rounded="lg"
+          class="text-caption mt-3 mb-0"
+        >
+          The bot first read this as "{{ intentCorrected.from }}", then corrected it to
+          "{{ intentCorrected.to }}".
+        </v-alert>
+
+        <!-- Sales mode: what it recorded about the lead -->
+        <template v-if="lead">
+          <div class="text-caption font-weight-bold text-uppercase grey--text mt-4 mb-2">
+            Lead (sales mode)
+          </div>
+          <div class="d-flex flex-wrap align-center mb-1">
+            <v-chip x-small label :color="leadStage.color" text-color="white" class="font-weight-bold mr-2">
+              {{ leadStage.label }}
+            </v-chip>
+            <span v-if="lead.score !== undefined" class="grey--text">Score {{ lead.score }} / 100</span>
+          </div>
+          <div v-for="f in leadFields" :key="f.label" class="mb-1">
+            <span class="grey--text mr-2">{{ f.label }}</span>{{ f.value }}
+          </div>
+        </template>
+
         <!-- Product lookup -->
         <template v-if="product">
           <div
@@ -427,6 +455,8 @@ import {
   catalogStockLabel,
 } from "@/utils/productModes";
 
+import { formatDay, stageInfo } from "@/utils/leads";
+
 export default {
   name: "AnswerTrace",
 
@@ -515,6 +545,27 @@ export default {
       if (this.trace.model)
         list.push({ label: "Model", value: this.trace.model });
       return list;
+    },
+    lead() {
+      const l = this.trace.lead;
+      return l && typeof l === "object" ? l : null;
+    },
+    leadStage() {
+      return stageInfo(this.lead?.stage);
+    },
+    leadFields() {
+      const l = this.lead || {};
+      return [
+        { label: "Wants", value: l.product },
+        { label: "Where", value: l.location },
+        { label: "From", value: l.startDate && formatDay(l.startDate) },
+        { label: "For", value: l.duration },
+        { label: "Next step", value: l.nextStep },
+      ].filter((f) => f.value);
+    },
+    intentCorrected() {
+      const c = this.trace.intentCorrected;
+      return c && c.from && c.to ? c : null;
     },
     webhookIntent() {
       const skipped = this.trace.webhookSkipped;
