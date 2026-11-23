@@ -170,10 +170,11 @@
                 label
                 outlined
                 :color="openStatus.color"
-                class="font-weight-bold my-1"
+                class="font-weight-bold mr-2 my-1"
               >
                 {{ openStatus.label }}
               </v-chip>
+              <LeadBadge v-if="currentLead" :lead="currentLead.lead" class="my-1 lead-in-header" />
             </div>
           </div>
 
@@ -518,6 +519,8 @@ import apiClient from "@/service/axios";
 import LiveTrace from "@/components/traces/LiveTrace.vue";
 import ChatConversations from "@/components/chats/ChatConversations.vue";
 import CustomerPanel from "@/components/chats/CustomerPanel.vue";
+import LeadBadge from "@/components/leads/LeadBadge.vue";
+import { latestLead } from "@/utils/leads";
 import ChatText from "@/components/chats/ChatText.vue";
 import {
   OPEN_STATUS,
@@ -530,7 +533,7 @@ import {
 import { formatPhone, verifiedIdentity } from "@/utils/identity";
 
 export default {
-  components: { LiveTrace, ChatConversations, ChatText, CustomerPanel },
+  components: { LiveTrace, ChatConversations, ChatText, CustomerPanel, LeadBadge },
 
   props: {
     chatId: {
@@ -636,6 +639,10 @@ export default {
     },
     openConversation() {
       return this.conversations.find(isOpen) || null;
+    },
+    // Sales mode: the newest conversation's lead (stage, score, what they want)
+    currentLead() {
+      return latestLead(this.conversations);
     },
     // Stored phone calls (chatId call_<number>) are read only: the backend
     // refuses replies with 409 read_only.
@@ -1049,6 +1056,9 @@ export default {
 </script>
 
 <style scoped>
+.lead-in-header {
+  max-width: 420px;
+}
 .media-read {
   max-width: 260px;
   padding: 6px 8px;
