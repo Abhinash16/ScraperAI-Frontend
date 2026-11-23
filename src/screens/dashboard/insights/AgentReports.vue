@@ -137,7 +137,7 @@
                   <th>Leads</th>
                   <th>Checkout</th>
                   <th>Links</th>
-                  <th>Paid</th>
+                  <th title="Payments the bot helped with">Paid</th>
                 </tr>
                 <tr v-for="(p, key) in sales.byPlatform || {}" :key="key">
                   <td>{{ platformLabel(key) }}</td>
@@ -165,7 +165,7 @@
               </table>
             </v-col>
             <v-col cols="12" md="4">
-              <div class="section-title mb-2">Payments by kind</div>
+              <div class="section-title mb-2">Payments with the bot, by kind</div>
               <table class="kv">
                 <tr v-for="(k, key) in closed.byKind || {}" :key="key">
                   <td>{{ kindLabel(key) }}</td>
@@ -379,17 +379,24 @@ export default {
       const s = this.sales;
       const made = s.dealsMade || {};
       const closed = this.closed;
-      const botRevenue = n(closed.revenue) - n(closed.revenueWithoutBot);
+      // dealsClosed is the bot's payments only; add the ones without it for all payments
+      const allCount = n(closed.count) + n(closed.withoutBot);
+      const allRevenue = n(closed.revenue) + n(closed.revenueWithoutBot);
       return [
         { label: "Leads", value: n(s.leads), sub: `of ${n(s.conversations)} chats`, help: "Chats where the customer showed interest" },
         { label: "Hot leads", value: n(s.hotLeads), sub: `average score ${n(s.averageScore)}` },
         { label: "Payment links sent", value: n(made.count), sub: this.money(made.amount), help: "Payment links the bot sent" },
-        { label: "Payments", value: n(closed.count), sub: this.money(closed.revenue), help: "Payments your system reported" },
         {
           label: "Revenue with the bot",
-          value: this.money(botRevenue) || "—",
-          sub: `${n(closed.viaBotLink) + n(closed.afterBotConversation)} payments`,
+          value: this.money(closed.revenue) || "—",
+          sub: `${n(closed.count)} payments`,
           help: "Paid within 30 days of the bot's link or a chat with the bot",
+        },
+        {
+          label: "All payments",
+          value: allCount,
+          sub: this.money(allRevenue),
+          help: "Every payment your system reported, with or without the bot",
         },
       ];
     },
@@ -411,7 +418,7 @@ export default {
         { label: "Leads that reached checkout", value: this.pct(r.leadToCheckout) },
         { label: "Leads that paid", value: this.pct(r.leadToWon) },
         { label: "Payment links that were paid", value: this.pct(r.linkToPaid) },
-        { label: "Share of all payments the bot helped with", value: this.pct(r.botShareOfPayments) },
+        { label: "Share of all payments the bot helped with (by count)", value: this.pct(r.botShareOfPayments) },
         { label: "Paid through the bot's link", value: n(closed.viaBotLink) },
         { label: "Paid after a chat with the bot", value: n(closed.afterBotConversation) },
         { label: "Paid without the bot", value: n(closed.withoutBot) },
@@ -438,7 +445,7 @@ export default {
       return [
         { name: "Leads", data: d.map((x) => n(x.leads)) },
         { name: "Payment links", data: d.map((x) => n(x.dealsMade)) },
-        { name: "Payments", data: d.map((x) => n(x.dealsClosed)) },
+        { name: "Payments with the bot", data: d.map((x) => n(x.dealsClosed)) },
       ];
     },
 
