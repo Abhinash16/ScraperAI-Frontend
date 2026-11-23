@@ -4,6 +4,7 @@
 // (checkboxes, dropdowns, alerts...) are remapped in VUETIFY_ICONS.
 import {
   Handshake,
+  Mail,
   IndianRupee,
   ShoppingBag,
   ArrowLeft,
@@ -359,6 +360,7 @@ const APP_ICONS = {
   "wallet": Wallet,
   "calendar-clock": CalendarClock,
   "handshake": Handshake,
+  "mail": Mail,
   "indian-rupee": IndianRupee,
   "shopping-bag": ShoppingBag,
 };
