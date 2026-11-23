@@ -98,16 +98,12 @@
         class="d-flex align-center text-decoration-none app-bar__brand"
         aria-label="scraperAI home"
       >
-        <AppLogo size="34" class="mr-3" />
+        <AppLogo size="34" class="hidden-sm-and-up" />
         <div class="hidden-xs-only min-w-0">
-          <div
-            class="text-subtitle-1 font-weight-black secondary--text lh-tight"
-          >
-            scraperAI
-          </div>
+          <AppLogo variant="wordmark" size="26" />
           <div
             v-if="companyName"
-            class="text-caption grey--text text--darken-1 text-truncate lh-tight"
+            class="text-caption grey--text text--darken-1 text-truncate lh-tight mt-1"
           >
             {{ companyName }}
           </div>

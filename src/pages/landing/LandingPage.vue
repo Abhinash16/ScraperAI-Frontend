@@ -16,10 +16,10 @@
           class="d-flex align-center text-decoration-none"
           aria-label="scraperAI home"
         >
-          <AppLogo :size="$vuetify.breakpoint.xsOnly ? 32 : 36" class="mr-2 mr-sm-3" />
-          <span class="text-h6 font-weight-black secondary--text"
-            >scraperAI</span
-          >
+          <AppLogo
+            variant="wordmark"
+            :size="$vuetify.breakpoint.xsOnly ? 30 : 36"
+          />
         </router-link>
 
         <v-spacer />
@@ -696,11 +696,8 @@
     <v-container class="py-8">
       <v-row align="center">
         <v-col cols="12" md="5" class="d-flex align-center">
-          <AppLogo size="32" class="mr-3" />
           <div>
-            <div class="text-body-2 font-weight-black secondary--text">
-              scraperAI
-            </div>
+            <AppLogo variant="wordmark" size="32" class="mb-1" />
             <div class="text-caption grey--text">
               AI customer support for WhatsApp and the web.
             </div>
