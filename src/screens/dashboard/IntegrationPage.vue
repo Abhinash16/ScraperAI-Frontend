@@ -353,6 +353,20 @@
                   addresses. Fix the endpoint and turn it on again.
                 </v-alert>
 
+                <v-alert
+                  v-if="activeWebhook.note"
+                  text
+                  dense
+                  color="primary"
+                  rounded="lg"
+                  class="text-body-2"
+                >
+                  <template #prepend>
+                    <v-icon color="primary" size="16" class="mr-3">$info</v-icon>
+                  </template>
+                  <span class="grey--text text--darken-3">{{ activeWebhook.note }}</span>
+                </v-alert>
+
                 <div class="d-flex align-center mb-3">
                   <v-icon size="16" color="grey darken-1" class="mr-2">$link</v-icon>
                   <span class="text-caption font-weight-bold text-uppercase grey--text">Endpoint</span>
@@ -384,6 +398,19 @@
                 <v-divider class="my-5" />
 
                 <HeadersEditor v-model="webhook.headerRows" />
+
+                <template v-if="activeWebhook.example">
+                  <v-divider class="my-5" />
+                  <div class="text-caption font-weight-bold text-uppercase grey--text mb-1">
+                    What we send
+                  </div>
+                  <div class="text-body-2 grey--text text--darken-1 mb-2">
+                    A JSON body like this. Details the customer hasn't given yet are left empty.
+                  </div>
+                  <v-sheet color="grey lighten-5" rounded="lg" class="pa-4">
+                    <pre class="text-caption text-pre-wrap text-break">{{ JSON.stringify(activeWebhook.example, null, 2) }}</pre>
+                  </v-sheet>
+                </template>
 
                 <v-alert text dense color="primary" rounded="lg" class="text-body-2 mt-4 mb-0">
                   <template #prepend>
@@ -526,11 +553,39 @@ const WEBHOOK_TYPES = [
     id: "upsell",
     name: "Upsell",
     description: "Called when the assistant spots an upsell opportunity.",
+    note: "This only tells your system. The bot keeps chatting; the chat isn't handed to your team.",
   },
   {
     id: "followup",
     name: "Follow-up",
     description: "Called when a customer should be followed up with.",
+    note: "This only tells your system. The bot keeps chatting; the chat isn't handed to your team.",
+  },
+  {
+    id: "lead",
+    name: "Hot lead",
+    description:
+      "Called once per conversation, when a customer's lead score reaches your hot-lead score (Bot behaviour → Sales).",
+    note: "Needs sales mode switched on. The bot keeps chatting; the chat isn't handed to your team.",
+    example: {
+      event: "lead.hot",
+      clientId: "…",
+      chatId: "…",
+      conversationId: "…",
+      platform: "whatsapp",
+      phone: "+919800000000",
+      lead: {
+        stage: "qualified",
+        score: 75,
+        product: "Activa 6G",
+        location: "Koramangala hub",
+        startDate: "2026-12-01",
+        duration: "3 months",
+        nextStep: "Send the payment link",
+      },
+      lastMessage: "Can I pick it up on Monday?",
+      at: "2026-11-23T10:15:00.000Z",
+    },
   },
 ];
 
