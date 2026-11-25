@@ -248,6 +248,7 @@ export const FEATURE_GUIDES = [
       "WhatsApp chats show up in Chats next to website chats.",
       "The bot reads photos, voice notes and location pins. It describes a photo, writes out a voice note and reads a pin's place, then replies to that. In Chats, you see what it read under the message. If it can't read one, it sends a standard acknowledgement and the chat says so.",
       "With the Customer API set up, the bot checks what customers send against their data: if they report a problem that already has an open service request, it gives that request's ID and stage instead of starting again. A payment screenshot is matched against their recent payments by amount and date, and is never taken as proof of payment on its own.",
+      "If your Customer API sends a rental's battery-swap status, the bot uses it when a customer says swapping isn't working: for an unpaid bill it gives the amount and the pay link and says access comes back about 30 minutes after paying; when your team paused it or the card was cancelled, it offers to raise a service request and never guesses why or promises a time.",
       "Customers chatting on your website or app can prove their phone number by sending a ready-made message to your WhatsApp number, with no code to type. Add your WhatsApp business number here to turn it on. Verified chats show a ✓ with the number, and the verification lasts for that conversation.",
     ],
   },
