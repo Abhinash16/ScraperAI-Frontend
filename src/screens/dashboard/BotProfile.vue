@@ -723,6 +723,69 @@
                   sales follow-ups bring. 10% is a good start.
                 </v-col>
               </v-row>
+
+              <!-- Urgency: only from facts checked per customer -->
+              <v-divider class="my-4" />
+              <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-2">Urgency</div>
+              <v-alert text dense color="primary" rounded="lg" class="text-body-2 mb-4" icon="$shield-check">
+                <div class="font-weight-bold mb-1">True urgency only</div>
+                <p class="mb-2">
+                  The bot creates urgency only from facts it checks for each customer: low stock at
+                  their hub (live data), an offer ending (a Promotion notice with an end date), their
+                  start date coming up, or their payment link about to expire. When none applies, it
+                  creates none. A message can't say "limited stock", "hurry" or "reserved for you"
+                  unless the facts back it; this is checked before anything is sent.
+                </p>
+                <p class="mb-0">
+                  False urgency (e.g. "limited stock!" sent to everyone, "reserved for 48 hours" when
+                  nothing is held) is a banned dark pattern under India's Guidelines for Prevention
+                  and Regulation of Dark Patterns, 2023, and customers quickly learn to ignore it.
+                  Urgency that's true every time converts better and keeps you safe.
+                </p>
+              </v-alert>
+              <v-row dense>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model.number="form.sales.urgency.lowStockAt"
+                    type="number"
+                    min="1"
+                    max="20"
+                    label="Low stock means this many or fewer left"
+                    outlined
+                    dense
+                    :rules="[wholeRule(1, 20)]"
+                    hint="Per hub. Needs your product API to send a count per hub (availability.count or availability.byLocation [{ location, count }]) or the status 'limited'."
+                    persistent-hint
+                  />
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model.number="form.sales.urgency.linkValidHours"
+                    type="number"
+                    min="0"
+                    max="168"
+                    label="Payment link valid for (hours)"
+                    suffix="hours"
+                    outlined
+                    dense
+                    :rules="[wholeRule(0, 168)]"
+                    hint="0 = the bot doesn't mention when the link expires. Up to 168 (7 days)."
+                    persistent-hint
+                  />
+                </v-col>
+              </v-row>
+              <v-textarea
+                v-model="form.sales.urgency.holdPolicy"
+                label="What paying secures (in your own words)"
+                outlined
+                rows="2"
+                auto-grow
+                counter="300"
+                :rules="[(v) => (v || '').length <= 300 || 'Up to 300 characters']"
+                hint="e.g. 'Your rental is confirmed once it's paid.' The bot only ever says a booking is confirmed, reserved or held in these words; leave empty if nothing is held."
+                persistent-hint
+                class="mt-3"
+              />
             </template>
           </v-sheet>
 
@@ -1154,7 +1217,7 @@
 <script>
 import apiClient from "@/service/axios";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
-import { FOLLOW_UP_DEFAULTS } from "@/utils/leads";
+import { FOLLOW_UP_DEFAULTS, URGENCY_DEFAULTS } from "@/utils/leads";
 import ReplyModelCard from "@/components/bot/ReplyModelCard.vue";
 
 const ENDPOINT = "/clients/bot-profile";
@@ -1396,6 +1459,7 @@ function toForm(profile = {}, defaults = CONVERSATION_DEFAULTS) {
       hotLeadScore: typeof sales.hotLeadScore === "number" ? sales.hotLeadScore : SALES.hotDefault,
       emailHotLeads: !!sales.emailHotLeads,
       followUps: followUpsForm(sales.followUps),
+      urgency: urgencyForm(sales.urgency),
     },
     customInstructions: str(profile.customInstructions),
   };
@@ -1473,6 +1537,12 @@ function toProfile(form) {
         sendBetween: { from: form.sales.followUps.from, to: form.sales.followUps.to },
         holdoutPercent: toInt(form.sales.followUps.holdoutPercent) ?? 0,
       },
+      // Always sent too: a save without it resets urgency to the defaults
+      urgency: {
+        lowStockAt: toInt(form.sales.urgency.lowStockAt) ?? URGENCY_DEFAULTS.lowStockAt,
+        linkValidHours: toInt(form.sales.urgency.linkValidHours) ?? URGENCY_DEFAULTS.linkValidHours,
+        holdPolicy: form.sales.urgency.holdPolicy.trim(),
+      },
     },
     customInstructions: form.customInstructions.trim(),
   };
@@ -1488,6 +1558,15 @@ function followUpsForm(saved = {}) {
     from: between.from || d.sendBetween.from,
     to: between.to || d.sendBetween.to,
     holdoutPercent: typeof saved.holdoutPercent === "number" ? saved.holdoutPercent : d.holdoutPercent,
+  };
+}
+
+function urgencyForm(saved = {}) {
+  const d = URGENCY_DEFAULTS;
+  return {
+    lowStockAt: typeof saved.lowStockAt === "number" ? saved.lowStockAt : d.lowStockAt,
+    linkValidHours: typeof saved.linkValidHours === "number" ? saved.linkValidHours : d.linkValidHours,
+    holdPolicy: typeof saved.holdPolicy === "string" ? saved.holdPolicy : d.holdPolicy,
   };
 }
 
@@ -1646,6 +1725,13 @@ export default {
     followUpHoursRule() {
       const { from, to } = this.form.sales.followUps;
       return from < to || "The start must be before the end";
+    },
+
+    wholeRule(min, max) {
+      return (value) => {
+        const n = Number(value);
+        return (value !== "" && Number.isInteger(n) && n >= min && n <= max) || `A whole number from ${min} to ${max}`;
+      };
     },
 
     holdoutRule(value) {

@@ -468,6 +468,14 @@
               </v-chip>
             </div>
           </div>
+          <div class="text-caption grey--text text--darken-1 mb-2">
+            <v-icon size="14" class="mr-1">$info</v-icon>
+            Show a part only when a value is there:
+            <code v-text="SECTION_EXAMPLE" />
+            shows the fine only when it isn't 0, and
+            <code v-text="INVERTED_EXAMPLE" />
+            only when there's none. Close every section, or saving fails.
+          </div>
           <div v-if="form.channels.includes('voice')" class="text-caption grey--text text--darken-1">
             <v-icon size="14" class="mr-1">$phone</v-icon>
             <template v-if="request">
@@ -580,6 +588,9 @@ export default {
   components: { ActionStepEditor, ActionTestPanel, AllowListInput, ConfirmDialog, SectionTitle, ThingsToKnow },
 
   data: () => ({
+    // Template sections (shown as text, so the braces aren't parsed by Vue)
+    SECTION_EXAMPLE: "{{#quote.penalty}} + late return fine ₹{{quote.penalty}}{{/quote.penalty}}",
+    INVERTED_EXAMPLE: "{{^quote.penalty}}…{{/quote.penalty}}",
     ACTION_TYPES,
     CHANNELS,
     INPUT_TYPES,

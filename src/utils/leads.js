@@ -124,6 +124,18 @@ export const FOLLOW_UP_DEFAULTS = {
   holdoutPercent: 0,
 };
 
+// Defaults of profile.sales.urgency (true urgency in follow-ups)
+export const URGENCY_DEFAULTS = { lowStockAt: 2, linkValidHours: 0, holdPolicy: "" };
+
+// The real signals a follow-up had, and its call to action
+export const URGENCY_TAGS = {
+  low_stock: "Low stock",
+  offer_ending: "Offer ending",
+  start_soon: "Start date close",
+  link_expiry: "Link expiring",
+};
+export const urgencyLabel = (k) => URGENCY_TAGS[k] || k;
+
 export async function listFollowUps(params) {
   const { data } = await apiClient.get("/leads/follow-ups", { params });
   return data.data || { items: [], total: 0 };
