@@ -696,7 +696,7 @@
                     <li>After the customer says no</li>
                     <li>After a complaint, or once the chat was handed to your team</li>
                     <li>After someone on your team replied</li>
-                    <li>After the customer replies "STOP" (they're never followed up again)</li>
+                    <li>After the customer replies "STOP" to a follow-up (they're never followed up again)</li>
                   </ul>
                 </v-col>
               </v-row>
