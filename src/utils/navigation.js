@@ -59,6 +59,12 @@ export const NAV_GROUPS = [
             match: startsWith("/dashboard/leads"),
           },
           {
+            name: "Follow-ups",
+            to: link("/dashboard/follow-ups"),
+            permission: "chat:read",
+            match: startsWith("/dashboard/follow-ups"),
+          },
+          {
             name: "Deals",
             to: link("/dashboard/deals"),
             permission: "analytics:view",
@@ -188,12 +194,6 @@ export const NAV_GROUPS = [
             to: link("/dashboard/chat/chatbot-knowledge-score"),
             permission: "insight:read",
             match: startsWith("/dashboard/chat/chatbot-knowledge-score"),
-          },
-          {
-            name: "Opportunities",
-            to: link("/dashboard/opportunity-analysis"),
-            permission: "insight:read",
-            match: startsWith("/dashboard/opportunity-analysis"),
           },
         ],
       },

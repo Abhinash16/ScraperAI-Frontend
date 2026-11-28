@@ -110,11 +110,7 @@ const routes = [
         meta: { permission: "settings:manage" },
       },
 
-      {
-        path: "opportunity-analysis",
-        component: () =>
-          import("../screens/dashboard/insights/OpportunityAnalysis.vue"),
-      },
+      { path: "opportunity-analysis", redirect: "/dashboard/chat-analytics" },
       // {
       //   path: "chatbot-knowledge-score",
       //   component: () =>
@@ -155,6 +151,11 @@ const routes = [
       {
         path: "leads",
         component: () => import("../screens/dashboard/sales/LeadsPage.vue"),
+        meta: { permission: "chat:read" },
+      },
+      {
+        path: "follow-ups",
+        component: () => import("../screens/dashboard/sales/FollowUpsPage.vue"),
         meta: { permission: "chat:read" },
       },
       {

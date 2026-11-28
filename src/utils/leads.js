@@ -82,6 +82,53 @@ export async function listDeals(params) {
   return data.data || { items: [], total: 0 };
 }
 
+// Sales follow-ups: the bot chasing quiet high-intent WhatsApp customers
+// (backend /api/leads/follow-ups, chat:read)
+export const FOLLOW_UP_TRIGGERS = {
+  promised_time: "At the time they named",
+  unpaid_link: "Payment link not paid",
+  checkout_stalled: "Stopped before paying",
+  went_quiet: "Went quiet",
+  second_nudge: "Second follow-up",
+  last_call: "Last follow-up",
+};
+export const triggerLabel = (t) => FOLLOW_UP_TRIGGERS[t] || t || "Follow-up";
+
+export const FOLLOW_UP_STOPS = {
+  won: "Paid",
+  lost: "Lost",
+  customer_declined: "Customer said no",
+  opted_out: "Said STOP",
+  agent_took_over: "Agent replied",
+  escalated: "Handed to the team",
+  writer_declined: "Bot judged a follow-up wrong",
+  all_sent: "All follow-ups sent",
+  window_closed: "WhatsApp window closed",
+  send_failed: "WhatsApp refused the message",
+};
+export const stopLabel = (r) => FOLLOW_UP_STOPS[r] || r || "";
+
+export const FOLLOW_UP_STATUS = {
+  active: { label: "Following up", color: "primary" },
+  done: { label: "Done", color: "success" },
+  stopped: { label: "Stopped", color: "grey darken-1" },
+  holdout: { label: "Holdout (not followed up)", color: "blue-grey" },
+};
+export const followUpStatus = (s) => FOLLOW_UP_STATUS[s] || { label: s || "—", color: "grey" };
+
+// Defaults and limits of profile.sales.followUps (backend botProfile.service)
+export const FOLLOW_UP_DEFAULTS = {
+  enabled: false,
+  maxNudges: 3,
+  sendBetween: { from: "06:00", to: "24:00" },
+  holdoutPercent: 0,
+};
+
+export async function listFollowUps(params) {
+  const { data } = await apiClient.get("/leads/follow-ups", { params });
+  return data.data || { items: [], total: 0 };
+}
+
 export async function fetchAgentReports(days) {
   const { data } = await apiClient.get("/analytics/agents", { params: { days } });
   return data.data || { agents: [] };

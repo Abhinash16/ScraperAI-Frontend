@@ -179,6 +179,59 @@
               </v-btn>
             </v-col>
           </v-row>
+
+          <!-- Follow-ups -->
+          <template v-if="followUps">
+            <v-divider class="my-5" />
+            <div class="d-flex align-center mb-1">
+              <div class="section-title">Follow-ups</div>
+              <v-spacer />
+              <v-btn small text color="primary" class="px-0" to="/dashboard/follow-ups">
+                See follow-ups
+                <v-icon right size="14">$arrow-right</v-icon>
+              </v-btn>
+            </div>
+            <div class="text-caption grey--text text--darken-1 mb-3">
+              Messages the bot sent on WhatsApp to customers who were close to buying and went quiet.
+            </div>
+            <NotOnNotice
+              v-if="!followUps.active"
+              text="Follow-ups are off, so the bot doesn't get back to quiet customers."
+              link="/dashboard/bot-profile?tab=sales"
+              link-text="Switch them on in Bot behaviour"
+            />
+            <v-row dense class="mb-2">
+              <v-col v-for="k in followUpKpis" :key="k.label" cols="6" md="3">
+                <Kpi v-bind="k" />
+              </v-col>
+            </v-row>
+            <div v-if="holdoutLine" class="text-body-2 grey--text text--darken-3 mb-3">
+              <v-icon size="14" class="mr-1">$chart-column</v-icon>
+              {{ holdoutLine }}
+            </div>
+            <v-row>
+              <v-col cols="12" md="6">
+                <div class="section-title mb-2">Why they were sent</div>
+                <div v-if="!(followUps.byTrigger || []).length" class="text-body-2 grey--text">None sent yet.</div>
+                <table v-else class="kv">
+                  <tr v-for="t in followUps.byTrigger" :key="t.trigger">
+                    <td>{{ triggerLabel(t.trigger) }}</td>
+                    <td class="text-right">{{ n(t.sent) }}</td>
+                  </tr>
+                </table>
+              </v-col>
+              <v-col cols="12" md="6">
+                <div class="section-title mb-2">Why they stopped early</div>
+                <div v-if="!(followUps.stopped || []).length" class="text-body-2 grey--text">None stopped.</div>
+                <table v-else class="kv">
+                  <tr v-for="r in followUps.stopped" :key="r.reason">
+                    <td>{{ stopLabel(r.reason) }}</td>
+                    <td class="text-right">{{ n(r.count) }}</td>
+                  </tr>
+                </table>
+              </v-col>
+            </v-row>
+          </template>
         </div>
       </v-card>
 
@@ -295,7 +348,16 @@ import { VAlert, VChip } from "vuetify/lib";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
 import { apiError } from "@/utils/knowledge";
 import { OUTCOMES } from "@/utils/conversations";
-import { DEAL_KINDS, FUNNEL, PLATFORMS, fetchAgentReports, formatMoney, stageInfo } from "@/utils/leads";
+import {
+  DEAL_KINDS,
+  FUNNEL,
+  PLATFORMS,
+  fetchAgentReports,
+  formatMoney,
+  stageInfo,
+  stopLabel,
+  triggerLabel,
+} from "@/utils/leads";
 
 const DAY_CHOICES = [7, 30, 90];
 
@@ -401,6 +463,27 @@ export default {
       ];
     },
 
+    followUps() {
+      return this.sales?.followUps || null;
+    },
+
+    followUpKpis() {
+      const f = this.followUps;
+      return [
+        { label: "Customers followed up", value: n(f.conversations), sub: `${n(f.nudges)} messages` },
+        { label: "Replied", value: this.pct(f.replyRate), sub: `${n(f.replied)} customers`, help: "Wrote back after a follow-up" },
+        { label: "Paid after a follow-up", value: this.pct(f.winRate), sub: `${n(f.won)} customers`, help: "Paid after a follow-up" },
+        { label: "Revenue after a follow-up", value: this.money(f.revenue) || "—" },
+      ];
+    },
+
+    // Only when some customers were held out, to compare with
+    holdoutLine() {
+      const h = this.followUps?.holdout;
+      if (!h || !n(h.conversations)) return "";
+      return `Share who paid: ${this.pct(this.followUps.winRate)} with follow-ups vs ${this.pct(h.winRate)} without (${n(h.conversations)} customers held out).`;
+    },
+
     funnel() {
       const rows = this.sales?.funnel || [];
       const top = Math.max(1, ...rows.map((r) => n(r.reached)));
@@ -504,6 +587,9 @@ export default {
   },
 
   methods: {
+    n,
+    triggerLabel,
+    stopLabel,
     stageLabel: (s) => stageInfo(s).label,
     platformLabel: (p) => PLATFORMS[p] || p,
     kindLabel: (k) => DEAL_KINDS[k] || k,

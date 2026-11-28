@@ -373,7 +373,19 @@
                     </template>
                   </div>
                 </v-card>
-                <div class="d-flex justify-end">
+                <div class="d-flex justify-end align-center">
+                  <v-chip
+                    v-if="message.followUpId"
+                    x-small
+                    label
+                    color="deep-orange lighten-5"
+                    text-color="deep-orange darken-2"
+                    class="font-weight-bold mr-2"
+                    title="The bot sent this on its own, to follow up after the customer went quiet"
+                  >
+                    <v-icon left size="11">$message-circle-reply</v-icon>
+                    Follow-up
+                  </v-chip>
                   <span class="caption grey--text mr-2">
                     {{ formatTime(message.timestamp) }}
                   </span>

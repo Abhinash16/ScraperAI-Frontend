@@ -748,7 +748,8 @@ const SALES_POINTS = [
   "Offers the payment link as soon as it has what it needs",
   "Suggests only the options you approve, never invented offers or fake urgency",
   "Stops selling after a no",
-  "Alerts your team by email or webhook when a lead turns hot, so they can follow up",
+  "Follows up on WhatsApp when a customer who was close to buying goes quiet: up to 3 short messages, written for them, inside WhatsApp's 24-hour window and only in the hours you set",
+  "Alerts your team by email or webhook when a lead turns hot",
 ];
 
 const STAGES = [
@@ -933,7 +934,7 @@ const STEPS = [
   {
     icon: "$chart-column",
     title: "Watch the reports",
-    text: "Leads, payments, SRs and the chats the bot finished on its own.",
+    text: "Leads, follow-ups, payments, SRs and the chats the bot finished on its own.",
   },
 ];
 
@@ -985,7 +986,7 @@ const FAQS = [
   },
   {
     q: "Will the sales agent pressure my customers?",
-    a: "No. It suggests only the options you approve, never invents offers or urgency, and stops after a no.",
+    a: "No. It suggests only the options you approve, never invents offers or urgency, and stops after a no. Follow-ups are off until you switch them on: at most 3 per conversation, never after a no, a complaint or a reply from your team, and a customer who replies STOP isn't followed up again.",
   },
   {
     q: "Do I need a developer?",
