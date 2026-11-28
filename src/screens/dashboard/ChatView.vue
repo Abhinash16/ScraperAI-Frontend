@@ -842,7 +842,7 @@ export default {
 
     async fetchChatInfo() {
       try {
-        const { data } = await apiClient.get(`/chats?chatId=${this.chatId}`);
+        const { data } = await apiClient.get(`/chats?chatId=${encodeURIComponent(this.chatId)}`);
 
         if (!data?.data?.length) {
           throw new Error("Chat not found");

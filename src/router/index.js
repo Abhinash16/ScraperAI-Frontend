@@ -226,6 +226,8 @@ const routes = [
       {
         path: ":chatId",
         component: () => import("../screens/dashboard/ChatView.vue"),
+        // ChatView takes the chat id as a prop (the Inbox passes it directly)
+        props: true,
       },
     ],
   },
