@@ -110,11 +110,7 @@ const routes = [
         meta: { permission: "settings:manage" },
       },
 
-      {
-        path: "opportunity-analysis",
-        component: () =>
-          import("../screens/dashboard/insights/OpportunityAnalysis.vue"),
-      },
+      { path: "opportunity-analysis", redirect: "/dashboard/chat-analytics" },
       // {
       //   path: "chatbot-knowledge-score",
       //   component: () =>

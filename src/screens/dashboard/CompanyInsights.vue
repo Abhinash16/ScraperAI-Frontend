@@ -40,8 +40,6 @@
         <v-card
           elevation="0"
           class="pa-6 rounded-lg score-card blue lighten-5"
-          to="/dashboard/opportunity-analysis"
-          router
         >
           <div class="text-overline primary--text">AI Opportunity</div>
 
@@ -248,15 +246,6 @@
           <div class="text-h6 font-weight-bold mb-4">
             AI Intelligence Reports
           </div>
-
-          <v-btn
-            class="mr-2 mb-2"
-            outlined
-            color="primary"
-            to="/dashboard/opportunity-analysis"
-          >
-            Opportunity Analysis
-          </v-btn>
 
           <v-btn
             class="mr-2 mb-2"

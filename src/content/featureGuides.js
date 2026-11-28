@@ -289,15 +289,15 @@ export const FEATURE_GUIDES = [
     icon: "$webhook",
     route: "/dashboard/integration?section=webhooks",
     summary:
-      "Tell your systems when a chat needs a person, shows buying interest, or needs a follow-up. Connect product and customer APIs for live answers.",
+      "Tell your systems when a chat needs a person or becomes a hot lead. Connect product and customer APIs for live answers.",
     steps: [
-      "Add a URL for Escalate, Upsell, Follow-up, or Hot lead events.",
+      "Add a URL for Escalate or Hot lead events.",
       "Connect your product or customer API under API Config so the bot can answer with live data.",
     ],
     thingsToKnow: [
       "Set up Escalate before going live, so \"I want to talk to a person\" reaches your team.",
       "Your endpoint should respond quickly. Slow endpoints can time out.",
-      "Only Escalate hands the chat to your team. Upsell, Follow-up and Hot lead just tell your system; the bot keeps chatting.",
+      "Only Escalate hands the chat to your team. Hot lead just tells your system; the bot keeps chatting.",
       "Hot lead is sent once per conversation, when the lead score reaches the hot-lead score you set under Bot behaviour → Sales. It includes the customer's phone, the stage, the score and what they want (product, location, start date, how long) and the next step.",
       "If we can't send an escalation to your system (the call fails, or the webhook was switched off after 3 failures), we email your alert addresses with the customer's phone, channel and message so someone can contact them. Set them under Escalate; empty means your account email. A webhook you turned off yourself sends no alerts.",
     ],
@@ -418,10 +418,9 @@ export const FEATURE_GUIDES = [
     icon: "$chart-line",
     route: "/dashboard/chat-analytics",
     summary:
-      "Conversation volume, engagement, and growth opportunities across your chats.",
+      "Conversation volume and engagement across your chats.",
     steps: [
       "Check Chat Analytics weekly to see what customers ask most.",
-      "Use Opportunity Analysis to find content or services worth adding.",
     ],
     thingsToKnow: [
       "Numbers come from your real chats. Expect them to fill in over your first few weeks live.",

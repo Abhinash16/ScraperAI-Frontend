@@ -550,18 +550,6 @@ const WEBHOOK_TYPES = [
     description: "Called when a conversation is escalated to your team.",
   },
   {
-    id: "upsell",
-    name: "Upsell",
-    description: "Called when the assistant spots an upsell opportunity.",
-    note: "This only tells your system. The bot keeps chatting; the chat isn't handed to your team.",
-  },
-  {
-    id: "followup",
-    name: "Follow-up",
-    description: "Called when a customer should be followed up with.",
-    note: "This only tells your system. The bot keeps chatting; the chat isn't handed to your team.",
-  },
-  {
     id: "lead",
     name: "Hot lead",
     description:
@@ -712,18 +700,6 @@ export default {
                 : null,
             },
           ].filter(Boolean),
-        },
-        {
-          title: "Developer",
-          items: [
-            {
-              id: "database",
-              name: "Database",
-              icon: "$database",
-              disabled: true,
-              badge: { text: "Retired", color: "grey" },
-            },
-          ],
         },
       ];
 

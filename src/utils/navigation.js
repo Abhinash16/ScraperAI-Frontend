@@ -189,12 +189,6 @@ export const NAV_GROUPS = [
             permission: "insight:read",
             match: startsWith("/dashboard/chat/chatbot-knowledge-score"),
           },
-          {
-            name: "Opportunities",
-            to: link("/dashboard/opportunity-analysis"),
-            permission: "insight:read",
-            match: startsWith("/dashboard/opportunity-analysis"),
-          },
         ],
       },
     ],
