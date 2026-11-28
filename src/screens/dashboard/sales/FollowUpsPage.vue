@@ -112,6 +112,30 @@
               </v-chip>
             </div>
             <div v-if="nudge.text" class="text-body-2 nudge-text">{{ nudge.text }}</div>
+            <div v-if="(nudge.urgency || []).length || nudge.cta" class="d-flex flex-wrap mt-1">
+              <v-chip
+                v-for="u in nudge.urgency || []"
+                :key="u"
+                x-small
+                label
+                color="amber lighten-5"
+                text-color="amber darken-4"
+                class="font-weight-bold mr-1 mb-1"
+                title="A real reason to act now that the bot checked for this customer"
+              >
+                {{ urgencyLabel(u) }}
+              </v-chip>
+              <v-chip
+                v-if="nudge.cta === 'book'"
+                x-small
+                label
+                color="primary lighten-5"
+                text-color="primary"
+                class="font-weight-bold mr-1 mb-1"
+              >
+                Asked to reply BOOK
+              </v-chip>
+            </div>
             <div v-if="nudge.reason && nudge.status !== 'sent'" class="text-caption grey--text text--darken-1">
               {{ nudge.reason }}
             </div>
@@ -159,6 +183,7 @@ import {
   stageInfo,
   stopLabel,
   triggerLabel,
+  urgencyLabel,
 } from "@/utils/leads";
 
 const DAY_CHOICES = [
@@ -227,6 +252,7 @@ export default {
     stageInfo,
     stopLabel,
     triggerLabel,
+    urgencyLabel,
     followUpStatus,
 
     // The writer's reason on the nudge it declined to send
