@@ -72,6 +72,7 @@ export const LIMITS = {
   cacheHoursMin: 1,
   cacheHoursMax: 48,
   cacheHoursDefault: 6,
+  templateMax: 1000,
 };
 
 // Where an input's current choices came from (GET /actions/:id/options)
@@ -88,11 +89,13 @@ export const DEFAULT_TEMPLATES = {
   confirm: "<Action name>: That's ₹2,400. Shall I send you the payment link? Please reply yes or no.",
   sent: "Here's your payment link for ₹{{link.amount}}: {{link.url}}",
   clientSent: "Done, I've sent the payment link for ₹2,400 to your phone. Please check your messages.",
+  declined: "Okay, I won't send it. Is there anything else I can help with?",
 };
 
 export const DEFAULT_REQUEST_TEMPLATES = {
   confirm: "<Action name>: shall I go ahead? Please reply yes or no.",
   sent: "Done, it's raised. Your reference number is <ID>. Our team will get back to you.",
+  declined: "Okay, I won't raise it. Is there anything else I can help with?",
 };
 
 // Results of the create step go into messages as {{link.x}} for payment
@@ -128,7 +131,7 @@ export function templatePlaceholders(form, template) {
     ? form.quote.outputs.filter((o) => o.name.trim()).map((o) => `{{quote.${o.name.trim()}}}`)
     : [];
   const link =
-    template === "confirm"
+    template === "confirm" || template === "declined"
       ? []
       : form.create.outputs
           .filter((o) => o.name.trim())
@@ -228,6 +231,7 @@ export function actionToForm(action) {
       confirm: a.templates?.confirm || "",
       sent: a.templates?.sent || "",
       clientSent: a.templates?.clientSent || "",
+      declined: a.templates?.declined || "",
     },
     maxPerChatPerDay: a.maxPerChatPerDay ?? 5,
   };
@@ -373,7 +377,7 @@ export function actionFromForm(f) {
   }
 
   const templates = {};
-  (request ? ["confirm", "sent"] : ["confirm", "sent", "clientSent"]).forEach((k) => {
+  (request ? ["confirm", "sent", "declined"] : ["confirm", "sent", "clientSent", "declined"]).forEach((k) => {
     const v = f.templates[k].trim();
     if (v) templates[k] = v;
   });

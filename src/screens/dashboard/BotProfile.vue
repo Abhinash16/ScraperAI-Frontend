@@ -547,6 +547,80 @@
             </v-col>
           </v-row>
 
+          <!-- Serious complaints: on for every client by default -->
+          <v-sheet outlined rounded="lg" class="pa-4 mt-6">
+            <div class="d-flex align-start">
+              <div class="flex-grow-1 mr-4">
+                <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
+                  Serious complaints (legal action, police, consumer forum, social media)
+                </div>
+                <div class="text-body-2 grey--text text--darken-1">
+                  When a customer threatens legal action, the police, a consumer forum or a social
+                  media post, the bot apologises, says your team will contact them personally, and
+                  never helps file a case or gives legal advice. Works in English, Hinglish, Hindi
+                  and Kannada.
+                </div>
+              </div>
+              <v-switch
+                v-model="form.rules.seriousComplaints.enabled"
+                color="primary"
+                inset
+                hide-details
+                class="mt-0 pt-0 flex-shrink-0"
+                label="Detect and handle carefully"
+                aria-label="Detect serious complaints and handle them carefully"
+              />
+            </div>
+
+            <template v-if="form.rules.seriousComplaints.enabled">
+              <v-checkbox
+                v-model="form.rules.seriousComplaints.handoff"
+                label="Hand over to the team (mark escalated)"
+                dense
+                hide-details
+                class="mt-4"
+              />
+              <v-checkbox
+                v-model="form.rules.seriousComplaints.alertEmail"
+                label="Email the alert addresses at once"
+                dense
+                hide-details
+                class="mt-1 mb-4"
+              />
+              <v-combobox
+                v-model="form.rules.seriousComplaints.keywords"
+                label="Extra words that count (e.g. 'scam company')"
+                hint="The bot already knows the usual words. Type a word or phrase and press Enter."
+                persistent-hint
+                :rules="[listRule(LIST_MAX, SHORT_MAX)]"
+                multiple
+                small-chips
+                deletable-chips
+                outlined
+                dense
+                class="mb-4"
+              />
+              <v-textarea
+                v-model="form.rules.seriousComplaints.reply"
+                label="Safe reply used if the AI's reply breaks the rules"
+                :placeholder="SERIOUS_REPLY_DEFAULT"
+                :hint="`Leave empty for: '${SERIOUS_REPLY_DEFAULT}'`"
+                persistent-hint
+                :counter="LINE_MAX"
+                :rules="[(v) => (v || '').length <= LINE_MAX || `Up to ${LINE_MAX} characters`]"
+                rows="2"
+                auto-grow
+                outlined
+                dense
+              />
+              <div class="text-caption grey--text text--darken-1 mt-3">
+                <v-icon size="14" class="mr-1">$info</v-icon>
+                The alert email goes to the escalation alert addresses. Make sure they reach someone
+                who will call the customer the same day.
+              </div>
+            </template>
+          </v-sheet>
+
           <v-btn small outlined color="primary" class="mt-5" to="/dashboard/integration?section=webhooks">
             <v-icon left size="14">$webhook</v-icon>
             Set where escalations are sent
@@ -1224,11 +1298,15 @@ const ENDPOINT = "/clients/bot-profile";
 
 // Backend limits
 const LIST_MAX = 30;
+const SHORT_MAX = 100;
 const LINE_MAX = 300;
 const POLICY_MAX = 2000;
 const CUSTOM_MAX = 10000;
 const DEFAULT_THRESHOLD = 0.6;
 const DEFAULT_TIMEZONE = "Asia/Kolkata";
+// What the backend says when rules.seriousComplaints.reply is empty
+const SERIOUS_REPLY_DEFAULT =
+  "I'm really sorry for the trouble you've been through. I've passed this to our team as a priority, and someone will contact you personally to resolve it.";
 // Fallback for data.defaults.conversation, which GET bot-profile returns
 const CONVERSATION_DEFAULTS = {
   holdingMessage: {
@@ -1438,6 +1516,7 @@ function toForm(profile = {}, defaults = CONVERSATION_DEFAULTS) {
             ? escalation.confidenceThreshold
             : DEFAULT_THRESHOLD,
       },
+      seriousComplaints: seriousForm(rules.seriousComplaints),
     },
     conversation: {
       holdingEnabled: holding.enabled !== false,
@@ -1504,6 +1583,14 @@ function toProfile(form) {
         keywords: clean(form.rules.escalation.keywords),
         confidenceThreshold: form.rules.escalation.confidenceThreshold,
       },
+      // Always sent: a save without it resets the client's choices to the defaults
+      seriousComplaints: {
+        enabled: !!form.rules.seriousComplaints.enabled,
+        handoff: !!form.rules.seriousComplaints.handoff,
+        alertEmail: !!form.rules.seriousComplaints.alertEmail,
+        keywords: clean(form.rules.seriousComplaints.keywords),
+        reply: form.rules.seriousComplaints.reply.trim(),
+      },
     },
     // Empty fields go as null, which means "use the default"
     conversation: {
@@ -1558,6 +1645,18 @@ function followUpsForm(saved = {}) {
     from: between.from || d.sendBetween.from,
     to: between.to || d.sendBetween.to,
     holdoutPercent: typeof saved.holdoutPercent === "number" ? saved.holdoutPercent : d.holdoutPercent,
+  };
+}
+
+// rules.seriousComplaints: every switch defaults to on (backend botProfile.service)
+function seriousForm(saved = {}) {
+  const on = (v) => (typeof v === "boolean" ? v : true);
+  return {
+    enabled: on(saved.enabled),
+    handoff: on(saved.handoff),
+    alertEmail: on(saved.alertEmail),
+    keywords: arr(saved.keywords),
+    reply: str(saved.reply),
   };
 }
 
@@ -1616,7 +1715,9 @@ export default {
       DAYS,
       FACT_LISTS,
       LIST_MAX,
+      SHORT_MAX,
       LINE_MAX,
+      SERIOUS_REPLY_DEFAULT,
       CUSTOM_MAX,
       DEFAULT_THRESHOLD,
       MESSAGE_MODES,
