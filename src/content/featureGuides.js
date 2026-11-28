@@ -689,44 +689,14 @@ export const GO_LIVE_CHECKLIST = [
 // repo. No dates: we only list what is coming, in rough order.
 export const COMING_NEXT = [
   {
-    icon: "$folder-tree",
-    title: "Documents as sources",
-    text: "Upload PDFs and Word documents as knowledge sources, next to your website, FAQs, and notes.",
-  },
-  {
-    icon: "$badge-alert",
-    title: "Knowledge health checks",
-    text: "Automatic warnings about contradictions, outdated content, and duplicates, plus a weekly digest.",
-  },
-  {
-    icon: "$rocket",
-    title: "Onboarding wizard",
-    text: "A guided setup with a readiness score, so you can go live in under 30 minutes.",
-  },
-  {
-    icon: "$database-zap",
-    title: "Live product and customer data",
-    text: "Connect your product and customer systems with mapping and preview, so answers use live stock, prices, and order status.",
-  },
-  {
-    icon: "$messages-square",
-    title: "Conversations and summaries",
-    text: "Chats grouped into conversations with automatic summaries, plus WhatsApp 24-hour window handling.",
+    icon: "$flame",
+    title: "Follow-ups and upsell",
+    text: "Getting back to customers who showed interest, and suggesting add-ons that fit what they're buying.",
   },
   {
     icon: "$shield-user",
-    title: "Verified customers",
-    text: "Phone verification and signed sign-in from your app, so the bot can safely discuss a customer's own account.",
-  },
-  {
-    icon: "$zap",
-    title: "Actions",
-    text: "The bot can do things for customers, like extending a booking or sending a payment link, with confirmation first.",
-  },
-  {
-    icon: "$flame",
-    title: "Follow-ups",
-    text: "Follow-up messages to leads go out on rules you set.",
+    title: "Sign-in from your app",
+    text: "Your app tells the bot who the customer is, so they can talk about their own account without verifying their phone first.",
   },
   {
     icon: "$smartphone",
