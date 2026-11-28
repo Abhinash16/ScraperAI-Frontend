@@ -168,6 +168,7 @@ export const FEATURE_GUIDES = [
       "Your replies are sent as your business, not as the AI.",
       "Turn AI off before you reply, so the bot doesn't answer at the same time as you.",
       "You only ever see your own business's chats.",
+      "A bot message with a Follow-up badge was sent by the bot on its own, after a customer who was close to buying went quiet (sales mode). Replying to it yourself stops further follow-ups in that conversation.",
     ],
   },
   {
@@ -474,6 +475,7 @@ export const FEATURE_GUIDES = [
       "Under Bot behaviour, set \"What the bot does\" to Support and sales.",
       "Open the Sales tab, switch on sales mode, and list the details a booking needs (like model, pickup hub, start date).",
       "Add the suggestions the bot may make, if any, and choose when a lead counts as hot.",
+      "Optional: switch on \"Follow up with quiet customers on WhatsApp\" and pick how many messages and the hours they may go out.",
       "Save, test in the sandbox, then publish.",
       "Optional: turn on a payment link action so the bot can take customers to payment, and add a Hot lead webhook or email alerts so your team hears about hot leads.",
     ],
@@ -485,7 +487,12 @@ export const FEATURE_GUIDES = [
       "A payment is credited to the bot only when it's made within 30 days of the bot's payment link, or of a chat with the bot. Deals shows every reported payment and whether the bot helped.",
       "In the sandbox, \"Why this answer\" shows what sales mode recorded for each reply: the stage, score, what the customer wants and the next step.",
       "Leads lists conversations from the last 30 days by last activity, hottest first. Open chat takes you to the conversation in the Inbox, where the lead's stage and score show in the header.",
-      "Only chats customers start are counted. Follow-up messages the bot sends first aren't part of this yet.",
+      "Only chats customers start are counted as leads.",
+      "Follow-ups (optional, Sales tab): when a customer who was interested, ready to book or at checkout goes quiet on WhatsApp, the bot gets back to them, up to 3 times per conversation (you choose 1 to 3). Each message is written for that customer, from where they stopped.",
+      "When it follows up: at the time the customer said they'd decide; 45 minutes after a payment link that wasn't paid; 1 hour after they stopped just before paying; 2–3 hours after they went quiet; a second one 5 hours later; and a last one before WhatsApp's 24-hour window closes. Only inside that window, and only between the hours you set (6:00 to midnight by default, in your business time zone).",
+      "It never follows up after a no, a complaint, a hand-off to your team or a reply from your team. A customer who replies STOP gets a short confirmation and is never followed up again. The bot can also decide a follow-up would be wrong for a customer and not send it.",
+      "Holdout (Advanced): a share of customers (0 to 50%, 10% is a good start) gets no follow-ups, so the Sales Agent report can show how many extra sales follow-ups bring.",
+      "Sales → Follow-ups lists every customer the bot followed up: each message with its time and why it was sent, whether they replied or paid, and why it stopped. In the Inbox, those messages carry a Follow-up badge, and \"Why this answer\" shows how the bot wrote them.",
     ],
   },
   {
@@ -504,7 +511,8 @@ export const FEATURE_GUIDES = [
       "The funnel counts leads that got at least that far, so a lead that paid is counted in every step.",
       "\"Revenue with the bot\" is payments made within 30 days of the bot's payment link or a chat with the bot. \"Paid\" only comes from payments your system reports.",
       "A conversation is sorted into sales or service when it ends, so the SR Agent's numbers lag chats that are still going on.",
-      "Only chats customers start are counted. Follow-up messages the bot sends first aren't part of this yet.",
+      "Only chats customers start are counted. Follow-ups the bot sends in those chats have their own section on the Sales Agent: customers followed up, how many replied and paid, and the revenue after a follow-up.",
+      "With a holdout set, the Sales Agent compares the share who paid with follow-ups against the customers held out without them.",
     ],
   },
   {
@@ -690,8 +698,8 @@ export const GO_LIVE_CHECKLIST = [
 export const COMING_NEXT = [
   {
     icon: "$flame",
-    title: "Follow-ups and upsell",
-    text: "Getting back to customers who showed interest, and suggesting add-ons that fit what they're buying.",
+    title: "Upsell",
+    text: "Suggesting add-ons that fit what the customer is buying, at the right moment.",
   },
   {
     icon: "$shield-user",

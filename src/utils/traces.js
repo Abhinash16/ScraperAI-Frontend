@@ -29,6 +29,7 @@ export const SOURCE_NOTES = {
   escalated: "Chat is with your team.",
   media: "The customer sent media, so there was no AI answer.",
   failed: "The reply could not be completed. See the error above.",
+  followup: "A follow-up the bot sent on its own after the customer went quiet.",
 };
 
 // "25 min", "2 h 10 min"

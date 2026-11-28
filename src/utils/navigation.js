@@ -59,6 +59,12 @@ export const NAV_GROUPS = [
             match: startsWith("/dashboard/leads"),
           },
           {
+            name: "Follow-ups",
+            to: link("/dashboard/follow-ups"),
+            permission: "chat:read",
+            match: startsWith("/dashboard/follow-ups"),
+          },
+          {
             name: "Deals",
             to: link("/dashboard/deals"),
             permission: "analytics:view",

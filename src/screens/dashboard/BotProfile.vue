@@ -605,6 +605,127 @@
             </v-alert>
           </v-sheet>
 
+          <!-- Follow-ups: only with sales mode on -->
+          <v-sheet outlined rounded="lg" class="pa-4 mb-5" :class="{ 'sales-off': !form.sales.enabled }">
+            <div class="d-flex align-start">
+              <div class="flex-grow-1 mr-4">
+                <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
+                  Follow up with quiet customers on WhatsApp
+                </div>
+                <div class="text-body-2 grey--text text--darken-1">
+                  When a customer who was close to buying stops replying, the bot sends them a short
+                  message to help them finish, written for that customer. Only on WhatsApp, and only
+                  while WhatsApp still lets you message them (24 hours after their last message).
+                </div>
+              </div>
+              <v-switch
+                v-model="form.sales.followUps.enabled"
+                color="primary"
+                inset
+                hide-details
+                class="mt-0 pt-0 flex-shrink-0"
+                :disabled="!form.sales.enabled"
+                :label="form.sales.followUps.enabled ? 'On' : 'Off'"
+                aria-label="Follow up with quiet customers on WhatsApp"
+              />
+            </div>
+            <div v-if="!form.sales.enabled" class="text-caption grey--text text--darken-1 mt-2">
+              Switch on sales mode first.
+            </div>
+
+            <template v-else-if="form.sales.followUps.enabled">
+              <v-row dense class="mt-4">
+                <v-col cols="12" md="4">
+                  <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-1">
+                    Messages per conversation
+                  </div>
+                  <v-btn-toggle v-model="form.sales.followUps.maxNudges" mandatory dense color="primary">
+                    <v-btn v-for="n in [1, 2, 3]" :key="n" small :value="n">{{ n }}</v-btn>
+                  </v-btn-toggle>
+                  <div class="text-caption grey--text text--darken-1 mt-1">At most this many follow-ups to one customer.</div>
+                </v-col>
+                <v-col cols="12" md="8">
+                  <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-1">
+                    Send only between
+                  </div>
+                  <div class="d-flex align-center">
+                    <v-select
+                      v-model="form.sales.followUps.from"
+                      :items="followUpFromItems"
+                      label="From"
+                      outlined
+                      dense
+                      hide-details="auto"
+                      class="time-field"
+                      :rules="[followUpHoursRule]"
+                    />
+                    <span class="mx-3 grey--text text--darken-1">and</span>
+                    <v-select
+                      v-model="form.sales.followUps.to"
+                      :items="followUpToItems"
+                      label="To"
+                      outlined
+                      dense
+                      hide-details="auto"
+                      class="time-field"
+                      :rules="[followUpHoursRule]"
+                    />
+                  </div>
+                  <div class="text-caption grey--text text--darken-1 mt-1">
+                    In your business time zone (Business facts). A follow-up due outside these hours
+                    waits for them, and isn't sent if WhatsApp's window closes first.
+                  </div>
+                </v-col>
+              </v-row>
+
+              <v-row dense class="mt-3">
+                <v-col cols="12" md="6">
+                  <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-1">When the bot follows up</div>
+                  <ul class="text-body-2 grey--text text--darken-2 follow-list">
+                    <li>At the time the customer said they'd decide</li>
+                    <li>45 minutes after a payment link that wasn't paid</li>
+                    <li>1 hour after they stopped just before paying</li>
+                    <li>2–3 hours after they went quiet</li>
+                    <li>A second one 5 hours later</li>
+                    <li>A last one before WhatsApp's 24-hour window closes</li>
+                  </ul>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <div class="text-body-2 font-weight-bold grey--text text--darken-4 mb-1">Never</div>
+                  <ul class="text-body-2 grey--text text--darken-2 follow-list">
+                    <li>After the customer says no</li>
+                    <li>After a complaint, or once the chat was handed to your team</li>
+                    <li>After someone on your team replied</li>
+                    <li>After the customer replies "STOP" (they're never followed up again)</li>
+                  </ul>
+                </v-col>
+              </v-row>
+
+              <v-btn x-small text color="primary" class="px-0 mt-2" @click="showFollowUpAdvanced = !showFollowUpAdvanced">
+                {{ showFollowUpAdvanced ? "Hide advanced" : "Advanced" }}
+              </v-btn>
+              <v-row v-if="showFollowUpAdvanced" dense class="mt-2">
+                <v-col cols="12" sm="5" md="3">
+                  <v-text-field
+                    v-model.number="form.sales.followUps.holdoutPercent"
+                    type="number"
+                    min="0"
+                    max="50"
+                    label="Holdout %"
+                    suffix="%"
+                    outlined
+                    dense
+                    :rules="[holdoutRule]"
+                  />
+                </v-col>
+                <v-col cols="12" sm="7" md="9" class="text-caption grey--text text--darken-1 pt-2">
+                  This share of customers gets no follow-ups, so the report can show how many extra
+                  sales follow-ups bring. 10% is a good start.
+                </v-col>
+              </v-row>
+            </template>
+          </v-sheet>
+
           <div :class="{ 'sales-off': !form.sales.enabled }">
             <div class="text-subtitle-2 font-weight-bold grey--text text--darken-4">
               Details a booking needs
@@ -1033,6 +1154,7 @@
 <script>
 import apiClient from "@/service/axios";
 import ThingsToKnow from "@/components/ThingsToKnow.vue";
+import { FOLLOW_UP_DEFAULTS } from "@/utils/leads";
 import ReplyModelCard from "@/components/bot/ReplyModelCard.vue";
 
 const ENDPOINT = "/clients/bot-profile";
@@ -1273,6 +1395,7 @@ function toForm(profile = {}, defaults = CONVERSATION_DEFAULTS) {
       crossSell: arr(sales.crossSell).join("\n"),
       hotLeadScore: typeof sales.hotLeadScore === "number" ? sales.hotLeadScore : SALES.hotDefault,
       emailHotLeads: !!sales.emailHotLeads,
+      followUps: followUpsForm(sales.followUps),
     },
     customInstructions: str(profile.customInstructions),
   };
@@ -1343,12 +1466,42 @@ function toProfile(form) {
       crossSell: lines(form.sales.crossSell),
       hotLeadScore: form.sales.hotLeadScore,
       emailHotLeads: form.sales.emailHotLeads,
+      // Always sent: a save without it resets follow-ups to off
+      followUps: {
+        enabled: !!form.sales.followUps.enabled,
+        maxNudges: form.sales.followUps.maxNudges,
+        sendBetween: { from: form.sales.followUps.from, to: form.sales.followUps.to },
+        holdoutPercent: toInt(form.sales.followUps.holdoutPercent) ?? 0,
+      },
     },
     customInstructions: form.customInstructions.trim(),
   };
 }
 
 // WhatsApp idle time: hours in the form, whole minutes in the profile
+function followUpsForm(saved = {}) {
+  const d = FOLLOW_UP_DEFAULTS;
+  const between = saved.sendBetween || {};
+  return {
+    enabled: typeof saved.enabled === "boolean" ? saved.enabled : d.enabled,
+    maxNudges: [1, 2, 3].includes(saved.maxNudges) ? saved.maxNudges : d.maxNudges,
+    from: between.from || d.sendBetween.from,
+    to: between.to || d.sendBetween.to,
+    holdoutPercent: typeof saved.holdoutPercent === "number" ? saved.holdoutPercent : d.holdoutPercent,
+  };
+}
+
+// "HH:00" choices; the saved value is kept even when it isn't on the hour
+function hourItems(start, end, keep) {
+  const items = [];
+  for (let h = start; h <= end; h += 1) {
+    const value = `${String(h).padStart(2, "0")}:00`;
+    items.push({ value, text: h === 24 ? "Midnight" : value });
+  }
+  if (keep && !items.some((i) => i.value === keep)) items.push({ value: keep, text: keep });
+  return items.sort((a, b) => a.value.localeCompare(b.value));
+}
+
 function hoursToMinutes(value) {
   const s = String(value ?? "").trim();
   return s === "" ? null : Math.round(Number(s) * 60);
@@ -1398,6 +1551,7 @@ export default {
       loadError: "",
       form: toForm(),
       savedJson: JSON.stringify(toProfile(toForm())),
+      showFollowUpAdvanced: false,
       version: 0,
       publishedVersion: null,
       publishedAt: null,
@@ -1421,6 +1575,13 @@ export default {
   computed: {
     dirty() {
       return JSON.stringify(toProfile(this.form)) !== this.savedJson;
+    },
+
+    followUpFromItems() {
+      return hourItems(0, 23, this.form.sales.followUps.from);
+    },
+    followUpToItems() {
+      return hourItems(1, 24, this.form.sales.followUps.to);
     },
 
     salesRoleOk() {
@@ -1482,6 +1643,16 @@ export default {
     },
 
     // A chip list: at most `max` entries of at most `len` characters
+    followUpHoursRule() {
+      const { from, to } = this.form.sales.followUps;
+      return from < to || "The start must be before the end";
+    },
+
+    holdoutRule(value) {
+      const n = Number(value);
+      return (value !== "" && Number.isInteger(n) && n >= 0 && n <= 50) || "A whole number from 0 to 50";
+    },
+
     listRule(max, len) {
       return (v) => {
         const list = clean(v);
@@ -1631,6 +1802,12 @@ export default {
 /* Keeps Save and Publish in reach while scrolling (64px top bar + gap) */
 .sales-off {
   opacity: 0.7;
+}
+.time-field {
+  max-width: 150px;
+}
+.follow-list {
+  padding-left: 18px;
 }
 
 .draft-bar {

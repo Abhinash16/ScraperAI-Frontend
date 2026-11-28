@@ -154,6 +154,11 @@ const routes = [
         meta: { permission: "chat:read" },
       },
       {
+        path: "follow-ups",
+        component: () => import("../screens/dashboard/sales/FollowUpsPage.vue"),
+        meta: { permission: "chat:read" },
+      },
+      {
         path: "deals",
         component: () => import("../screens/dashboard/sales/DealsPage.vue"),
         meta: { permission: "analytics:view" },

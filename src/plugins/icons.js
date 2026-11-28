@@ -3,6 +3,7 @@
 // import it from "lucide" and add it to APP_ICONS. Vuetify's own icons
 // (checkboxes, dropdowns, alerts...) are remapped in VUETIFY_ICONS.
 import {
+  MessageCircleReply,
   Handshake,
   Mail,
   IndianRupee,
@@ -363,6 +364,7 @@ const APP_ICONS = {
   "mail": Mail,
   "indian-rupee": IndianRupee,
   "shopping-bag": ShoppingBag,
+  "message-circle-reply": MessageCircleReply,
 };
 
 const VUETIFY_ICONS = {
