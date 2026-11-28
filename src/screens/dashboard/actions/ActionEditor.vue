@@ -449,6 +449,8 @@
               :label="t.label"
               :placeholder="t.placeholder"
               :hint="t.hint"
+              :counter="LIMITS.templateMax"
+              :maxlength="LIMITS.templateMax"
               persistent-hint
               rows="2"
               auto-grow
@@ -651,6 +653,12 @@ export default {
             placeholder: DEFAULT_REQUEST_TEMPLATES.sent,
             hint: "Must contain {{result.id}}: the customer needs the ID. Said on calls too.",
           },
+          {
+            key: "declined",
+            label: "When the customer says no",
+            placeholder: DEFAULT_REQUEST_TEMPLATES.declined,
+            hint: "What the bot says when the customer says no, e.g. what happens if they don't, or a cheaper option your quote returns. For 30 minutes after a quote the customer didn't take, the bot also reminds them of this once before they leave.",
+          },
         ];
       }
       return [
@@ -671,6 +679,12 @@ export default {
           label: "Link sent (your system sends it)",
           placeholder: DEFAULT_TEMPLATES.clientSent,
           hint: "Said when your system sent the link, and always on calls.",
+        },
+        {
+          key: "declined",
+          label: "When the customer says no",
+          placeholder: DEFAULT_TEMPLATES.declined,
+          hint: "What the bot says when the customer says no, e.g. what happens if they don't, or a cheaper option your quote returns. For 30 minutes after a quote the customer didn't take, the bot also reminds them of this once before they leave.",
         },
       ];
     },
